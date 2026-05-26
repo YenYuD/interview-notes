@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分頁：Offset vs Cursor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="index.html">← 回索引</a>
+    <span class="tag">API-03</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">API 設計</div>
+    <h1>翻頁 vs <em>接著看</em></h1>
+    <p class="lede">資料太多不能一次全回，要分頁。<b>Offset</b> 像「翻到第幾頁」，<b>Cursor</b> 像「從上次那筆繼續往下」。差別在資料變動時誰會出錯。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 邊看邊有人插隊</span>
+    <h2>看第 2 頁時，有人新增了一筆…</h2>
+    <p>你正在看第 1 頁（最新 3 筆）。這時有人新增了一台車插到最前面。按「載入下一頁」，看兩種分頁誰漏資料：</p>
+
+    <div class="lab">
+      <div class="lab-label">先選分頁方式</div>
+      <div class="toggle-row" id="modeRow">
+        <button data-m="offset" class="on bad">Offset（翻頁）</button>
+        <button data-m="cursor">Cursor（接續）</button>
+      </div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="btn-ghost" id="insertBtn">➕ 有人新增一筆（插到最前）</button>
+        <button class="btn-primary" id="nextBtn">載入下一頁</button>
+        <button class="btn-ghost" id="resetBtn">重來</button>
+      </div>
+      <div style="display:grid;gap:.5rem">
+        <div style="font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)">你已經看過的內容：</div>
+        <div id="seen" style="display:flex;flex-direction:column;gap:.35rem"></div>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// 操作說明會顯示在這…</div></div>
+    </div>
+    <div class="aside" id="verdict">提示：先按「載入下一頁」載到第 1 頁，再「新增一筆」，再「載入下一頁」看第 2 頁。</div>
+  </section>
+
+  <section>
+    <span class="num">兩種分頁的本質</span>
+    <h2>SQL 差在哪</h2>
+    <h3>Offset 分頁（翻頁式）</h3>
+    <pre><code><span class="tok-com">GET /bikes?page=2&limit=20</span>
+SQL: <span class="tok-key">OFFSET</span> 20 <span class="tok-key">LIMIT</span> 20</code></pre>
+    <p>像書本「跳到第 3 頁」。<b>能跳頁、能顯示總頁數</b>，但 OFFSET 很大時 DB 要先數過前面所有列才能跳過 → <b style="color:var(--bad)">越後面越慢</b>；資料變動時還會<b style="color:var(--bad)">跳重複或漏資料</b>。</p>
+
+    <h3>Cursor 分頁（接續式）</h3>
+    <pre><code><span class="tok-com">GET /bikes?cursor=abc&limit=20</span>
+SQL: <span class="tok-key">WHERE</span> id &gt; <span class="tok-str">'abc'</span> <span class="tok-key">LIMIT</span> 20</code></pre>
+    <p>像「我看到 abc 這筆了，給我之後的 20 筆」。<b style="color:var(--good)">穩定、效能好</b>（直接用索引定位），但<b>不能跳頁</b>、要設計穩定排序鍵。</p>
+  </section>
+
+  <section>
+    <span class="num">怎麼選</span>
+    <h2>MOOVO 即時車輛列表 → Cursor</h2>
+    <p>因為車輛資料一直在變，使用者通常只往下滑「下一頁」，不會跳到第 50 頁。關鍵：用 <code>(updated_at, id)</code> 這種<b>複合 cursor</b>，避免「同一秒插入兩筆」造成排序不穩、漏資料。</p>
+    <div class="chips">
+      <div class="chip info">後台報表<small>資料穩定、要跳頁 → Offset</small></div>
+      <div class="chip good">即時動態列表<small>資料變動、只看下一頁 → Cursor</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Cursor 要加密嗎？</summary><p>一般明文 base64 編碼即可；只有 cursor 內含敏感資訊時才加密。</p></details>
+      <details><summary>要回總筆數嗎？</summary><p>Cursor 分頁通常不回 —— 要算總數得另外下一次 query，很貴。</p></details>
+    </div>
+    <div class="callout warn"><span class="ico">✕</span><p>用 <code>id</code> 當 cursor 但排序卻用 <code>created_at</code> → 同秒兩筆會出錯。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「資料穩定、要跳頁（如後台報表）→ <span class="hl">offset</span>；資料即時變動、只看下一頁（如動態列表）→ <span class="hl">cursor</span>。MOOVO 的即時車輛列表我選 cursor，用 <span class="hl">(updated_at, id)</span> 當複合鍵保證穩定，避免 offset 在大量資料下變慢又漏資料。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="DB-02-PostgreSQL索引Index.html">DB-02 索引</a>
+      <a href="API-01-RESTful設計原則.html">API-01 RESTful</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // 資料：id 越大越新。初始有 A B C（3,2,1）
+  let mode='offset';
+  let nextId=3;
+  let bikes=[]; // {id,label}
+  let seenIds=[];
+  let offsetCursor=0; // offset 已讀數
+  let lastSeenId=null; // cursor 用
+  let page=0;
+
+  const LIMIT=3;
+  const seenEl=document.getElementById('seen');
+  const log=document.getElementById('log');
+  const verdict=document.getElementById('verdict');
+
+  function init(){
+    bikes=[{id:3,label:'車 C'},{id:2,label:'車 B'},{id:1,label:'車 A'}];
+    nextId=3; seenIds=[]; offsetCursor=0; lastSeenId=null; page=0;
+    seenEl.innerHTML='';
+    log.innerHTML='<div class="ln empty">// 操作說明會顯示在這…</div>';
+    verdict.innerHTML='提示：先「載入下一頁」，再「新增一筆」，再「載入下一頁」，比較兩種模式。';
+  }
+  function addLog(html,cls){
+    const em=log.querySelector('.empty'); if(em) em.remove();
+    const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html;
+    log.appendChild(d); log.scrollTop=log.scrollHeight;
+  }
+  function renderSeen(){
+    seenEl.innerHTML='';
+    seenIds.forEach(item=>{
+      const div=document.createElement('div');
+      const dup = item.dup;
+      div.style.cssText=`font-family:var(--mono);font-size:.85rem;padding:.4rem .7rem;border-radius:8px;border:1px solid var(--line);background:var(--paper);${dup?'border-color:var(--bad);color:var(--bad)':''}`;
+      div.textContent = `第${item.page}頁 · ${item.label} (id:${item.id})` + (dup?'  ⚠️ 重複！':'');
+      seenEl.appendChild(div);
+    });
+  }
+  document.getElementById('modeRow').addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    [...e.currentTarget.children].forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); mode=b.dataset.m; init();
+  });
+  document.getElementById('insertBtn').addEventListener('click',()=>{
+    nextId++;
+    const label='車 '+String.fromCharCode(64+nextId);
+    bikes.unshift({id:nextId,label}); // 插到最前（最新）
+    addLog(`<span class="c-ok">➕ 有人新增了 ${label} (id:${nextId})，插到最前面</span>`,'c-ok');
+  });
+  document.getElementById('nextBtn').addEventListener('click',()=>{
+    page++;
+    let slice;
+    if(mode==='offset'){
+      slice=bikes.slice(offsetCursor, offsetCursor+LIMIT);
+      offsetCursor+=LIMIT;
+      addLog(`<span class="c-req">GET /bikes?page=${page}  →  OFFSET ${offsetCursor-LIMIT} LIMIT ${LIMIT}</span>`,'');
+    } else {
+      let startIdx=0;
+      if(lastSeenId!=null){ startIdx=bikes.findIndex(b=>b.id===lastSeenId)+1; }
+      slice=bikes.slice(startIdx, startIdx+LIMIT);
+      addLog(`<span class="c-req">GET /bikes?cursor=${lastSeenId??'(起點)'}  →  WHERE id &lt; ${lastSeenId??'∞'} LIMIT ${LIMIT}</span>`,'');
+      if(slice.length) lastSeenId=slice[slice.length-1].id;
+    }
+    if(!slice.length){ addLog('<span class="c-dim">沒有更多資料了</span>','c-dim'); return; }
+    slice.forEach(b=>{
+      const already=seenIds.some(s=>s.id===b.id);
+      seenIds.push({...b,page,dup:already});
+      addLog(`&nbsp;&nbsp;← ${b.label} (id:${b.id})` + (already?' <span class="c-bad">⚠️ 你已經看過這筆了！</span>':''),'');
+    });
+    renderSeen();
+    const dupCount=seenIds.filter(s=>s.dup).length;
+    if(mode==='offset' && dupCount>0){
+      verdict.innerHTML=`<b style="color:var(--bad)">看到了嗎？</b> 因為新增的車把所有人往後推一格，offset 的「第 ${LIMIT} 筆」位置錯位，<b>你重複看到了同一台車</b>，真正的新資料反而被擠掉。`;
+    } else if(mode==='cursor' && page>=2){
+      verdict.innerHTML=`<b style="color:var(--good)">穩！</b> cursor 記住「上次看到 id=${lastSeenId??'?'}」，不管中間插了幾筆，<b>都從那筆之後接續</b>，不重複不漏。`;
+    }
+  });
+  document.getElementById('resetBtn').addEventListener('click',init);
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PostgreSQL 索引 Index</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">DB-02 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">資料庫 · 效能</div>
+    <h1>像書末的<em>索引頁</em></h1>
+    <p class="lede">沒索引，DB 查資料要一頁頁翻全書（全表掃描 Seq Scan）。索引預先把欄位排好、建好查找結構，DB 就能直接跳到目標 —— 像查字典用部首。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 找 email 的賽跑</span>
+    <h2>全表掃描 vs 索引，誰先找到？</h2>
+    <p>要找 <code>email = user_42</code>。按開始，左邊沒索引一筆筆看，右邊有索引直接跳：</p>
+    <div class="lab">
+      <div class="lab-label">按下開始，看兩種掃描</div>
+      <button class="btn-primary" id="startBtn" style="margin-bottom:1.2rem">▶ 開始查詢</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div>
+          <div style="font-family:var(--mono);font-size:.78rem;color:var(--bad);margin-bottom:.4rem">Seq Scan（無索引）</div>
+          <div id="seqGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px"></div>
+          <div id="seqResult" style="font-family:var(--mono);font-size:.8rem;margin-top:.5rem;color:var(--ink-soft)">—</div>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:.78rem;color:var(--good);margin-bottom:.4rem">Index Scan（有索引）</div>
+          <div id="idxGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px"></div>
+          <div id="idxResult" style="font-family:var(--mono);font-size:.8rem;margin-top:.5rem;color:var(--ink-soft)">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="aside">代價：索引佔空間，每次寫入都要更新索引 → <b>寫變慢</b>。所以索引不是越多越好。</div>
+  </section>
+
+  <section>
+    <span class="num">索引類型</span>
+    <h2>不同資料用不同索引</h2>
+    <table>
+      <tr><th>類型</th><th>適用情境</th></tr>
+      <tr><td><b>B-tree</b>（預設）</td><td>等值(=)、範圍(&lt;, &gt;, BETWEEN)、排序(ORDER BY)</td></tr>
+      <tr><td><b>Hash</b></td><td>只做等值，很少用（B-tree 已夠好）</td></tr>
+      <tr><td><b>GIN</b></td><td>array、jsonb、全文搜尋（多值欄位）</td></tr>
+      <tr><td><b>GiST</b></td><td>地理資料（PostGIS）、範圍型別</td></tr>
+      <tr><td><b>BRIN</b></td><td>超大表且資料天然有序（time-series）</td></tr>
+      <tr><td><b>Partial</b></td><td>只索引部分（如 <code>WHERE deleted = false</code>），省空間</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">複合索引的順序（重要）</span>
+    <h2>等值在前、範圍在後</h2>
+    <pre><code><span class="tok-com">-- 查「某 user 的訂單，依時間新到舊排序」</span>
+<span class="tok-key">CREATE INDEX</span> idx_orders_user_time
+  <span class="tok-key">ON</span> orders (user_id, created_at <span class="tok-key">DESC</span>);
+<span class="tok-com">-- 完美命中：WHERE user_id = ? ORDER BY created_at DESC LIMIT 20</span></code></pre>
+    <p>先用 <code>user_id</code> 等值縮小範圍，再用已排好序的 <code>created_at</code> 直接取前 20 筆，不用額外排序。</p>
+  </section>
+
+  <section>
+    <span class="num">常見踩雷</span>
+    <h2>這些索引等於沒建</h2>
+    <div class="callout warn"><span class="ico">✕</span><p>對低基數欄位（如 boolean）建索引通常沒用 → 考慮 <b>partial index</b>。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p>索引欄位上用函式（<code>WHERE lower(email) = ...</code>）會讓普通索引失效 → 要建 <b>expression index</b>。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「B-tree 是預設、處理等值/範圍/排序；jsonb 和全文搜尋用 <span class="hl">GIN</span>；地理資料用 GiST；超大有序表用 BRIN；只查部分資料用 partial index。複合索引順序是『<span class="hl">等值欄位在前、範圍在後</span>』並對齊 ORDER BY，例如 (user_id, created_at DESC)。索引會拖慢寫入、佔空間，所以要針對實際 query 設計，不是亂加。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="DB-03-EXPLAIN-ANALYZE怎麼看.html">DB-03 EXPLAIN</a><a href="API-03-分頁-offset與cursor.html">API-03 分頁</a><a href="DB-01-正規化與反正規化.html">DB-01 正規化</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const N=24, TARGET=15; // 第16格是目標
+  const $=id=>document.getElementById(id);
+  const seqGrid=$('seqGrid'),idxGrid=$('idxGrid');
+  function build(grid){ grid.innerHTML=''; const cells=[]; for(let i=0;i<N;i++){ const d=document.createElement('div'); d.style.cssText='aspect-ratio:1;border-radius:4px;background:var(--paper);border:1px solid var(--line);transition:background .1s'; grid.appendChild(d); cells.push(d); } return cells; }
+  let seqCells=build(seqGrid), idxCells=build(idxGrid);
+  $('startBtn').addEventListener('click',()=>{
+    seqCells=build(seqGrid); idxCells=build(idxGrid);
+    $('seqResult').textContent='掃描中…'; $('idxResult').textContent='跳到目標…';
+    // seq: 一筆筆
+    let i=0; const seqTimer=setInterval(()=>{
+      if(i>0) seqCells[i-1].style.background='var(--bad-soft)';
+      if(i>TARGET){ clearInterval(seqTimer); seqCells[TARGET].style.background='var(--bad)'; $('seqResult').innerHTML=`看了 <b style="color:var(--bad)">${TARGET+1}</b> 筆才找到 🐢`; return; }
+      seqCells[i].style.background='var(--accent-soft)'; i++;
+    },90);
+    // idx: 直接跳
+    setTimeout(()=>{ idxCells[TARGET].style.background='var(--good)'; $('idxResult').innerHTML='只看 <b style="color:var(--good)">1</b> 次直接命中 ⚡'; },300);
+  });
+</script>
+</body>
+</html>

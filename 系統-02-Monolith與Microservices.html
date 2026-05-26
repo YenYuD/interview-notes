@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monolith vs Microservices</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">系統-02</span></div>
+
+  <header class="hero">
+    <div class="kicker">系統設計</div>
+    <h1>一包 vs <em>很多小服務</em></h1>
+    <p class="lede"><b>Monolith</b> 是整個應用一包；<b>Microservices</b> 是拆成很多獨立小服務各自部署。不是越微越好，過早拆會吃盡分散式系統的苦。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 團隊規模建議</span>
+    <h2>拉拉看，什麼規模適合什麼</h2>
+    <p>拖動團隊人數，看建議的架構：</p>
+    <div class="lab">
+      <div class="lab-label">拖動滑桿</div>
+      <input type="range" id="slider" min="3" max="80" value="8" style="width:100%;accent-color:var(--accent);margin-bottom:1rem">
+      <div class="balance-box" style="text-align:left;padding:1.2rem">
+        <div style="font-size:.78rem;color:var(--ink-soft)">團隊 <b id="teamNum" style="color:var(--accent)">8</b> 人 → 建議</div>
+        <div id="rec" style="font-family:'Noto Serif TC';font-weight:900;font-size:1.5rem;color:var(--accent);margin:.3rem 0"></div>
+        <div id="recWhy" style="font-size:.92rem;color:var(--ink-soft)"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">各自適合</span>
+    <h2>對照</h2>
+    <table>
+      <tr><th></th><th>適合</th></tr>
+      <tr><td><b>Monolith</b></td><td>早期、小團隊、業務邊界還在變動</td></tr>
+      <tr><td><b>Microservices</b></td><td>團隊大（30+ 人）、業務邊界穩定、不同服務有不同擴展需求</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">為什麼別過早拆</span>
+    <h2>微服務的痛</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p>網路會失敗、資料一致性難保證、跨服務 debug 很痛、部署複雜度爆增。團隊小、業務還在變的時候拆，這些痛會吃光微服務的好處。</p></div>
+    <div class="callout tip"><span class="ico">📦</span><p><b>折衷：Modular Monolith</b> —— 一個 codebase、一個部署，但內部用強模組邊界（見<a href="系統-01-高內聚低耦合.html">高內聚低耦合</a>）。等某個模組真的需要獨立擴展，再抽出來變服務。MOOVO 規模很可能就是這個最合適。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Monolith 適合早期、小團隊、業務還在變；Microservices 適合大團隊、邊界穩定、各服務擴展需求不同。但我不會過早拆 —— 微服務的網路、一致性、debug、部署複雜度很容易吃掉好處。我偏好先做 <span class="hl">modular monolith</span>：一個部署但模組邊界清楚，哪天某模組真需要獨立擴展再抽出去。MOOVO 這規模我猜 modular monolith 最划算。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="系統-01-高內聚低耦合.html">系統-01 高內聚低耦合</a><a href="系統-04-Message-Queue訊息佇列.html">系統-04 Message Queue</a><a href="Node-04-Cluster與Worker-Threads.html">Node-04 Cluster</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const slider=document.getElementById('slider');
+  const teamNum=document.getElementById('teamNum');
+  const rec=document.getElementById('rec');
+  const recWhy=document.getElementById('recWhy');
+  function update(){
+    const n=+slider.value; teamNum.textContent=n;
+    let f,w;
+    if(n<12){ f='Monolith'; w='小團隊、業務還在變動，一包最快最省事。'; }
+    else if(n<30){ f='Modular Monolith'; w='一個部署，但內部模組邊界清楚，為未來抽服務鋪路。'; }
+    else { f='Microservices'; w='團隊夠大、邊界穩定，各服務獨立部署與擴展才划算。'; }
+    rec.textContent=f; recWhy.textContent=w;
+  }
+  slider.addEventListener('input',update);
+  update();
+</script>
+</body>
+</html>

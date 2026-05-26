@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>交易隔離等級</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">DB-04</span></div>
+
+  <header class="hero">
+    <div class="kicker">資料庫 · 併發</div>
+    <h1>同時操作時<br>能看到對方<em>多少</em></h1>
+    <p class="lede">多個交易同時進行可能互相干擾出現「怪現象」。隔離等級就是設定「我這個交易要被保護到什麼程度，不被別人的併發操作影響」—— 越嚴格越安全，但效能成本越高。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 拉桿選等級</span>
+    <h2>選一個等級，看它擋住哪些異常</h2>
+    <p>點四個等級，看三種併發異常哪些被擋（✕）哪些可能發生：</p>
+    <div class="lab">
+      <div class="lab-label">選隔離等級</div>
+      <div class="toggle-row" id="lvlRow" style="flex-direction:column">
+        <button data-l="0">READ UNCOMMITTED</button>
+        <button data-l="1" class="on">READ COMMITTED（PG 預設）</button>
+        <button data-l="2">REPEATABLE READ</button>
+        <button data-l="3">SERIALIZABLE</button>
+      </div>
+      <div id="anomalies" style="display:grid;gap:.6rem"></div>
+      <div id="note" style="margin-top:1rem;font-weight:700;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">三種併發異常（由輕到重）</span>
+    <h2>怪現象</h2>
+    <div class="callout info"><span class="ico">①</span><p><b>Dirty Read 髒讀</b>：讀到別人<b>還沒 commit</b>（可能等下會 rollback）的資料。</p></div>
+    <div class="callout info"><span class="ico">②</span><p><b>Non-Repeatable Read 不可重複讀</b>：同一筆資料讀兩次，值卻不一樣（別人中途改了並 commit）。</p></div>
+    <div class="callout info"><span class="ico">③</span><p><b>Phantom Read 幻讀</b>：同一查詢條件讀兩次，<b>筆數變了</b>（別人插了符合條件的新列）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">重點</span>
+    <h2>PG 的特別之處</h2>
+    <ul>
+      <li><b>PG 的 REPEATABLE READ 比 SQL 標準更強</b>：用 MVCC snapshot，連幻讀都擋掉了。</li>
+      <li><b>SERIALIZABLE</b>：保證結果等同「交易一個一個跑」，但偵測到衝突會 <b>abort 交易</b>，應用層要準備 retry。</li>
+      <li>PG 沒有真正的 READ UNCOMMITTED，設了也當 READ COMMITTED。</li>
+    </ul>
+    <div class="chips">
+      <div class="chip good">一般 OLTP<small>→ READ COMMITTED（預設就夠）</small></div>
+      <div class="chip info">金流結算 / 預訂衝突<small>→ SERIALIZABLE 或 SELECT ... FOR UPDATE</small></div>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「隔離等級擋三種異常：髒讀、不可重複讀、幻讀。PG 預設 <span class="hl">READ COMMITTED</span> 擋髒讀；REPEATABLE READ 用 <span class="hl">MVCC snapshot</span> 連幻讀都擋（比標準強）；SERIALIZABLE 最嚴格但衝突會 abort 要 retry。一般 OLTP 用預設就好，金流或預訂衝突我會用 SERIALIZABLE 或 SELECT FOR UPDATE。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="DB-05-樂觀鎖與悲觀鎖.html">DB-05 樂觀/悲觀鎖</a><a href="API-04-冪等性-Idempotency.html">API-04 冪等性</a></div>
+  </footer>
+
+</div>
+
+<script>
+  // 每個等級對三異常: true=擋住, false=可能發生
+  const levels={
+    0:{block:[false,false,false],note:'最寬鬆，三種異常都可能。實務幾乎不用。'},
+    1:{block:[true,false,false],note:'PG 預設。擋掉髒讀，但同一筆讀兩次仍可能不同值。'},
+    2:{block:[true,true,true],note:'PG 用 MVCC snapshot，比 SQL 標準更強 —— 連幻讀都擋掉。'},
+    3:{block:[true,true,true],note:'最嚴格，等同交易排隊執行。偵測到衝突會 abort，要在應用層 retry。'},
+  };
+  const names=['髒讀 Dirty Read','不可重複讀 Non-Repeatable','幻讀 Phantom Read'];
+  const lvlRow=document.getElementById('lvlRow');
+  const anomalies=document.getElementById('anomalies');
+  const note=document.getElementById('note');
+  function render(l){
+    const d=levels[l];
+    anomalies.innerHTML='';
+    names.forEach((n,i)=>{
+      const blocked=d.block[i];
+      const div=document.createElement('div');
+      div.style.cssText=`display:flex;justify-content:space-between;align-items:center;padding:.6rem .9rem;border-radius:9px;border:1.5px solid ${blocked?'var(--good)':'var(--bad)'};background:${blocked?'var(--good-soft)':'var(--bad-soft)'};font-weight:700;color:${blocked?'var(--good)':'var(--bad)'}`;
+      div.innerHTML=`<span>${n}</span><span>${blocked?'✕ 擋住':'⚠️ 可能發生'}</span>`;
+      anomalies.appendChild(div);
+    });
+    note.textContent=d.note;
+  }
+  lvlRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...lvlRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(b.dataset.l); });
+  render('1');
+</script>
+</body>
+</html>

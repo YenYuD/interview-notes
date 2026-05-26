@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>常見 Web 資安威脅與防禦</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">資安-01 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">資安專題</div>
+    <h1>四大經典攻擊，<br>一眼<em>看出風險</em></h1>
+    <p class="lede">全端工程師必須認得這幾種經典攻擊（SQL injection、XSS、CSRF、SSRF）和對應防禦，code review 時要能一眼看出風險。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 攻擊 vs 防禦</span>
+    <h2>點一種攻擊，看怎麼打、怎麼防</h2>
+    <div class="lab">
+      <div class="lab-label">選攻擊類型</div>
+      <div class="toggle-row" id="atkRow" style="flex-direction:column">
+        <button data-a="sqli" class="on">SQL Injection（SQL 注入）</button>
+        <button data-a="xss">XSS（跨站腳本）</button>
+        <button data-a="csrf">CSRF（跨站請求偽造）</button>
+        <button data-a="ssrf">SSRF（伺服器端請求偽造）</button>
+      </div>
+      <div style="display:grid;gap:.8rem">
+        <div style="padding:1rem;border-radius:10px;background:var(--bad-soft);border:1px solid var(--bad)">
+          <div style="font-family:var(--mono);font-size:.72rem;color:var(--bad);font-weight:700;letter-spacing:.1em">🔴 攻擊</div>
+          <div id="atkText" style="margin-top:.4rem"></div>
+        </div>
+        <div style="padding:1rem;border-radius:10px;background:var(--good-soft);border:1px solid var(--good)">
+          <div style="font-family:var(--mono);font-size:.72rem;color:var(--good);font-weight:700;letter-spacing:.1em">🛡️ 防禦</div>
+          <div id="defText" style="margin-top:.4rem"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">SQL Injection 的正確寫法</span>
+    <h2>永遠用參數化查詢</h2>
+    <pre><code><span class="tok-com">// ❌ db.query(`SELECT * FROM users WHERE email = '${email}'`)</span>
+<span class="tok-com">// ✅ 參數化：</span>
+db.<span class="tok-fn">query</span>(<span class="tok-str">'SELECT * FROM users WHERE email = $1'</span>, [email])</code></pre>
+  </section>
+
+  <section>
+    <span class="num">其他散落的資安點</span>
+    <h2>code review 必盯</h2>
+    <ul>
+      <li><b>JWT 演算法 none 攻擊</b>：server 一定要鎖定允許的演算法，不能信 token 自報的 <code>alg</code>。</li>
+      <li><b>mTLS</b>：雙向憑證驗證，B2B 機敏 API 與 IoT 裝置認證常用。</li>
+      <li><b>Webhook 簽章驗證</b>：收 Stripe webhook 一定要驗 <code>Stripe-Signature</code>，並用 <code>event.id</code> 去重防重送。</li>
+      <li><b>錯誤訊息別吐 stack trace</b> 給 client。</li>
+      <li><b>Rate limiting</b> 防暴力破解。</li>
+    </ul>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「四大經典：SQL injection 用<span class="hl">參數化查詢</span>防；XSS 用<span class="hl">輸出跳脫 + CSP + httpOnly cookie</span> 防；CSRF 用 <span class="hl">SameSite cookie + CSRF token</span> 防；SSRF 用 <span class="hl">URL 白名單</span>防。再加上 JWT 要鎖演算法防 none 攻擊、webhook 要驗簽章、錯誤別吐 stack trace。code review 時我會特別盯有沒有字串拼 SQL、有沒有對使用者輸入做跳脫。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="API-06-JWT與Session認證.html">API-06 JWT/Session</a><a href="網路-05-CORS跨來源資源共用.html">網路-05 CORS</a><a href="網路-04-TLS與HTTPS握手.html">網路-04 TLS</a><a href="API-07-Rate-Limiting.html">API-07 Rate Limiting</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const data={
+    sqli:{
+      atk:'把惡意 SQL 拼進輸入。例如登入框輸入 <code>\' OR \'1\'=\'1</code>，讓 <code>WHERE password = \'...\'</code> 永遠成立，繞過登入。',
+      def:'<b>永遠用參數化查詢（prepared statement）/ ORM</b>，絕不用字串拼接 SQL。'
+    },
+    xss:{
+      atk:'把惡意 <code>&lt;script&gt;</code> 塞進會被別人瀏覽的內容（留言、暱稱），別人開頁面就執行了攻擊者的 JS（偷 cookie / token）。',
+      def:'輸出時跳脫 HTML（React/Vue 預設會跳脫，但 <code>dangerouslySetInnerHTML</code> 要小心）；設 <code>Content-Security-Policy</code>；敏感 token 放 <b>httpOnly cookie</b>（JS 讀不到）。'
+    },
+    csrf:{
+      atk:'你登入了銀行（cookie 還在），攻擊者誘你點一個連結，瀏覽器<b>自動帶上你的 cookie</b> 去打銀行的轉帳 API。',
+      def:'<code>SameSite=Lax/Strict</code> cookie（跨站不自動帶）+ CSRF token + 檢查 Origin/Referer。用 <code>Authorization: Bearer</code> 的 JWT 天生較不怕（瀏覽器不會自動帶 header）。'
+    },
+    ssrf:{
+      atk:'誘使你的 server 去打一個攻擊者指定的內部網址（如 <code>http://169.254.169.254</code> 雲端 metadata，可偷到雲端憑證）。',
+      def:'對「使用者可控的 URL」做<b>白名單、禁打內網位址</b>。'
+    }
+  };
+  const atkRow=document.getElementById('atkRow');
+  const atkText=document.getElementById('atkText');
+  const defText=document.getElementById('defText');
+  function show(a){ atkText.innerHTML=data[a].atk; defText.innerHTML=data[a].def; }
+  atkRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...atkRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); show(b.dataset.a); });
+  show('sqli');
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>正規化 vs 反正規化</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">DB-01</span></div>
+
+  <header class="hero">
+    <div class="kicker">資料庫 · 設計</div>
+    <h1>只存一處 vs <em>故意複製</em></h1>
+    <p class="lede"><b>正規化</b>：同一份資料只存一處、用關聯連起來，避免重複。<b>反正規化</b>：為了讀得快，故意複製一份 —— 代價是改了要記得同步，否則資料不一致。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 改個名字看災情</span>
+    <h2>Emily 改名字，幾個地方要更新？</h2>
+    <p>用戶名字出現在「用戶表」和很多筆「訂單」。切換設計，按「Emily 改名為 Emma」看會發生什麼：</p>
+    <div class="lab">
+      <div class="lab-label">先選設計</div>
+      <div class="toggle-row" id="designRow">
+        <button data-d="norm" class="on good">✅ 正規化（用 JOIN）</button>
+        <button data-d="denorm">📋 反正規化（複製名字）</button>
+      </div>
+      <div id="tables" style="display:grid;gap:.8rem;margin-bottom:1rem"></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn-primary" id="renameBtn">把 Emily 改名為 Emma</button>
+        <button class="btn-ghost" id="resetBtn">重來</button>
+      </div>
+      <div id="verdict" style="margin-top:1rem;font-weight:700"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">各自時機</span>
+    <h2>什麼時候打破正規化</h2>
+    <ul>
+      <li><b>讀遠多於寫，而且 JOIN 很慢</b>（dashboard、報表）。</li>
+      <li>跨服務複製資料，避免跨服務 JOIN。</li>
+    </ul>
+    <div class="callout tip"><span class="ico">💡</span><p>優先用<b>物化視圖（materialized view）/ cache table</b>，而不是直接改基本表 —— 原始資料還是正規化的，只是多一份算好的快取。</p></div>
+  </section>
+
+  <section>
+    <span class="num">MOOVO 判斷例子</span>
+    <h2>列車輛要顯示「最後使用者名字」，要冗餘進 bike 表嗎？</h2>
+    <p><b>不要。</b>用 JOIN 就好。因為名字會改，冗餘進去就要到處同步，一致性顧不到。除非這個查詢量大到 JOIN 成為瓶頸，才考慮用物化視圖。</p>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「預設<span class="hl">正規化</span>，避免重複、保證一致。只有在『讀遠多於寫且 JOIN 成為瓶頸』時才反正規化，而且我會優先用<span class="hl">物化視圖或 cache table</span>，讓原始資料維持正規化、只多一份算好的快取，而不是直接在基本表塞冗餘欄位 —— 那會帶來同步與一致性的麻煩。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="DB-02-PostgreSQL索引Index.html">DB-02 索引</a><a href="DB-06-N加1查詢問題.html">DB-06 N+1</a><a href="系統-03-Caching快取策略.html">系統-03 快取</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let design='norm', renamed=false;
+  const $=id=>document.getElementById(id);
+  const tables=$('tables'),verdict=$('verdict'),designRow=$('designRow');
+  function render(){
+    const name=renamed?'Emma':'Emily';
+    if(design==='norm'){
+      tables.innerHTML=`
+        <div class="balance-box" style="text-align:left;padding:1rem"><div style="font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)">users 表（唯一來源）</div><div style="font-family:var(--mono);margin-top:.3rem">id:5 · name: <b style="color:var(--accent)">${name}</b></div></div>
+        <div class="balance-box" style="text-align:left;padding:1rem"><div style="font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)">orders 表（只存 user_id）</div><div style="font-family:var(--mono);margin-top:.3rem">#101 user_id:5 ｜ #102 user_id:5 ｜ #103 user_id:5</div><div style="font-size:.8rem;color:var(--ink-soft);margin-top:.3rem">顯示名字時 JOIN users → 永遠拿到最新</div></div>`;
+    } else {
+      const oldName='Emily';
+      tables.innerHTML=`
+        <div class="balance-box" style="text-align:left;padding:1rem"><div style="font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)">users 表</div><div style="font-family:var(--mono);margin-top:.3rem">id:5 · name: <b style="color:var(--accent)">${name}</b></div></div>
+        <div class="balance-box ${renamed?'danger':''}" style="text-align:left;padding:1rem"><div style="font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)">orders 表（複製了名字）</div><div style="font-family:var(--mono);margin-top:.3rem">#101 name:<b>${renamed?oldName:name}</b> ｜ #102 name:<b>${renamed?oldName:name}</b> ｜ #103 name:<b>${renamed?oldName:name}</b></div></div>`;
+    }
+  }
+  designRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...designRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); design=b.dataset.d; renamed=false; verdict.textContent=''; render(); });
+  $('renameBtn').addEventListener('click',()=>{ renamed=true; render(); if(design==='norm'){ verdict.innerHTML='<span style="color:var(--good)">✅ 只改 users 一個地方，所有訂單 JOIN 後立刻顯示 Emma。乾淨。</span>'; } else { verdict.innerHTML='<span style="color:var(--bad)">💥 users 改成 Emma 了，但 3 筆訂單還是舊的 Emily！資料不一致 —— 你得記得同步每一筆。</span>'; } });
+  $('resetBtn').addEventListener('click',()=>{ renamed=false; verdict.textContent=''; render(); });
+  render();
+</script>
+</body>
+</html>

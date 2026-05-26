@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N+1 查詢問題</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">DB-06 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">資料庫 · 效能</div>
+    <h1>查清單 1 次，<br>每筆又各查<em>一次</em></h1>
+    <p class="lede">查一個清單（1 次 query），然後對清單裡每一筆又各自查一次關聯資料（N 次），總共打了 <b>1+N 次 DB</b>，量大時超慢。常因 ORM 的 lazy loading 不小心觸發。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 數數打了幾次 DB</span>
+    <h2>列 10 個用戶 + 各自的訂單</h2>
+    <p>切換 lazy / eager，按「載入」看打了幾次 DB、花多久：</p>
+    <div class="lab">
+      <div class="lab-label">先選載入方式</div>
+      <div class="toggle-row" id="modeRow">
+        <button data-m="lazy" class="on bad">😱 Lazy（N+1）</button>
+        <button data-m="eager">✅ Eager（JOIN / IN）</button>
+      </div>
+      <button class="btn-primary" id="loadBtn" style="margin-bottom:1rem">載入 10 個用戶的訂單</button>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.8rem">
+        <div class="balance-box" style="flex:1;min-width:120px;padding:1rem"><div class="label">DB 查詢次數</div><div class="amount" id="qcount" style="font-size:2rem">0</div></div>
+        <div class="balance-box" style="flex:1;min-width:120px;padding:1rem"><div class="label">總耗時（模擬）</div><div class="amount" id="qtime" style="font-size:2rem">0ms</div></div>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// 送出的 query 會顯示在這…</div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">問題長相</span>
+    <h2>為什麼是 1+N</h2>
+    <pre><code><span class="tok-com">-- 1 次：</span>
+<span class="tok-key">SELECT</span> * <span class="tok-key">FROM</span> users <span class="tok-key">LIMIT</span> 10;          <span class="tok-com">-- 拿到 10 個 user</span>
+<span class="tok-com">-- 然後對每個 user 各跑一次：</span>
+<span class="tok-key">SELECT</span> * <span class="tok-key">FROM</span> orders <span class="tok-key">WHERE</span> user_id = ?;   <span class="tok-com">-- 跑 10 次！</span></code></pre>
+    <p>總共 <b>1 + 10 = 11 次</b>。100 個用戶就 101 次。每次查詢都有來回網路開銷，量一大就拖垮效能。</p>
+  </section>
+
+  <section>
+    <span class="num">解法</span>
+    <h2>把 N 次併成 1 次</h2>
+    <ul>
+      <li><b>SQL</b>：用 JOIN，或一次 <code>WHERE user_id IN (1,2,3,...)</code>。</li>
+      <li><b>ORM eager loading</b>：Prisma <code>include: { orders: true }</code>、TypeORM <code>relations: ['orders']</code>。</li>
+      <li><b>GraphQL</b>：用 <b>DataLoader</b> —— 把同一 tick 內所有「查 user 的 orders」收集起來合併成一次 batch query，並 cache。</li>
+    </ul>
+    <div class="callout info"><span class="ico">🔍</span><p>怎麼發現它：看 DB log / APM trace 出現「<b>同一句 query 被打了好幾十次只差參數</b>」。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「N+1 是查清單 1 次、再對每筆各查 1 次關聯、總共 1+N 次，通常是 ORM <span class="hl">lazy loading</span> 造成的。解法是 JOIN、或 <span class="hl">IN (...)</span> 批次查、或 ORM 的 eager loading；GraphQL 場景用 <span class="hl">DataLoader</span> 把同一 tick 的請求 batch + cache。我會在 APM 看到『同一句 query 重複幾十次』就知道中了。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="API-08-REST與GraphQL.html">API-08 REST/GraphQL</a><a href="DB-03-EXPLAIN-ANALYZE怎麼看.html">DB-03 EXPLAIN</a><a href="Node-09-API變慢的排查方法.html">Node-09 API變慢</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let mode='lazy';
+  const $=id=>document.getElementById(id);
+  const log=$('log'),modeRow=$('modeRow'),qcount=$('qcount'),qtime=$('qtime');
+  modeRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...modeRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); mode=b.dataset.m; log.innerHTML='<div class="ln empty">// 送出的 query 會顯示在這…</div>'; qcount.textContent='0'; qtime.textContent='0ms'; });
+  function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+  $('loadBtn').addEventListener('click',()=>{
+    log.innerHTML=''; let count=0; let i=0;
+    if(mode==='lazy'){
+      addLog('<span class="c-req">SELECT * FROM users LIMIT 10</span>'); count=1;
+      const timer=setInterval(()=>{
+        i++; count++;
+        addLog(`<span class="c-bad">SELECT * FROM orders WHERE user_id = ${i}</span>  <span class="c-dim">(第 ${i} 次)</span>`);
+        qcount.textContent=count;
+        if(i>=10){ clearInterval(timer); qcount.textContent='11'; qtime.textContent='~330ms 🐢'; addLog('<span class="c-bad">→ 共 11 次！每次都有網路來回</span>','c-bad'); }
+      },150);
+    } else {
+      addLog('<span class="c-req">SELECT * FROM users LIMIT 10</span>');
+      setTimeout(()=>{ addLog('<span class="c-ok">SELECT * FROM orders WHERE user_id IN (1,2,...,10)</span>','c-ok'); addLog('<span class="c-ok">→ 共 2 次，一次撈齊所有訂單 ⚡</span>','c-ok'); qcount.textContent='2'; qtime.textContent='~30ms ⚡'; },300);
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 變慢的排查方法</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-09 · ⭐ 場景題</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js · 場景題</div>
+    <h1>從 100ms 暴增到 5s，<br><em>怎麼查？</em></h1>
+    <p class="lede">這題在測你有沒有「系統化 debug」能力，而不是亂猜。核心心法：<b>分層排查，從外到內</b>，一層層縮小範圍。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 分層往內鑽</span>
+    <h2>一層一層點下去，找出兇手</h2>
+    <p>不要一開始就猜「是不是 DB 慢」。照順序點每一層，看該層要查什麼：</p>
+    <div class="lab">
+      <div class="lab-label">依序點開每一層</div>
+      <div id="layers" style="display:flex;flex-direction:column;gap:.5rem"></div>
+      <div id="detail" style="margin-top:1rem;padding:1rem;border-radius:10px;background:var(--paper);border:1px solid var(--line);min-height:3rem;color:var(--ink-soft)">👆 點上面任一層看排查重點</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">常見元兇</span>
+    <h2>最後通常是這幾個</h2>
+    <ul>
+      <li>某張表的 index 失效（VACUUM 後、或新欄位排序沒 index）→ 變全表掃描。</li>
+      <li><b>連線池耗盡</b>（connection pool exhaustion）→ 請求排隊等連線。</li>
+      <li>某段同步程式碼<b>意外卡住 Event Loop</b>（JSON.parse 巨大物件、bcrypt 沒用 async 版）。</li>
+      <li>第三方 API（Stripe）變慢，拖累整條請求。</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="num">為什麼要分 P50 / P99</span>
+    <h2>平均值會騙人</h2>
+    <div class="chips">
+      <div class="chip bad">P50 高<small>大家普遍變慢 → 系統性問題</small></div>
+      <div class="chip info">只有 P99 高<small>多數正常、少數很慢 → 特定大資料 / 用戶 / GC / 鎖等待</small></div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>只看「平均值」會被極端值帶歪，看不出真相。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會<span class="hl">分層、從外到內</span>：先看 CDN/LB 是不是特定 region，再看是哪個 endpoint、是 P50 還是 P99 高，然後用 <span class="hl">APM trace</span> 定位慢在 Node、DB 還是外部 API。DB 慢就 pg_stat_statements + EXPLAIN ANALYZE；懷疑 Node 就看 <span class="hl">event loop utilization</span>。常見兇手是 index 失效、連線池耗盡、同步程式卡住 event loop、第三方 API 拖累。如果沒有 APM/log，我會老實說第一步是先補上 <span class="hl">observability</span>，否則只能猜。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-01-Event-Loop事件迴圈.html">Node-01 Event Loop</a><a href="DB-03-EXPLAIN-ANALYZE怎麼看.html">DB-03 EXPLAIN</a><a href="系統-03-Caching快取策略.html">系統-03 快取</a><a href="Node-08-記憶體洩漏排查.html">Node-08 記憶體洩漏</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const layers=[
+    {n:'① 網路層',d:'CDN / Load Balancer 的 metric 異常嗎？是某個特定 region 才慢，還是全球都慢？'},
+    {n:'② 應用層 metrics',d:'是哪個 endpoint 慢？全部請求變慢（P50 也高），還是只有尾端（P99 高）？'},
+    {n:'③ APM trace',d:'看一個請求的 distributed trace，到底慢在哪段：Node 處理？DB query？呼叫外部 API（Stripe）？'},
+    {n:'④ DB',d:'用 pg_stat_statements 找慢 query，對它跑 EXPLAIN ANALYZE 看是不是缺索引、全表掃描。'},
+    {n:'⑤ Node.js 本身',d:'Event Loop 被卡住了嗎？看 process.eventLoopUtilization()、用 --inspect 做 profile。'},
+    {n:'⑥ 依賴',d:'Redis 滿了？MQTT broker 連線斷了？連線池（connection pool）耗盡了？'},
+  ];
+  const wrap=document.getElementById('layers');
+  const detail=document.getElementById('detail');
+  layers.forEach((l,i)=>{
+    const row=document.createElement('button');
+    row.style.cssText='text-align:left;padding:.7rem .9rem;border-radius:9px;border:1.5px solid var(--line);background:var(--paper);font-weight:700;color:var(--ink);display:flex;justify-content:space-between;align-items:center';
+    row.innerHTML=`<span>${l.n}</span><span style="font-family:var(--mono);font-size:.75rem;color:var(--accent)">往內鑽 →</span>`;
+    row.addEventListener('click',()=>{
+      [...wrap.children].forEach(c=>{c.style.borderColor='var(--line)';c.style.background='var(--paper)';});
+      row.style.borderColor='var(--accent)'; row.style.background='var(--accent-soft)';
+      detail.innerHTML=`<b style="color:var(--accent)">${l.n}</b><br>${l.d}`;
+      detail.style.color='var(--ink)';
+    });
+    wrap.appendChild(row);
+  });
+</script>
+</body>
+</html>

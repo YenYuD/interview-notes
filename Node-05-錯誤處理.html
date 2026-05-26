@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node.js 錯誤處理</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-05 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js</div>
+    <h1>try/catch <em>抓不到</em>的錯</h1>
+    <p class="lede">非同步的錯誤 try/catch 不一定抓得到。要懂為什麼，並準備好「Express 錯誤 middleware」和「全域兜底」兩道防線。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 同一個 try，兩種結果</span>
+    <h2>為什麼 callback 的錯抓不到？</h2>
+    <p>切換兩種寫法，按「執行」看 try/catch 有沒有接住錯誤：</p>
+    <div class="lab">
+      <div class="lab-label">切換寫法</div>
+      <div class="toggle-row" id="wayRow">
+        <button data-w="cb" class="on bad">舊式 callback</button>
+        <button data-w="await">async / await</button>
+      </div>
+      <pre><code id="codeBox"></code></pre>
+      <button class="btn-primary" id="runBtn" style="margin:1rem 0">▶ 執行</button>
+      <div class="log" id="log"><div class="ln empty">// 執行結果會顯示在這…</div></div>
+    </div>
+    <div class="aside">try/catch 只能抓「<b>當下這個同步執行流</b>」裡的錯。舊式 callback 在未來某個 tick 才被 Event Loop 呼叫，那時 try 早就跑完離開了。async/await 是 Promise 語法糖，await 把後面的程式碼接回同一個錯誤流，所以 catch 得到。</div>
+  </section>
+
+  <section>
+    <span class="num">第一道防線</span>
+    <h2>Express 錯誤 middleware（業務層）</h2>
+    <pre><code>app.<span class="tok-fn">use</span>((err, req, res, next) =&gt; {
+  <span class="tok-com">// 「四個參數」是 Express 辨識錯誤 middleware 的方式</span>
+  res.<span class="tok-fn">status</span>(err.status || 500).<span class="tok-fn">json</span>({ code: err.code, message: err.message });
+});</code></pre>
+    <p>任何 middleware 呼叫 <code>next(err)</code> 就會跳到這。<b>Async middleware 要包 wrapper</b>，不然 throw 出來的錯沒人接：</p>
+    <pre><code><span class="tok-key">const</span> asyncHandler = (fn) =&gt; (req, res, next) =&gt;
+  <span class="tok-key">Promise</span>.<span class="tok-fn">resolve</span>(<span class="tok-fn">fn</span>(req, res, next)).<span class="tok-fn">catch</span>(next);</code></pre>
+    <p>（Express 5+ 已內建支援 async，但很多專案還在 4.x 要自己包。）</p>
+  </section>
+
+  <section>
+    <span class="num">第二道防線</span>
+    <h2>全域兜底（最後一道）</h2>
+    <pre><code>process.<span class="tok-fn">on</span>(<span class="tok-str">'uncaughtException'</span>, (err) =&gt; {
+  logger.<span class="tok-fn">fatal</span>(err);
+  process.<span class="tok-fn">exit</span>(1);  <span class="tok-com">// 重要：強制重啟，狀態已不可信任</span>
+});
+process.<span class="tok-fn">on</span>(<span class="tok-str">'unhandledRejection'</span>, (reason) =&gt; {
+  logger.<span class="tok-fn">error</span>(reason);
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">常見踩雷</span>
+    <h2>這些別做</h2>
+    <div class="callout warn"><span class="ico">✕</span><p><code>uncaughtException</code> 之後繼續跑 → 狀態已不可信，<b>一定要 exit</b> 讓 process manager 重啟。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p>一堆 async function 沒 await → 觸發 <code>unhandledRejection</code> 警告。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p>在 callback 內 <code>throw</code> → Event Loop 接不到。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「try/catch 抓不到舊式 callback 的錯，因為 callback 在<span class="hl">未來的 tick</span> 才執行，那時 try 區塊早跑完了；async/await 是 Promise 語法糖所以抓得到。實務兩道防線：Express 用<span class="hl">四參數的錯誤 middleware</span> 統一處理，async handler 要包 wrapper 把 reject 轉成 next(err)；最後用 uncaughtException 全域兜底，但一定要 <span class="hl">process.exit(1)</span> 重啟。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-06-Express-Middleware機制.html">Node-06 Middleware</a><a href="Node-01-Event-Loop事件迴圈.html">Node-01 Event Loop</a><a href="API-05-API錯誤處理格式.html">API-05 錯誤格式</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let way='cb';
+  const code={
+    cb:`try {
+  fs.readFile('x', (err, data) => {
+    throw err;   // ← 在未來的 tick 才跑
+  });
+} catch (e) {
+  console.log('抓到了:', e);
+}`,
+    await:`try {
+  await fs.promises.readFile('x');
+} catch (e) {
+  console.log('抓到了:', e);
+}`
+  };
+  const $=id=>document.getElementById(id);
+  const wayRow=$('wayRow'),log=$('log');
+  function show(){ $('codeBox').textContent=code[way]; log.innerHTML='<div class="ln empty">// 執行結果會顯示在這…</div>'; }
+  function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); }
+  wayRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...wayRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); way=b.dataset.w; show(); });
+  $('runBtn').addEventListener('click',()=>{
+    log.innerHTML='';
+    if(way==='cb'){
+      addLog('<span class="c-dim">同步流程：進入 try → 註冊 readFile callback → 離開 try ✓</span>','c-dim');
+      addLog('<span class="c-dim">（catch 區塊此時已經沒在監聽了）</span>','c-dim');
+      setTimeout(()=>{ addLog('<span class="c-bad">⏰ 未來的 tick：callback 執行 throw err</span>','c-bad'); addLog('<span class="c-bad">💥 沒人接 → uncaughtException → 程式崩潰</span>','c-bad'); },700);
+    } else {
+      addLog('<span class="c-req">await readFile(\'x\') …</span>');
+      setTimeout(()=>{ addLog('<span class="c-ok">reject → await 把錯誤接回同一個流</span>','c-ok'); addLog('<span class="c-ok">✓ 抓到了: Error: ENOENT</span>','c-ok'); },700);
+    }
+  });
+  show();
+</script>
+</body>
+</html>

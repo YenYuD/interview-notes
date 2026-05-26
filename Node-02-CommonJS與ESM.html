@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CommonJS vs ESM</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-02</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js</div>
+    <h1>require vs <em>import</em></h1>
+    <p class="lede">Node 的兩套模組系統。CommonJS 是 Node 老家用的 <code>require</code>，ESM 是 JS 官方標準的 <code>import</code>。混用時常出問題。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — Tree-shaking 差在哪</span>
+    <h2>為什麼 ESM 能搖掉沒用的 code</h2>
+    <p>假設你只用了工具庫的 1 個函式。切換看打包後留下什麼：</p>
+    <div class="lab">
+      <div class="lab-label">先選模組系統</div>
+      <div class="toggle-row" id="modRow">
+        <button data-m="cjs" class="on bad">CommonJS（require）</button>
+        <button data-m="esm">ESM（import）</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);margin-bottom:.4rem">你的程式：</div>
+      <pre><code id="srcBox"></code></pre>
+      <div style="font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);margin:.8rem 0 .4rem">打包後留下：</div>
+      <pre><code id="bundleBox"></code></pre>
+      <div id="note" style="margin-top:.6rem;font-weight:700"></div>
+    </div>
+    <div class="aside">ESM 的 import 是<b>靜態</b>的，打包工具編譯時就能分析哪些 export 沒用到並刪掉。CJS 的 require 是執行時動態決定（甚至能寫在 if 裡），工具無法事先確定。</div>
+  </section>
+
+  <section>
+    <span class="num">逐項對照</span>
+    <h2>差異一覽</h2>
+    <table>
+      <tr><th>特性</th><th>CommonJS</th><th>ESM</th></tr>
+      <tr><td>語法</td><td><code>require</code> / <code>module.exports</code></td><td><code>import</code> / <code>export</code></td></tr>
+      <tr><td>載入時機</td><td>執行時、同步</td><td>編譯時、靜態（hoist）</td></tr>
+      <tr><td>Tree-shaking</td><td>難</td><td>容易</td></tr>
+      <tr><td>Top-level await</td><td>不支援</td><td>支援</td></tr>
+      <tr><td><code>__dirname</code></td><td>內建可用</td><td>用 <code>import.meta.url</code> 自算</td></tr>
+      <tr><td>副檔名</td><td>可省略</td><td>必須寫完整 <code>./foo.js</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">常見的坑</span>
+    <h2>混用會出事</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p>用 <code>require()</code> 載 ESM 模組 → 舊版 Node 直接報錯；新版(22+)有限度支援但仍受限。</p></div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>用 <code>import</code> 載 CommonJS → default export 行為很怪，常要寫 <code>import pkg from 'lib'</code> 才拿到 <code>module.exports</code>。</p></div>
+    <div class="callout info"><span class="ico">💡</span><p>TypeScript 的 <code>"module": "NodeNext"</code> vs <code>"commonjs"</code> 取捨會影響輸出格式。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CommonJS 是 require、同步、執行時載入，難 tree-shaking；ESM 是 import、<span class="hl">靜態分析</span>、可 tree-shaking、支援 top-level await，但要寫完整副檔名、__dirname 要用 <span class="hl">import.meta.url</span> 算。混用最常見的坑是 CJS 與 ESM 的 default export 互通行為。新專案我會直接用 ESM。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-01-Event-Loop事件迴圈.html">Node-01 Event Loop</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let mod='cjs';
+  const data={
+    cjs:{
+      src:`const { sum } = require('./math');\nconsole.log(sum(1, 2));`,
+      bundle:`// math.js 全部被打包進來：\nfunction sum(a,b){ return a+b }\nfunction multiply(a,b){ ... }  // ← 沒用到也留著\nfunction divide(a,b){ ... }    // ← 沒用到也留著`,
+      note:'❌ require 是動態的，工具不敢刪 → 沒用到的也被打包，bundle 變肥',
+      color:'var(--bad)'
+    },
+    esm:{
+      src:`import { sum } from './math.js';\nconsole.log(sum(1, 2));`,
+      bundle:`// 只留下用到的：\nfunction sum(a,b){ return a+b }\n// multiply / divide 被 tree-shaking 刪掉了 ✂️`,
+      note:'✅ import 是靜態的 → 沒用到的被搖掉，bundle 更小',
+      color:'var(--good)'
+    }
+  };
+  const modRow=document.getElementById('modRow');
+  function show(){ const d=data[mod]; document.getElementById('srcBox').textContent=d.src; document.getElementById('bundleBox').textContent=d.bundle; const n=document.getElementById('note'); n.textContent=d.note; n.style.color=d.color; }
+  modRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...modRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); mod=b.dataset.m; show(); });
+  show();
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebSocket vs SSE vs Long Polling</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">網路-06</span></div>
+
+  <header class="hero">
+    <div class="kicker">網路協定 · 即時</div>
+    <h1>讓 server 能<em>主動推</em></h1>
+    <p class="lede">HTTP 本來是「client 問、server 答」。即時功能（聊天、看車輛位置）需要 server 一有更新就推給你。三種做法，差別在方向、協定、複雜度。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 看訊息怎麼流</span>
+    <h2>三種機制的連線方式</h2>
+    <p>選一種，按「server 有更新了」看訊息怎麼傳：</p>
+    <div class="lab">
+      <div class="lab-label">選機制</div>
+      <div class="toggle-row" id="mRow" style="flex-direction:column">
+        <button data-m="poll" class="on">Long Polling</button>
+        <button data-m="sse">SSE（單向）</button>
+        <button data-m="ws">WebSocket（雙向）</button>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+        <button class="btn-primary" id="updateBtn">server 有更新了 📢</button>
+        <button class="btn-ghost" id="clientBtn">client 想說話 💬</button>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// 訊息流動顯示在這…</div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">逐項對照</span>
+    <h2>四種一覽</h2>
+    <table>
+      <tr><th>機制</th><th>方向</th><th>底層</th><th>典型用途</th></tr>
+      <tr><td><b>Long Polling</b></td><td>server→client</td><td>HTTP</td><td>退而求其次的相容方案</td></tr>
+      <tr><td><b>SSE</b></td><td>server→client（單向）</td><td>HTTP</td><td>通知、進度、即時統計</td></tr>
+      <tr><td><b>WebSocket</b></td><td>雙向</td><td>ws/wss</td><td>聊天、遊戲、雙向互動</td></tr>
+      <tr><td><b>MQTT</b></td><td>雙向 pub/sub</td><td>TCP 自有協定</td><td>大量 IoT 裝置</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">WebSocket vs MQTT（容易混）</span>
+    <h2>連線層 vs 應用層</h2>
+    <ul>
+      <li><b>WebSocket</b> 是<b>連線層</b>的雙向通道，本身沒有 topic、QoS、訂閱，要自己造。</li>
+      <li><b>MQTT</b> 是<b>應用層協定</b>，內建 publish/subscribe、QoS、retain。</li>
+      <li>IoT 裝置動輒上萬，需要 broker 管訂閱與可靠度 → <a href="網路-08-MQTT與IoT.html">MQTT</a> 勝出。</li>
+    </ul>
+    <div class="chips">
+      <div class="chip info">看車輛位置（只看）<small>→ SSE</small></div>
+      <div class="chip info">需要互動<small>→ WebSocket</small></div>
+      <div class="chip good">車輛上報 telemetry<small>→ MQTT（不是 WebSocket！）</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>SSE 斷線怎辦？</summary><p>瀏覽器內建自動重連，並帶 <code>Last-Event-ID</code> 讓 server 知道從哪續傳。</p></details>
+      <details><summary>WebSocket 的 proxy 問題？</summary><p>有些企業 proxy 不支援 ws；nginx 要正確設定 <code>Upgrade</code> / <code>Connection</code> header。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「單向推（通知、進度、即時統計）用 <span class="hl">SSE</span>，省事又能自動重連；要雙向互動用 <span class="hl">WebSocket</span>；裝置端大量上報用 <span class="hl">MQTT</span> 而不是 WebSocket，因為 MQTT 有 broker、topic、QoS 這些 IoT 需要的抽象。MOOVO 我會用 SSE 推車況給 App、MQTT 收車輛 telemetry。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="網路-08-MQTT與IoT.html">網路-08 MQTT</a><a href="網路-01-HTTP-1-2-3的差異.html">網路-01 HTTP1/2/3</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let m='poll';
+  const $=id=>document.getElementById(id);
+  const log=$('log'),mRow=$('mRow');
+  function addLog(html,cls,delay){ setTimeout(()=>{ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; },delay||0); }
+  mRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...mRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); m=b.dataset.m; log.innerHTML='<div class="ln empty">// 訊息流動顯示在這…</div>'; });
+  $('updateBtn').addEventListener('click',()=>{
+    log.innerHTML='';
+    if(m==='poll'){ addLog('<span class="c-dim">client：發請求，server 先不回（hold 住）⏳</span>',null,0); addLog('<span class="c-ok">server 有更新 → 這時才回應這個 hold 住的請求</span>','c-ok',600); addLog('<span class="c-req">client 收到後，馬上再發一個新請求（一直舉手）</span>',null,1200); }
+    else if(m==='sse'){ addLog('<span class="c-dim">一條長連線已建立（單向）</span>',null,0); addLog('<span class="c-ok">server → client：data: 車輛位置更新 ⬇️</span>','c-ok',500); addLog('<span class="c-ok">server → client：data: 又一筆 ⬇️（源源不斷推）</span>','c-ok',1000); }
+    else { addLog('<span class="c-dim">ws 連線已建立（雙向）</span>',null,0); addLog('<span class="c-ok">server → client：訊息 ⬇️</span>','c-ok',500); }
+  });
+  $('clientBtn').addEventListener('click',()=>{
+    if(m==='ws'){ addLog('<span class="c-req">client → server：我也能隨時發訊息 ⬆️ ✓</span>','c-req'); }
+    else if(m==='sse'){ addLog('<span class="c-bad">SSE 是單向的，client 不能用這條連線回話（要另開 HTTP 請求）</span>','c-bad'); }
+    else { addLog('<span class="c-dim">Long Polling：client 本來就靠發請求說話，但效率差</span>','c-dim'); }
+  });
+</script>
+</body>
+</html>

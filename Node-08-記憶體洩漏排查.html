@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>記憶體洩漏排查</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-08</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js · 排查</div>
+    <h1>該回收的，<br>被<em>誰一直抓著</em></h1>
+    <p class="lede">記憶體用量一直漲不會降，通常是有東西「該被 GC 回收卻被某個 reference 一直抓著」。要靠 heap snapshot 比對找出兇手。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 洩漏 vs 正常 cache</span>
+    <h2>第一步：分辨是真洩漏還是正常</h2>
+    <p>切換看記憶體曲線。重點：<b>洩漏是「無限漲」，正常 cache 是「漲到一個量就穩定」</b>：</p>
+    <div class="lab">
+      <div class="lab-label">切換情境，看曲線</div>
+      <div class="toggle-row" id="caseRow">
+        <button data-c="leak" class="on bad">🔴 真的洩漏</button>
+        <button data-c="cache">🟢 正常 cache</button>
+      </div>
+      <svg id="chart" viewBox="0 0 320 140" style="width:100%;height:160px;background:var(--paper);border:1px solid var(--line);border-radius:10px"></svg>
+      <div style="display:flex;gap:.5rem;margin-top:1rem">
+        <button class="btn-primary" id="runBtn">▶ 開始監控</button>
+        <button class="btn-ghost" id="stopBtn">停止</button>
+      </div>
+      <div id="note" style="margin-top:1rem;font-weight:700;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">排查步驟</span>
+    <h2>取兩個 snapshot 比對</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>先確認真的是洩漏</h4><p>看記憶體是「無限漲」還是「漲到一個量就穩定」。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>取兩個 heap snapshot</h4><p>壓力測試前 vs 後。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>用 Comparison view 比對</h4><p>找「之間新增了一堆、卻沒被釋放」的物件。</p></div></div>
+      <div class="flow-step"><div class="flow-dot good">4</div><div class="flow-body"><h4>看 retainer（誰在抓著它）</h4><p>往上找到 root cause。</p></div></div>
+    </div>
+    <p>工具：<code>--inspect</code> + Chrome DevTools、<code>clinic.js</code>、<code>process.memoryUsage()</code>、Prometheus 監控 <code>nodejs_heap_size_used_bytes</code>。</p>
+  </section>
+
+  <section>
+    <span class="num">常見洩漏源</span>
+    <h2>兇手清單</h2>
+    <ul>
+      <li>全域 cache 沒設 TTL / 大小上限 → 無限長大。</li>
+      <li><b>Event listener 加了沒移除</b>（如重複 <code>server.on('connection', ...)</code>）。</li>
+      <li><b>Closure 抓著大物件</b> 不放。</li>
+      <li><b>Timer 沒 clear</b>（<code>setInterval</code> 會一直持有 callback reference）。</li>
+      <li>ORM 的 connection / cursor 用完沒關。</li>
+    </ul>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會先分辨是真洩漏還是正常 cache（看記憶體會不會穩定下來）。確認後取壓測前後兩個 <span class="hl">heap snapshot</span>，用 DevTools 的 <span class="hl">comparison view</span> 找新增又沒釋放的物件，再順著 <span class="hl">retainer</span> 找 root cause。最常見的兇手是沒清的 event listener、沒設上限的全域 cache、沒 clear 的 timer、和抓著大物件的 closure。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-01-Event-Loop事件迴圈.html">Node-01 Event Loop</a><a href="Node-09-API變慢的排查方法.html">Node-09 API變慢</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let mode='leak', timer=null, t=0, pts=[];
+  const $=id=>document.getElementById(id);
+  const chart=$('chart'),note=$('note'),caseRow=$('caseRow');
+  function val(x){ // x: 0..1
+    if(mode==='leak') return 10 + x*110;            // 一直漲
+    return 110*(1-Math.exp(-x*4)) ;                  // 漲到穩定
+  }
+  function draw(){
+    const W=320,H=140,pad=10;
+    let path='';
+    pts.forEach((p,i)=>{ const px=pad+(p.x)*(W-2*pad); const py=H-pad-(p.y/130)*(H-2*pad); path+=(i?'L':'M')+px.toFixed(1)+' '+py.toFixed(1)+' '; });
+    const color = mode==='leak'?'var(--bad)':'var(--good)';
+    chart.innerHTML=`
+      <line x1="10" y1="130" x2="310" y2="130" stroke="var(--line)"/>
+      <line x1="10" y1="10" x2="10" y2="130" stroke="var(--line)"/>
+      <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5"/>
+      <text x="14" y="22" font-size="9" fill="var(--ink-soft)" font-family="monospace">heap used</text>`;
+  }
+  function stop(){ if(timer){clearInterval(timer);timer=null;} }
+  caseRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...caseRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); mode=b.dataset.c; stop(); t=0; pts=[]; draw(); note.textContent=''; });
+  $('runBtn').addEventListener('click',()=>{
+    stop(); t=0; pts=[];
+    timer=setInterval(()=>{
+      t+=0.04; if(t>1){ stop();
+        note.innerHTML = mode==='leak'
+          ? '<span style="color:var(--bad)">📈 無限往上、不回頭 → 這是真洩漏，該抓 heap snapshot 找兇手。</span>'
+          : '<span style="color:var(--good)">✅ 漲到一個量就持平 → 這是正常 cache，不是洩漏。</span>';
+        return;
+      }
+      pts.push({x:t,y:val(t)}); draw();
+    },80);
+  });
+  $('stopBtn').addEventListener('click',()=>{ stop(); });
+  draw();
+</script>
+</body>
+</html>

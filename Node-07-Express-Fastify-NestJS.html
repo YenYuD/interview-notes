@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Express vs Fastify vs NestJS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-07</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js</div>
+    <h1>三個框架，<br>三種<em>個性</em></h1>
+    <p class="lede"><b>Express</b> 極簡彈性、<b>Fastify</b> 主打效能、<b>NestJS</b> 強制架構（適合大型團隊）。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 我的專案該選哪個？</span>
+    <h2>選你的情境，看推薦</h2>
+    <div class="lab">
+      <div class="lab-label">點你的專案類型</div>
+      <div class="toggle-row" id="caseRow" style="flex-direction:column">
+        <button data-c="proto" class="on">快速做個原型 / 小 API</button>
+        <button data-c="perf">吞吐量優先、要內建驗證</button>
+        <button data-c="team">大團隊、長期維護的大型專案</button>
+      </div>
+      <div class="balance-box" style="text-align:left;padding:1.2rem">
+        <div style="font-size:.78rem;color:var(--ink-soft)">推薦框架</div>
+        <div id="rec" style="font-family:'Noto Serif TC';font-weight:900;font-size:1.5rem;color:var(--accent);margin:.3rem 0"></div>
+        <div id="recWhy" style="font-size:.92rem;color:var(--ink-soft)"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">逐項對照</span>
+    <h2>三框架一覽</h2>
+    <table>
+      <tr><th>框架</th><th>風格</th><th>適合</th></tr>
+      <tr><td><b>Express</b></td><td>極簡，以 middleware 為核心，什麼都自己組</td><td>小型專案、原型</td></tr>
+      <tr><td><b>Fastify</b></td><td>高效能，內建 JSON schema 驗證</td><td>注重吞吐量</td></tr>
+      <tr><td><b>NestJS</b></td><td>像 Angular 後端版：DI、模組化、TS 優先</td><td>大型團隊、長期專案</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">NestJS 為什麼適合大型專案</span>
+    <h2>架構自帶紀律</h2>
+    <ul>
+      <li><b>強制模組化</b>（Controller / Service / Module）→ 自然達到<a href="系統-01-高內聚低耦合.html">高內聚低耦合</a>（MOOVO JD 關鍵字）。</li>
+      <li><b>DI 依賴注入 container</b> → 容易替換、容易測試（mock 依賴）。</li>
+      <li><b>Decorator 寫法清晰</b>：<code>@Controller('bikes')</code>、<code>@Get(':id')</code>。</li>
+      <li>內建支援 Swagger、Validation、GraphQL、WebSocket、MQTT、microservices。</li>
+    </ul>
+    <div class="callout warn"><span class="ico">⚠️</span><p>何時不用 NestJS：簡單 API 用 Express / Fastify 就好，NestJS 的架構 overhead 太大；團隊不熟 DI / OOP 模式時也不適合。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答（Emily 可能被問「為什麼選 NestJS」）</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Express 極簡彈性、適合小專案；Fastify 主打效能與內建 schema 驗證；NestJS 像 Angular 後端版，用 <span class="hl">DI 和模組化</span>強制高內聚低耦合，內建一堆企業功能，適合大團隊長期維護。我主力是 Express 和 Next.js Route Handlers，NestJS 的 DI、模組、decorator-based controller 我研究過設計理念，可以快速上手。」</p>
+    <div class="callout tip"><span class="ico">💡</span><p>誠實應對：沒 production 用過 NestJS 沒關係，講得出「<b>Module / Controller / Service / Provider 怎麼搭</b>」+「它解決什麼問題」就很加分。</p></div>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-06-Express-Middleware機制.html">Node-06 Middleware</a><a href="系統-01-高內聚低耦合.html">系統-01 高內聚低耦合</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const rec={
+    proto:{f:'Express',why:'極簡、彈性、middleware 為核心，最快把想法跑起來。'},
+    perf:{f:'Fastify',why:'高效能、內建 JSON schema 驗證，吞吐量比 Express 好。'},
+    team:{f:'NestJS',why:'DI + 模組化強制高內聚低耦合，企業功能齊全，大團隊長期維護最穩。'},
+  };
+  const caseRow=document.getElementById('caseRow');
+  function show(c){ document.getElementById('rec').textContent=rec[c].f; document.getElementById('recWhy').textContent=rec[c].why; }
+  caseRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...caseRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); show(b.dataset.c); });
+  show('proto');
+</script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Express Middleware 機制</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-06 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js · Express</div>
+    <h1>請求跑過<br>一條<em>輸送帶</em></h1>
+    <p class="lede">Express 把每個請求丟進一條「處理管線」，管線上每一節就是一個 middleware，靠呼叫 <code>next()</code> 把棒子交給下一節。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 請求在管線上跑</span>
+    <h2>next() 傳棒、不呼叫就卡住</h2>
+    <p>選一種情境，按「送出請求」看那顆球怎麼在管線上跑：</p>
+    <div class="lab">
+      <div class="lab-label">選情境</div>
+      <div class="toggle-row" id="caseRow" style="flex-direction:column">
+        <button data-c="normal" class="on">✅ 每站都呼叫 next()</button>
+        <button data-c="hang">⚠️ auth 忘了呼叫 next()</button>
+        <button data-c="err">🔴 auth 呼叫 next(err)</button>
+      </div>
+      <div id="pipe" style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem"></div>
+      <button class="btn-primary" id="sendBtn">送出請求 →</button>
+      <div id="result" style="margin-top:1rem;font-weight:700;min-height:1.5em;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">每個 middleware 的長相</span>
+    <h2>(req, res, next)</h2>
+    <ul>
+      <li>呼叫 <code>next()</code> → 把控制權交給下一個 middleware。</li>
+      <li><b>不呼叫 next() 也不回應</b> → 請求永遠卡住（hang）。</li>
+      <li>直接 <code>res.send()</code> → 提前結束，不再往下。</li>
+    </ul>
+    <div class="callout info"><span class="ico">🔴</span><p><b>錯誤 middleware</b> 簽名是<b>四個參數</b> <code>(err, req, res, next)</code> —— Express 靠「參數數量」判斷這是錯誤處理器。任何 middleware 呼叫 <code>next(err)</code> 就會跳過一般 middleware、直接進到它。</p></div>
+  </section>
+
+  <section>
+    <span class="num">順序很重要</span>
+    <h2>標準排法</h2>
+    <pre><code>app.<span class="tok-fn">use</span>(<span class="tok-fn">cors</span>());          <span class="tok-com">// 1. CORS 最先（OPTIONS 預檢要先過）</span>
+app.<span class="tok-fn">use</span>(<span class="tok-fn">helmet</span>());        <span class="tok-com">// 2. 安全 header</span>
+app.<span class="tok-fn">use</span>(express.<span class="tok-fn">json</span>());  <span class="tok-com">// 3. 解析 body</span>
+app.<span class="tok-fn">use</span>(logger);          <span class="tok-com">// 4. log</span>
+app.<span class="tok-fn">use</span>(<span class="tok-str">'/api'</span>, auth);    <span class="tok-com">// 5. 驗證</span>
+app.<span class="tok-fn">use</span>(<span class="tok-str">'/api'</span>, routes);  <span class="tok-com">// 6. 業務邏輯</span>
+app.<span class="tok-fn">use</span>(notFound);        <span class="tok-com">// 7. 404 兜底</span>
+app.<span class="tok-fn">use</span>(errorHandler);    <span class="tok-com">// 8. 錯誤兜底（一定最後）</span></code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>順序錯會出 bug：例如 auth 放在 cors 前面，OPTIONS 預檢會因為沒帶 token 被擋。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>為什麼 middleware 能串接？</summary><p><code>next</code> 是個 closure，包著「下一個 middleware 的 reference」。</p></details>
+      <details><summary>Express vs Koa 差在哪？</summary><p>Koa 用 <code>async/await</code> + <code>await next()</code>，可以「在 next 之後再做事」，形成<b>洋蔥模型</b>（請求進去一層層、回來再一層層）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Express 把請求送進一條 middleware 管線，每個 middleware 是 (req,res,next)，呼叫 <span class="hl">next()</span> 往下傳、不呼叫就卡住。錯誤 middleware 用<span class="hl">四個參數</span>簽名來辨識，next(err) 會直接跳過去。順序很關鍵：cors → 安全 header → body parser → log → auth → 路由 → 404 → 錯誤兜底放最後。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-05-錯誤處理.html">Node-05 錯誤處理</a><a href="網路-05-CORS跨來源資源共用.html">網路-05 CORS</a><a href="Node-07-Express-Fastify-NestJS.html">Node-07 框架比較</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const stations=['cors','helmet','json','logger','auth','routes'];
+  let mode='normal';
+  const $=id=>document.getElementById(id);
+  const pipe=$('pipe'),result=$('result'),caseRow=$('caseRow');
+  function render(){
+    pipe.innerHTML='';
+    stations.forEach(s=>{
+      const isErr = (mode!=='normal') && s==='auth';
+      const row=document.createElement('div');
+      row.dataset.s=s;
+      row.style.cssText=`display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;border-radius:9px;border:1.5px solid var(--line);background:var(--paper);font-family:var(--mono);font-size:.88rem;transition:all .2s`;
+      row.innerHTML=`<span style="width:14px;height:14px;border-radius:50%;background:var(--line);flex-shrink:0" class="dot"></span><span>app.use(${s})</span>`;
+      pipe.appendChild(row);
+    });
+    // 錯誤處理器顯示
+    const eh=document.createElement('div');
+    eh.dataset.s='errorHandler';
+    eh.style.cssText='display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;border-radius:9px;border:1.5px dashed var(--bad);background:var(--bad-soft);font-family:var(--mono);font-size:.88rem';
+    eh.innerHTML='<span style="width:14px;height:14px;border-radius:50%;background:var(--line);flex-shrink:0" class="dot"></span><span>errorHandler (err,req,res,next)</span>';
+    pipe.appendChild(eh);
+    result.textContent='';
+  }
+  caseRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...caseRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); mode=b.dataset.c; render(); });
+  function light(sel,color){ const row=pipe.querySelector(`[data-s="${sel}"]`); if(!row)return; row.style.borderColor=color; row.style.background= color==='var(--bad)'?'var(--bad-soft)':'var(--accent-soft)'; row.querySelector('.dot').style.background=color; }
+  $('sendBtn').addEventListener('click',()=>{
+    render();
+    const seq = mode==='err' ? ['cors','helmet','json','logger','auth','errorHandler'] : stations;
+    let i=0;
+    const timer=setInterval(()=>{
+      if(i>=seq.length){ clearInterval(timer);
+        if(mode==='normal'){ result.innerHTML='<span style="color:var(--good)">✅ 跑完整條管線 → res.send() 回應 200</span>'; }
+        else if(mode==='err'){ result.innerHTML='<span style="color:var(--bad)">🔴 auth next(err) → 跳過 routes，直接進 errorHandler → 回 401</span>'; }
+        return;
+      }
+      const s=seq[i];
+      if(mode==='hang' && s==='auth'){ light('auth','var(--bad)'); clearInterval(timer); result.innerHTML='<span style="color:var(--bad)">⏳ auth 沒呼叫 next() 也沒回應 → 請求永遠卡住（hang）</span>'; return; }
+      light(s, mode==='err'&&s==='errorHandler'?'var(--bad)':'var(--accent)');
+      i++;
+    },450);
+  });
+  render();
+</script>
+</body>
+</html>

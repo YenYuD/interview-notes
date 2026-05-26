@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node.js Event Loop</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-01 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js</div>
+    <h1>一個服務生，<br>跑滿<em>整間餐廳</em></h1>
+    <p class="lede">Node 只有一條 JS 執行緒，靠 Event Loop 不斷輪詢「有沒有完成的非同步工作要處理」。耗時的 I/O 丟給底層 libuv 背景做，JS 大部分時間在「等」，所以單執行緒也能撐高並發。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 經典考題</span>
+    <h2>猜這段的輸出順序</h2>
+    <p>面試最愛問。先自己猜，再按「執行」一步步看為什麼：</p>
+    <div class="lab">
+      <div class="lab-label">按執行，逐步揭曉</div>
+      <pre><code><span class="tok-fn">setTimeout</span>(() =&gt; <span class="tok-fn">console.log</span>(<span class="tok-str">'1'</span>), 0);
+<span class="tok-fn">setImmediate</span>(() =&gt; <span class="tok-fn">console.log</span>(<span class="tok-str">'2'</span>));
+<span class="tok-key">Promise</span>.resolve().then(() =&gt; <span class="tok-fn">console.log</span>(<span class="tok-str">'3'</span>));
+process.<span class="tok-fn">nextTick</span>(() =&gt; <span class="tok-fn">console.log</span>(<span class="tok-str">'4'</span>));
+<span class="tok-fn">console.log</span>(<span class="tok-str">'5'</span>);</code></pre>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0">
+        <button class="btn-primary" id="runBtn">▶ 執行</button>
+        <button class="btn-ghost" id="resetBtn">重來</button>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-bottom:.8rem" id="output"></div>
+      <div id="step" style="font-weight:700;min-height:1.6em;color:var(--ink-soft)"></div>
+    </div>
+    <div class="aside">輸出：<code>5 → 4 → 3 → 1/2</code>。同步 5 先跑 → nextTick 4 → microtask 3 → timer 1 / setImmediate 2（順序不一定）。</div>
+  </section>
+
+  <section>
+    <span class="num">優先順序總結</span>
+    <h2>誰先誰後</h2>
+    <pre><code>同步程式碼 → process.nextTick → microtasks(Promise) → 進入下一階段</code></pre>
+    <ul>
+      <li>每個階段「之間」都會清空一次 microtask queue（<code>Promise.then</code>、<code>queueMicrotask</code>）。</li>
+      <li><code>process.nextTick</code> 又優先於 microtask（它有自己獨立的 queue）。</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="num">六個階段（依序循環）</span>
+    <h2>Event Loop 的巡邏路線</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>Timers</h4><p>執行到期的 <code>setTimeout</code> / <code>setInterval</code>。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>Pending callbacks</h4><p>某些系統操作的 callback（如 TCP 錯誤）。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>Poll（最主要）</h4><p>取得新 I/O 事件、執行 I/O callback。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">4</div><div class="flow-body"><h4>Check</h4><p>執行 <code>setImmediate</code>。</p></div></div>
+      <div class="flow-step"><div class="flow-dot good">5</div><div class="flow-body"><h4>Close callbacks</h4><p>如 <code>socket.on('close', ...)</code>。</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">為什麼單執行緒能高並發 & 踩雷</span>
+    <h2>擅長 I/O，怕 CPU</h2>
+    <div class="chips">
+      <div class="chip good">I/O bound<small>API、DB query → 適合 Node</small></div>
+      <div class="chip bad">CPU bound<small>影像、加解密 → 會卡死整條執行緒</small></div>
+    </div>
+    <div class="callout warn"><span class="ico">✕</span><p>把 CPU 密集運算放主執行緒 → 整個 server 卡住、所有請求變慢。要丟給 <a href="Node-04-Cluster與Worker-Threads.html">Worker Threads</a>。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p>無限遞迴呼叫 <code>process.nextTick</code> → 餓死 I/O，後面階段永遠輪不到。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Node 單執行緒跑 JS，I/O 交給 <span class="hl">libuv</span> 背景做，Event Loop 輪巡六個階段（timers→pending→poll→check→close）。每個階段之間清空 microtask，而 <span class="hl">process.nextTick</span> 又優先於一般 microtask。所以它擅長 I/O 密集、不擅長 CPU 密集 —— CPU 重活會卡死整條執行緒，要丟給 Worker Threads。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-04-Cluster與Worker-Threads.html">Node-04 Cluster/Worker</a><a href="Node-09-API變慢的排查方法.html">Node-09 API變慢</a><a href="Node-05-錯誤處理.html">Node-05 錯誤處理</a></div>
+  </footer>
+
+</div>
+
+<script>
+  // 順序：5(同步) 4(nextTick) 3(microtask) 1(timer) 2(immediate)
+  const seq=[
+    {v:'5',note:'console.log(5) — 同步程式碼，最先執行'},
+    {v:'4',note:'process.nextTick — 同步跑完後最優先，自己的獨立 queue'},
+    {v:'3',note:'Promise.then — microtask，nextTick 之後'},
+    {v:'1',note:'setTimeout(0) — 進入 Timers 階段'},
+    {v:'2',note:'setImmediate — Check 階段（與 timer 順序不一定）'},
+  ];
+  const $=id=>document.getElementById(id);
+  const out=$('output'),step=$('step');
+  function reset(){ out.innerHTML=''; for(let i=0;i<5;i++){ const d=document.createElement('div'); d.style.cssText='width:48px;height:48px;border-radius:10px;border:2px dashed var(--line);display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:1.3rem;color:var(--line)'; d.textContent='?'; out.appendChild(d); } step.textContent=''; }
+  $('runBtn').addEventListener('click',()=>{
+    reset();
+    seq.forEach((s,i)=>setTimeout(()=>{
+      const cell=out.children[i];
+      cell.style.cssText='width:48px;height:48px;border-radius:10px;border:2px solid var(--accent);background:var(--accent-soft);display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:1.3rem;color:var(--accent)';
+      cell.textContent=s.v; step.textContent=`第 ${i+1} 個輸出：${s.note}`; step.style.color='var(--ink)';
+    },600*(i+1)));
+  });
+  $('resetBtn').addEventListener('click',reset);
+  reset();
+</script>
+</body>
+</html>

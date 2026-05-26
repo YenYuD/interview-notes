@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Message Queue 訊息佇列</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">系統-04</span></div>
+
+  <header class="hero">
+    <div class="kicker">系統設計</div>
+    <h1>放一張<em>待辦清單</em>在中間</h1>
+    <p class="lede">在兩個系統之間放一個「待辦清單」，A 把任務丟進去就走、B 慢慢處理，達到<b>削峰、解耦、可重試</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 削峰填谷</span>
+    <h2>突發流量打進來，queue 怎麼扛</h2>
+    <p>按「灌入大量訂單」看：沒 queue 時 API 同步全做會塞爆；有 queue 時先堆著、consumer 慢慢消化：</p>
+    <div class="lab">
+      <div class="lab-label">按按鈕看差別</div>
+      <div style="margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)"><span>Queue 待辦量</span><span id="qlen">0</span></div>
+        <div style="height:22px;border-radius:8px;background:var(--paper);border:1px solid var(--line);overflow:hidden;margin-top:.3rem"><div id="qbar" style="height:100%;width:0%;background:var(--accent);transition:width .25s"></div></div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn-primary" id="burstBtn">💥 灌入 20 筆訂單</button>
+        <button class="btn-ghost" id="resetBtn">重來</button>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// consumer 處理過程顯示在這…</div></div>
+    </div>
+    <div class="aside">API 只把「訂單成立」丟進 queue 就立刻回應使用者；扣款、寄信、通知由各自的 consumer 慢慢做 —— 像餐廳「點完餐先給號碼牌」。</div>
+  </section>
+
+  <section>
+    <span class="num">什麼時候該引入</span>
+    <h2>四大用途</h2>
+    <div class="chips">
+      <div class="chip info">削峰<small>突發流量先堆 queue，consumer 按速度消化</small></div>
+      <div class="chip info">解耦<small>A 不用等 B、也不用知道 B 是誰</small></div>
+      <div class="chip info">重試<small>B 暫掛，訊息留著，復原後繼續</small></div>
+      <div class="chip info">廣播<small>一事件多 consumer 各自處理</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">最重要觀念</span>
+    <h2>Exactly-once 做不到</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p><b>At-least-once（業界主流）</b>：保證至少送達一次，但<b>可能重複</b>。<b>Exactly-once</b> 在分散式系統中理論上做不到 —— 廠商宣稱的其實都是「at-least-once + 冪等保證」包裝出來的。</p></div>
+    <div class="callout tip"><span class="ico">✅</span><p>結論：設計 consumer 時<b>一定假設訊息會重複</b>，靠<a href="API-04-冪等性-Idempotency.html">冪等</a>（用 event id）去重。</p></div>
+    <p>選型：業務事件流用 Kafka / RabbitMQ；Node 任務佇列用 BullMQ（Redis-backed）；AWS 用 SQS / Kinesis。</p>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Queue 用在<span class="hl">削峰、解耦、重試、廣播</span> —— 例如 MOOVO 的 Stripe 續扣失敗，我不會在 webhook 同步做重活，而是丟進 BullMQ 排程處理。關鍵觀念是 <span class="hl">exactly-once 在分散式下做不到</span>，主流是 at-least-once，所以 consumer 一定要做<span class="hl">冪等去重</span>（用 event id）。選型上業務事件用 Kafka/RabbitMQ，Node 任務佇列用 BullMQ。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="API-04-冪等性-Idempotency.html">API-04 冪等性</a><a href="網路-08-MQTT與IoT.html">網路-08 MQTT</a><a href="系統-02-Monolith與Microservices.html">系統-02 微服務</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let q=0, timer=null;
+  const MAX=20;
+  const $=id=>document.getElementById(id);
+  const qbar=$('qbar'),qlen=$('qlen'),log=$('log');
+  function render(){ qlen.textContent=q; qbar.style.width=(q/MAX*100)+'%'; }
+  function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+  $('burstBtn').addEventListener('click',()=>{
+    log.innerHTML='';
+    q=MAX; render();
+    addLog('<span class="c-req">💥 20 筆訂單瞬間湧入 → 全進 queue，API 立刻回應使用者 ✓</span>');
+    addLog('<span class="c-dim">consumer 開始按自己的速度消化…</span>','c-dim');
+    if(timer) clearInterval(timer);
+    timer=setInterval(()=>{
+      if(q<=0){ clearInterval(timer); addLog('<span class="c-ok">✅ 全部處理完，過程中 API 沒被打爆</span>','c-ok'); return; }
+      q--; render();
+      addLog(`<span class="c-ok">consumer 處理 1 筆（扣款+寄信），剩 ${q}</span>`,'c-ok');
+    },350);
+  });
+  $('resetBtn').addEventListener('click',()=>{ if(timer)clearInterval(timer); q=0; render(); log.innerHTML='<div class="ln empty">// consumer 處理過程顯示在這…</div>'; });
+  render();
+</script>
+</body>
+</html>

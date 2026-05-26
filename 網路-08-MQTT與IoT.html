@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MQTT 與 IoT</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">網路-08 · ⭐ 加分項</span></div>
+
+  <header class="hero">
+    <div class="kicker">網路協定 · IoT</div>
+    <h1>一萬台車的<br><em>輕量</em>對話</h1>
+    <p class="lede">MQTT 是專為「大量、低功耗、不穩定網路的裝置」設計的輕量訊息協定，用 publish/subscribe 模型，是共享單車這類 IoT 的標準選擇。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — Publish / Subscribe</span>
+    <h2>車輛發布、訂閱者收到</h2>
+    <p>車輛把訊息 publish 到 topic，broker 轉發給所有訂閱者。按按鈕看流動：</p>
+    <div class="lab">
+      <div class="lab-label">按 publish 看轉發</div>
+      <div style="display:flex;justify-content:space-around;align-items:center;text-align:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem">
+        <div><div style="font-size:2rem">🚲</div><div style="font-size:.78rem;color:var(--ink-soft)">車輛 #42</div></div>
+        <div id="arrow1" style="font-family:var(--mono);color:var(--line);transition:color .3s">──▶</div>
+        <div><div style="font-size:2rem">📡</div><div style="font-size:.78rem;color:var(--ink-soft)">Broker</div></div>
+        <div id="arrow2" style="font-family:var(--mono);color:var(--line);transition:color .3s">──▶</div>
+        <div><div style="font-size:1.6rem">🖥️📱</div><div style="font-size:.78rem;color:var(--ink-soft)">訂閱者</div></div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn-primary" id="pubBtn">🚲 publish GPS 到 topic</button>
+        <button class="btn-ghost" id="cmdBtn">🖥️ server 下解鎖指令</button>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// pub/sub 流動顯示在這…</div></div>
+    </div>
+    <div class="aside">發布者和訂閱者<b>互相不需要知道對方是誰</b>，只透過 topic 解耦 —— 這就是 pub/sub 的精髓。</div>
+  </section>
+
+  <section>
+    <span class="num">為什麼不用 HTTP polling</span>
+    <h2>MQTT 的優勢</h2>
+    <ul>
+      <li><b>超輕量 header</b>：最小 2 bytes（HTTP 動輒幾百 bytes）。</li>
+      <li><b>長連線</b>：避免每次重做 TCP + TLS 握手。</li>
+      <li><b>Retain message</b>：broker 保留 topic 最後一筆，新訂閱者一連上立刻收到目前狀態。</li>
+      <li><b>Last Will（遺囑）</b>：裝置異常斷線時 broker 自動發預設訊息 → 實現「車輛離線」通知。</li>
+      <li><b>省電</b>：對電池供電的裝置至關重要。</li>
+    </ul>
+    <div class="callout info"><span class="ico">📊</span><p>一萬台車每 5 秒打一次 HTTP = 約 2000 RPS 純消耗；MQTT 長連線 + 2 bytes header，broker 壓力小非常多。</p></div>
+  </section>
+
+  <section>
+    <span class="num">三種 QoS</span>
+    <h2>可靠度分級</h2>
+    <table>
+      <tr><th>QoS</th><th>意思</th><th>用在哪</th></tr>
+      <tr><td><b>0</b></td><td>最多一次（發了就忘）</td><td>GPS telemetry（丟一筆無所謂）</td></tr>
+      <tr><td><b>1</b></td><td>至少一次（可能重複）</td><td>解鎖指令（一定要到，重複靠應用層 <a href="API-04-冪等性-Idempotency.html">idempotency</a>）</td></tr>
+      <tr><td><b>2</b></td><td>剛好一次（四段握手，最貴）</td><td>計費結算</td></tr>
+    </table>
+    <pre><code>bikes/{bikeId}/telemetry     <span class="tok-com"># 上行：車輛回報 GPS/電量</span>
+bikes/{bikeId}/cmd/unlock     <span class="tok-com"># 下行：server 發解鎖指令</span>
+bikes/{bikeId}/status         <span class="tok-com"># retain：保留最新狀態</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">大量 telemetry 不打爆 server</span>
+    <h2>進階策略</h2>
+    <ul>
+      <li><b>Batching</b>：broker 收完先寫 queue（如 Kafka），consumer 每秒 batch insert（別每筆 INSERT）。</li>
+      <li><b>降採樣</b>：高頻收集、低頻寫入；90 天後只留 1 分鐘平均。</li>
+      <li><b>Tiering</b>：熱資料 Redis、溫資料 TimescaleDB、冷資料 S3。</li>
+      <li><b>離線補傳</b>：裝置端本地 buffer（SQLite），重連後每筆帶 timestamp，server 依 timestamp 排序 + dedup key 去重。</li>
+    </ul>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「IoT 用 MQTT 是因為<span class="hl">長連線 + 2 bytes header + pub/sub + 省電</span>，比 HTTP polling 省太多。QoS：GPS 用 0、解鎖用 1（一定要到，重複靠應用層 idempotency）、計費用 2。再搭 <span class="hl">retain</span> 提供最新狀態、<span class="hl">Last Will</span> 做離線偵測。寫入 DB 一定 batch、不要每筆 INSERT。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="網路-06-WebSocket-SSE-LongPolling.html">網路-06 WebSocket/SSE</a><a href="API-04-冪等性-Idempotency.html">API-04 冪等性</a><a href="系統-04-Message-Queue訊息佇列.html">系統-04 Message Queue</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const $=id=>document.getElementById(id);
+  const log=$('log'),a1=$('arrow1'),a2=$('arrow2');
+  function flash(el){ el.style.color='var(--accent)'; setTimeout(()=>el.style.color='var(--line)',700); }
+  function addLog(html,cls,delay){ setTimeout(()=>{ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; },delay||0); }
+  $('pubBtn').addEventListener('click',()=>{
+    log.innerHTML='';
+    flash(a1); addLog('<span class="c-req">🚲 #42 publish → bikes/42/telemetry  {lat,lng}（QoS 0）</span>',null,0);
+    setTimeout(()=>flash(a2),400);
+    addLog('<span class="c-ok">📡 broker 轉發給所有訂閱 bikes/+/telemetry 的人</span>','c-ok',500);
+    addLog('<span class="c-ok">🖥️📱 訂閱者收到，更新地圖上的車輛位置</span>','c-ok',900);
+  });
+  $('cmdBtn').addEventListener('click',()=>{
+    log.innerHTML='';
+    addLog('<span class="c-req">🖥️ server publish → bikes/42/cmd/unlock（QoS 1，一定要到）</span>',null,0);
+    setTimeout(()=>{flash(a2);flash(a1);},400);
+    addLog('<span class="c-ok">📡 broker 轉給訂閱該 topic 的車輛 #42</span>','c-ok',500);
+    addLog('<span class="c-ok">🚲 #42 收到 → 解鎖！（重複收到靠 idempotency 處理）</span>','c-ok',900);
+  });
+</script>
+</body>
+</html>

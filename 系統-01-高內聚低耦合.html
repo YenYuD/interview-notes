@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高內聚低耦合</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">系統-01 · ⭐ JD關鍵字</span></div>
+
+  <header class="hero">
+    <div class="kicker">系統設計</div>
+    <h1>相關的放一起，<br>彼此<em>少伸手</em></h1>
+    <p class="lede"><b>高內聚</b> = 相關的東西放一起；<b>低耦合</b> = 模組之間盡量少互相依賴。這樣改一處不會牽動全身。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 改一個模組會怎樣</span>
+    <h2>糾纏 vs 乾淨邊界</h2>
+    <p>切換兩種架構，按「改 payments 模組」看會波及哪些模組：</p>
+    <div class="lab">
+      <div class="lab-label">切換架構</div>
+      <div class="toggle-row" id="archRow">
+        <button data-a="tangle" class="on bad">🍝 糾纏（互叫內部）</button>
+        <button data-a="clean">📦 高內聚低耦合</button>
+      </div>
+      <div id="modules" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem"></div>
+      <button class="btn-primary" id="changeBtn">改 payments 模組</button>
+      <div id="verdict" style="margin-top:1rem;font-weight:700;min-height:1.5em"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實務怎麼做到</span>
+    <h2>分層 + 依賴反轉 + 按業務切</h2>
+    <ol>
+      <li><b>分層架構</b>：Controller（HTTP 邊界）→ Service（業務邏輯）→ Repository（資料存取）→ Domain model（核心實體）。</li>
+      <li><b>依賴反轉</b>：Service 依賴 Repository 的<b>介面</b>，不是具體實作 → 換 DB 或 mock 測試都不用改 Service。</li>
+      <li><b>以「業務能力」切模組，不是以「技術層」切</b>。</li>
+      <li>不跨模組偷叫對方的內部，要走公開 API。</li>
+    </ol>
+    <div class="chips">
+      <div class="chip good">✅ 按業務切<small>bikes/ payments/ subscriptions/ 各自完整</small></div>
+      <div class="chip bad">❌ 按技術切<small>controllers/ services/ repos/ 全混在一起</small></div>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「高內聚是把一件事的相關程式碼聚在一起，低耦合是模組間透過<span class="hl">介面</span>溝通、不碰彼此內部。我會分層（Controller / Service / Repository / Domain），用<span class="hl">依賴反轉</span>讓 Service 依賴 Repository 介面方便測試與換實作，並且<span class="hl">以業務能力切模組</span>（bikes、payments 各自完整）。NestJS 的 Module 天生就在強制這個邊界。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-07-Express-Fastify-NestJS.html">Node-07 框架比較</a><a href="系統-02-Monolith與Microservices.html">系統-02 微服務</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let arch='tangle';
+  const mods=['bikes','payments','users'];
+  const $=id=>document.getElementById(id);
+  const modules=$('modules'),verdict=$('verdict'),archRow=$('archRow');
+  function render(affected){
+    modules.innerHTML='';
+    mods.forEach(m=>{
+      const hit = affected && affected.includes(m);
+      const box=document.createElement('div');
+      box.style.cssText=`padding:1rem;border-radius:10px;text-align:center;border:2px solid ${hit?'var(--bad)':'var(--line)'};background:${hit?'var(--bad-soft)':'var(--paper)'};font-weight:700;transition:all .3s;${hit?'color:var(--bad)':''}`;
+      box.innerHTML=`${m}/<div style="font-size:.7rem;font-weight:400;color:var(--ink-soft);margin-top:.2rem">${hit?'💥 被波及':'正常'}</div>`;
+      modules.appendChild(box);
+    });
+  }
+  archRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...archRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); arch=b.dataset.a; verdict.textContent=''; render(null); });
+  $('changeBtn').addEventListener('click',()=>{
+    if(arch==='tangle'){ render(['bikes','payments','users']); verdict.innerHTML='<span style="color:var(--bad)">💥 改 payments 卻波及全部！因為大家互相伸手進對方內部，牽一髮動全身。</span>'; }
+    else { render(['payments']); verdict.innerHTML='<span style="color:var(--good)">✅ 只有 payments 受影響。其他模組透過穩定介面溝通，不受內部改動影響。</span>'; }
+  });
+  render(null);
+</script>
+</body>
+</html>

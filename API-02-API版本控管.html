@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 版本控管</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="index.html">← 回索引</a>
+    <span class="tag">API-02</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">API 設計</div>
+    <h1>改 API，但<em>別弄壞</em>舊 App</h1>
+    <p class="lede">API 上線後一定會改，但已經串接的舊 client 不能說壞就壞。版本控管就是讓 <b>/v1 維持舊行為、新規格放 /v2</b>，舊 client 慢慢遷移，等沒人用了再下線。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 版本控管救了誰</span>
+    <h2>你改了 API，舊 App 會怎樣？</h2>
+    <p>情境：幾萬支 App 1.0 在用你的 <code>/bikes</code>。現在你要改回傳格式。切換「有沒有做版本控管」，再按「部署新版 API」看結果：</p>
+
+    <div class="lab">
+      <div class="lab-label">先選策略，再部署</div>
+      <div class="toggle-row" id="verRow">
+        <button data-v="off" class="on bad">❌ 沒做版本控管</button>
+        <button data-v="on">✅ 用 URL 版本</button>
+      </div>
+      <div style="display:grid;gap:0.8rem">
+        <div class="balance-box" id="appBox" style="text-align:left;padding:1.1rem">
+          <div style="font-size:.78rem;color:var(--ink-soft)">📱 舊 App 1.0 還在打</div>
+          <div style="font-family:var(--mono);font-size:.9rem;margin-top:.3rem" id="appReq">GET /bikes</div>
+          <div id="appResult" style="font-weight:700;margin-top:.5rem;color:var(--good)">運作正常 ✓</div>
+        </div>
+        <button class="btn-primary" id="deployBtn">🚀 部署「改了格式」的新版 API</button>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// 部署後舊 App 的狀態會顯示在這…</div></div>
+    </div>
+    <div class="aside">沒版本控管：新版一蓋上去，<b>舊 App 立刻崩</b>（用戶又不會馬上更新）。<br>有版本控管：新格式放 <code>/v2</code>，舊 App 的 <code>/v1</code> 原封不動，<b>零災情</b>。</div>
+  </section>
+
+  <section>
+    <span class="num">三種做法</span>
+    <h2>怎麼放版本號</h2>
+    <table>
+      <tr><th>做法</th><th>範例</th><th>結論</th></tr>
+      <tr><td><b>URL 版本</b><br><small style="color:var(--good)">最常見</small></td><td><code>/v1/bikes</code></td><td>直觀、好 debug、CDN 友善。約 90% 團隊用這個。</td></tr>
+      <tr><td><b>Header 版本</b></td><td><code>Accept: …vnd.moovo.v2+json</code></td><td>URL 不變較「純」，但難測試、cache 複雜。</td></tr>
+      <tr><td><b>Query 參數</b></td><td><code>/bikes?version=2</code></td><td>cache 行為混亂，<b style="color:var(--bad)">不建議</b>。</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>實務結論：<b>「簡單好維護」遠比「理論純粹」重要</b>，所以多數選 URL 版本。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>v1 何時能下線？</summary><p>統計用量 + 給通知期（通常 6 個月）+ 在 response 加 <code>Deprecation</code> / <code>Sunset</code> header 提醒。</p></details>
+      <details><summary>怎麼做向後相容？</summary><p>加欄位 OK；改欄位語意不 OK；要刪欄位先標 deprecate 再刪。</p></details>
+    </div>
+    <div class="callout warn"><span class="ico">✕</span><p>最大的雷：在<b>同一個版本內</b>偷改欄位語意（例如把 <code>status</code> 從數字改成字串）—— 等於暗中破壞相容性。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會用 <span class="hl">URL versioning（/v1）</span>，因為直觀、CDN cache 友善、debug 方便。雖然 header versioning 理論上更符合 REST『一個資源一個 URI』，但實務上難測難 cache，多數團隊還是選 URL。下線舊版前會給遷移期並加 <span class="hl">Deprecation / Sunset</span> header。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="API-01-RESTful設計原則.html">API-01 RESTful</a>
+      <a href="網路-07-DNS解析流程.html">網路-07 DNS</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  let versioned = false;
+  const verRow = document.getElementById('verRow');
+  const appReq = document.getElementById('appReq');
+  const appResult = document.getElementById('appResult');
+  const appBox = document.getElementById('appBox');
+  const log = document.getElementById('log');
+
+  function reset(){
+    appReq.textContent = versioned ? 'GET /v1/bikes' : 'GET /bikes';
+    appResult.textContent = '運作正常 ✓';
+    appResult.style.color = 'var(--good)';
+    appBox.classList.remove('danger');
+    log.innerHTML = '<div class="ln empty">// 部署後舊 App 的狀態會顯示在這…</div>';
+  }
+  verRow.addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    [...verRow.children].forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    versioned = b.dataset.v === 'on';
+    reset();
+  });
+  function addLog(html,cls){
+    const em=log.querySelector('.empty'); if(em) em.remove();
+    const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html;
+    log.appendChild(d); log.scrollTop=log.scrollHeight;
+  }
+  document.getElementById('deployBtn').addEventListener('click', ()=>{
+    log.innerHTML='';
+    if(versioned){
+      addLog('<span class="c-req">部署 /v2/bikes（新格式）</span>','');
+      addLog('<span class="c-dim">舊 App 仍打 /v1/bikes …</span>','');
+      addLog('<span class="c-ok">→ /v1 維持舊格式，App 1.0 完全正常 ✓</span>','c-ok');
+      appResult.textContent='運作正常 ✓（走 /v1）';
+      appResult.style.color='var(--good)';
+      appBox.classList.remove('danger');
+    } else {
+      addLog('<span class="c-req">部署 /bikes（直接覆蓋成新格式）</span>','');
+      addLog('<span class="c-dim">舊 App 仍打 /bikes，期待舊格式 …</span>','');
+      addLog('<span class="c-bad">→ 收到看不懂的新格式，解析失敗 💥</span>','c-bad');
+      appResult.textContent='崩潰！畫面白屏 💥';
+      appResult.style.color='var(--bad)';
+      appBox.classList.add('danger');
+    }
+  });
+  reset();
+</script>
+</body>
+</html>

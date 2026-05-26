@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLS / HTTPS 握手</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">網路-04 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">網路協定 · 加密</div>
+    <h1>傳資料前，<br>先<em>驗身份配鑰匙</em></h1>
+    <p class="lede">HTTPS = HTTP + TLS 加密。TLS 握手就是在傳資料前，雙方先「驗證身份 + 協商出一把只有彼此知道的金鑰」。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 從網址到加密</span>
+    <h2>逐步播放完整連線流程</h2>
+    <p>按「下一步」一步步走完，看打 https 之後背後發生什麼：</p>
+    <div class="lab">
+      <div class="lab-label">逐步前進</div>
+      <div id="steps" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem"></div>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn-primary" id="nextBtn">下一步 →</button>
+        <button class="btn-ghost" id="resetBtn">重來</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">三個關鍵概念</span>
+    <h2>SNI / 憑證鏈 / 前向保密</h2>
+    <div class="callout info"><span class="ico">🏷️</span><p><b>SNI</b>：一個 IP 可能掛很多網域，client 在握手時告訴 server「我要哪個網域」，server 才知道出示哪張憑證。</p></div>
+    <div class="callout info"><span class="ico">🔗</span><p><b>憑證鏈</b>：你的網站憑證 ← 中介 CA ← Root CA。瀏覽器內建信任一批 Root CA，從你的憑證一路驗到 Root 都有效才信任。</p></div>
+    <div class="callout info"><span class="ico">🔐</span><p><b>ECDHE → 前向保密</b>：每次連線用「臨時」金鑰協商。即使將來 server 私鑰外洩，<b>過去側錄的流量也解不開</b>，因為當時的 session key 是臨時算的、沒存下來。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>自簽憑證 vs Let's Encrypt 差在哪？</summary><p>信任鏈在不在瀏覽器內建的 Root CA 清單裡。自簽的瀏覽器會跳警告。</p></details>
+      <details><summary>mTLS 是什麼？</summary><p>雙向驗證 —— 不只 client 驗 server，server 也要求 client 出示憑證。常用於 B2B 機敏 API 與 IoT 裝置認證。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「使用者打 https，先 DNS 拿 IP、TCP 三次握手、再 TLS 握手。<span class="hl">TLS 1.3 一個 RTT</span> 就完成：Client Hello 帶 <span class="hl">SNI</span> 和臨時金鑰，Server 回憑證和它的臨時金鑰，client 驗憑證鏈到 Root CA，雙方用 <span class="hl">ECDHE</span> 算出 session key，之後內容都加密。用 ECDHE 是為了<span class="hl">前向保密</span> —— 私鑰外洩也救不回過去流量。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="網路-03-TCP三次握手與四次揮手.html">網路-03 握手</a><a href="網路-07-DNS解析流程.html">網路-07 DNS</a><a href="資安-01-常見Web威脅與防禦.html">資安-01 Web威脅</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const steps=[
+    {t:'DNS 解析',d:'moovo.com → IP（向 DNS 問地址）',c:'var(--info)'},
+    {t:'TCP 三次握手',d:'SYN → SYN+ACK → ACK，建立連線',c:'var(--info)'},
+    {t:'Client Hello',d:'我支援這些加密套件、這是我的臨時金鑰、我要連的網域是 X（SNI）',c:'var(--accent)'},
+    {t:'Server Hello',d:'選定加密套件、回傳憑證、給我的臨時金鑰',c:'var(--accent)'},
+    {t:'驗證憑證鏈',d:'Client 一路驗到瀏覽器信任的 Root CA',c:'var(--accent)'},
+    {t:'算出 session key',d:'雙方用各自臨時金鑰透過 ECDHE 算出同一把 session key（TLS 1.3 只要 1-RTT）',c:'var(--accent)'},
+    {t:'加密通訊',d:'之後的 HTTP 請求/回應都用 session key 加密 🔒',c:'var(--good)'},
+  ];
+  const $=id=>document.getElementById(id);
+  const wrap=$('steps'); let idx=0;
+  function render(){
+    wrap.innerHTML='';
+    steps.forEach((s,i)=>{
+      const on = i<idx;
+      const row=document.createElement('div');
+      row.style.cssText=`display:flex;gap:.8rem;align-items:flex-start;padding:.7rem .9rem;border-radius:10px;border:1.5px solid ${on?s.c:'var(--line)'};background:${on?'var(--paper)':'transparent'};opacity:${on?1:.4};transition:all .3s`;
+      row.innerHTML=`<div style="width:26px;height:26px;border-radius:50%;background:${on?s.c:'var(--line)'};color:#fff;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:.8rem;flex-shrink:0">${i+1}</div><div><div style="font-weight:700">${s.t}</div><div style="font-size:.88rem;color:var(--ink-soft)">${s.d}</div></div>`;
+      wrap.appendChild(row);
+    });
+  }
+  $('nextBtn').addEventListener('click',()=>{ if(idx<steps.length){ idx++; render(); } });
+  $('resetBtn').addEventListener('click',()=>{ idx=0; render(); });
+  render();
+</script>
+</body>
+</html>

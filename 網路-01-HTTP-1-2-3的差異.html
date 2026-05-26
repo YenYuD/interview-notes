@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTTP/1.1 vs /2 vs /3</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">網路-01 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">網路協定</div>
+    <h1>三代都在解<br>同一個<em>塞車</em>問題</h1>
+    <p class="lede">HTTP 三代演進的核心，都在解決「同一條連線上多個請求互相塞車」（隊頭阻塞）。HTTP/3 甚至為此換掉了底層的 TCP。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 收費站塞車</span>
+    <h2>掉一個封包，誰會卡住整條？</h2>
+    <p>每條連線送 4 個資源。按「送出並掉包」，看一個封包掉了會怎樣：</p>
+    <div class="lab">
+      <div class="lab-label">切換版本，按送出</div>
+      <div class="toggle-row" id="verRow">
+        <button data-v="1" class="on">HTTP/1.1</button>
+        <button data-v="2">HTTP/2</button>
+        <button data-v="3">HTTP/3</button>
+      </div>
+      <div id="lanes" style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem"></div>
+      <button class="btn-primary" id="sendBtn">送出（第 2 個封包會掉）</button>
+      <div id="note" style="margin-top:1rem;font-weight:700;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">逐項對照</span>
+    <h2>三代一覽</h2>
+    <table>
+      <tr><th>特性</th><th>HTTP/1.1</th><th>HTTP/2</th><th>HTTP/3</th></tr>
+      <tr><td>傳輸層</td><td>TCP</td><td>TCP</td><td><b>UDP (QUIC)</b></td></tr>
+      <tr><td>多工</td><td>依序排隊</td><td>多 stream 並行</td><td>多 stream 互不阻塞</td></tr>
+      <tr><td>Header</td><td>純文字</td><td>HPACK</td><td>QPACK</td></tr>
+      <tr><td>TLS</td><td>可選</td><td>實務必備</td><td>內建 TLS 1.3</td></tr>
+      <tr><td>握手</td><td>多個 RTT</td><td>多個 RTT</td><td>0-RTT / 1-RTT</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">核心：隊頭阻塞</span>
+    <h2>Head-of-Line Blocking</h2>
+    <ul>
+      <li><b>HTTP/1.1</b>：只有一個收費道，前面那台卡住，後面全等。</li>
+      <li><b>HTTP/2</b>：開多個收費道（多 stream 並行），<b>應用層</b>不卡了。但底層還是 TCP，要求「封包按順序到」—— 只要<b>一個封包掉了</b>，TCP 讓整條連線停下來等重傳（<b>TCP 層隊頭阻塞</b>），開幾個 stream 都沒用。</li>
+      <li><b>HTTP/3</b>：改用 QUIC（建在 UDP 上），<b>每個 stream 獨立</b>，一個掉包不影響其他 stream。</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="num">為什麼走 UDP & 行動加分點</span>
+    <h2>connection migration</h2>
+    <ul>
+      <li>TCP 的行為寫死在作業系統核心（kernel），改不動。</li>
+      <li>UDP 在使用者態，QUIC 才能自由設計擁塞控制與多工。</li>
+    </ul>
+    <div class="callout tip"><span class="ico">📱</span><p>HTTP/3 有 <b>connection migration</b> —— 從 Wi-Fi 切到 4G 時不用重新握手，連線無縫接續。對 MOOVO 這種行動 App 特別有價值。</p></div>
+    <div class="followup">
+      <details><summary>我的 API 該升 HTTP/3 嗎？</summary><p>靜態資源（走 CDN）升級 CP 值高；API 看 client 是不是大量行動端。</p></details>
+      <details><summary>QUIC 真的比較省？</summary><p>連線建立省一個 RTT，但 CPU 比 TCP 重（kernel 沒幫忙處理）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三代主軸都在解決<span class="hl">隊頭阻塞</span>。HTTP/1.1 一條連線排隊；HTTP/2 在應用層多工，但底層 TCP 一掉包整條停等；HTTP/3 改用 <span class="hl">QUIC over UDP</span>，每個 stream 獨立、掉包互不影響，還內建 TLS 1.3、握手更快、支援連線遷移。要走 UDP 是因為 TCP 寫死在 kernel 改不動。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="網路-02-TCP與UDP.html">網路-02 TCP/UDP</a><a href="網路-03-TCP三次握手與四次揮手.html">網路-03 握手</a><a href="網路-04-TLS與HTTPS握手.html">網路-04 TLS</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let ver='1';
+  const $=id=>document.getElementById(id);
+  const lanes=$('lanes'),note=$('note'),verRow=$('verRow');
+  function laneCount(){ return ver==='1'?1:4; }
+  function render(){
+    lanes.innerHTML='';
+    const n=laneCount();
+    for(let i=0;i<n;i++){
+      const lane=document.createElement('div');
+      lane.style.cssText='display:flex;align-items:center;gap:.4rem';
+      lane.innerHTML=`<span style="font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);width:54px">道 ${i+1}</span><div class="track" style="flex:1;display:flex;gap:.3rem"></div>`;
+      lanes.appendChild(lane);
+    }
+    note.textContent='';
+  }
+  verRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...verRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); ver=b.dataset.v; render(); });
+  function pkt(state){ // state: ok | drop | wait
+    const d=document.createElement('div');
+    const bg = state==='ok'?'var(--good)':state==='drop'?'var(--bad)':'var(--line)';
+    d.style.cssText=`flex:1;height:22px;border-radius:5px;background:${bg};display:grid;place-items:center;font-size:.7rem;color:#fff;font-family:var(--mono)`;
+    d.textContent = state==='drop'?'✕':state==='wait'?'…':'✓';
+    return d;
+  }
+  $('sendBtn').addEventListener('click',()=>{
+    render();
+    const tracks=[...lanes.querySelectorAll('.track')];
+    if(ver==='1'){
+      // 單道：第2個掉，後面全等
+      const t=tracks[0];
+      const states=['ok','drop','wait','wait'];
+      states.forEach((s,i)=>setTimeout(()=>t.appendChild(pkt(s)),250*i));
+      setTimeout(()=>{ note.innerHTML='<span style="color:var(--bad)">🚧 第 2 個掉包，後面 2 個全卡住排隊等重傳 —— 應用層隊頭阻塞</span>'; },1100);
+    } else if(ver==='2'){
+      // 4道但共用一條TCP：掉包→全部停等
+      tracks.forEach((t,i)=>{ const s = i===1?'drop':'wait'; setTimeout(()=>t.appendChild(pkt(i===0?'ok':s)),250*i); });
+      setTimeout(()=>{ note.innerHTML='<span style="color:var(--bad)">🚧 應用層分了 4 道，但共用一條 TCP —— 道 2 掉包，TCP 讓「整條」停等，其他道也卡住</span>'; },1100);
+    } else {
+      // 4道獨立：只有掉的那道重傳，其他照跑
+      tracks.forEach((t,i)=>{ setTimeout(()=>t.appendChild(pkt(i===1?'drop':'ok')),250*i); });
+      setTimeout(()=>{ tracks[1].appendChild(pkt('ok')); note.innerHTML='<span style="color:var(--good)">✅ QUIC 每個 stream 獨立 —— 只有道 2 重傳，其他 3 道照常完成，互不影響</span>'; },1300);
+    }
+  });
+  render();
+</script>
+</body>
+</html>

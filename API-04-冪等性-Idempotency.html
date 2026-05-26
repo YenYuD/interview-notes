@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>冪等性 Idempotency</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="index.html">← 回索引</a>
+    <span class="tag">API-04 · ⭐ 必考</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">API 設計</div>
+    <h1>同一件事做<em>很多次</em><br>結果只算一次</h1>
+    <p class="lede">冪等性：同一個請求做 N 次跟做 1 次，<b>對系統狀態的結果一樣</b>。重點是「狀態一樣」，不是「回應一樣」。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO 01 — 直覺</span>
+    <h2>電梯按鈕：按 1 次跟按 50 次一樣</h2>
+    <p>你進電梯狂按關門鍵，門不會因為你按得多就關得多。下面這顆隨便按，永遠只來一台電梯：</p>
+    <div class="lab">
+      <div class="lab-label">親手試試</div>
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+        <button id="elevBtn" style="width:84px;height:84px;border-radius:50%;font-size:1.8rem;background:radial-gradient(circle at 35% 30%,oklch(80% .02 70),oklch(68% .02 70));border:4px solid oklch(60% .02 70);color:var(--ink-soft)">▲</button>
+        <div style="flex:1;min-width:180px">
+          <div style="font-family:var(--mono);font-size:.9rem;color:var(--ink-soft)">你按了 <b id="elevPress" style="color:var(--accent);font-size:1.3rem">0</b> 次</div>
+          <div style="font-family:var(--mono);font-size:.9rem;color:var(--ink-soft)">來了 <b id="elevCome" style="color:var(--accent);font-size:1.3rem">0</b> 台電梯</div>
+          <div id="elevResult" style="font-weight:700;margin-top:.5rem;color:var(--good);min-height:1.5em"></div>
+        </div>
+      </div>
+    </div>
+    <div class="aside">關鍵：冪等的重點是「<b>系統最後的狀態</b>」一樣，不是每次的回應一樣。</div>
+  </section>
+
+  <section>
+    <span class="num">DEMO 02 — 為什麼工程師要在意</span>
+    <h2>弱網下你連點「付款」，會被扣幾次？</h2>
+    <p>手機訊號爛，你按了付款轉圈圈沒回應，急了又按幾下 —— 每按一下 App 都偷偷送了一次請求。切換兩種伺服器，<span class="hl">用力連點付款</span>：</p>
+    <div class="lab">
+      <div class="lab-label">切換伺服器，然後狂點</div>
+      <div class="toggle-row" id="modeRow">
+        <button data-mode="off" class="on bad">❌ 沒做冪等</button>
+        <button data-mode="key">✅ 用 Idempotency-Key</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="balance-box" id="balanceBox">
+          <div class="label">你的餘額</div>
+          <div class="amount" id="balance">$1,000</div>
+          <div class="sub">每次扣款 <b>$100</b></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.7rem;justify-content:center">
+          <button class="btn-primary" id="payBtn" style="width:100%">送出付款 $100</button>
+          <button class="btn-ghost" id="resetBtn">重設餘額</button>
+          <div id="payHint" style="font-size:.8rem;color:var(--ink-soft);text-align:center">模式：沒做冪等 — 點幾下扣幾次</div>
+        </div>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// 伺服器收到的請求會顯示在這…</div></div>
+    </div>
+    <div class="aside">沒冪等：5 次點擊 = 扣 5 次。有 Idempotency-Key：後面 4 次伺服器一看「這把 key 處理過了」，<b>直接回上次結果、不再扣款</b>。</div>
+  </section>
+
+  <section>
+    <span class="num">機制 — Stripe 的做法</span>
+    <h2>Idempotency-Key 四步驟</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>Client 產生一把唯一的 key</h4><p>通常是 UUID，放進 <code>Idempotency-Key</code> header。同一筆操作的 retry 用<b>同一把</b>。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>Server 先查這把 key 看過沒</h4><p>查 Redis / DB，順便比對 request body 的 hash，防止用同把 key 偷改金額。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>沒看過 → 執行，然後存起來</h4><p>存 <code>key + 結果 + status code</code>，設 TTL（例如 24 小時）。</p></div></div>
+      <div class="flow-step"><div class="flow-dot good">✓</div><div class="flow-body"><h4>看過了 → 不重做，直接回上次結果</h4><p>重送幾次都安全，因為實際只執行了一次。</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">速查</span>
+    <h2>HTTP method 的冪等性</h2>
+    <div class="chips">
+      <div class="chip good">GET<small>只讀</small></div>
+      <div class="chip good">PUT<small>覆蓋成同一份</small></div>
+      <div class="chip good">DELETE<small>刪到不存在為止</small></div>
+      <div class="chip good">HEAD / OPTIONS<small>只讀</small></div>
+      <div class="chip bad">POST<small>每次新增一筆</small></div>
+      <div class="chip bad">PATCH<small>看 body 寫法</small></div>
+    </div>
+    <div class="aside">陷阱題：<b>DELETE 第二次回什麼？</b> 第一次 <code>204</code>、第二次 <code>404</code>。回應不一樣，但「那筆資料不存在」這個<b>狀態</b>一樣 —— 所以 DELETE 還是冪等的。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問 & 踩雷</span>
+    <h2>別搞混</h2>
+    <div class="followup">
+      <details><summary>第一次還在處理，第二次同 key 進來？</summary><p>回 <code>409 Conflict</code> 或讓它等（看設計）。</p></details>
+    </div>
+    <div class="callout warn"><span class="ico">✕</span><p>把冪等跟<b>快取</b>搞混：快取是「相同 GET 回相同結果」；冪等是「相同寫入只生效一次」。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p>只比對 key、沒比對 request body hash → client 拿同把 key 偷改金額會出包。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「冪等性是<span class="hl">同一請求做幾次，對系統狀態的結果都一樣</span>，重點在狀態、不在回應。金流一定要做，因為網路抖動會 retry。實作上讓 client 帶 <span class="hl">Idempotency-Key</span>，server 用 Redis 記這把 key 對應的結果，命中就直接回上次結果、TTL 設 24 小時，並存 request body 的 hash 防止同 key 改金額。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="API-01-RESTful設計原則.html">API-01 RESTful</a>
+      <a href="系統-04-Message-Queue訊息佇列.html">系統-04 Message Queue</a>
+      <a href="網路-08-MQTT與IoT.html">網路-08 MQTT</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // 電梯
+  (function(){
+    const btn=document.getElementById('elevBtn'),p=document.getElementById('elevPress'),c=document.getElementById('elevCome'),r=document.getElementById('elevResult');
+    let press=0;
+    btn.addEventListener('click',()=>{
+      press++; p.textContent=press; c.textContent='1';
+      btn.style.background='radial-gradient(circle at 35% 30%,oklch(85% .14 85),oklch(72% .17 70))';
+      btn.style.borderColor='oklch(60% .17 60)'; btn.style.color='oklch(30% .1 60)';
+      btn.style.boxShadow='0 0 0 6px var(--accent-soft)';
+      r.textContent = press===1?'🛗 電梯來了！' : press<5?'🛗 還是那一台…' : `🛗 按了 ${press} 次，依然 1 台。這就是冪等。`;
+    });
+  })();
+  // 扣款
+  (function(){
+    const START=1000,COST=100; let balance=START,mode='off',seenKey=false;
+    const $=id=>document.getElementById(id);
+    const balanceEl=$('balance'),box=$('balanceBox'),hint=$('payHint'),log=$('log'),mr=$('modeRow');
+    const fmt=n=>'$'+n.toLocaleString();
+    function render(){ balanceEl.textContent=fmt(balance); box.classList.toggle('danger',balance<START); }
+    function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+    function resetState(){ balance=START; seenKey=false; log.innerHTML='<div class="ln empty">// 伺服器收到的請求會顯示在這…</div>'; render(); }
+    mr.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...mr.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); mode=b.dataset.mode; hint.innerHTML=mode==='off'?'模式：沒做冪等 — <b>點幾下扣幾次</b>':'模式：帶同一把 Idempotency-Key — <b>只扣第一次</b>'; resetState(); });
+    $('payBtn').addEventListener('click',()=>{
+      if(mode==='off'){ balance-=COST; addLog(`<span class="c-req">→ POST /charge $100</span>　<span class="c-bad">扣款 ✓ 餘額 ${fmt(balance)}</span>`); }
+      else{ const key='key_a1b2c3'; if(!seenKey){ seenKey=true; balance-=COST; addLog(`<span class="c-req">→ POST /charge  Idempotency-Key: ${key}</span>`); addLog(`&nbsp;&nbsp;&nbsp;沒看過 → <span class="c-bad">真的扣款 ✓ 餘額 ${fmt(balance)}</span>`); } else { addLog(`<span class="c-req">→ POST /charge  Idempotency-Key: ${key}</span>`); addLog(`&nbsp;&nbsp;&nbsp;<span class="c-ok">看過了！不重扣，回上次結果 → 餘額 ${fmt(balance)}</span>`,'c-ok'); } }
+      render();
+    });
+    $('resetBtn').addEventListener('click',resetState);
+    render();
+  })();
+</script>
+</body>
+</html>

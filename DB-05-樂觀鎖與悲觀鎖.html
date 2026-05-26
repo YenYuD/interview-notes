@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>樂觀鎖 vs 悲觀鎖</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">DB-05</span></div>
+
+  <header class="hero">
+    <div class="kicker">資料庫 · 併發</div>
+    <h1>先鎖起來 vs <em>改時才檢查</em></h1>
+    <p class="lede">兩人同時想預訂同一台車，怎麼保證只有一個成功？<b>悲觀鎖</b>先把車鎖住不准別人動；<b>樂觀鎖</b>不鎖，改的時候才檢查有沒有被別人搶先。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 兩人搶同一台車</span>
+    <h2>Amy 和 Bob 同時按預訂</h2>
+    <p>切換鎖策略，按「兩人同時搶」，看誰成功、機制怎麼運作：</p>
+    <div class="lab">
+      <div class="lab-label">先選鎖策略</div>
+      <div class="toggle-row" id="lockRow">
+        <button data-l="pess" class="on">🔒 悲觀鎖</button>
+        <button data-l="opt">🎲 樂觀鎖</button>
+      </div>
+      <button class="btn-primary" id="raceBtn" style="margin-bottom:1rem">兩人同時搶 🚲</button>
+      <div class="log" id="log"><div class="ln empty">// 搶車過程會顯示在這…</div></div>
+    </div>
+    <div class="aside" id="verdict">悲觀鎖：假設衝突常發生，先鎖。樂觀鎖：假設衝突少，不鎖、改時才比對 version。</div>
+  </section>
+
+  <section>
+    <span class="num">悲觀鎖（先鎖再改）</span>
+    <h2>SELECT ... FOR UPDATE</h2>
+    <pre><code><span class="tok-key">BEGIN</span>;
+<span class="tok-key">SELECT</span> * <span class="tok-key">FROM</span> bikes <span class="tok-key">WHERE</span> id = ? <span class="tok-key">FOR UPDATE</span>;  <span class="tok-com">-- 鎖住這列</span>
+<span class="tok-com">-- 其他交易想改這列只能等</span>
+<span class="tok-key">UPDATE</span> bikes <span class="tok-key">SET</span> status = <span class="tok-str">'reserved'</span> <span class="tok-key">WHERE</span> id = ?;
+<span class="tok-key">COMMIT</span>;</code></pre>
+    <p>適合<b>高衝突</b>場景。缺點：鎖太久會卡住別人。</p>
+  </section>
+
+  <section>
+    <span class="num">樂觀鎖（改時才檢查）</span>
+    <h2>用 version 欄位</h2>
+    <pre><code><span class="tok-key">UPDATE</span> bikes
+<span class="tok-key">SET</span> status = <span class="tok-str">'reserved'</span>, version = version + 1
+<span class="tok-key">WHERE</span> id = ? <span class="tok-key">AND</span> version = ?;   <span class="tok-com">-- 帶上我讀到的 version</span>
+<span class="tok-com">-- 影響 0 筆 → version 已被別人改過 → 衝突 → 重試</span></code></pre>
+    <p>適合<b>低衝突</b>場景。不鎖、效能好，但要自己寫 retry 邏輯。</p>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「高衝突用<span class="hl">悲觀鎖</span>（SELECT FOR UPDATE），先鎖住別人得等，直觀但鎖久會卡；低衝突用<span class="hl">樂觀鎖</span>，加 version 欄位、UPDATE 時帶舊 version，影響 0 筆代表被搶先要 retry。MOOVO 搶車這種我傾向悲觀鎖或 <span class="hl">Redis 分散式鎖（SET NX EX）</span>，因為衝突明確且要立即裁決。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="DB-04-交易隔離等級.html">DB-04 隔離等級</a><a href="系統-03-Caching快取策略.html">系統-03 快取</a><a href="API-04-冪等性-Idempotency.html">API-04 冪等性</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let lock='pess';
+  const $=id=>document.getElementById(id);
+  const log=$('log'),lockRow=$('lockRow');
+  function addLog(html,cls,delay){ setTimeout(()=>{ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; },delay); }
+  lockRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...lockRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); lock=b.dataset.l; log.innerHTML='<div class="ln empty">// 搶車過程會顯示在這…</div>'; });
+  $('raceBtn').addEventListener('click',()=>{
+    log.innerHTML='';
+    if(lock==='pess'){
+      addLog('<span class="c-req">Amy: BEGIN; SELECT ... FOR UPDATE 🔒</span>','',0);
+      addLog('<span class="c-dim">Bob: SELECT ... FOR UPDATE → 被鎖住，排隊等 ⏳</span>','c-dim',500);
+      addLog('<span class="c-ok">Amy: UPDATE status=reserved; COMMIT ✓ 搶到了</span>','c-ok',1100);
+      addLog('<span class="c-bad">Bob: 等到了，但車已 reserved → 預訂失敗</span>','c-bad',1700);
+      addLog('<span class="c-dim">→ 全程沒打架，靠鎖排隊裁決</span>','c-dim',2200);
+    } else {
+      addLog('<span class="c-req">Amy & Bob 都讀到 version=3（不鎖）</span>','',0);
+      addLog('<span class="c-ok">Amy: UPDATE ... WHERE version=3 → 影響 1 筆 ✓ version→4</span>','c-ok',600);
+      addLog('<span class="c-bad">Bob: UPDATE ... WHERE version=3 → 影響 0 筆！（已被改成 4）</span>','c-bad',1200);
+      addLog('<span class="c-dim">Bob: 偵測到衝突 → 重讀 version=4 → retry 或放棄</span>','c-dim',1800);
+    }
+  });
+</script>
+</body>
+</html>

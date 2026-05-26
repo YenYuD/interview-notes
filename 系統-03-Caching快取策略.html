@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caching 快取策略</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">系統-03 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">系統設計</div>
+    <h1>把慢答案<em>貼便利貼</em></h1>
+    <p class="lede">快取把「算很久或讀很慢的結果」先存起來，下次直接拿。難的不是存，是「<b>什麼時候讓它失效</b>」。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — Cache-aside 最常見</span>
+    <h2>讀先看 cache、寫讓 cache 失效</h2>
+    <p>按「讀取車輛位置」看 cache 命中/未命中；按「更新位置」看寫入怎麼讓 cache 失效：</p>
+    <div class="lab">
+      <div class="lab-label">操作看看</div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">
+        <div class="balance-box" style="flex:1;min-width:120px;padding:1rem"><div class="label">Redis Cache</div><div class="amount" id="cacheState" style="font-size:1.3rem;font-family:var(--mono)">（空）</div></div>
+        <div class="balance-box" style="flex:1;min-width:120px;padding:1rem"><div class="label">PostgreSQL DB</div><div class="amount" id="dbState" style="font-size:1.3rem;font-family:var(--mono)">📍 位置 A</div></div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn-primary" id="readBtn">讀取車輛位置</button>
+        <button class="btn-ghost" id="writeBtn">更新位置（A→B）</button>
+        <button class="btn-ghost" id="resetBtn">重來</button>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// 讀寫流程顯示在這…</div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">四種模式</span>
+    <h2>讀寫策略</h2>
+    <ul>
+      <li><b>Cache-aside（最常見）</b>：讀先看 cache、miss 就讀 DB 再回填；寫 DB 後<b>讓 cache 失效</b>。</li>
+      <li><b>Write-through</b>：寫 DB 同時也寫 cache → 永遠最新，但寫變慢。</li>
+      <li><b>Write-behind</b>：先寫 cache、之後非同步寫 DB → 快，但掛掉有掉資料風險。</li>
+      <li><b>Refresh-ahead</b>：TTL 過期前主動更新，避免使用者撞上 miss。</li>
+    </ul>
+    <div class="chips">
+      <div class="chip bad">熱資料<small>短 TTL（30秒~5分）+ 寫入主動失效</small></div>
+      <div class="chip info">冷資料<small>長 TTL（1小時~1天）</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">快取失效難題</span>
+    <h2>電腦科學兩大難題之一</h2>
+    <div class="callout info"><span class="ico">💬</span><p>「Cache invalidation 是電腦科學兩大難題之一（另一個是命名）。」策略：盡量<b>短 TTL + 寫入時主動 invalidate + tag-based invalidation</b>（給快取打標籤，一次失效一整組）。</p></div>
+    <p>Redis 常見用途：Session store、<a href="API-07-Rate-Limiting.html">rate limiting</a>、熱資料快取（車輛即時位置）、分散式鎖（<code>SET NX EX</code>）、queue、Pub/Sub。</p>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「最常用 <span class="hl">cache-aside</span>：讀先看 cache、miss 就回填，寫則更新 DB 再讓 cache 失效。要更即時可以 write-through（寫變慢）；要極快可接受掉資料風險用 write-behind。TTL 熱資料短 + 主動失效、冷資料長。最難的是失效時機，我會用短 TTL 加寫入時主動 invalidate，必要時用 tag-based。MOOVO 車輛即時位置我會放 Redis、TTL 約 10 秒。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="API-07-Rate-Limiting.html">API-07 Rate Limiting</a><a href="DB-05-樂觀鎖與悲觀鎖.html">DB-05 鎖</a><a href="DB-01-正規化與反正規化.html">DB-01 正規化</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let cache=null, db='A';
+  const $=id=>document.getElementById(id);
+  const cacheState=$('cacheState'),dbState=$('dbState'),log=$('log');
+  function render(){ cacheState.textContent = cache?('📍 位置 '+cache):'（空）'; dbState.textContent='📍 位置 '+db; }
+  function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+  $('readBtn').addEventListener('click',()=>{
+    if(cache){ addLog(`<span class="c-ok">讀 cache → 命中（HIT）！直接回 位置 ${cache} ⚡</span>`,'c-ok'); }
+    else { addLog('<span class="c-bad">讀 cache → 未命中（MISS）</span>','c-bad'); addLog(`<span class="c-req">→ 改讀 DB 拿到 位置 ${db}，回填 cache</span>`); cache=db; render(); }
+  });
+  $('writeBtn').addEventListener('click',()=>{
+    db = db==='A'?'B':'A';
+    addLog(`<span class="c-req">寫 DB：位置更新為 ${db}</span>`);
+    addLog('<span class="c-ok">→ 刪掉 cache（讓它失效），下次讀自然重新載入</span>','c-ok');
+    cache=null; render();
+  });
+  $('resetBtn').addEventListener('click',()=>{ cache=null; db='A'; log.innerHTML='<div class="ln empty">// 讀寫流程顯示在這…</div>'; render(); });
+  render();
+</script>
+</body>
+</html>

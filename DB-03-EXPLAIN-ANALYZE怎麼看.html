@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXPLAIN ANALYZE 怎麼看</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">DB-03 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">資料庫 · 排查</div>
+    <h1>把 DB 的<em>盤算</em>攤開看</h1>
+    <p class="lede"><code>EXPLAIN</code> 顯示「DB 打算怎麼查」；加 <code>ANALYZE</code> 會<b>實際跑一遍</b>並回報真實時間與筆數。看懂它，就知道「為什麼這條 query 慢、該不該加索引」。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 加索引前後對照</span>
+    <h2>同一條 query，加索引前後的計畫</h2>
+    <p>切換看執行計畫怎麼從 Seq Scan 變 Index Scan，點計畫裡的節點看解讀：</p>
+    <div class="lab">
+      <div class="lab-label">切換索引狀態</div>
+      <div class="toggle-row" id="idxRow">
+        <button data-i="before" class="on bad">加索引前</button>
+        <button data-i="after">加索引後</button>
+      </div>
+      <pre style="cursor:pointer" id="plan"></pre>
+      <div id="explain" style="margin-top:.8rem;font-weight:700;min-height:1.5em;color:var(--ink-soft)">點上面計畫的任一行看解讀…</div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p><code>ANALYZE</code> 會<b>真的執行</b> query（含 INSERT/UPDATE/DELETE！）。測寫入操作時記得包在交易裡 rollback。</p></div>
+  </section>
+
+  <section>
+    <span class="num">關鍵詞彙</span>
+    <h2>怎麼讀</h2>
+    <h3>掃描方式</h3>
+    <ul>
+      <li><code>Seq Scan</code>：掃全表。大表上出現 → <b>可能缺索引</b>（警訊）。</li>
+      <li><code>Index Scan</code> / <code>Index Only Scan</code>：用了索引（後者連表都不回查，最快）。</li>
+      <li><code>Bitmap Heap Scan</code>：合併多個索引的結果。</li>
+    </ul>
+    <h3>怎麼讀數字</h3>
+    <ul>
+      <li><code>actual time=0.123..5.678</code>：第一個是「找到第一筆」，第二個是「全部完成」。</li>
+      <li><code>rows=</code>：實際筆數。<b>估計與實際差很多</b> → 統計過期，跑 <code>ANALYZE 表名</code>。</li>
+      <li><code>Buffers: shared hit=X read=Y</code>：hit 命中記憶體，read 真的讀了 disk（read 多代表 cache 不夠）。</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="num">判斷瓶頸四步</span>
+    <h2>SOP</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>找最貴的節點</h4><p>cost 或 actual time 最高的那個。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>大表 Seq Scan？</h4><p>考慮加索引。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>估計 rows ≠ 實際？</h4><p>統計過期，<code>ANALYZE</code>。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">4</div><div class="flow-body"><h4>索引後出現 Filter？</h4><p>索引沒涵蓋這條件，還是掃了很多列。</p></div></div>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會用 <span class="hl">EXPLAIN ANALYZE</span> 看執行計畫。先看有沒有大表 <span class="hl">Seq Scan</span>（通常代表缺索引），再看 actual time 最貴的節點。如果估計 rows 和實際差很多，代表統計過期要 ANALYZE。Buffers 的 read 高代表在讀 disk。理想是看到 Index Scan 甚至 Index Only Scan。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="DB-02-PostgreSQL索引Index.html">DB-02 索引</a><a href="Node-09-API變慢的排查方法.html">Node-09 API變慢</a><a href="DB-06-N加1查詢問題.html">DB-06 N+1</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let idx='before';
+  const plans={
+    before:[
+      {t:'Seq Scan on orders  (cost=0.00..18540 rows=1 width=64)',e:'😱 大表全表掃描！18540 的 cost 很貴 —— 這就是缺索引的訊號。'},
+      {t:'  Filter: (user_id = 42)',e:'條件用 Filter 過濾，代表沒有索引可用，只能一列列比對。'},
+      {t:'  Rows Removed by Filter: 99999',e:'掃了 10 萬列只為了留下 1 列 —— 浪費。'},
+      {t:'  actual time=0.011..152.3  rows=1',e:'實際花了 152ms。對單筆查詢來說太慢了。'},
+    ],
+    after:[
+      {t:'Index Scan using idx_user on orders  (cost=0.42..8.44 rows=1)',e:'✅ 用上索引了！cost 從 18540 掉到 8.44。'},
+      {t:'  Index Cond: (user_id = 42)',e:'條件變成 Index Cond（不是 Filter），代表直接用索引定位。'},
+      {t:'  actual time=0.021..0.024  rows=1',e:'實際只花 0.024ms。快了上千倍。'},
+      {t:'  Buffers: shared hit=4',e:'只讀 4 個 buffer 且都命中記憶體（hit），沒碰 disk。'},
+    ]
+  };
+  const idxRow=document.getElementById('idxRow');
+  const plan=document.getElementById('plan');
+  const explain=document.getElementById('explain');
+  function render(){
+    plan.innerHTML='';
+    plans[idx].forEach((line,i)=>{
+      const span=document.createElement('div');
+      span.textContent=line.t;
+      span.style.cssText='padding:.15rem 0;border-radius:3px';
+      span.dataset.i=i;
+      plan.appendChild(span);
+    });
+    explain.textContent='點上面計畫的任一行看解讀…';
+    explain.style.color='var(--ink-soft)';
+  }
+  plan.addEventListener('click',e=>{
+    const d=e.target.closest('[data-i]'); if(!d)return;
+    [...plan.children].forEach(c=>c.style.background='transparent');
+    d.style.background='oklch(58% .16 38 / .25)';
+    const item=plans[idx][d.dataset.i];
+    explain.textContent=item.e;
+    explain.style.color='var(--paper)';
+  });
+  idxRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...idxRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); idx=b.dataset.i; render(); });
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REST vs GraphQL</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">API-08</span></div>
+
+  <header class="hero">
+    <div class="kicker">API 設計</div>
+    <h1>套餐 vs <em>自助餐</em></h1>
+    <p class="lede"><b>REST</b>：server 定好每個 endpoint 回什麼（像套餐，多的少的都不能改）。<b>GraphQL</b>：client 自己描述要哪些欄位，server 照單給（像自助餐，不多不少）。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — over-fetching 有多浪費</span>
+    <h2>我只要名字跟訂單金額…</h2>
+    <p>情境：手機只想顯示「用戶名 + 最近 3 筆訂單金額」。切換看回傳差多少：</p>
+    <div class="lab">
+      <div class="lab-label">先選 API 風格</div>
+      <div class="toggle-row" id="apiRow">
+        <button data-a="rest" class="on">REST（套餐）</button>
+        <button data-a="gql">GraphQL（自助餐）</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);margin-bottom:.4rem" id="reqLabel">送出的請求：</div>
+      <pre><code id="reqBox" class="tok-fn">GET /users/5</code></pre>
+      <div style="font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);margin:.8rem 0 .4rem">收到的回傳：</div>
+      <pre><code id="respBox"></code></pre>
+      <div id="size" style="font-weight:700;margin-top:.6rem;font-family:var(--mono);font-size:.85rem"></div>
+    </div>
+    <div class="aside">REST 回了一堆你不要的欄位（<b>over-fetching</b>），訂單又得再打一支 API（<b>under-fetching</b>）。GraphQL 一次剛好給你要的。</div>
+  </section>
+
+  <section>
+    <span class="num">各自適合的場景</span>
+    <h2>怎麼選</h2>
+    <div class="chips">
+      <div class="chip info">GraphQL 適合<small>需求多變 / 弱網省流量 / 聚合多來源(BFF)</small></div>
+      <div class="chip good">REST 適合<small>公開 API / HTTP 快取 / 檔案串流 / 團隊不熟 GraphQL</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">GraphQL 的痛點</span>
+    <h2>不是免費的午餐</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p><b>N+1 問題</b>：查一個 user 的 orders、再查每個 order 的 items，會打 N 次 DB。解法是 <b>DataLoader</b>（把同 tick 內查詢 batch 起來 + cache）。</p></div>
+    <div class="callout warn"><span class="ico">⚠️</span><p><b>沒有原生 HTTP cache</b>：查詢全走 POST，CDN/瀏覽器的 GET 快取用不上。</p></div>
+    <div class="callout warn"><span class="ico">⚠️</span><p><b>Schema 演進要小心</b>：不能隨便改型別，否則破壞 client。</p></div>
+  </section>
+
+  <section>
+    <span class="num">MOOVO 場景判斷</span>
+    <h2>建議：REST 為主，必要時加 BFF</h2>
+    <ul>
+      <li>B2B 後台（資料表單純）→ REST 夠用。</li>
+      <li>B2C 個人化 dashboard → GraphQL 有優勢但對這規模算 overkill。</li>
+    </ul>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「需求多變、要省流量、要聚合多來源 → <span class="hl">GraphQL</span>；公開 API、要 HTTP cache、檔案串流 → <span class="hl">REST</span>。MOOVO 我會選 REST 為主，因為資料模型還算單純，GraphQL 的 N+1 與 cache 複雜度不划算；真的需要前端聚合再加一層 BFF。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="API-01-RESTful設計原則.html">API-01 RESTful</a><a href="DB-06-N加1查詢問題.html">DB-06 N+1 問題</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let api='rest';
+  const data={
+    rest:{
+      req:'GET /users/5\n// 想要訂單還得再打：GET /users/5/orders',
+      resp:`{
+  "id": 5, "name": "Emily",
+  "email": "...", "phone": "...",
+  "address": "...", "createdAt": "...",
+  "avatar": "...", "bio": "...",
+  "settings": { ... }   // ← 全都用不到
+}`,
+      size:'📦 回了 ~10 個欄位，9 成用不到 + 還要第 2 支 API 拿訂單',
+      color:'var(--bad)'
+    },
+    gql:{
+      req:`POST /graphql
+{
+  user(id: 5) {
+    name
+    orders(last: 3) { amount }
+  }
+}`,
+      resp:`{
+  "data": {
+    "user": {
+      "name": "Emily",
+      "orders": [
+        { "amount": 100 },
+        { "amount": 250 },
+        { "amount": 80 }
+      ]
+    }
+  }
+}`,
+      size:'📦 不多不少，一次拿齊。弱網省流量',
+      color:'var(--good)'
+    }
+  };
+  const apiRow=document.getElementById('apiRow');
+  const reqBox=document.getElementById('reqBox');
+  const respBox=document.getElementById('respBox');
+  const size=document.getElementById('size');
+  function show(){ const d=data[api]; reqBox.textContent=d.req; respBox.textContent=d.resp; size.textContent=d.size; size.style.color=d.color; }
+  apiRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...apiRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); api=b.dataset.a; show(); });
+  show();
+</script>
+</body>
+</html>

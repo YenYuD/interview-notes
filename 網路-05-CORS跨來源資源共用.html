@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORS 跨來源資源共用</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">網路-05 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">網路協定 · 瀏覽器</div>
+    <h1>瀏覽器擋的，<br>不是 <em>server</em></h1>
+    <p class="lede">瀏覽器預設禁止網頁向「不同來源」的 server 要資料（同源政策）。CORS 是 server 用回應 header 主動「授權」放行的機制。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 誰會先送 OPTIONS？</span>
+    <h2>simple request vs preflight 預檢</h2>
+    <p>選一種請求，看瀏覽器要不要先偷送一個 <code>OPTIONS</code> 預檢：</p>
+    <div class="lab">
+      <div class="lab-label">選請求類型</div>
+      <div class="toggle-row" id="reqRow" style="flex-direction:column">
+        <button data-r="simple" class="on">GET（simple request）</button>
+        <button data-r="json">POST + Content-Type: application/json</button>
+        <button data-r="curl">用 curl / Postman 打（非瀏覽器）</button>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// 請求流程顯示在這…</div></div>
+    </div>
+    <div class="aside">重點：CORS 是<b>瀏覽器</b>在擋，不是 server。用 curl、Postman 打同一支 API 完全不受影響。它保護的是「使用者的瀏覽器不被惡意網站利用」。</div>
+  </section>
+
+  <section>
+    <span class="num">什麼時候觸發 preflight</span>
+    <h2>踩到任一條就要預檢</h2>
+    <div class="chips">
+      <div class="chip good">Simple（直接送）<small>GET/HEAD/POST + 簡單 header + 三種 Content-Type</small></div>
+      <div class="chip bad">Preflight（先 OPTIONS）<small>PUT/DELETE/PATCH</small></div>
+      <div class="chip bad">Preflight<small>自訂 header 如 Authorization</small></div>
+      <div class="chip bad">Preflight<small>Content-Type: application/json ← 99% JSON API</small></div>
+    </div>
+    <p>Preflight 流程：瀏覽器先送 <code>OPTIONS</code> 帶 <code>Access-Control-Request-*</code> → server 回 <code>Access-Control-Allow-*</code> + <code>Max-Age</code>（預檢結果可 cache 多久）→ 通過才送真正的請求。</p>
+  </section>
+
+  <section>
+    <span class="num">帶 Cookie 的跨源</span>
+    <h2>兩個常見地雷</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p>Client 要 <code>fetch(url, { credentials: 'include' })</code>；Server 要回 <code>Access-Control-Allow-Credentials: true</code>，<b>而且 Allow-Origin 不能是 <code>*</code></b>，必須是具體網域。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問 & 踩雷</span>
+    <h2>常見出事點</h2>
+    <div class="followup">
+      <details><summary>為什麼要 preflight 不直接送？</summary><p>保護那些「沒準備好處理跨源」的舊 server，避免它們收到非預期的 PUT/DELETE 就誤執行。</p></details>
+    </div>
+    <div class="callout warn"><span class="ico">✕</span><p>某個 middleware 把 OPTIONS 攔下來（如 auth 要求 token，但 OPTIONS 不帶 token）→ 預檢失敗。所以 <a href="Node-06-Express-Middleware機制.html">cors 要放在 auth 前面</a>。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p><code>Allow-Headers</code> 漏了 <code>Authorization</code> → 帶 token 的請求被擋。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CORS 是瀏覽器同源政策的放行機制，由 server 用 <span class="hl">Access-Control-Allow-*</span> header 授權，<span class="hl">擋的是瀏覽器不是 server</span>。GET/POST 的簡單請求直接送；但用了 PUT/DELETE、自訂 header、或 Content-Type: application/json（幾乎所有 API）就會先送 <span class="hl">OPTIONS 預檢</span>。帶 cookie 時 Allow-Credentials 要 true 且 Allow-Origin 不能用萬用字元。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="API-06-JWT與Session認證.html">API-06 JWT/Session</a><a href="資安-01-常見Web威脅與防禦.html">資安-01 Web威脅</a><a href="Node-06-Express-Middleware機制.html">Node-06 Middleware</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let req='simple';
+  const $=id=>document.getElementById(id);
+  const log=$('log'),reqRow=$('reqRow');
+  function addLog(html,cls,delay){ setTimeout(()=>{ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; },delay); }
+  function run(){
+    log.innerHTML='';
+    if(req==='simple'){
+      addLog('<span class="c-req">瀏覽器 → server：GET /bikes（直接送，不預檢）</span>','',0);
+      addLog('<span class="c-ok">← Access-Control-Allow-Origin: https://app.vercel.app ✓</span>','c-ok',500);
+      addLog('<span class="c-ok">→ 通過，JS 拿得到回應</span>','c-ok',1000);
+    } else if(req==='json'){
+      addLog('<span class="c-dim">瀏覽器發現：Content-Type: application/json → 要預檢！</span>','c-dim',0);
+      addLog('<span class="c-req">① OPTIONS /bikes（預檢）Access-Control-Request-Method: POST</span>','',500);
+      addLog('<span class="c-ok">② server 回 Allow-Methods / Allow-Headers / Max-Age ✓</span>','c-ok',1100);
+      addLog('<span class="c-req">③ 通過了，才送真正的 POST /bikes</span>','',1700);
+    } else {
+      addLog('<span class="c-req">curl -X POST https://api.../bikes</span>','',0);
+      addLog('<span class="c-ok">← 200 OK（完全沒 CORS 這回事）</span>','c-ok',500);
+      addLog('<span class="c-dim">→ 因為 CORS 是瀏覽器的規則，curl 不是瀏覽器</span>','c-dim',1000);
+    }
+  }
+  reqRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...reqRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); req=b.dataset.r; run(); });
+  run();
+</script>
+</body>
+</html>

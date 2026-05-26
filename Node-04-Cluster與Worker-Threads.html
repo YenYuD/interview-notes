@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cluster vs Worker Threads</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">Node-04</span></div>
+
+  <header class="hero">
+    <div class="kicker">Node.js</div>
+    <h1>把<em>多核 CPU</em>用滿</h1>
+    <p class="lede">Node 預設只用一條執行緒，但機器有 8 核太浪費。<b>Cluster</b> 開多個獨立行程處理大量請求；<b>Worker Threads</b> 開多執行緒跑單一耗 CPU 的運算。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 8 核心使用率</span>
+    <h2>單執行緒 vs 開多核</h2>
+    <p>切換看 8 顆 CPU 核心被用到多少：</p>
+    <div class="lab">
+      <div class="lab-label">切換策略，看核心使用率</div>
+      <div class="toggle-row" id="strRow">
+        <button data-s="single" class="on bad">😴 預設單執行緒</button>
+        <button data-s="cluster">🏪 Cluster 多行程</button>
+        <button data-s="worker">🧵 Worker Threads</button>
+      </div>
+      <div id="cores" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem"></div>
+      <div id="note" style="font-weight:700;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">兩種解法</span>
+    <h2>行程 vs 執行緒</h2>
+    <div class="callout info"><span class="ico">🏪</span><p><b>Cluster（多行程）</b>：開多個 Node 行程，各有自己的 Event Loop，<b>共用同一個 port</b>（master 分配連線）。像「開多個收銀台」分攤人潮。適合 <b>I/O bound</b>（API server）。</p></div>
+    <div class="callout info"><span class="ico">🧵</span><p><b>Worker Threads（多執行緒）</b>：同一行程內開多條執行緒，可共享記憶體（<code>SharedArrayBuffer</code>）。像「請人專門去後場處理大訂單」，不擋前台。適合 <b>CPU bound</b>（影像、加解密）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">怎麼選</span>
+    <h2>對照表</h2>
+    <table>
+      <tr><th>任務類型</th><th>用什麼</th></tr>
+      <tr><td>I/O bound（API、DB）</td><td>Cluster + 前面擺 load balancer</td></tr>
+      <tr><td>CPU bound（資料運算）</td><td>Worker Threads</td></tr>
+      <tr><td><b>多數實務</b></td><td>用 <b>PM2 / Docker 開多 instance + nginx</b>，不自己手寫 cluster</td></tr>
+    </table>
+    <div class="followup">
+      <details><summary>為什麼不用 Cluster 處理 CPU 任務？</summary><p>每個行程都有完整 V8 與記憶體開銷，太貴；Worker Threads 共享記憶體較輕。</p></details>
+      <details><summary>Worker Threads 怎麼傳資料？</summary><p><code>postMessage</code>（序列化複製）或 <code>SharedArrayBuffer</code>（真正共享）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「要吃滿多核：I/O 密集用 <span class="hl">Cluster</span> 開多行程共用 port，CPU 密集用 <span class="hl">Worker Threads</span> 把重運算丟到另一條執行緒、別卡住主 Event Loop。但實務上我多半直接用 <span class="hl">Docker / PM2 開多 instance + nginx</span> 負載均衡，比自己寫 cluster 邏輯簡單可靠。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="Node-01-Event-Loop事件迴圈.html">Node-01 Event Loop</a><a href="Node-09-API變慢的排查方法.html">Node-09 API變慢</a><a href="系統-02-Monolith與Microservices.html">系統-02 微服務</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let str='single';
+  const cores=document.getElementById('cores');
+  const note=document.getElementById('note');
+  const data={
+    single:{used:[100,0,0,0,0,0,0,0],note:'只用 1 顆核心，其他 7 顆閒置 —— 浪費 87% 的算力。'},
+    cluster:{used:[80,80,80,80,80,80,80,80],note:'8 個行程各吃一顆核心，一起分攤大量 API 請求 —— 吞吐量大增。'},
+    worker:{used:[60,90,90,90,0,0,0,0],note:'主執行緒(1)顧 Event Loop，幾條 worker 分攤 CPU 重運算，不卡住前台。'},
+  };
+  function render(){
+    const d=data[str];
+    cores.innerHTML='';
+    d.used.forEach((u,i)=>{
+      const box=document.createElement('div');
+      box.style.cssText='border:1px solid var(--line);border-radius:10px;padding:.5rem;background:var(--paper)';
+      box.innerHTML=`<div style="font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)">CPU ${i}</div>
+        <div style="height:40px;display:flex;align-items:flex-end;margin-top:.3rem"><div style="width:100%;height:${u}%;border-radius:4px;background:${u>70?'var(--accent)':u>0?'oklch(72% .12 70)':'var(--line)'};transition:height .4s"></div></div>
+        <div style="font-family:var(--mono);font-size:.7rem;text-align:center;margin-top:.2rem;color:var(--ink-soft)">${u}%</div>`;
+      cores.appendChild(box);
+    });
+    note.textContent=d.note;
+  }
+  document.getElementById('strRow').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...e.currentTarget.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); str=b.dataset.s; render(); });
+  render();
+</script>
+</body>
+</html>

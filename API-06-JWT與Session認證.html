@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT vs Session 認證</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">API-06 · ⭐ 必考</span></div>
+
+  <header class="hero">
+    <div class="kicker">API 設計 · 認證</div>
+    <h1>手環 vs <em>護照</em></h1>
+    <p class="lede">HTTP 無狀態，server 預設不記得你是誰。登入後怎麼證明「我是剛剛登入的人」有兩種思路：<b>Session 把狀態存在 server</b>，<b>JWT 把狀態打包成一張簽章過的票自己帶著走</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — server 怎麼認你</span>
+    <h2>出示證件，server 做什麼？</h2>
+    <p>切換兩種認證，按「發出請求」看 server 的動作差別，再按「登出/撤銷」看誰能立刻生效：</p>
+    <div class="lab">
+      <div class="lab-label">先選認證方式</div>
+      <div class="toggle-row" id="authRow">
+        <button data-a="session" class="on">🎟️ Session（手環）</button>
+        <button data-a="jwt">🛂 JWT（護照）</button>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="btn-primary" id="reqBtn">發出請求</button>
+        <button class="btn-ghost" id="revokeBtn">登出 / 撤銷</button>
+        <button class="btn-ghost" id="resetBtn">重來</button>
+      </div>
+      <div class="log" id="log"><div class="ln empty">// server 的動作會顯示在這…</div></div>
+    </div>
+    <div class="aside" id="verdict">Session 像遊樂園手環：server 有一本名冊，每次翻冊確認。JWT 像護照：server 只驗章、不查冊。</div>
+  </section>
+
+  <section>
+    <span class="num">兩種比較</span>
+    <h2>優缺點</h2>
+    <table>
+      <tr><th></th><th>Session（狀態在 server）</th><th>JWT（狀態在 token）</th></tr>
+      <tr><td><b>怎麼認</b></td><td>查名冊（通常放 Redis）</td><td>只驗簽章，不查任何資料</td></tr>
+      <tr><td><b>優點</b></td><td>可隨時失效、適合 web</td><td>無狀態、跨服務、行動友善</td></tr>
+      <tr><td><b>缺點</b></td><td>多台 server 要共享名冊</td><td>發出去難收回、payload 較大</td></tr>
+    </table>
+    <div class="chips">
+      <div class="chip info">B2C App（行動端）<small>→ JWT：access 短效 + refresh 長效</small></div>
+      <div class="chip good">B2B 後台（web）<small>→ Session + httpOnly cookie（要強登出）</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">重要機制</span>
+    <h2>Refresh Token：短效才安全，但別一直重登</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">A</div><div class="flow-body"><h4>Access token（短效，如 15 分鐘）</h4><p>每次請求帶它。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">R</div><div class="flow-body"><h4>Refresh token（長效，如 30 天）</h4><p>存 DB 可撤銷，只用來換新的 access token。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">↻</div><div class="flow-body"><h4>流程</h4><p>access 過期 → 收到 <code>401</code> → 用 refresh 換新 access → 換失敗才導回登入。</p></div></div>
+      <div class="flow-step"><div class="flow-dot good">✓</div><div class="flow-body"><h4>Refresh token rotation</h4><p>每次換新時把舊的作廢，防止被偷後重放。</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問 & 踩雷</span>
+    <h2>資安重點</h2>
+    <div class="followup">
+      <details><summary>JWT 被偷怎辦？</summary><p>短 TTL + refresh rotation + 異常 IP 偵測 + 重要操作二次驗證。</p></details>
+      <details><summary>JWT 放哪？</summary><p>localStorage 怕 XSS；httpOnly cookie 怕 CSRF（用 <code>SameSite=Lax</code> + CSRF token）；行動端用 secure storage（iOS Keychain / Android Keystore）。</p></details>
+    </div>
+    <div class="callout warn"><span class="ico">✕</span><p>JWT 演算法欄位寫 <code>none</code> 卻不檢查 → 攻擊者可<b>偽造 token</b>（經典 CVE）。一定要在 server 端鎖定允許的演算法。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「行動端我用 <span class="hl">JWT</span>，access 15 分鐘 + refresh 30 天且存 DB 可撤銷，並做 <span class="hl">refresh rotation</span> 防重放。後台管理用 <span class="hl">session + httpOnly cookie</span>，因為管理員需要『一鍵踢掉所有登入』這種強登出能力，session 刪一筆就生效。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="資安-01-常見Web威脅與防禦.html">資安-01 Web威脅</a><a href="網路-05-CORS跨來源資源共用.html">網路-05 CORS</a><a href="系統-03-Caching快取策略.html">系統-03 快取</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let auth='session', loggedIn=true;
+  const $=id=>document.getElementById(id);
+  const log=$('log'),authRow=$('authRow'),verdict=$('verdict');
+  function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+  function reset(){ loggedIn=true; log.innerHTML='<div class="ln empty">// server 的動作會顯示在這…</div>'; }
+  authRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...authRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); auth=b.dataset.a; reset(); verdict.innerHTML = auth==='session'?'Session：server 有一本名冊，每次翻冊確認 → 刪掉那筆就立刻登出。':'JWT：server 只驗簽章、不查冊 → 發出去的票在過期前都有效，難立刻收回。'; });
+  $('reqBtn').addEventListener('click',()=>{
+    if(auth==='session'){
+      addLog('<span class="c-req">→ 帶 sessionId=abc123 的 cookie</span>');
+      if(loggedIn){ addLog('&nbsp;&nbsp;server 翻名冊：abc123 → 用戶 Emily ✓','c-ok'); addLog('&nbsp;&nbsp;<span class="c-ok">200 OK</span>','c-ok'); }
+      else { addLog('&nbsp;&nbsp;server 翻名冊：abc123 → <span class="c-bad">查無此筆</span>','c-bad'); addLog('&nbsp;&nbsp;<span class="c-bad">401 請重新登入</span>','c-bad'); }
+    } else {
+      addLog('<span class="c-req">→ 帶 JWT（已簽章）</span>');
+      if(loggedIn){ addLog('&nbsp;&nbsp;server 只驗簽章是否有效（不查冊）✓','c-ok'); addLog('&nbsp;&nbsp;<span class="c-ok">200 OK</span>','c-ok'); }
+      else { addLog('&nbsp;&nbsp;<span class="c-bad">簽章仍有效… server 不查冊，照樣放行 😱</span>','c-bad'); addLog('&nbsp;&nbsp;<span class="c-dim">（這就是 JWT 難「立刻」撤銷的痛點）</span>','c-dim'); }
+    }
+  });
+  $('revokeBtn').addEventListener('click',()=>{
+    loggedIn=false;
+    if(auth==='session'){ addLog('<span class="c-ok">🗑️ server 把名冊那筆刪掉 → 下次請求立刻失效</span>','c-ok'); }
+    else { addLog('<span class="c-bad">🛂 護照已發出，沒辦法「撕掉」 → 要靠黑名單或等它過期</span>','c-bad'); }
+  });
+  $('resetBtn').addEventListener('click',reset);
+</script>
+</body>
+</html>

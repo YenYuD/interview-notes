@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面試概念・互動筆記</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">MOOVO / Rybit 全端面試</div>
+    <h1>概念，用<em>動手玩</em>的</h1>
+    <p class="lede">把 38 篇後端 / 網路 / 資安筆記做成<b>可互動的視覺頁</b>。看文字卡住的，就用按的、用拖的、用模擬的弄懂它。<br>建議先攻 ⭐ 高頻必考題。</p>
+  </header>
+
+  <div class="index-grid">
+
+    <section style="margin:0">
+      <div class="cat-title">API 設計 <span class="cnt">8 篇</span></div>
+      <p class="cat-desc">資源命名、版本、分頁、冪等、認證、限流 —— 設計一個 API 的全套思路。</p>
+      <div class="card-list">
+        <a class="note-card" href="API-01-RESTful設計原則.html"><span class="nid">API-01</span><div class="ntitle">RESTful 設計原則 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="API-02-API版本控管.html"><span class="nid">API-02</span><div class="ntitle">API 版本控管</div></a>
+        <a class="note-card" href="API-03-分頁-offset與cursor.html"><span class="nid">API-03</span><div class="ntitle">分頁：Offset vs Cursor</div></a>
+        <a class="note-card" href="API-04-冪等性-Idempotency.html"><span class="nid">API-04</span><div class="ntitle">冪等性 Idempotency <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="API-05-API錯誤處理格式.html"><span class="nid">API-05</span><div class="ntitle">API 錯誤處理格式</div></a>
+        <a class="note-card" href="API-06-JWT與Session認證.html"><span class="nid">API-06</span><div class="ntitle">JWT 與 Session 認證 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="API-07-Rate-Limiting.html"><span class="nid">API-07</span><div class="ntitle">Rate Limiting 限流</div></a>
+        <a class="note-card" href="API-08-REST與GraphQL.html"><span class="nid">API-08</span><div class="ntitle">REST 與 GraphQL</div></a>
+      </div>
+    </section>
+
+    <section style="margin:0">
+      <div class="cat-title">網路協定 <span class="cnt">8 篇</span></div>
+      <p class="cat-desc">從輸入網址到畫面出現的完整連線故事：DNS → TCP → TLS → HTTP → CORS。</p>
+      <div class="card-list">
+        <a class="note-card" href="網路-01-HTTP-1-2-3的差異.html"><span class="nid">網路-01</span><div class="ntitle">HTTP 1/2/3 的差異 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="網路-02-TCP與UDP.html"><span class="nid">網路-02</span><div class="ntitle">TCP 與 UDP</div></a>
+        <a class="note-card" href="網路-03-TCP三次握手與四次揮手.html"><span class="nid">網路-03</span><div class="ntitle">TCP 三次握手 / 四次揮手 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="網路-04-TLS與HTTPS握手.html"><span class="nid">網路-04</span><div class="ntitle">TLS 與 HTTPS 握手 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="網路-05-CORS跨來源資源共用.html"><span class="nid">網路-05</span><div class="ntitle">CORS 跨來源資源共用 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="網路-06-WebSocket-SSE-LongPolling.html"><span class="nid">網路-06</span><div class="ntitle">WebSocket / SSE / Long Polling</div></a>
+        <a class="note-card" href="網路-07-DNS解析流程.html"><span class="nid">網路-07</span><div class="ntitle">DNS 解析流程</div></a>
+        <a class="note-card" href="網路-08-MQTT與IoT.html"><span class="nid">網路-08</span><div class="ntitle">MQTT 與 IoT <span class="nstar">⭐</span></div></a>
+      </div>
+    </section>
+
+    <section style="margin:0">
+      <div class="cat-title">Node.js / Express <span class="cnt">9 篇</span></div>
+      <p class="cat-desc">Event Loop、Stream、錯誤處理、效能排查 —— Node 後端的核心機制與實戰。</p>
+      <div class="card-list">
+        <a class="note-card" href="Node-01-Event-Loop事件迴圈.html"><span class="nid">Node-01</span><div class="ntitle">Event Loop 事件迴圈 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="Node-02-CommonJS與ESM.html"><span class="nid">Node-02</span><div class="ntitle">CommonJS 與 ESM</div></a>
+        <a class="note-card" href="Node-03-Stream與Backpressure.html"><span class="nid">Node-03</span><div class="ntitle">Stream 與 Backpressure</div></a>
+        <a class="note-card" href="Node-04-Cluster與Worker-Threads.html"><span class="nid">Node-04</span><div class="ntitle">Cluster 與 Worker Threads</div></a>
+        <a class="note-card" href="Node-05-錯誤處理.html"><span class="nid">Node-05</span><div class="ntitle">錯誤處理 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="Node-06-Express-Middleware機制.html"><span class="nid">Node-06</span><div class="ntitle">Express Middleware 機制 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="Node-07-Express-Fastify-NestJS.html"><span class="nid">Node-07</span><div class="ntitle">Express / Fastify / NestJS</div></a>
+        <a class="note-card" href="Node-08-記憶體洩漏排查.html"><span class="nid">Node-08</span><div class="ntitle">記憶體洩漏排查</div></a>
+        <a class="note-card" href="Node-09-API變慢的排查方法.html"><span class="nid">Node-09</span><div class="ntitle">API 變慢的排查方法 <span class="nstar">⭐</span></div></a>
+      </div>
+    </section>
+
+    <section style="margin:0">
+      <div class="cat-title">資料庫 PostgreSQL <span class="cnt">7 篇</span></div>
+      <p class="cat-desc">正規化、索引、EXPLAIN、鎖、N+1 —— 讓查詢又快又正確的關鍵。</p>
+      <div class="card-list">
+        <a class="note-card" href="DB-01-正規化與反正規化.html"><span class="nid">DB-01</span><div class="ntitle">正規化與反正規化</div></a>
+        <a class="note-card" href="DB-02-PostgreSQL索引Index.html"><span class="nid">DB-02</span><div class="ntitle">PostgreSQL 索引 Index <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="DB-03-EXPLAIN-ANALYZE怎麼看.html"><span class="nid">DB-03</span><div class="ntitle">EXPLAIN ANALYZE 怎麼看 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="DB-04-交易隔離等級.html"><span class="nid">DB-04</span><div class="ntitle">交易隔離等級</div></a>
+        <a class="note-card" href="DB-05-樂觀鎖與悲觀鎖.html"><span class="nid">DB-05</span><div class="ntitle">樂觀鎖與悲觀鎖</div></a>
+        <a class="note-card" href="DB-06-N加1查詢問題.html"><span class="nid">DB-06</span><div class="ntitle">N+1 查詢問題 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="DB-07-軟刪除與硬刪除.html"><span class="nid">DB-07</span><div class="ntitle">軟刪除與硬刪除</div></a>
+      </div>
+    </section>
+
+    <section style="margin:0">
+      <div class="cat-title">系統設計 <span class="cnt">4 篇</span></div>
+      <p class="cat-desc">高內聚低耦合、微服務、快取、訊息佇列 —— 架構層級的取捨。</p>
+      <div class="card-list">
+        <a class="note-card" href="系統-01-高內聚低耦合.html"><span class="nid">系統-01</span><div class="ntitle">高內聚低耦合 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="系統-02-Monolith與Microservices.html"><span class="nid">系統-02</span><div class="ntitle">Monolith 與 Microservices</div></a>
+        <a class="note-card" href="系統-03-Caching快取策略.html"><span class="nid">系統-03</span><div class="ntitle">Caching 快取策略 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="系統-04-Message-Queue訊息佇列.html"><span class="nid">系統-04</span><div class="ntitle">Message Queue 訊息佇列</div></a>
+      </div>
+    </section>
+
+    <section style="margin:0">
+      <div class="cat-title">資安專題 <span class="cnt">2 篇</span></div>
+      <p class="cat-desc">XSS、CSRF、SQL Injection 等常見 Web 威脅與防禦，以及 Cookie 安全設定。</p>
+      <div class="card-list">
+        <a class="note-card" href="資安-01-常見Web威脅與防禦.html"><span class="nid">資安-01</span><div class="ntitle">常見 Web 威脅與防禦 <span class="nstar">⭐</span></div></a>
+        <a class="note-card" href="資安-02-Cookie完整教學.html"><span class="nid">資安-02</span><div class="ntitle">Cookie 完整教學 <span class="nstar">⭐</span></div></a>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div>三題必練 · 覆蓋面最廣</div>
+    <div class="rel">
+      <a href="網路-07-DNS解析流程.html">① 完整連線故事</a>
+      <a href="API-01-RESTful設計原則.html">② 租借 API 設計</a>
+      <a href="Node-01-Event-Loop事件迴圈.html">③ Event Loop + 排查</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

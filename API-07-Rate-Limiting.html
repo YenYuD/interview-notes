@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate Limiting 流量限制</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">API-07</span></div>
+
+  <header class="hero">
+    <div class="kicker">API 設計</div>
+    <h1>每人每段時間<em>限打幾次</em></h1>
+    <p class="lede">像遊樂設施「每人每 5 分鐘限玩一次」。沒有限制的話，有人寫腳本狂打你的 API、或暴力嘗試密碼，就會拖垮系統或造成資安問題。Rate limiting 就是擋這個。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — Token Bucket 桶子</span>
+    <h2>桶裡有代幣才放行</h2>
+    <p>桶子最多裝 5 顆代幣，每 2 秒自動補 1 顆。每次請求花 1 顆。狂點看看，代幣空了就吃 <code>429</code>：</p>
+    <div class="lab">
+      <div class="lab-label">狂點，看代幣消耗與回補</div>
+      <div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;margin-bottom:1rem">
+        <div id="bucket" style="display:flex;gap:.4rem"></div>
+        <button class="btn-primary" id="reqBtn">送出請求</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);margin-bottom:.8rem">
+        X-RateLimit-Remaining: <b id="remain" style="color:var(--accent)">5</b> / 5　·　每 2 秒回補 1 顆
+      </div>
+      <div class="log" id="log"><div class="ln empty">// 請求結果會顯示在這…</div></div>
+    </div>
+    <div class="aside">Token bucket 的精髓：平常累積代幣，<b>允許短暫突發</b>（一次用掉好幾顆），但長期速率被回補速度綁住。</div>
+  </section>
+
+  <section>
+    <span class="num">四種演算法</span>
+    <h2>怎麼算「這段時間幾次」</h2>
+    <table>
+      <tr><th>演算法</th><th>概念</th><th>特性</th></tr>
+      <tr><td><b>Fixed window</b></td><td>每分鐘 60 次，整點重算</td><td>簡單，但跨整點邊界會爆量（1 秒內可達 120 次）</td></tr>
+      <tr><td><b>Sliding window</b></td><td>看「過去 60 秒」</td><td>較準確</td></tr>
+      <tr><td><b>Token bucket</b><br><small style="color:var(--good)">常用</small></td><td>定速放代幣，有幣才放行</td><td>允許短暫突發</td></tr>
+      <tr><td><b>Leaky bucket</b></td><td>請求像水滴勻速漏出</td><td>強制平滑、不允許突發</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">維度與實作</span>
+    <h2>per 什麼？放哪算？</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p><b>要選對維度</b>：解鎖按鈕應該 <b>per user</b>，否則「一家人共用同一支手機（同 IP）」就會互相卡到。</p></div>
+    <p>用 Redis 的 <code>INCR</code> + <code>EXPIRE</code>（多台 server 共享狀態，不能用單機記憶體），並在回應加 header 告訴 client 現況：</p>
+    <pre><code>X-RateLimit-Limit: 60        <span class="tok-com"># 上限</span>
+X-RateLimit-Remaining: 23     <span class="tok-com"># 還剩幾次</span>
+X-RateLimit-Reset: 1716000000 <span class="tok-com"># 何時重置</span></code></pre>
+    <p>超過就回 <code>429 Too Many Requests</code> + <code>Retry-After</code>（幾秒後再試）。</p>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>DDoS 怎辦？</summary><p>Rate limit 是應用層的；大規模 DDoS 要在更前面的 Cloudflare / WAF 層擋。</p></details>
+      <details><summary>為什麼用 Redis 不用記憶體？</summary><p>多台 server 要共享同一份計數，記憶體各算各的會破功。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會用 <span class="hl">token bucket</span> 允許合理突發，存在 <span class="hl">Redis</span> 讓多台 server 共享計數，維度選 <span class="hl">per user</span>（解鎖這種要綁人不綁 IP）。回應帶 X-RateLimit-* header，超過回 <span class="hl">429 + Retry-After</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="系統-03-Caching快取策略.html">系統-03 快取</a><a href="資安-01-常見Web威脅與防禦.html">資安-01 Web威脅</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const MAX=5; let tokens=MAX;
+  const $=id=>document.getElementById(id);
+  const bucket=$('bucket'),log=$('log'),remain=$('remain');
+  function render(){
+    bucket.innerHTML='';
+    for(let i=0;i<MAX;i++){
+      const d=document.createElement('div');
+      const filled=i<tokens;
+      d.style.cssText=`width:26px;height:26px;border-radius:50%;border:2px solid var(--accent);background:${filled?'var(--accent)':'transparent'};transition:background .2s`;
+      bucket.appendChild(d);
+    }
+    remain.textContent=tokens;
+  }
+  function addLog(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); const d=document.createElement('div'); d.className='ln '+(cls||''); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+  $('reqBtn').addEventListener('click',()=>{
+    if(tokens>0){ tokens--; addLog(`<span class="c-req">→ 請求</span>  <span class="c-ok">200 OK（花 1 顆，剩 ${tokens}）</span>`); }
+    else { addLog(`<span class="c-req">→ 請求</span>  <span class="c-bad">429 Too Many Requests · Retry-After: 2s</span>`,'c-bad'); }
+    render();
+  });
+  setInterval(()=>{ if(tokens<MAX){ tokens++; render(); addLog('<span class="c-dim">+1 代幣回補</span>','c-dim'); } },2000);
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNS 解析流程</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">網路-07</span></div>
+
+  <header class="hero">
+    <div class="kicker">網路協定</div>
+    <h1>網路的<em>電話簿</em></h1>
+    <p class="lede">DNS 把人類好記的網域名（moovo.com）翻譯成電腦用的 IP 位址。為了快，沿路每一層都有快取。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 一層層問下去</span>
+    <h2>第一次查 vs 有快取</h2>
+    <p>按「解析 moovo.com」看遞迴查詢；再按一次看快取命中有多快：</p>
+    <div class="lab">
+      <div class="lab-label">按解析，看流程</div>
+      <div id="steps" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem"></div>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn-primary" id="resolveBtn">解析 moovo.com</button>
+        <button class="btn-ghost" id="clearBtn">清快取重來</button>
+      </div>
+      <div id="note" style="margin-top:1rem;font-weight:700;color:var(--ink-soft)"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">完整查詢路徑</span>
+    <h2>沿路都有快取</h2>
+    <ol>
+      <li>瀏覽器快取 → 沒有就往下</li>
+      <li>作業系統 hosts 檔 → 沒有就往下</li>
+      <li>OS DNS resolver 快取 → 沒有就送到網路</li>
+      <li>本地 DNS server（ISP，或 8.8.8.8 / 1.1.1.1）做<b>遞迴查詢</b>：Root →「.com 問誰」、TLD →「moovo.com 問誰」、Authoritative → 拿到真正 IP</li>
+      <li>IP 一路回傳，每層順手依 TTL 快取</li>
+    </ol>
+  </section>
+
+  <section>
+    <span class="num">紀錄類型 & CDN</span>
+    <h2>常見 record</h2>
+    <table>
+      <tr><th>類型</th><th>用途</th></tr>
+      <tr><td><code>A</code> / <code>AAAA</code></td><td>網域 → IPv4 / IPv6</td></tr>
+      <tr><td><code>CNAME</code></td><td>別名（指向另一個網域名）</td></tr>
+      <tr><td><code>MX</code></td><td>郵件伺服器</td></tr>
+      <tr><td><code>TXT</code></td><td>驗證用（SPF、DKIM）</td></tr>
+      <tr><td><code>NS</code></td><td>指定權威 name server</td></tr>
+    </table>
+    <div class="callout info"><span class="ico">🌍</span><p><b>CDN 怎麼運作</b>：網域用 CNAME 指到 CDN 業者 → CDN 用 GeoDNS / Anycast 回給你地理上最近的 edge 節點 IP → edge cache miss 才回源站。這就是 CDN 能加速的原因。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「DNS 把網域翻成 IP，沿路瀏覽器、OS、resolver 都有快取。真要查時本地 DNS 做<span class="hl">遞迴</span>：Root → TLD → 權威 NS，拿到 IP 後各層依 TTL 快取。CDN 則是用 <span class="hl">CNAME</span> 指過去，再用 <span class="hl">GeoDNS/Anycast</span> 回最近的 edge IP，cache miss 才回源站。」</p>
+    <div class="callout tip"><span class="ico">🔗</span><p>這題常和 TLS 串成「從輸入網址到看到網頁的完整故事」一起問，是必練的第一題。</p></div>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="網路-04-TLS與HTTPS握手.html">網路-04 TLS</a><a href="網路-03-TCP三次握手與四次揮手.html">網路-03 握手</a><a href="系統-03-Caching快取策略.html">系統-03 快取</a></div>
+  </footer>
+
+</div>
+
+<script>
+  const steps=[
+    {t:'瀏覽器 / OS 快取',d:'先問自己有沒有記過'},
+    {t:'本地 DNS resolver',d:'ISP 或 8.8.8.8 / 1.1.1.1'},
+    {t:'Root server',d:'「.com 去問誰」'},
+    {t:'TLD (.com) server',d:'「moovo.com 去問誰」'},
+    {t:'Authoritative NS',d:'moovo.com 的權威，給出真正 IP 93.184.216.34'},
+  ];
+  const $=id=>document.getElementById(id);
+  const wrap=$('steps'),note=$('note');
+  let cached=false;
+  function render(active){
+    wrap.innerHTML='';
+    steps.forEach((s,i)=>{
+      const lit = active!=null && (cached? i===0 : i<=active);
+      const row=document.createElement('div');
+      row.style.cssText=`display:flex;gap:.8rem;align-items:flex-start;padding:.6rem .9rem;border-radius:10px;border:1.5px solid ${lit?'var(--accent)':'var(--line)'};background:${lit?'var(--accent-soft)':'transparent'};opacity:${lit||active==null?1:.4};transition:all .25s`;
+      row.innerHTML=`<div style="width:24px;height:24px;border-radius:50%;background:${lit?'var(--accent)':'var(--line)'};color:#fff;display:grid;place-items:center;font-family:var(--mono);font-size:.75rem;font-weight:700;flex-shrink:0">${i+1}</div><div><div style="font-weight:700">${s.t}</div><div style="font-size:.85rem;color:var(--ink-soft)">${s.d}</div></div>`;
+      wrap.appendChild(row);
+    });
+  }
+  $('resolveBtn').addEventListener('click',()=>{
+    if(cached){ render(0); note.innerHTML='<span style="color:var(--good)">⚡ 快取命中！瀏覽器直接給 IP，0 個網路往返 —— 這就是快取的價值。</span>'; return; }
+    let i=0; render(-1);
+    const timer=setInterval(()=>{ render(i); if(i>=steps.length-1){ clearInterval(timer); cached=true; note.innerHTML='<span style="color:var(--accent)">第一次：一路遞迴問到權威 NS 拿到 IP，每層順手快取。再按一次解析看看 →</span>'; } i++; },500);
+  });
+  $('clearBtn').addEventListener('click',()=>{ cached=false; render(null); note.textContent=''; });
+  render(null);
+</script>
+</body>
+</html>

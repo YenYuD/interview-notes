@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 錯誤處理格式</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar"><a href="index.html">← 回索引</a><span class="tag">API-05</span></div>
+
+  <header class="hero">
+    <div class="kicker">API 設計</div>
+    <h1>錯誤回應<em>長得一致</em>，前端才好接</h1>
+    <p class="lede">如果每個 endpoint 出錯長得都不一樣，前端就得寫一堆 if 去猜格式。統一錯誤格式：<b>不管哪裡出錯，錯誤長相都一樣</b>。業界常參考 RFC 7807（Problem Details）。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 前端的惡夢 vs 天堂</span>
+    <h2>切換後端風格，看前端怎麼接</h2>
+    <p>點不同的錯誤來源，看「亂回」與「統一回」時，前端要寫的解析邏輯差多少：</p>
+    <div class="lab">
+      <div class="lab-label">先選後端風格</div>
+      <div class="toggle-row" id="styleRow">
+        <button data-s="mess" class="on bad">😵 各回各的</button>
+        <button data-s="unified">😌 統一格式</button>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="btn-ghost" data-e="balance">餘額不足</button>
+        <button class="btn-ghost" data-e="auth">未登入</button>
+        <button class="btn-ghost" data-e="valid">表單驗證失敗</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);margin-bottom:.4rem">後端回傳：</div>
+      <pre><code id="resp" class="tok-str">點上面的錯誤情境看看…</code></pre>
+      <div style="font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);margin:.8rem 0 .4rem">前端要寫的處理：</div>
+      <div id="feNote" style="font-weight:700;color:var(--ink-soft)">—</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">核心觀念</span>
+    <h2>HTTP code 和 business code 分兩層</h2>
+    <table>
+      <tr><th>層級</th><th>例子</th><th>給誰用</th></tr>
+      <tr><td><b>HTTP code</b></td><td><code>402</code></td><td>client 的框架（fetch / axios 判斷成功失敗）</td></tr>
+      <tr><td><b>business code</b></td><td><code>BALANCE_INSUFFICIENT</code></td><td>前端業務邏輯（顯示哪句 i18n、跳哪頁）</td></tr>
+    </table>
+    <div class="callout info"><span class="ico">💡</span><p>為什麼要分？因為 HTTP code 種類有限，但<b>業務錯誤千百種</b>，需要自己的代碼系統。</p></div>
+    <ul>
+      <li>一定要回 <code>traceId</code>：出問題時 client 把它給工程師，就能在 server log 對到同一筆請求。</li>
+      <li>多語（i18n）：訊息文字交給前端用 <code>code</code> 對照，或後端依 <code>Accept-Language</code> 回對應語言。</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="num">表單錯誤</span>
+    <h2>多欄位驗證一次全回</h2>
+    <pre><code>{
+  <span class="tok-key">"status"</span>: 422,
+  <span class="tok-key">"code"</span>: <span class="tok-str">"VALIDATION_ERROR"</span>,
+  <span class="tok-key">"errors"</span>: [
+    { <span class="tok-key">"field"</span>: <span class="tok-str">"email"</span>, <span class="tok-key">"code"</span>: <span class="tok-str">"INVALID_FORMAT"</span> },
+    { <span class="tok-key">"field"</span>: <span class="tok-str">"age"</span>, <span class="tok-key">"code"</span>: <span class="tok-str">"OUT_OF_RANGE"</span> }
+  ]
+}</code></pre>
+    <p>用 <code>errors</code> 陣列一次回所有欄位問題，而不是一次只回一個 —— 使用者不用一個一個試。</p>
+  </section>
+
+  <section>
+    <span class="num">常見踩雷</span>
+    <h2>這些別做</h2>
+    <div class="callout warn"><span class="ico">✕</span><p>用 <code>200</code> 包錯誤訊息。</p></div>
+    <div class="callout warn"><span class="ico">✕</span><p>把後端的 stack trace 直接吐給 client → <b>洩漏內部資訊</b>（資安問題）。</p></div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會用統一結構（參考 <span class="hl">RFC 7807</span>），把 HTTP code 與業務 code 分層：HTTP code 給框架判斷、字串 code 給前端決定訊息與跳轉。每個錯誤都帶 <span class="hl">traceId</span> 方便 debug。表單驗證錯誤用 errors 陣列一次回所有欄位的問題。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel"><a href="API-01-RESTful設計原則.html">API-01 RESTful</a><a href="Node-05-錯誤處理.html">Node-05 錯誤處理</a><a href="資安-01-常見Web威脅與防禦.html">資安-01 Web威脅</a></div>
+  </footer>
+
+</div>
+
+<script>
+  let style='mess';
+  const data={
+    mess:{
+      balance:{body:`{ "error": "餘額不足" }`, fe:'⚠️ status 200，要自己翻 body 才知道錯了'},
+      auth:{body:`"Unauthorized"  // 純字串！`, fe:'⚠️ 又是另一種格式，得再寫一套解析'},
+      valid:{body:`{ "msg": "email 格式錯", "code": 5 }`, fe:'⚠️ 一次只回一個錯，欄位名還對不上'},
+    },
+    unified:{
+      balance:{body:`{
+  "status": 402,
+  "code": "BALANCE_INSUFFICIENT",
+  "detail": "餘額 50，需要 100",
+  "traceId": "req_xyz"
+}`, fe:'✅ 看 code 決定訊息 + 用 traceId 回報'},
+      auth:{body:`{
+  "status": 401,
+  "code": "UNAUTHENTICATED",
+  "traceId": "req_abc"
+}`, fe:'✅ 同一套：看 code → 導去登入頁'},
+      valid:{body:`{
+  "status": 422,
+  "code": "VALIDATION_ERROR",
+  "errors": [
+    { "field": "email", "code": "INVALID_FORMAT" },
+    { "field": "age", "code": "OUT_OF_RANGE" }
+  ]
+}`, fe:'✅ 一次標出所有錯誤欄位'},
+    }
+  };
+  const styleRow=document.getElementById('styleRow');
+  const resp=document.getElementById('resp');
+  const feNote=document.getElementById('feNote');
+  let lastE='balance';
+  function show(e){ lastE=e; const d=data[style][e]; resp.textContent=d.body; feNote.textContent=d.fe; feNote.style.color = style==='mess'?'var(--bad)':'var(--good)'; }
+  styleRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...styleRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); style=b.dataset.s; show(lastE); });
+  document.querySelectorAll('[data-e]').forEach(btn=>btn.addEventListener('click',()=>show(btn.dataset.e)));
+</script>
+</body>
+</html>
