@@ -61,7 +61,7 @@
   <section class="interview">
     <span class="num">面試這樣答</span>
     <h2>30 秒版本</h2>
-    <p class="quote">「最常用 <span class="hl">cache-aside</span>：讀先看 cache、miss 就回填，寫則更新 DB 再讓 cache 失效。要更即時可以 write-through（寫變慢）；要極快可接受掉資料風險用 write-behind。TTL 熱資料短 + 主動失效、冷資料長。最難的是失效時機，我會用短 TTL 加寫入時主動 invalidate，必要時用 tag-based。MOOVO 車輛即時位置我會放 Redis、TTL 約 10 秒。」</p>
+    <p class="quote">「最常用 <span class="hl">cache-aside</span>：讀先看 cache、miss 就回填，寫則更新 DB 再讓 cache 失效。要更即時可以 write-through（寫變慢）；要極快可接受掉資料風險用 write-behind。TTL 熱資料短 + 主動失效、冷資料長。最難的是失效時機，我會用短 TTL 加寫入時主動 invalidate，必要時用 tag-based。車輛即時位置這種我會放 Redis、TTL 約 10 秒。」</p>
   </section>
 
   <footer>

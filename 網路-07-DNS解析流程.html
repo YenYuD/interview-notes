@@ -14,18 +14,18 @@
   <header class="hero">
     <div class="kicker">網路協定</div>
     <h1>網路的<em>電話簿</em></h1>
-    <p class="lede">DNS 把人類好記的網域名（moovo.com）翻譯成電腦用的 IP 位址。為了快，沿路每一層都有快取。</p>
+    <p class="lede">DNS 把人類好記的網域名（example.com）翻譯成電腦用的 IP 位址。為了快，沿路每一層都有快取。</p>
   </header>
 
   <section>
     <span class="num">DEMO — 一層層問下去</span>
     <h2>第一次查 vs 有快取</h2>
-    <p>按「解析 moovo.com」看遞迴查詢；再按一次看快取命中有多快：</p>
+    <p>按「解析 example.com」看遞迴查詢；再按一次看快取命中有多快：</p>
     <div class="lab">
       <div class="lab-label">按解析，看流程</div>
       <div id="steps" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem"></div>
       <div style="display:flex;gap:.5rem">
-        <button class="btn-primary" id="resolveBtn">解析 moovo.com</button>
+        <button class="btn-primary" id="resolveBtn">解析 example.com</button>
         <button class="btn-ghost" id="clearBtn">清快取重來</button>
       </div>
       <div id="note" style="margin-top:1rem;font-weight:700;color:var(--ink-soft)"></div>
@@ -39,7 +39,7 @@
       <li>瀏覽器快取 → 沒有就往下</li>
       <li>作業系統 hosts 檔 → 沒有就往下</li>
       <li>OS DNS resolver 快取 → 沒有就送到網路</li>
-      <li>本地 DNS server（ISP，或 8.8.8.8 / 1.1.1.1）做<b>遞迴查詢</b>：Root →「.com 問誰」、TLD →「moovo.com 問誰」、Authoritative → 拿到真正 IP</li>
+      <li>本地 DNS server（ISP，或 8.8.8.8 / 1.1.1.1）做<b>遞迴查詢</b>：Root →「.com 問誰」、TLD →「example.com 問誰」、Authoritative → 拿到真正 IP</li>
       <li>IP 一路回傳，每層順手依 TTL 快取</li>
     </ol>
   </section>
@@ -77,8 +77,8 @@
     {t:'瀏覽器 / OS 快取',d:'先問自己有沒有記過'},
     {t:'本地 DNS resolver',d:'ISP 或 8.8.8.8 / 1.1.1.1'},
     {t:'Root server',d:'「.com 去問誰」'},
-    {t:'TLD (.com) server',d:'「moovo.com 去問誰」'},
-    {t:'Authoritative NS',d:'moovo.com 的權威，給出真正 IP 93.184.216.34'},
+    {t:'TLD (.com) server',d:'「example.com 去問誰」'},
+    {t:'Authoritative NS',d:'example.com 的權威，給出真正 IP 93.184.216.34'},
   ];
   const $=id=>document.getElementById(id);
   const wrap=$('steps'),note=$('note');

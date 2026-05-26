@@ -58,7 +58,7 @@
   <section class="interview">
     <span class="num">面試這樣答</span>
     <h2>30 秒版本</h2>
-    <p class="quote">「Queue 用在<span class="hl">削峰、解耦、重試、廣播</span> —— 例如 MOOVO 的 Stripe 續扣失敗，我不會在 webhook 同步做重活，而是丟進 BullMQ 排程處理。關鍵觀念是 <span class="hl">exactly-once 在分散式下做不到</span>，主流是 at-least-once，所以 consumer 一定要做<span class="hl">冪等去重</span>（用 event id）。選型上業務事件用 Kafka/RabbitMQ，Node 任務佇列用 BullMQ。」</p>
+    <p class="quote">「Queue 用在<span class="hl">削峰、解耦、重試、廣播</span> —— 例如 Stripe 續扣失敗，我不會在 webhook 同步做重活，而是丟進 BullMQ 排程處理。關鍵觀念是 <span class="hl">exactly-once 在分散式下做不到</span>，主流是 at-least-once，所以 consumer 一定要做<span class="hl">冪等去重</span>（用 event id）。選型上業務事件用 Kafka/RabbitMQ，Node 任務佇列用 BullMQ。」</p>
   </section>
 
   <footer>

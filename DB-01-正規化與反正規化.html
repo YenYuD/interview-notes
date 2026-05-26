@@ -19,8 +19,8 @@
 
   <section>
     <span class="num">DEMO — 改個名字看災情</span>
-    <h2>Emily 改名字，幾個地方要更新？</h2>
-    <p>用戶名字出現在「用戶表」和很多筆「訂單」。切換設計，按「Emily 改名為 Emma」看會發生什麼：</p>
+    <h2>Alice 改名字，幾個地方要更新？</h2>
+    <p>用戶名字出現在「用戶表」和很多筆「訂單」。切換設計，按「Alice 改名為 Emma」看會發生什麼：</p>
     <div class="lab">
       <div class="lab-label">先選設計</div>
       <div class="toggle-row" id="designRow">
@@ -29,7 +29,7 @@
       </div>
       <div id="tables" style="display:grid;gap:.8rem;margin-bottom:1rem"></div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn-primary" id="renameBtn">把 Emily 改名為 Emma</button>
+        <button class="btn-primary" id="renameBtn">把 Alice 改名為 Emma</button>
         <button class="btn-ghost" id="resetBtn">重來</button>
       </div>
       <div id="verdict" style="margin-top:1rem;font-weight:700"></div>
@@ -47,7 +47,7 @@
   </section>
 
   <section>
-    <span class="num">MOOVO 判斷例子</span>
+    <span class="num">場景判斷例子</span>
     <h2>列車輛要顯示「最後使用者名字」，要冗餘進 bike 表嗎？</h2>
     <p><b>不要。</b>用 JOIN 就好。因為名字會改，冗餘進去就要到處同步，一致性顧不到。除非這個查詢量大到 JOIN 成為瓶頸，才考慮用物化視圖。</p>
   </section>
@@ -70,20 +70,20 @@
   const $=id=>document.getElementById(id);
   const tables=$('tables'),verdict=$('verdict'),designRow=$('designRow');
   function render(){
-    const name=renamed?'Emma':'Emily';
+    const name=renamed?'Emma':'Alice';
     if(design==='norm'){
       tables.innerHTML=`
         <div class="balance-box" style="text-align:left;padding:1rem"><div style="font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)">users 表（唯一來源）</div><div style="font-family:var(--mono);margin-top:.3rem">id:5 · name: <b style="color:var(--accent)">${name}</b></div></div>
         <div class="balance-box" style="text-align:left;padding:1rem"><div style="font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)">orders 表（只存 user_id）</div><div style="font-family:var(--mono);margin-top:.3rem">#101 user_id:5 ｜ #102 user_id:5 ｜ #103 user_id:5</div><div style="font-size:.8rem;color:var(--ink-soft);margin-top:.3rem">顯示名字時 JOIN users → 永遠拿到最新</div></div>`;
     } else {
-      const oldName='Emily';
+      const oldName='Alice';
       tables.innerHTML=`
         <div class="balance-box" style="text-align:left;padding:1rem"><div style="font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)">users 表</div><div style="font-family:var(--mono);margin-top:.3rem">id:5 · name: <b style="color:var(--accent)">${name}</b></div></div>
         <div class="balance-box ${renamed?'danger':''}" style="text-align:left;padding:1rem"><div style="font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)">orders 表（複製了名字）</div><div style="font-family:var(--mono);margin-top:.3rem">#101 name:<b>${renamed?oldName:name}</b> ｜ #102 name:<b>${renamed?oldName:name}</b> ｜ #103 name:<b>${renamed?oldName:name}</b></div></div>`;
     }
   }
   designRow.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...designRow.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); design=b.dataset.d; renamed=false; verdict.textContent=''; render(); });
-  $('renameBtn').addEventListener('click',()=>{ renamed=true; render(); if(design==='norm'){ verdict.innerHTML='<span style="color:var(--good)">✅ 只改 users 一個地方，所有訂單 JOIN 後立刻顯示 Emma。乾淨。</span>'; } else { verdict.innerHTML='<span style="color:var(--bad)">💥 users 改成 Emma 了，但 3 筆訂單還是舊的 Emily！資料不一致 —— 你得記得同步每一筆。</span>'; } });
+  $('renameBtn').addEventListener('click',()=>{ renamed=true; render(); if(design==='norm'){ verdict.innerHTML='<span style="color:var(--good)">✅ 只改 users 一個地方，所有訂單 JOIN 後立刻顯示 Emma。乾淨。</span>'; } else { verdict.innerHTML='<span style="color:var(--bad)">💥 users 改成 Emma 了，但 3 筆訂單還是舊的 Alice！資料不一致 —— 你得記得同步每一筆。</span>'; } });
   $('resetBtn').addEventListener('click',()=>{ renamed=false; verdict.textContent=''; render(); });
   render();
 </script>

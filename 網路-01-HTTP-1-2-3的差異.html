@@ -64,7 +64,7 @@
       <li>TCP 的行為寫死在作業系統核心（kernel），改不動。</li>
       <li>UDP 在使用者態，QUIC 才能自由設計擁塞控制與多工。</li>
     </ul>
-    <div class="callout tip"><span class="ico">📱</span><p>HTTP/3 有 <b>connection migration</b> —— 從 Wi-Fi 切到 4G 時不用重新握手，連線無縫接續。對 MOOVO 這種行動 App 特別有價值。</p></div>
+    <div class="callout tip"><span class="ico">📱</span><p>HTTP/3 有 <b>connection migration</b> —— 從 Wi-Fi 切到 4G 時不用重新握手，連線無縫接續。對行動 App 特別有價值。</p></div>
     <div class="followup">
       <details><summary>我的 API 該升 HTTP/3 嗎？</summary><p>靜態資源（走 CDN）升級 CP 值高；API 看 client 是不是大量行動端。</p></details>
       <details><summary>QUIC 真的比較省？</summary><p>連線建立省一個 RTT，但 CPU 比 TCP 重（kernel 沒幫忙處理）。</p></details>

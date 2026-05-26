@@ -50,7 +50,7 @@
     <table>
       <tr><th>做法</th><th>範例</th><th>結論</th></tr>
       <tr><td><b>URL 版本</b><br><small style="color:var(--good)">最常見</small></td><td><code>/v1/bikes</code></td><td>直觀、好 debug、CDN 友善。約 90% 團隊用這個。</td></tr>
-      <tr><td><b>Header 版本</b></td><td><code>Accept: …vnd.moovo.v2+json</code></td><td>URL 不變較「純」，但難測試、cache 複雜。</td></tr>
+      <tr><td><b>Header 版本</b></td><td><code>Accept: …vnd.example.v2+json</code></td><td>URL 不變較「純」，但難測試、cache 複雜。</td></tr>
       <tr><td><b>Query 參數</b></td><td><code>/bikes?version=2</code></td><td>cache 行為混亂，<b style="color:var(--bad)">不建議</b>。</td></tr>
     </table>
     <div class="callout tip"><span class="ico">✅</span><p>實務結論：<b>「簡單好維護」遠比「理論純粹」重要</b>，所以多數選 URL 版本。</p></div>

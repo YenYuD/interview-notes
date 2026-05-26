@@ -57,7 +57,7 @@
   <section class="interview">
     <span class="num">面試這樣答</span>
     <h2>30 秒版本</h2>
-    <p class="quote">「高衝突用<span class="hl">悲觀鎖</span>（SELECT FOR UPDATE），先鎖住別人得等，直觀但鎖久會卡；低衝突用<span class="hl">樂觀鎖</span>，加 version 欄位、UPDATE 時帶舊 version，影響 0 筆代表被搶先要 retry。MOOVO 搶車這種我傾向悲觀鎖或 <span class="hl">Redis 分散式鎖（SET NX EX）</span>，因為衝突明確且要立即裁決。」</p>
+    <p class="quote">「高衝突用<span class="hl">悲觀鎖</span>（SELECT FOR UPDATE），先鎖住別人得等，直觀但鎖久會卡；低衝突用<span class="hl">樂觀鎖</span>，加 version 欄位、UPDATE 時帶舊 version，影響 0 筆代表被搶先要 retry。搶資源這種高衝突場景我傾向悲觀鎖或 <span class="hl">Redis 分散式鎖（SET NX EX）</span>，因為衝突明確且要立即裁決。」</p>
   </section>
 
   <footer>

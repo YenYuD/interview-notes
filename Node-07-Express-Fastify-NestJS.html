@@ -50,7 +50,7 @@
     <span class="num">NestJS 為什麼適合大型專案</span>
     <h2>架構自帶紀律</h2>
     <ul>
-      <li><b>強制模組化</b>（Controller / Service / Module）→ 自然達到<a href="系統-01-高內聚低耦合.html">高內聚低耦合</a>（MOOVO JD 關鍵字）。</li>
+      <li><b>強制模組化</b>（Controller / Service / Module）→ 自然達到<a href="系統-01-高內聚低耦合.html">高內聚低耦合</a>（常見 JD 關鍵字）。</li>
       <li><b>DI 依賴注入 container</b> → 容易替換、容易測試（mock 依賴）。</li>
       <li><b>Decorator 寫法清晰</b>：<code>@Controller('bikes')</code>、<code>@Get(':id')</code>。</li>
       <li>內建支援 Swagger、Validation、GraphQL、WebSocket、MQTT、microservices。</li>
@@ -59,7 +59,7 @@
   </section>
 
   <section class="interview">
-    <span class="num">面試這樣答（Emily 可能被問「為什麼選 NestJS」）</span>
+    <span class="num">面試這樣答（可能被問「為什麼選 NestJS」）</span>
     <h2>30 秒版本</h2>
     <p class="quote">「Express 極簡彈性、適合小專案；Fastify 主打效能與內建 schema 驗證；NestJS 像 Angular 後端版，用 <span class="hl">DI 和模組化</span>強制高內聚低耦合，內建一堆企業功能，適合大團隊長期維護。我主力是 Express 和 Next.js Route Handlers，NestJS 的 DI、模組、decorator-based controller 我研究過設計理念，可以快速上手。」</p>
     <div class="callout tip"><span class="ico">💡</span><p>誠實應對：沒 production 用過 NestJS 沒關係，講得出「<b>Module / Controller / Service / Provider 怎麼搭</b>」+「它解決什麼問題」就很加分。</p></div>

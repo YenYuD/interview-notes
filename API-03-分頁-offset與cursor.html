@@ -61,7 +61,7 @@ SQL: <span class="tok-key">WHERE</span> id &gt; <span class="tok-str">'abc'</spa
 
   <section>
     <span class="num">怎麼選</span>
-    <h2>MOOVO 即時車輛列表 → Cursor</h2>
+    <h2>即時車輛列表 → Cursor</h2>
     <p>因為車輛資料一直在變，使用者通常只往下滑「下一頁」，不會跳到第 50 頁。關鍵：用 <code>(updated_at, id)</code> 這種<b>複合 cursor</b>，避免「同一秒插入兩筆」造成排序不穩、漏資料。</p>
     <div class="chips">
       <div class="chip info">後台報表<small>資料穩定、要跳頁 → Offset</small></div>
@@ -82,7 +82,7 @@ SQL: <span class="tok-key">WHERE</span> id &gt; <span class="tok-str">'abc'</spa
   <section class="interview">
     <span class="num">面試這樣答</span>
     <h2>30 秒版本</h2>
-    <p class="quote">「資料穩定、要跳頁（如後台報表）→ <span class="hl">offset</span>；資料即時變動、只看下一頁（如動態列表）→ <span class="hl">cursor</span>。MOOVO 的即時車輛列表我選 cursor，用 <span class="hl">(updated_at, id)</span> 當複合鍵保證穩定，避免 offset 在大量資料下變慢又漏資料。」</p>
+    <p class="quote">「資料穩定、要跳頁（如後台報表）→ <span class="hl">offset</span>；資料即時變動、只看下一頁（如動態列表）→ <span class="hl">cursor</span>。即時車輛列表我選 cursor，用 <span class="hl">(updated_at, id)</span> 當複合鍵保證穩定，避免 offset 在大量資料下變慢又漏資料。」</p>
   </section>
 
   <footer>

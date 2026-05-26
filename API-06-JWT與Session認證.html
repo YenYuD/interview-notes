@@ -96,7 +96,7 @@
   $('reqBtn').addEventListener('click',()=>{
     if(auth==='session'){
       addLog('<span class="c-req">→ 帶 sessionId=abc123 的 cookie</span>');
-      if(loggedIn){ addLog('&nbsp;&nbsp;server 翻名冊：abc123 → 用戶 Emily ✓','c-ok'); addLog('&nbsp;&nbsp;<span class="c-ok">200 OK</span>','c-ok'); }
+      if(loggedIn){ addLog('&nbsp;&nbsp;server 翻名冊：abc123 → 用戶 Alice ✓','c-ok'); addLog('&nbsp;&nbsp;<span class="c-ok">200 OK</span>','c-ok'); }
       else { addLog('&nbsp;&nbsp;server 翻名冊：abc123 → <span class="c-bad">查無此筆</span>','c-bad'); addLog('&nbsp;&nbsp;<span class="c-bad">401 請重新登入</span>','c-bad'); }
     } else {
       addLog('<span class="c-req">→ 帶 JWT（已簽章）</span>');

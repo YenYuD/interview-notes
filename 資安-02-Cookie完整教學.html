@@ -20,7 +20,7 @@
   <section>
     <span class="num">先搞懂</span>
     <h2>Cookie 是什麼？怎麼運作？</h2>
-    <p>登入成功後，server 回一個 <code>Set-Cookie</code> header；瀏覽器存起來，之後對<b>同一個網域</b>的每次請求都自動在 <code>Cookie</code> header 帶上它。server 看到就知道「喔，是剛剛登入的 Emily」。</p>
+    <p>登入成功後，server 回一個 <code>Set-Cookie</code> header；瀏覽器存起來，之後對<b>同一個網域</b>的每次請求都自動在 <code>Cookie</code> header 帶上它。server 看到就知道「喔，是剛剛登入的 Alice」。</p>
     <pre><code><span class="tok-com">// server 回應：</span>
 Set-Cookie: sessionId=abc123; HttpOnly; Secure; SameSite=Lax
 

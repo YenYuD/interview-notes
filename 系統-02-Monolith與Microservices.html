@@ -46,13 +46,13 @@
     <span class="num">為什麼別過早拆</span>
     <h2>微服務的痛</h2>
     <div class="callout warn"><span class="ico">⚠️</span><p>網路會失敗、資料一致性難保證、跨服務 debug 很痛、部署複雜度爆增。團隊小、業務還在變的時候拆，這些痛會吃光微服務的好處。</p></div>
-    <div class="callout tip"><span class="ico">📦</span><p><b>折衷：Modular Monolith</b> —— 一個 codebase、一個部署，但內部用強模組邊界（見<a href="系統-01-高內聚低耦合.html">高內聚低耦合</a>）。等某個模組真的需要獨立擴展，再抽出來變服務。MOOVO 規模很可能就是這個最合適。</p></div>
+    <div class="callout tip"><span class="ico">📦</span><p><b>折衷：Modular Monolith</b> —— 一個 codebase、一個部署，但內部用強模組邊界（見<a href="系統-01-高內聚低耦合.html">高內聚低耦合</a>）。等某個模組真的需要獨立擴展，再抽出來變服務。這種規模很可能就是這個最合適。</p></div>
   </section>
 
   <section class="interview">
     <span class="num">面試這樣答</span>
     <h2>30 秒版本</h2>
-    <p class="quote">「Monolith 適合早期、小團隊、業務還在變；Microservices 適合大團隊、邊界穩定、各服務擴展需求不同。但我不會過早拆 —— 微服務的網路、一致性、debug、部署複雜度很容易吃掉好處。我偏好先做 <span class="hl">modular monolith</span>：一個部署但模組邊界清楚，哪天某模組真需要獨立擴展再抽出去。MOOVO 這規模我猜 modular monolith 最划算。」</p>
+    <p class="quote">「Monolith 適合早期、小團隊、業務還在變；Microservices 適合大團隊、邊界穩定、各服務擴展需求不同。但我不會過早拆 —— 微服務的網路、一致性、debug、部署複雜度很容易吃掉好處。我偏好先做 <span class="hl">modular monolith</span>：一個部署但模組邊界清楚，哪天某模組真需要獨立擴展再抽出去。這種規模我猜 modular monolith 最划算。」</p>
   </section>
 
   <footer>

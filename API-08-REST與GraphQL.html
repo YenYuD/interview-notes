@@ -54,7 +54,7 @@
   </section>
 
   <section>
-    <span class="num">MOOVO 場景判斷</span>
+    <span class="num">場景判斷</span>
     <h2>建議：REST 為主，必要時加 BFF</h2>
     <ul>
       <li>B2B 後台（資料表單純）→ REST 夠用。</li>
@@ -65,7 +65,7 @@
   <section class="interview">
     <span class="num">面試這樣答</span>
     <h2>30 秒版本</h2>
-    <p class="quote">「需求多變、要省流量、要聚合多來源 → <span class="hl">GraphQL</span>；公開 API、要 HTTP cache、檔案串流 → <span class="hl">REST</span>。MOOVO 我會選 REST 為主，因為資料模型還算單純，GraphQL 的 N+1 與 cache 複雜度不划算；真的需要前端聚合再加一層 BFF。」</p>
+    <p class="quote">「需求多變、要省流量、要聚合多來源 → <span class="hl">GraphQL</span>；公開 API、要 HTTP cache、檔案串流 → <span class="hl">REST</span>。這個場景我會選 REST 為主，因為資料模型還算單純，GraphQL 的 N+1 與 cache 複雜度不划算；真的需要前端聚合再加一層 BFF。」</p>
   </section>
 
   <footer>
@@ -81,7 +81,7 @@
     rest:{
       req:'GET /users/5\n// 想要訂單還得再打：GET /users/5/orders',
       resp:`{
-  "id": 5, "name": "Emily",
+  "id": 5, "name": "Alice",
   "email": "...", "phone": "...",
   "address": "...", "createdAt": "...",
   "avatar": "...", "bio": "...",
@@ -101,7 +101,7 @@
       resp:`{
   "data": {
     "user": {
-      "name": "Emily",
+      "name": "Alice",
       "orders": [
         { "amount": 100 },
         { "amount": 250 },

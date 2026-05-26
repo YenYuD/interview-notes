@@ -48,7 +48,7 @@
   </section>
 
   <section>
-    <span class="num">MOOVO 判斷</span>
+    <span class="num">場景判斷</span>
     <h2>看法規與業務，不是無腦選一種</h2>
     <div class="chips">
       <div class="chip info">訂單 / 金流紀錄<small>→ 絕對軟刪除（甚至不該刪），稽核法規要留</small></div>
@@ -66,7 +66,7 @@
   <section class="interview">
     <span class="num">面試這樣答</span>
     <h2>30 秒版本</h2>
-    <p class="quote">「軟刪除加 <span class="hl">deleted_at</span>、可救回又保留審計，但每個 query 都要記得過濾、unique constraint 會卡；硬刪除乾淨但不可逆、要搭 audit table。MOOVO 的訂單金流我會軟刪除（稽核要留），但使用者個資因為 <span class="hl">GDPR</span> 要支援真刪除或匿名化。選哪種取決於法規和業務。」</p>
+    <p class="quote">「軟刪除加 <span class="hl">deleted_at</span>、可救回又保留審計，但每個 query 都要記得過濾、unique constraint 會卡；硬刪除乾淨但不可逆、要搭 audit table。訂單金流這種我會軟刪除（稽核要留），但使用者個資因為 <span class="hl">GDPR</span> 要支援真刪除或匿名化。選哪種取決於法規和業務。」</p>
   </section>
 
   <footer>
