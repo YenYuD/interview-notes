@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>this 關鍵字常見陷阱</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">this・常見錯誤</div>
+    <h1>三種最容易踩的 <em>this</em> 地雷，以及怎麼解</h1>
+    <p class="lede"><code>this</code> 的值由<b>呼叫方式</b>決定，而非定義位置。最常見的三個陷阱：<b>方法當回呼傳出、巢狀函式內 this 跳走、誤用箭頭函式當物件方法</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">陷阱一</span>
+    <h2>方法作為回呼傳出，this 丟失</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>問題：脫離物件後 this 不再是 obj</small>
+        <pre><code>const obj = { value: 42, get() { return this.value; } };
+const fn = obj.get;
+fn(); // undefined ← this 變成 global/undefined</code></pre>
+      </div>
+      <div class="chip good">
+        <small>解法：bind 固定 this</small>
+        <pre><code>const fn = obj.get.bind(obj);
+fn(); // 42 ✅</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">陷阱二</span>
+    <h2>巢狀普通函式裡的 this 指向全域</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>問題：innerFunction 的 this 不是 obj</small>
+        <pre><code>const obj = {
+  value: 42,
+  get() {
+    function inner() { return this.value; }
+    return inner(); // undefined
+  }
+};</code></pre>
+      </div>
+      <div class="chip good">
+        <small>解法：改用箭頭函式繼承外層 this</small>
+        <pre><code>const obj = {
+  value: 42,
+  get() {
+    const inner = () =&gt; this.value;
+    return inner(); // 42 ✅
+  }
+};</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">陷阱三</span>
+    <h2>箭頭函式當物件方法，this 跑掉</h2>
+    <pre><code>const obj = {
+  value: 42,
+  getValue: () =&gt; this.value  // ❌ this 是外層作用域（通常是 global）
+};
+obj.getValue(); // undefined</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>物件字面量本身<b>不建立新的 this</b>，箭頭函式繼承的是<b>定義時的外層 this</b>（通常是 global 或 undefined）。物件方法請用普通函式。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>嚴格模式下，自由函式呼叫的 this 是什麼？</summary><p>嚴格模式（<code>'use strict'</code>）下，自由函式呼叫的 this 是 <code>undefined</code>，而非全域物件。ES6 class 內部預設為嚴格模式。</p></details>
+      <details><summary>self = this 的老做法和箭頭函式哪個好？</summary><p>現代 JavaScript 應優先選箭頭函式，語意更清晰且不易出錯。<code>self/that/me = this</code> 是 ES6 之前的慣用解法，維護舊代碼時仍常見。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「this 最常見的三個陷阱：一、<span class="hl">把方法當回呼傳出</span>，this 從物件變成 global——用 bind 或箭頭函式解；二、<span class="hl">巢狀普通函式的 this 不繼承外層</span>，改用箭頭函式；三、<span class="hl">箭頭函式不該當物件字面量的方法</span>，因為它的 this 不是物件本身。核心原則：this 由呼叫方式決定，不由定義位置決定。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋JavaScript中this的運作原理.html">this 運作原理</a>
+      <a href="事件處理器中this綁定概念解析.html">事件處理器中 this 綁定</a>
+      <a href="解釋 JavaScript 的 Function.prototype.bind.html">Function.prototype.bind</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

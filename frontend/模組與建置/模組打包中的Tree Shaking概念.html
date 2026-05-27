@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tree Shaking — 搖掉沒用到的程式碼</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">模組與建置</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">MODULE &amp; BUILD</div>
+    <h1>打包前先<em>搖一搖</em>，沒用到的程式碼自動掉</h1>
+    <p class="lede">Tree Shaking 是打包工具的靜態分析魔法：只保留真正被 <b>import</b> 的程式碼，讓最終 bundle 瘦身、瀏覽器少解析、使用者少等待。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>「搖樹」到底搖什麼？</h2>
+    <p>想像程式碼是一棵樹，根節點是你的 <code>main.js</code>，枝葉是各模組匯出的函式與變數。Tree Shaking 沿著 <code>import</code> 依賴圖追蹤，凡是<strong>沒有從根節點可達</strong>的枝葉一律剪掉，最終產出的 bundle 只含被用到的節點。</p>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>必要條件：ES 模組語法。</b>CommonJS 的 <code>require()</code> 是執行時動態決定，無法靜態分析，打包工具看不出哪些匯出真的被用到。ESM 的 <code>import/export</code> 是頂層靜態宣告，讓編譯期分析成為可能。</p>
+    </div>
+
+    <pre><code><span class="tok-com">// utils.js — 匯出兩個函式</span>
+<span class="tok-key">export function</span> <span class="tok-fn">add</span>(a, b) { <span class="tok-key">return</span> a + b; }
+<span class="tok-key">export function</span> <span class="tok-fn">subtract</span>(a, b) { <span class="tok-key">return</span> a - b; }
+
+<span class="tok-com">// main.js — 只用了 add</span>
+<span class="tok-key">import</span> { add } <span class="tok-key">from</span> <span class="tok-str">'./utils'</span>;
+console.log(<span class="tok-fn">add</span>(2, 3));</code></pre>
+
+    <p>Webpack / Rollup 在生產模式下分析後，<code>subtract</code> 從未被引用，因此<strong>不會出現在 bundle</strong> 中。</p>
+  </section>
+
+  <section>
+    <span class="num">互動示意</span>
+    <h2>保留 vs 搖掉 — 點擊模擬打包結果</h2>
+
+    <div class="lab">
+      <div class="lab-label">TREE SHAKING SIMULATOR</div>
+      <p style="font-size:0.9rem; color:var(--ink-soft); margin-bottom:1.2rem;">選擇在 <code>main.js</code> 中匯入哪些函式，觀察打包器保留／移除的結果。</p>
+
+      <div class="toggle-row">
+        <button id="btn-add" class="on good" onclick="toggleFn('add')">import add</button>
+        <button id="btn-sub" onclick="toggleFn('sub')">import subtract</button>
+        <button id="btn-mul" onclick="toggleFn('mul')">import multiply</button>
+      </div>
+
+      <button class="btn-primary" onclick="runShake()">🌳 執行 Tree Shaking</button>
+
+      <div class="log" id="shake-log">
+        <div class="ln empty">— 點擊上方按鈕選擇匯入，再執行 Tree Shaking —</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">生效條件</span>
+    <h2>三件事都對，才能搖起來</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>使用 ES 模組語法</h4>
+          <p>以 <code>import / export</code> 撰寫；CommonJS <code>require()</code> 無法靜態分析。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>打包工具支援 Tree Shaking</h4>
+          <p>Webpack 設 <code>mode: 'production'</code>；Rollup 預設啟用；Vite 底層用 Rollup。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>標記無副作用（sideEffects）</h4>
+          <p>在 <code>package.json</code> 加 <code>"sideEffects": false</code>，告訴打包器整個套件都可安全搖。有副作用的檔案（如 polyfill）需列出排除。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>Vite 使用者：</b>開發模式用原生 ESM 不打包，生產模式自動用 Rollup Tree Shaking，幾乎零設定。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>為什麼 CommonJS 不支援 Tree Shaking？</summary>
+        <p><code>require()</code> 是函式呼叫，可在任何地方執行（條件、迴圈、動態字串路徑），打包器在編譯時不知道最終會載入哪個模組，無法靜態推斷哪些匯出用到了。ESM 的 <code>import</code> 只能放頂層，路徑必須是字串常數，讓靜態分析成為可能。</p>
+      </details>
+      <details>
+        <summary>sideEffects: false 設錯了會怎樣？</summary>
+        <p>若有副作用的模組（如「直接修改全域、注入 polyfill」的 CSS / JS）被標記 <code>false</code>，打包器可能把它們也搖掉，造成 polyfill 消失或全域樣式不見等執行時 bug。應在陣列中列出有副作用的檔案路徑，或保守地不設此欄位。</p>
+      </details>
+      <details>
+        <summary>動態 import() 能被 Tree Shaking 嗎？</summary>
+        <p>動態 <code>import()</code> 產生的 chunk 本身會被單獨打包，chunk 內部仍可 Tree Shaking；但動態路徑（<code>import(variable)</code>）無法分析，整個可能的模組都會被保留。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Tree Shaking 是打包工具利用 <span class="hl">ESM 靜態分析</span>，在 bundle 時移除未被引用的匯出程式碼，以縮小最終 bundle 大小。它的前提是使用 <span class="hl">import / export 語法</span>，因為 CommonJS 的 require() 是動態執行，無法在編譯時確定哪些程式碼用到。實務上還需在 <span class="hl">package.json 設 sideEffects: false</span>，讓打包工具知道整個套件可以安全搖，Webpack 生產模式和 Rollup 都預設支援。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="CommonJS與ESM比較.html">CommonJS vs ESM</a>
+      <a href="模組打包工具的優點.html">模組打包工具的優點</a>
+      <a href="JavaScript模組的匯入與匯出方法.html">模組匯入與匯出</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const state = { add: true, sub: false, mul: false };
+  const all = {
+    add: { name: 'add', code: 'function add(a,b){return a+b;}' },
+    sub: { name: 'subtract', code: 'function subtract(a,b){return a-b;}' },
+    mul: { name: 'multiply', code: 'function multiply(a,b){return a*b;}' }
+  };
+
+  function toggleFn(fn) {
+    state[fn] = !state[fn];
+    const btn = document.getElementById('btn-' + fn);
+    if (state[fn]) {
+      btn.classList.add('on', 'good');
+    } else {
+      btn.classList.remove('on', 'good');
+    }
+  }
+
+  function runShake() {
+    const log = document.getElementById('shake-log');
+    log.innerHTML = '';
+
+    const kept = Object.keys(state).filter(k => state[k]);
+    const removed = Object.keys(state).filter(k => !state[k]);
+
+    const lines = [];
+    lines.push({ cls: 'c-dim', text: '$ webpack --mode=production' });
+    lines.push({ cls: 'c-dim', text: '' });
+    lines.push({ cls: 'c-req', text: '▶ 分析 import 依賴圖…' });
+
+    kept.forEach(k => {
+      lines.push({ cls: 'c-ok', text: `  ✓ ${all[k].name} — 已使用，保留` });
+    });
+    removed.forEach(k => {
+      lines.push({ cls: 'c-bad', text: `  ✗ ${all[k].name} — 未使用，移除（Dead Code）` });
+    });
+
+    lines.push({ cls: 'c-dim', text: '' });
+
+    if (kept.length === 0) {
+      lines.push({ cls: 'c-bad', text: '⚠ 警告：沒有任何匯入，bundle 為空！' });
+    } else {
+      const savedPct = Math.round((removed.length / Object.keys(all).length) * 100);
+      lines.push({ cls: 'c-ok', text: `✅ Bundle 完成 — 節省了約 ${savedPct}% 程式碼` });
+      lines.push({ cls: 'c-dim', text: '' });
+      lines.push({ cls: 'c-req', text: '// 最終 bundle 包含：' });
+      kept.forEach(k => {
+        lines.push({ cls: 'c-ok', text: `   ${all[k].code}` });
+      });
+    }
+
+    lines.forEach((l, i) => {
+      setTimeout(() => {
+        const div = document.createElement('div');
+        div.className = 'ln ' + l.cls;
+        div.textContent = l.text || ' ';
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+      }, i * 80);
+    });
+  }
+</script>
+</body>
+</html>

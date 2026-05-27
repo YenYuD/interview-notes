@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Portals</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT DOM</div>
+    <h1>Portal：把子組件「傳送」到<em> DOM 樹的任意位置</em></h1>
+    <p class="lede">Modal、Tooltip、Dropdown 常被 <code>overflow: hidden</code> 或 <code>z-index</code> 剪裁，因為它們被困在父組件的 DOM 節點裡。<b>Portal</b> 讓你把這些 UI 渲染到 <code>#root</code> 以外的目標節點，<b>同時保留 React 的事件冒泡</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">API</span>
+    <h2>createPortal(child, container)</h2>
+    <pre><code><span class="tok-key">import</span> ReactDOM <span class="tok-key">from</span> <span class="tok-str">'react-dom'</span>;
+
+<span class="tok-key">function</span> <span class="tok-fn">Modal</span>({ isOpen, children }) {
+  <span class="tok-key">if</span> (!isOpen) <span class="tok-key">return</span> <span class="tok-key">null</span>;
+
+  <span class="tok-key">return</span> ReactDOM.<span class="tok-fn">createPortal</span>(
+    &lt;div className=<span class="tok-str">"modal-overlay"</span>&gt;{children}&lt;/div&gt;,
+    document.<span class="tok-fn">getElementById</span>(<span class="tok-str">'modal-root'</span>)  <span class="tok-com">// 目標容器</span>
+  );
+}</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>記得在 <code>index.html</code> 加上 <code>&lt;div id="modal-root"&gt;&lt;/div&gt;</code>，與 <code>#root</code> 平行，這樣 Modal 就不受 <code>#root</code> 的 CSS 限制。</p></div>
+  </section>
+
+  <section>
+    <span class="num">三大使用場景</span>
+    <h2>什麼時候非用 Portal 不可</h2>
+    <div class="chips">
+      <div class="chip info"><small>Modal 對話框</small>需渲染在 body 頂層，避免 z-index 問題</div>
+      <div class="chip info"><small>Tooltip / Popover</small>父元素有 overflow:hidden 時會被裁切</div>
+      <div class="chip info"><small>全螢幕元素</small>需要脫離所有父層的 CSS 上下文</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">一個常見誤解</span>
+    <h2>Portal 脫離 DOM，但事件仍冒泡到 React 父組件</h2>
+    <div class="aside">Portal 只是「渲染目標」改變了。在 React 的組件樹裡，Portal 仍是父組件的子節點，所以在 Portal 內觸發的事件會冒泡到 React 的父組件。這個行為讓狀態管理保持一致。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Portal 內部的事件會冒泡到 React 組件樹的父組件嗎？</summary><p>會。React 的事件委派（event delegation）是基於 React 組件樹的邏輯關係，而非實際 DOM 位置。Portal 內的點擊事件依然會冒泡到邏輯父組件。</p></details>
+      <details><summary>Portal 和 CSS position:fixed 有什麼不同？</summary><p><code>position:fixed</code> 視覺上脫離文件流，但 DOM 節點仍在原位，仍受祖先 <code>transform</code> 影響。Portal 把 DOM 節點移到新位置，完全脫離原 DOM 上下文。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Portal 用 <code>ReactDOM.createPortal(child, container)</code> 把子組件渲染到 React 根節點以外的 DOM 位置，常見於 Modal、Tooltip 這類需要<span class="hl">突破父層 overflow 或 z-index 限制</span>的場景。雖然 DOM 位置變了，但在 React 組件樹裡 Portal 仍是父組件的邏輯子節點，所以<span class="hl">事件冒泡行為不變</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 是什麼？請描述 React 的優點.html">React 核心</a>
+      <a href="React 中的錯誤邊界（error boundaries）是做什麼用的？.html">錯誤邊界</a>
+      <a href="React Suspense 是什麼？它實現了什麼功能？.html">React Suspense</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>class vs ES5 建構子</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 類別</div>
+    <h1>同樣的原型，截然不同的<em>可讀性</em></h1>
+    <p class="lede">ES5 函式建構子和 ES2015 <b>class</b> 本質一樣，都是原型繼承。但 class 把繁瑣的 <code>prototype</code> 操作藏起來，讓繼承像其他語言一樣直覺。</p>
+  </header>
+
+  <section>
+    <span class="num">語法對照</span>
+    <h2>繼承寫法：ES5 vs ES2015</h2>
+    <table>
+      <thead><tr><th>功能</th><th>ES5 函式建構子</th><th>ES2015 class</th></tr></thead>
+      <tbody>
+        <tr><td>定義類別</td><td><code>function Person(name){…}</code></td><td><code>class Person { constructor(name){…} }</code></td></tr>
+        <tr><td>新增方法</td><td><code>Person.prototype.greet = function(){…}</code></td><td>直接寫在 class 主體內</td></tr>
+        <tr><td>靜態方法</td><td><code>Person.sayHi = function(){…}</code></td><td><code>static sayHi(){…}</code></td></tr>
+        <tr><td>繼承</td><td><code>Object.create()</code> + 手動重設 constructor</td><td><code>extends</code> + <code>super()</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">繼承對比</span>
+    <h2>同樣的 Student 繼承 Person</h2>
+    <pre><code><span class="tok-com">// ─── ES5 ──────────────────────────</span>
+<span class="tok-key">function</span> <span class="tok-fn">Student</span>(name, id) {
+  Person.<span class="tok-fn">call</span>(<span class="tok-key">this</span>, name);   <span class="tok-com">// 手動呼叫父建構子</span>
+  <span class="tok-key">this</span>.id = id;
+}
+Student.prototype = Object.<span class="tok-fn">create</span>(Person.prototype);
+Student.prototype.constructor = Student; <span class="tok-com">// 補回 constructor</span>
+
+<span class="tok-com">// ─── ES2015 ───────────────────────</span>
+<span class="tok-key">class</span> <span class="tok-fn">Student</span> <span class="tok-key">extends</span> Person {
+  <span class="tok-fn">constructor</span>(name, id) {
+    <span class="tok-key">super</span>(name);             <span class="tok-com">// 一行搞定</span>
+    <span class="tok-key">this</span>.id = id;
+  }
+}</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>ES2015 <code>class</code> 的底層仍是原型鏈。<code>typeof Person</code> 是 <code>"function"</code>，<code>instanceof</code> 行為相同。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>class 和 function 建構子有什麼行為差異？</summary><p>最重要的一點：<code>class</code> 定義的函式不可以不帶 <code>new</code> 呼叫（否則拋 TypeError）；ES5 函式建構子可以不帶 <code>new</code> 呼叫（但 <code>this</code> 會出錯）。此外，class 主體自動處於 strict mode。</p></details>
+      <details><summary>class 方法是否可列舉（enumerable）？</summary><p>不可列舉。class 方法定義於 prototype 上，且 <code>enumerable: false</code>；ES5 直接指派到 prototype 的方法預設可列舉。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「ES5 函式建構子和 ES2015 class 本質相同，底層都是原型繼承。差異在語法：ES5 繼承需要手動 <span class="hl">Object.create()</span> 並重設 <code>constructor</code>，ES2015 只要 <span class="hl">extends</span> + <code>super()</code>，程式碼更短、更不易出錯。另外 class 的方法不可列舉、主體自動進入 strict mode，也不能不帶 new 呼叫——這些是少數實際行為差異。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="ES2015類別繼承概念說明.html">extends 與 super</a>
+      <a href="如何建立建構子函式.html">如何建立建構子函式</a>
+      <a href="經典繼承與原型繼承差異.html">經典 vs 原型繼承</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

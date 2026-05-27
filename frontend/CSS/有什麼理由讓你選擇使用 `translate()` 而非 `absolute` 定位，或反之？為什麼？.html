@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>translate() vs absolute 定位</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 動畫效能</div>
+    <h1>移動元素時用 <em>translate()</em>，不用 <em>absolute</em>——除非版面真的需要</h1>
+    <p class="lede"><b>translate()</b> 移動元素不觸發 reflow，由 GPU 處理，動畫更流暢；<b>absolute 定位</b>改 top/left 會觸發 reflow，讓整個頁面重新計算版面。兩者的使用場景根本不同。</p>
+  </header>
+
+  <section>
+    <span class="num">效能關鍵差異</span>
+    <h2>為什麼 translate() 更快</h2>
+    <table>
+      <thead>
+        <tr><th></th><th>translate()</th><th>改變 top/left</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>觸發渲染階段</td><td>只觸發 Composite（合成）</td><td>觸發 Reflow → Repaint → Composite</td></tr>
+        <tr><td>計算單位</td><td>GPU（合成層）</td><td>CPU（版面計算）</td></tr>
+        <tr><td>對其他元素影響</td><td>不影響（仍佔原空間）</td><td>影響（元素離開原位）</td></tr>
+        <tr><td>動畫流暢度</td><td>60fps 流暢</td><td>可能掉幀</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">/* 動畫：用 translate，不用 top/left */</span>
+<span class="tok-key">.slide-in</span> {
+  transform: <span class="tok-fn">translateX</span>(-100%);
+  transition: transform 0.3s ease;
+}
+<span class="tok-key">.slide-in.active</span> {
+  transform: <span class="tok-fn">translateX</span>(0);  <span class="tok-com">/* GPU 合成，流暢 */</span>
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">使用情境</span>
+    <h2>各自適合的場景</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>用 translate()</small>
+        動畫效果（滑入滑出、Hover 位移）；不需改變文件流；效能優先場景
+      </div>
+      <div class="chip info">
+        <small>用 absolute 定位</small>
+        元素需要脫離文件流（如 tooltip、dropdown、modal）；定位相對於某個容器；靜態位置不需動畫
+      </div>
+    </div>
+    <div class="aside">
+      <strong>補充：</strong>translate() 移動後元素「仍佔原始空間」，周圍元素不受影響（類似 position: relative）。absolute 則讓元素完全脫離文件流。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>什麼時候用 will-change: transform？</summary>
+        <p>在動畫開始前告知瀏覽器提前建立合成層，讓動畫更流暢。但不要過早或過廣設置——過多合成層消耗大量記憶體，只在確認有效能問題的元素上用。動畫結束後可移除 will-change。</p>
+      </details>
+      <details>
+        <summary>translate() 和 translateZ(0) 的 GPU 加速有什麼關係？</summary>
+        <p>設置 <code>transform: translateZ(0)</code> 是老式「hack」，強制建立 GPU 合成層。現代瀏覽器只要設置任何 transform 就會建立合成層，不需要這個 hack。直接用 <code>translate()</code> 即可，或用 <code>will-change: transform</code> 更語意清晰。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「用 <code>translate()</code> 移動元素只觸發 <span class="hl">Composite（GPU 合成）</span>，不影響文件流，動畫可以跑在 GPU 上保持 60fps 流暢；改變 <code>top/left</code> 則觸發 <span class="hl">Reflow</span>，整個頁面版面需要重新計算，效能差很多。所以動畫效果和位移一律用 <code>transform: translate()</code>。反之，元素需要脫離文件流（tooltip、modal、dropdown）才用 <code>absolute</code> 定位，這是版面的考量而不是動畫。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="撰寫高效 CSS 時有哪些常見的陷阱？.html">高效 CSS 的陷阱</a>
+      <a href="`relative`、`fixed`、`absolute`、`sticky` 和 `static` 定位的元素有什麼差別？.html">各種定位方式的差別</a>
+      <a href="描述 `z-index` 以及堆疊上下文的形成方式.html">z-index 與堆疊上下文</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

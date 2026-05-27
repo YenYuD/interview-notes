@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如何建立建構子函式</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 建構子</div>
+    <h1>ES5 的「類別」：用<em>建構子函式</em>批次製造物件</h1>
+    <p class="lede">建構子函式是 class 語法出現前的主要批次建立物件方式。關鍵在：<b>PascalCase 命名</b>、<b>用 this 設定屬性</b>、<b>方法放在 prototype</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">三個要點</span>
+    <h2>建構子函式的標準寫法</h2>
+    <pre><code><span class="tok-com">// 1. PascalCase：告訴使用者要用 new 呼叫</span>
+<span class="tok-key">function</span> <span class="tok-fn">Person</span>(name, age) {
+  <span class="tok-com">// 2. this 設定實例屬性</span>
+  <span class="tok-key">this</span>.name = name;
+  <span class="tok-key">this</span>.age = age;
+}
+
+<span class="tok-com">// 3. 方法放 prototype，所有實例共用（省記憶體）</span>
+Person.prototype.<span class="tok-fn">greet</span> = <span class="tok-key">function</span>() {
+  console.log(<span class="tok-str">`Hi, I'm ${this.name}`</span>);
+};
+
+<span class="tok-key">const</span> alice = <span class="tok-key">new</span> Person(<span class="tok-str">'Alice'</span>, 28);
+alice.<span class="tok-fn">greet</span>();                       <span class="tok-com">// Hi, I'm Alice</span>
+console.log(alice <span class="tok-key">instanceof</span> Person); <span class="tok-com">// true</span></code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>方法若直接寫在建構子內（<code>this.greet = function(){}</code>），每個實例都會各存一份函式，浪費記憶體。放在 prototype 上，所有實例共用一份。</p></div>
+  </section>
+
+  <section>
+    <span class="num">方法位置對比</span>
+    <h2>this 內 vs prototype 上</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <strong>放在 this（記憶體浪費）</strong>
+        <small><code>this.greet = function(){}</code> ← 每個實例各複製一份</small>
+      </div>
+      <div class="chip good">
+        <strong>放在 prototype（推薦）</strong>
+        <small><code>Person.prototype.greet = function(){}</code> ← 所有實例共用一份</small>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>建構子函式和 class 哪個比較好？</summary><p>現代開發幾乎都用 <code>class</code>，可讀性更高、繼承更簡單、強制需要 <code>new</code>。除非維護舊 ES5 程式碼，否則沒有理由不用 class。</p></details>
+      <details><summary>如何判斷一個物件是某建構函式的實例？</summary><p>用 <code>instanceof</code>：<code>alice instanceof Person</code>；或 <code>Object.getPrototypeOf(alice) === Person.prototype</code>。<code>instanceof</code> 會沿原型鏈查找，所以子類別實例也會被父類別的 instanceof 認可。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「建構子函式用 <span class="hl">PascalCase 命名</span>，以示需搭配 <code>new</code> 使用。在函式內用 <code>this</code> 設定每個實例專屬的屬性，<span class="hl">方法放在 prototype</span> 讓所有實例共用以省記憶體。今天大多直接用 <code>class</code> 語法，但底層機制完全相同。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="new關鍵字的用途.html">new 關鍵字詳解</a>
+      <a href="JavaScript ES2015 類別與 ES5 函式建構子差異.html">class vs ES5 建構子</a>
+      <a href="JavaScript原型繼承原理解析.html">原型繼承原理</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

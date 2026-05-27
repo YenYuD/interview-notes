@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS link 放 head、JS script 放 body 底部</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS / 效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 頁面效能</div>
+    <h1>資源擺放順序直接影響<em>首次渲染速度</em></h1>
+    <p class="lede">CSS <code>&lt;link&gt;</code> 放 <b>&lt;head&gt;</b> 確保樣式在渲染前就緒，避免無樣式閃爍（FOUC）；JS <code>&lt;script&gt;</code> 放 <b>&lt;/body&gt;</b> 前避免阻塞 HTML 解析。搞清楚原理，才能在有快取、有 <code>defer/async</code> 時做出正確判斷。</p>
+  </header>
+
+  <section>
+    <span class="num">核心原理</span>
+    <h2>CSS 要盡早，JS 要最後</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>CSS &lt;link&gt; 放 &lt;head&gt;</small>
+        HTML 解析 DOM 的同時並行下載 CSS 建立 CSSOM；兩者都完成後才渲染，確保首次渲染不閃爍
+      </div>
+      <div class="chip bad">
+        <small>CSS 放底部的問題</small>
+        部分瀏覽器阻塞漸進式渲染；或先顯示無樣式內容，再套用樣式——產生 FOUC
+      </div>
+    </div>
+    <div class="chips">
+      <div class="chip good">
+        <small>JS &lt;script&gt; 放 &lt;/body&gt; 前</small>
+        避免阻塞 HTML 解析；DOM 完整後才執行，不會找不到目標元素
+      </div>
+      <div class="chip info">
+        <small>或在 &lt;head&gt; 加 defer</small>
+        <code>defer</code> 讓瀏覽器更早發起下載，同時 DOM 解析完後才執行，空快取更快
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">script 載入策略</span>
+    <h2>defer vs async vs 放底部</h2>
+    <table>
+      <thead>
+        <tr><th>方式</th><th>下載時機</th><th>執行時機</th><th>阻塞 HTML 解析</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>放 &lt;/body&gt; 前</td><td>HTML 解析完後</td><td>立即</td><td>不阻塞（已結束）</td></tr>
+        <tr><td><code>defer</code>（放 head）</td><td>並行下載</td><td>DOM 解析完後，按順序</td><td>不阻塞</td></tr>
+        <tr><td><code>async</code></td><td>並行下載</td><td>下載完立即執行</td><td>執行時阻塞</td></tr>
+        <tr><td>無屬性（放 head）</td><td>遇到就下載</td><td>立即執行</td><td>阻塞！</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>有快取時，<code>defer</code> 在 <code>&lt;head&gt;</code> 比放 <code>&lt;/body&gt;</code> 更快，因為可以更早發起下載請求。現代推薦：主要腳本用 <code>defer</code>，不依賴 DOM 的第三方腳本（GA、廣告）用 <code>async</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>什麼是 FOUC（無樣式內容閃爍）？</summary>
+        <p>Floating Of Unstyled Content。CSS 未載入前，瀏覽器先以預設樣式渲染 HTML，CSS 載入後瞬間重繪，使用者會看到版面短暫「閃一下」。CSS 放 <code>&lt;head&gt;</code> 可確保 CSSOM 在首次渲染前就緒，避免此問題。</p>
+      </details>
+      <details>
+        <summary>defer 和 async 在模組（type="module"）腳本中的行為？</summary>
+        <p>ES Module（<code>type="module"</code>）預設行為就像 <code>defer</code>——並行下載、DOM 解析完後執行。可以再加 <code>async</code> 使其變成下載完立即執行（適合不依賴 DOM 的模組）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CSS <code>&lt;link&gt;</code> 放 <code>&lt;head&gt;</code> 是因為瀏覽器需要 DOM + CSSOM 才能渲染，盡早下載 CSS 確保首次渲染時樣式就緒，避免<span class="hl">無樣式閃爍（FOUC）</span>。JS 放 <code>&lt;/body&gt;</code> 前是因為 script 標籤會<span class="hl">阻塞 HTML 解析</span>，放底部讓 DOM 先建完，腳本執行時也能找到所有元素。現代推薦改用 <span class="hl"><code>defer</code></span> 放在 head——可以更早觸發下載，DOM 解析完後才執行，有快取時頁面更快。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="什麼是漸進式渲染（progressive rendering）？.html">漸進式渲染</a>
+      <a href="你為什麼會使用像 `load` 這樣的事件？它有什麼缺點？有哪些替代方案，為什麼要使用它們？.html">load 事件的替代方案</a>
+      <a href="撰寫高效 CSS 時有哪些常見的陷阱？.html">高效 CSS 的陷阱</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

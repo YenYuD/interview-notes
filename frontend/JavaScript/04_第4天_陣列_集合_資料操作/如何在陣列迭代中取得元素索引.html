@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>迭代時取得索引</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 陣列</div>
+    <h1>跑陣列時，<em>怎麼同時拿到 index？</em></h1>
+    <p class="lede">不同迭代方式取得索引的語法不一樣。<b>forEach</b> 的回呼第二個參數就是 index；<b>for...of</b> 則要搭配 <code>.entries()</code>；傳統 <code>for</code> 迴圈本身就有計數器。</p>
+  </header>
+
+  <section>
+    <span class="num">三種姿勢</span>
+    <h2>取得索引的寫法對比</h2>
+    <pre><code><span class="tok-key">const</span> arr = [<span class="tok-str">'a'</span>, <span class="tok-str">'b'</span>, <span class="tok-str">'c'</span>];
+
+<span class="tok-com">// 1. forEach — 第二個參數是 index</span>
+arr.<span class="tok-fn">forEach</span>((el, i) => console.<span class="tok-fn">log</span>(i, el));
+
+<span class="tok-com">// 2. for...of + entries() — 解構出 [index, element]</span>
+<span class="tok-key">for</span> (<span class="tok-key">const</span> [i, el] <span class="tok-key">of</span> arr.<span class="tok-fn">entries</span>()) {
+  console.<span class="tok-fn">log</span>(i, el);
+}
+
+<span class="tok-com">// 3. 傳統 for — 計數器 i 就是索引</span>
+<span class="tok-key">for</span> (<span class="tok-key">let</span> i = 0; i &lt; arr.length; i++) {
+  console.<span class="tok-fn">log</span>(i, arr[i]);
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">選擇準則</span>
+    <h2>什麼時候用哪一種？</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>forEach</small>
+        純副作用、不需中斷
+      </div>
+      <div class="chip good">
+        <small>for...of + entries</small>
+        需要中斷（break）且語法要優雅
+      </div>
+      <div class="chip info">
+        <small>傳統 for</small>
+        需要精細控制步長或雙向走訪
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p><code>map</code> 的回呼同樣有 <code>(element, index, array)</code> 三個參數，但如果你只需要 index 而不需要回傳新陣列，<b>不要用 map</b>——語意不清且浪費效能。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>entries() 回傳什麼？</summary><p><code>Array.prototype.entries()</code> 回傳一個迭代器（Iterator），每次迭代吐出 <code>[index, value]</code> 的配對，可以用 for...of 或展開成陣列。</p></details>
+      <details><summary>forEach 可以取到陣列本身嗎？</summary><p>可以，回呼有第三個參數 <code>array</code>，即原始陣列本身。但直接使用外層變數更清晰。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「在陣列迭代中取得 index，最常用的是 <span class="hl">forEach 的第二個回呼參數</span>；如果需要中途 break，改用 <span class="hl">for...of 搭配 arr.entries() 解構</span>；傳統 for 迴圈的計數器本身就是 index，適合需要精細控制的情況。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="陣列迭代方法.html">陣列迭代方法</a>
+      <a href="JavaScript中遍歷物件屬性與陣列元素的語法.html">遍歷物件與陣列語法</a>
+      <a href="陣列元素的新增、刪除與更新方法.html">陣列新增刪除更新</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事件捕獲機制</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>事件捕獲：事件<em>從根節點向下傳播</em>，冒泡的相反方向</h1>
+    <p class="lede">DOM 事件傳播分三階段：<b>捕獲（由上而下）→ 目標 → 冒泡（由下而上）</b>。捕獲階段預設不啟用，加上 <code>{ capture: true }</code> 才會在事件到達目標前先攔截。</p>
+  </header>
+
+  <section>
+    <span class="num">三個傳播階段</span>
+    <h2>完整事件流程</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>捕獲階段（Capture）</b>：事件從 document root 向下傳遞到目標元素，路徑上設定 <code>capture: true</code> 的監聽器依序觸發</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>目標階段（Target）</b>：事件到達目標元素，capture 和 bubble 監聽器依綁定順序觸發</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>冒泡階段（Bubble）</b>：事件從目標元素向上傳遞，路徑上設定 <code>capture: false</code>（預設）的監聽器依序觸發</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">啟用方式</span>
+    <h2>addEventListener 第三個參數控制捕獲</h2>
+    <pre><code><span class="tok-key">const</span> parent = document.getElementById(<span class="tok-str">'parent'</span>);
+<span class="tok-key">const</span> child  = document.getElementById(<span class="tok-str">'child'</span>);
+
+<span class="tok-com">// 捕獲階段觸發（事件往下傳時）</span>
+parent.addEventListener(<span class="tok-str">'click'</span>, () => {
+  console.log(<span class="tok-str">'1. Parent 捕獲'</span>);
+}, <span class="tok-key">true</span>);  <span class="tok-com">// 或 { capture: true }</span>
+
+<span class="tok-com">// 冒泡階段觸發（預設，事件往上傳時）</span>
+parent.addEventListener(<span class="tok-str">'click'</span>, () => {
+  console.log(<span class="tok-str">'3. Parent 冒泡'</span>);
+});  <span class="tok-com">// 預設 capture: false</span>
+
+child.addEventListener(<span class="tok-str">'click'</span>, () => {
+  console.log(<span class="tok-str">'2. Child 目標'</span>);
+});
+
+<span class="tok-com">// 點擊 child 的輸出順序：</span>
+<span class="tok-com">// 1. Parent 捕獲  ← 捕獲先觸發</span>
+<span class="tok-com">// 2. Child 目標</span>
+<span class="tok-com">// 3. Parent 冒泡  ← 冒泡後觸發</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">互動展示</span>
+    <h2>點擊按鈕，觀察三階段觸發順序</h2>
+    <div class="lab">
+      <div class="lab-label">事件傳播示意</div>
+      <div class="toggle-row">
+        <label>
+          <input type="checkbox" id="enableCapture"> 啟用父層捕獲（capture: true）
+        </label>
+        <label>
+          <input type="checkbox" id="stopCapture"> 在捕獲階段 stopPropagation
+        </label>
+      </div>
+      <div id="demo-container" style="padding:16px; background:#e8f4f8; border-radius:8px; cursor:default;">
+        <span style="font-size:0.85em; color:#666;">外層 div（document 下方）</span>
+        <div id="demo-parent" style="padding:16px; margin-top:8px; background:#b3d9f0; border-radius:6px; cursor:default;">
+          <span style="font-size:0.85em; color:#444;">父元素 #parent</span>
+          <div style="text-align:center; margin-top:8px;">
+            <button id="demo-child" class="btn-primary">點我（#child）</button>
+          </div>
+        </div>
+      </div>
+      <div class="log" id="demoLog">
+        <div class="ln c-dim">← 點擊按鈕查看事件觸發順序</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>捕獲和冒泡哪個先觸發？</summary>
+        <p>捕獲先。事件從根節點往下捕獲 → 到達目標元素 → 再往上冒泡。同一元素上若同時有捕獲和冒泡監聽器，目標元素上按綁定順序觸發，其他元素則捕獲優先。</p>
+      </details>
+      <details>
+        <summary>什麼場景真的需要用事件捕獲？</summary>
+        <p>需要在事件抵達目標前攔截的場景：例如「點擊下拉選單外部關閉」可在 document 用捕獲監聽；或阻止某些子元素收到特定事件（在父層捕獲後 stopPropagation）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「DOM 事件傳播有三個階段：<span class="hl">捕獲</span>（從 document root 向下到目標）→ <span class="hl">目標</span>（到達點擊的元素）→ <span class="hl">冒泡</span>（從目標向上回到根節點）。預設 addEventListener 在冒泡階段觸發；加 <code>capture: true</code> 才在捕獲階段觸發，優先於冒泡。實務上冒泡比較常用，捕獲用在需要在事件到達目標前先攔截的特殊場景。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript事件冒泡與瀏覽器行為.html">事件冒泡說明</a>
+      <a href="JavaScript事件代理說明.html">事件代理說明</a>
+      <a href="瀏覽器事件階段說明.html">瀏覽器事件三階段（互動展示）</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  const log = document.getElementById('demoLog');
+  const parent = document.getElementById('demo-parent');
+  const child = document.getElementById('demo-child');
+  const enableCapture = document.getElementById('enableCapture');
+  const stopCapture = document.getElementById('stopCapture');
+
+  function addLog(msg, cls) {
+    const el = document.createElement('div');
+    el.className = 'ln ' + cls;
+    el.textContent = msg;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function clearLog() {
+    log.innerHTML = '';
+  }
+
+  function setupListeners() {
+    // Remove old listeners by cloning
+    const newParent = parent.cloneNode(true);
+    parent.parentNode.replaceChild(newParent, parent);
+    const newChild = document.getElementById('demo-child');
+
+    const useCapture = enableCapture.checked;
+    const doStop = stopCapture.checked;
+
+    // Parent capture listener
+    newParent.addEventListener('click', function (e) {
+      addLog('⬇ 1. Parent 捕獲階段', 'c-req');
+      if (doStop) {
+        e.stopPropagation();
+        addLog('  ↩ stopPropagation() — 後續監聽器不觸發', 'c-bad');
+      }
+    }, true);
+
+    // Child listener
+    newChild.addEventListener('click', function () {
+      addLog('🎯 2. Child 目標階段', 'c-ok');
+    });
+
+    // Parent bubble listener
+    newParent.addEventListener('click', function () {
+      addLog('⬆ 3. Parent 冒泡階段', 'c-dim');
+    });
+
+    // Trigger on child click
+    newChild.addEventListener('click', function () {
+      // clearLog on each new click
+    }, { capture: true });
+
+    // Wrap to clear log before each click
+    newParent.addEventListener('click', function () {}, { capture: true, once: false });
+  }
+
+  // Intercept child click to clear log first
+  document.getElementById('demo-child').addEventListener('click', function () {
+    clearLog();
+  }, { capture: true });
+
+  setupListeners();
+
+  enableCapture.addEventListener('change', setupListeners);
+  stopCapture.addEventListener('change', setupListeners);
+})();
+</script>
+</body>
+</html>

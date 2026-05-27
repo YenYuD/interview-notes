@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>展開運算子概念與應用</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 展開運算子</div>
+    <h1>一個 <code>...</code>，<em>替代掉四種舊寫法</em></h1>
+    <p class="lede">ES6 的展開運算子讓陣列複製、合併、物件淺拷貝從多行變成一行，也讓函式呼叫不再需要 <b>apply()</b>。掌握它是寫出簡潔、不可變風格程式碼的基礎。</p>
+  </header>
+
+  <section>
+    <span class="num">新舊對比</span>
+    <h2>展開運算子取代哪些舊寫法</h2>
+    <table>
+      <thead><tr><th>操作</th><th>舊寫法</th><th>展開運算子</th></tr></thead>
+      <tbody>
+        <tr><td>複製陣列</td><td><code>arr.slice()</code></td><td><code>[...arr]</code></td></tr>
+        <tr><td>合併陣列</td><td><code>arr1.concat(arr2)</code></td><td><code>[...arr1, ...arr2]</code></td></tr>
+        <tr><td>複製物件</td><td><code>Object.assign({}, obj)</code></td><td><code>{ ...obj }</code></td></tr>
+        <tr><td>傳陣列給函式</td><td><code>fn.apply(null, arr)</code></td><td><code>fn(...arr)</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">實用範例</span>
+    <h2>在現有陣列或物件基礎上新增內容</h2>
+    <pre><code><span class="tok-com">// 陣列：在尾端加元素，不改動原始陣列</span>
+<span class="tok-key">const</span> arr = [1, 2, 3];
+<span class="tok-key">const</span> newArr = [...arr, 4, 5];  <span class="tok-com">// [1, 2, 3, 4, 5]</span>
+
+<span class="tok-com">// 物件：覆蓋某個屬性（後者贏）</span>
+<span class="tok-key">const</span> user = { name: <span class="tok-str">'Alice'</span>, age: 25 };
+<span class="tok-key">const</span> updated = { ...user, age: 26 };
+<span class="tok-com">// { name: 'Alice', age: 26 }</span></code></pre>
+    <div class="aside">物件展開時，<b>後面的屬性會覆蓋前面同名的屬性</b>。這個特性讓「更新某個欄位」的寫法非常乾淨，Redux reducer 裡很常見。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>展開和 Object.assign 在屬性覆蓋上有差嗎？</summary><p>行為相同，後者覆蓋前者。差別在 setter 觸發：<code>Object.assign</code> 會呼叫目標的 setter，展開不會。另外 <code>Object.assign</code> 可以多目標，展開只能建立新物件。</p></details>
+      <details><summary>展開後修改巢狀物件會影響原始物件嗎？</summary><p>會。展開只複製第一層，巢狀物件仍是共享參考。<code>{ ...user, address: { ...user.address, city: 'Taipei' } }</code> 這樣才能安全更新巢狀欄位。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「展開運算子讓陣列和物件的複製、合併語法大幅簡化，也取代了 <code>apply()</code> 傳陣列的需求。它是<span class="hl">淺層複製</span>，這是最重要的注意點——巢狀物件需要逐層展開才能避免修改原始資料。在 Redux / React state 的 immutable 更新模式中大量使用。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="展開運算子及其用法.html">展開運算子用法</a>
+      <a href="JavaScript展開語法與剩餘語法的差異與優點.html">展開 vs 剩餘語法</a>
+      <a href="使用展開運算子於陣列與物件的優勢.html">展開運算子優勢</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

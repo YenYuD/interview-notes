@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>解構賦值</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 解構</div>
+    <h1>不用一個個取值，<em>解構賦值一次搞定</em></h1>
+    <p class="lede">解構賦值讓你用模式匹配的方式，把陣列的值或物件的屬性「拆出來」直接賦給變數。配合<b>重新命名、預設值、巢狀解構</b>，能讓函式簽名和賦值邏輯清晰很多。</p>
+  </header>
+
+  <section>
+    <span class="num">陣列解構</span>
+    <h2>依位置取值，可以跳過、可以設預設值</h2>
+    <pre><code><span class="tok-key">const</span> [a, b, c] = [1, 2, 3];
+console.<span class="tok-fn">log</span>(a, b, c); <span class="tok-com">// 1 2 3</span>
+
+<span class="tok-com">// 跳過第二個元素</span>
+<span class="tok-key">const</span> [first, , third] = [10, 20, 30];
+console.<span class="tok-fn">log</span>(first, third); <span class="tok-com">// 10 30</span>
+
+<span class="tok-com">// 預設值（元素不足時）</span>
+<span class="tok-key">const</span> [x, y = 99] = [1];
+console.<span class="tok-fn">log</span>(x, y); <span class="tok-com">// 1 99</span>
+
+<span class="tok-com">// 交換變數（最優雅的用法）</span>
+<span class="tok-key">let</span> p = 1, q = 2;
+[p, q] = [q, p]; <span class="tok-com">// p=2, q=1</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">物件解構</span>
+    <h2>依鍵名取值，可以重新命名</h2>
+    <pre><code><span class="tok-key">const</span> { name, age } = { name: <span class="tok-str">'Alice'</span>, age: 25 };
+
+<span class="tok-com">// 重新命名：name → personName</span>
+<span class="tok-key">const</span> { name: personName, age: personAge = 18 } = { name: <span class="tok-str">'Bob'</span> };
+
+<span class="tok-com">// 巢狀解構</span>
+<span class="tok-key">const</span> { address: { city, zip } } = {
+  address: { city: <span class="tok-str">'Taipei'</span>, zip: <span class="tok-str">'100'</span> }
+};</code></pre>
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p>函式參數解構非常實用：<code>function greet({ name, age = 0 }) {...}</code>——呼叫方傳物件，函式內直接用具名變數，省去 <code>opts.name</code> 這類重複前綴。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>解構可以搭配剩餘語法嗎？</summary><p>可以。陣列：<code>const [first, ...rest] = [1,2,3,4]</code>，rest 是 <code>[2,3,4]</code>；物件：<code>const { a, ...others } = obj</code>，others 是除了 a 以外的屬性。</p></details>
+      <details><summary>解構的預設值何時生效？</summary><p>只有在解構到的值是 <code>undefined</code> 時，才會用預設值。<code>null</code> 不會觸發預設值，<code>null</code> 本身就是值。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「解構賦值是 ES6 的語法糖，讓你用模式匹配一次拆出多個值。陣列解構<span class="hl">依位置、物件解構依鍵名</span>；兩者都支援預設值和剩餘語法。最實用的場景是函式參數解構，讓 API 設計更清晰，以及 React Hooks 的 <code>const [state, setState] = useState()</code> 這種模式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript展開語法與剩餘語法的差異與優點.html">展開 vs 剩餘語法</a>
+      <a href="展開運算子及其用法.html">展開運算子用法</a>
+      <a href="複製物件與陣列的方法.html">複製物件與陣列</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

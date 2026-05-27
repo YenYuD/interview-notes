@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>setState 函式格式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT STATE</div>
+    <h1><code>setState(fn)</code>：用<em>函式格式</em>才能保證拿到最新狀態</h1>
+    <p class="lede">React 的 <code>setState</code> 是非同步且可能被批次合併，如果你直接用目前的 state 值計算下一個值，可能讀到的是「過時的快照」。傳入<b>函式</b>（<code>prevState =&gt; newState</code>）才能保證永遠基於<b>最新的狀態</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">問題根源</span>
+    <h2>直接寫 vs 函式格式的差別</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>可能出 bug</small>
+        <code>setCount(count + 1);</code><br>
+        <code>setCount(count + 1);</code><br>
+        <small style="color:var(--danger)">// 兩次都讀同一個 count，結果 +1 而非 +2</small>
+      </div>
+      <div class="chip good">
+        <small>永遠正確</small>
+        <code>setCount(prev =&gt; prev + 1);</code><br>
+        <code>setCount(prev =&gt; prev + 1);</code><br>
+        <small>// 串聯執行，結果 +2</small>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>在同一個事件處理器或 <code>useEffect</code> 裡連續呼叫多次 setState，React 會批次處理（batching）。若直接寫值，每次都讀同一個 state 快照；改用函式格式，React 會把上一次的結果傳進來，保證串聯正確。</p></div>
+  </section>
+
+  <section>
+    <span class="num">典型情境</span>
+    <h2>什麼時候一定要用函式格式</h2>
+    <ul>
+      <li><b>新狀態依賴舊狀態</b>：計數器、toggle、陣列 push/filter</li>
+      <li><b>同一個 handler 連續多次更新同一 state</b></li>
+      <li><b>在 useEffect / setTimeout / Promise callback 裡更新 state</b>（這些地方的 state 是閉包捕獲的舊值）</li>
+    </ul>
+    <pre><code><span class="tok-com">// 類別組件</span>
+this.<span class="tok-fn">setState</span>((prevState, props) => ({
+  counter: prevState.counter + props.step
+}));
+
+<span class="tok-com">// 功能組件（useState）</span>
+<span class="tok-fn">setItems</span>(prev => [...prev, newItem]);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React 18 的自動批次（auto batching）如何影響這個問題？</summary><p>React 18 把批次更新擴展到 setTimeout、Promise 等非同步場景（之前只在事件處理器內批次）。這讓函式格式更重要，因為批次場景更多了。</p></details>
+      <details><summary>useState 的 setter 和類別組件的 setState 行為一樣嗎？</summary><p>不完全一樣：<code>useState</code> 的 setter 完全替換 state，而 <code>this.setState</code> 會做淺合併（shallow merge）。但兩者都支援函式格式，且語意相同。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>setState</code> 的函式格式（<code>prevState =&gt; newState</code>）確保<span class="hl">更新永遠基於最新的狀態</span>。因為 React 可能批次處理多個 setState，如果直接寫 <code>setState(count + 1)</code>，連續呼叫多次都讀同一個舊值；改用函式格式，React 會把上一次的結果傳進函式，串聯更新正確。凡是<span class="hl">新狀態依賴舊狀態</span>，都應使用函式格式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋在 React 中調用 `useState` 的 setter 函式時會發生什麼事.html">useState setter 的行為</a>
+      <a href="為什麼 React 建議不要直接修改（mutate）State？.html">為何不能直接修改 State</a>
+      <a href="React 中的 State 和 Props 有什麼區別？.html">State vs Props</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

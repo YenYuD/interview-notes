@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useState setter 的行為</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT STATE</div>
+    <h1>呼叫 setter 不是「立即更新」，而是<em>排入更新隊列</em></h1>
+    <p class="lede">呼叫 <code>setCount(1)</code> 後，<code>count</code> 的值<b>不會立刻變</b>。React 把更新排入隊列，在下一次渲染時才套用新值。這是理解 React state 行為的核心認知。</p>
+  </header>
+
+  <section>
+    <span class="num">三個重要行為</span>
+    <h2>呼叫 setter 後發生了什麼</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>排入更新隊列</b>：React 標記此組件需要重渲，但不立即執行</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>批次處理（Batching）</b>：同一事件處理器或 effect 裡的多個 setter 合併成一次重渲（React 18 自動批次擴展到所有非同步場景）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>完全替換</b>（vs setState 的淺合併）：<code>setUser({ name: 'A' })</code> 會刪掉原本所有其他欄位</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 這兩行在同一個 handler 裡，只觸發一次重渲</span>
+<span class="tok-fn">setCount</span>(count + 1);
+<span class="tok-fn">setName</span>(<span class="tok-str">'Yenyu'</span>);
+
+<span class="tok-com">// setter 是完全替換，要保留其他欄位必須展開</span>
+<span class="tok-fn">setUser</span>(prev =&gt; ({ ...prev, name: <span class="tok-str">'Yenyu'</span> }));</code></pre>
+  </section>
+
+  <section>
+    <span class="num">常見誤解</span>
+    <h2>為什麼 setter 後立刻讀 state 還是舊值？</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p>在同一個 render 執行週期內，state 是「快照」（snapshot）。呼叫 setter 不改變目前這次執行週期的 state 值，下次渲染才有新值。若需要連鎖更新同一個 state，用函式格式：<code>setCount(prev =&gt; prev + 1)</code>。</p></div>
+    <pre><code><span class="tok-com">// count 目前是 0</span>
+<span class="tok-fn">setCount</span>(count + 1);  <span class="tok-com">// 排入 1</span>
+<span class="tok-fn">setCount</span>(count + 1);  <span class="tok-com">// 還是排入 1！count 快照沒變</span>
+<span class="tok-com">// 結果：count 變成 1（不是 2）</span>
+
+<span class="tok-com">// 正確做法：函式格式串聯</span>
+<span class="tok-fn">setCount</span>(prev =&gt; prev + 1);  <span class="tok-com">// 1</span>
+<span class="tok-fn">setCount</span>(prev =&gt; prev + 1);  <span class="tok-com">// 2</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React 18 的 auto batching 對舊有程式碼有影響嗎？</summary><p>有影響。React 17 只在事件處理器批次，React 18 把 setTimeout、Promise、原生事件等也納入批次。大多數情況行為更一致，但若你的程式碼依賴「每次 setState 立刻重渲」的行為（不建議），需要用 <code>flushSync</code> 強制同步更新。</p></details>
+      <details><summary>useState 的初始值函式（惰性初始化）是什麼？</summary><p><code>useState(fn)</code> 若傳函式，React 只在第一次渲染呼叫它，避免每次渲染都執行昂貴的計算。例如：<code>useState(() =&gt; JSON.parse(localStorage.getItem('state')))</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「呼叫 setter 會把更新排入隊列，不立即更新——state 在當前渲染週期是<span class="hl">快照（snapshot）</span>，下一次渲染才有新值。React 會批次合併多個 setter，減少重渲次數（React 18 擴展到所有場景）。<code>useState</code> 的 setter 是<span class="hl">完全替換</span>，不像 class 的 setState 會淺合併；連鎖更新同一 state 要用函式格式 <code>prev =&gt; newValue</code>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中 `setState()` 的回呼函式參數格式有什麼用途？什麼時候應該使用它？.html">setState 函式格式</a>
+      <a href="為什麼 React 建議不要直接修改（mutate）State？.html">為何不能直接修改 State</a>
+      <a href="在 React 中，「重新渲染」（re-rendering）是什麼意思？.html">重新渲染</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

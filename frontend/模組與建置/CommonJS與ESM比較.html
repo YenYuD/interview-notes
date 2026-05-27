@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CommonJS vs ESM 比較</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">模組與建置</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">MODULE &amp; BUILD</div>
+    <h1><em>require</em> 還是 <em>import</em>？兩套模組系統一次搞清楚</h1>
+    <p class="lede">CommonJS 是 Node.js 的歷史遺產，<b>同步、動態</b>；ESM 是官方標準，<b>靜態、可 Tree Shaking</b>。知道差異才能在面試與實務中做對選擇。</p>
+  </header>
+
+  <section>
+    <span class="num">快速對照</span>
+    <h2>一張表看懂關鍵差異</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>特性</th>
+          <th>CommonJS (CJS)</th>
+          <th>ES Modules (ESM)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>語法</td>
+          <td><code>require()</code> / <code>module.exports</code></td>
+          <td><code>import</code> / <code>export</code></td>
+        </tr>
+        <tr>
+          <td>載入方式</td>
+          <td>同步（阻塞執行）</td>
+          <td>非同步（非阻塞）</td>
+        </tr>
+        <tr>
+          <td>分析時機</td>
+          <td>執行時（動態）</td>
+          <td>編譯時（靜態）</td>
+        </tr>
+        <tr>
+          <td>Tree Shaking</td>
+          <td>❌ 不支援</td>
+          <td>✅ 支援</td>
+        </tr>
+        <tr>
+          <td>瀏覽器原生支援</td>
+          <td>❌ 需打包</td>
+          <td>✅ 現代瀏覽器直接支援</td>
+        </tr>
+        <tr>
+          <td>Node.js 支援</td>
+          <td>✅ 預設（.js）</td>
+          <td>✅ 需 .mjs 或 <code>"type":"module"</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">語法比較</span>
+    <h2>寫法長什麼樣？</h2>
+
+    <div class="chips">
+      <div class="chip bad">CommonJS<small>動態 · 同步</small></div>
+      <div class="chip good">ESM<small>靜態 · 可搖樹</small></div>
+    </div>
+
+    <pre><code><span class="tok-com">// ── CommonJS ──</span>
+<span class="tok-key">const</span> dep = <span class="tok-fn">require</span>(<span class="tok-str">'./dep'</span>);
+module.exports = { <span class="tok-fn">doSomething</span> };
+
+<span class="tok-com">// ── ES Modules ──</span>
+<span class="tok-key">import</span> dep <span class="tok-key">from</span> <span class="tok-str">'./dep'</span>;
+<span class="tok-key">export function</span> <span class="tok-fn">doSomething</span>() { <span class="tok-com">/* … */</span> }</code></pre>
+
+    <div class="aside">
+      <b>動態 require 的副作用：</b>因為 <code>require(variable)</code> 合法，打包工具無法在編譯時確定哪些模組會被載入，所以 CommonJS 無法做 Tree Shaking。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">選擇指南</span>
+    <h2>現在該用哪一個？</h2>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot good">✓</div>
+        <div class="flow-body">
+          <h4>新專案 → 選 ESM</h4>
+          <p>現代瀏覽器 + Node.js 18+ 原生支援，Vite / Rollup / esbuild 預設 ESM，Tree Shaking 開箱即用。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">?</div>
+        <div class="flow-body">
+          <h4>舊有 Node.js 專案 → 可維持 CJS</h4>
+          <p>改寫代價高；若需要可逐步遷移，或用 <code>"type":"module"</code> 漸進切換。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">!</div>
+        <div class="flow-body">
+          <h4>發布 npm 套件 → 兩者都提供</h4>
+          <p>在 <code>package.json</code> 用 <code>exports</code> 欄位同時提供 CJS 與 ESM，讓使用者環境自行選擇。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p><b>AMD（Asynchronous Module Definition）</b>是更早期為瀏覽器設計的非同步模組系統（RequireJS），現已幾乎完全被 ESM 取代，面試提一句帶過即可。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>ESM 與 CJS 能混用嗎？</summary>
+        <p>可以，但有限制。在 ESM 中可用動態 <code>import()</code> 載入 CJS 模組；但 CJS 的 <code>require()</code> 無法直接載入 ESM（因為 ESM 是非同步的）。打包工具通常會自動處理互操作（interop），但直接在 Node.js 裡混用需要注意副檔名與 <code>type</code> 設定。</p>
+      </details>
+      <details>
+        <summary>Node.js 怎麼判斷要用哪種模組系統？</summary>
+        <p>副檔名 <code>.cjs</code> 強制 CommonJS；<code>.mjs</code> 強制 ESM；<code>.js</code> 則看最近的 <code>package.json</code> 中 <code>"type"</code> 欄位——<code>"module"</code> 為 ESM，<code>"commonjs"</code>（預設）為 CJS。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CommonJS 用 <span class="hl">require / module.exports</span>，是 Node.js 的歷史預設，同步載入、執行時動態分析，所以無法 Tree Shaking。ESM 用 <span class="hl">import / export</span>，是 ES2015 的官方標準，靜態結構讓打包器在編譯時就能移除未使用的程式碼。現代新專案我會優先選 ESM；若要發布 npm 套件，則在 <span class="hl">package.json exports</span> 欄位同時提供 CJS 與 ESM 雙入口，相容舊環境。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="CommonJS與ES模組差異解析.html">CJS vs ESM 差異解析</a>
+      <a href="模組打包中的Tree Shaking概念.html">Tree Shaking</a>
+      <a href="JavaScript模組的匯入與匯出方法.html">模組匯入與匯出</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

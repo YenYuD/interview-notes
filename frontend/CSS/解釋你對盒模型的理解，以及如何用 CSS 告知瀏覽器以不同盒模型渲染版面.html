@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 盒模型</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS 版面</div>
+    <h1>你設 <code>width:100px</code>，<em>結果它佔了 130px</em></h1>
+    <p class="lede">每個元素都是一個盒子：content + padding + border + margin。痛點在於——<b>預設情況下 padding 和 border 會「加」在 width 之外</b>，所以盒子比你想的胖。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 親手量一次</span>
+    <h2>同樣 width:100px，盒子多寬？</h2>
+    <p>這個盒子固定 <code>width:100px; padding:10px; border:5px</code>。切換 <code>box-sizing</code>，看「實際佔用寬度」怎麼變：</p>
+
+    <div class="lab">
+      <div class="lab-label">切換盒模型</div>
+      <div class="toggle-row" id="row">
+        <button class="on" data-m="content-box">content-box（預設）</button>
+        <button data-m="border-box">border-box</button>
+      </div>
+
+      <div style="background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:1.4rem;display:flex;justify-content:center">
+        <div id="box" style="box-sizing:content-box;width:100px;padding:10px;border:5px solid var(--accent);background:var(--accent-soft);text-align:center;font-family:var(--mono);font-size:.8rem;color:var(--accent);transition:none">
+          content<br>100px
+        </div>
+      </div>
+
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+    <div class="aside"><code>margin</code> 不算進盒子尺寸——它影響的是盒子<b>外面</b>佔的空間，盒子的範圍到 <code>border</code> 為止。</div>
+  </section>
+
+  <section>
+    <span class="num">兩種算法</span>
+    <h2>差在「width 指的是誰」</h2>
+    <table>
+      <tr><th>box-sizing</th><th>width 指</th><th>實際佔用</th></tr>
+      <tr><td><code>content-box</code><br><small>預設</small></td><td>只有內容區</td><td>100 + 10×2 + 5×2 = <b>130px</b></td></tr>
+      <tr><td><code>border-box</code></td><td>含 padding+border</td><td>就是 <b>100px</b>（內容被擠到 70px）</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>幾乎所有框架（Bootstrap / Tailwind / Bulma）都全域設 <code>* { box-sizing: border-box; }</code>——因為「我設 100 就是 100」比較符合直覺。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>border 和 margin 會重疊／摺疊嗎？</summary><p>border 不會，每個元素各自渲染。margin 會「摺疊」，但只在<b>垂直方向、區塊級元素之間</b>——上下相鄰只取較大的那個，水平方向不摺疊。</p></details>
+      <details><summary>沒設 height 的區塊元素多高？</summary><p>等於內容高度 + padding。沒設 width 的非浮動區塊元素則會撐滿父層寬度（扣掉 padding），除非有 <code>max-width</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「盒模型是 <span class="hl">content + padding + border + margin</span>。預設 <span class="hl">content-box</span> 下，width 只算內容，padding 和 border 會額外加上去，所以盒子常比預期胖。我習慣全域設 <span class="hl">border-box</span>，這樣 width 就包含 padding 和 border，量起來符合直覺。margin 不算盒子尺寸，只影響外部間距。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="`* { box-sizing border-box; }` 的作用是什麼？.html">box-sizing: border-box</a>
+      <a href="描述 `float` 及其運作方式.html">float</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const box = document.getElementById('box');
+  const row = document.getElementById('row');
+  const log = document.getElementById('log');
+  function render(mode){
+    box.style.boxSizing = mode;
+    if(mode === 'content-box'){
+      box.innerHTML = 'content<br>100px';
+      log.innerHTML =
+        '<div class="ln c-dim">box-sizing: content-box</div>'+
+        '<div class="ln">width(100) + padding(10×2) + border(5×2)</div>'+
+        '<div class="ln c-bad">→ 實際佔用 130px（比你設的胖 30px）</div>';
+    } else {
+      box.innerHTML = 'content<br><span style="opacity:.7">70px</span>';
+      log.innerHTML =
+        '<div class="ln c-dim">box-sizing: border-box</div>'+
+        '<div class="ln">padding+border 被「塞進」100px 裡</div>'+
+        '<div class="ln c-ok">→ 實際佔用 100px（內容被壓到 70px）</div>';
+    }
+  }
+  row.addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    [...row.children].forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    render(b.dataset.m);
+  });
+  render('content-box');
+</script>
+</body>
+</html>

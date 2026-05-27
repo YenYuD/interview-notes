@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柯里化與部分應用的差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式式程式設計・概念辨析</div>
+    <h1>容易搞混的兩個概念：<em>Currying 不等於 Partial Application</em></h1>
+    <p class="lede">兩者都能從通用函式衍生專用函式，但<b>柯里化嚴格每次一個參數</b>、<b>部分套用可一次固定多個</b>。記住這個核心差異，面試就不會答混。</p>
+  </header>
+
+  <section>
+    <span class="num">對比</span>
+    <h2>一張表，一次釐清</h2>
+    <table>
+      <tr><th></th><th>柯里化（Currying）</th><th>部分套用（Partial Application）</th></tr>
+      <tr><td>參數格式</td><td>嚴格每次一個：<code>f(a)(b)(c)</code></td><td>可一次固定多個：<code>f(a, b)</code> 留 c</td></tr>
+      <tr><td>函式鏈長度</td><td>等於原函式 arity</td><td>不固定，視固定了幾個而定</td></tr>
+      <tr><td>常見實作</td><td>巢狀箭頭函式 / curry util</td><td><code>bind</code> / 自定義 partial</td></tr>
+      <tr><td>適合場景</td><td>函式組合（compose/pipe）</td><td>一次填多個固定參數</td></tr>
+    </table>
+    <div class="chips">
+      <div class="chip info">
+        <small>柯里化：f(a)(b)(c)</small>
+        <pre><code>const add = (a) =&gt; (b) =&gt; (c) =&gt; a + b + c;
+add(1)(2)(3); // 6
+// 每次只能一個參數</code></pre>
+      </div>
+      <div class="chip info">
+        <small>部分套用：一次固定多個</small>
+        <pre><code>const add = (a, b, c) =&gt; a + b + c;
+const addOne = add.bind(null, 1); // 固定 a=1
+addOne(2, 3); // 6
+// 剩餘兩個參數一次傳入</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">關係</span>
+    <h2>柯里化函式天然支援部分套用</h2>
+    <pre><code>const curriedAdd = (a) =&gt; (b) =&gt; (c) =&gt; a + b + c;
+
+// 柯里化同時支援部分套用
+const add1 = curriedAdd(1);      // 固定 a=1（這就是部分套用！）
+const add1and2 = add1(2);        // 再固定 b=2
+add1and2(3); // 6</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>柯里化後的函式是部分套用的「超集」——你可以對它做部分套用，但未柯里化的函式不一定支援單參數鏈式呼叫。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>可以把柯里化說成一種特殊的部分套用嗎？</summary><p>某種程度上可以：柯里化是「每次套用一個參數的部分套用」。但學術定義上兩者是不同的概念——柯里化是函式轉換（結構性改變），部分套用是呼叫策略（使用方式）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「兩者都能<span class="hl">預先填入部分參數、衍生出專用函式</span>。核心差異：柯里化嚴格每次只接受一個參數，轉換後的結構是 <code>f(a)(b)(c)</code>；部分套用則可以一次固定多個，更靈活。<span class="hl">柯里化的函式天然支援部分套用</span>，因為你可以中途停下來只填一個或幾個參數。柯里化更適合函式組合場景，部分套用用 bind 就夠了。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="柯里化原理與應用.html">柯里化原理與應用</a>
+      <a href="部分應用概念說明.html">部分應用概念說明</a>
+      <a href="柯里化與部分套用的優點.html">柯里化與部分套用的優點</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

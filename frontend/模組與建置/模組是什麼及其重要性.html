@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模組是什麼及其重要性</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">模組與建置</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">MODULE &amp; BUILD</div>
+    <h1>把程式碼<em>拆成模組</em>，才能駕馭複雜度</h1>
+    <p class="lede">模組是 JavaScript 組織程式碼的基本單位：<b>封裝作用域、明確依賴、可重複使用</b>。沒有模組系統，大型應用很快就會變成全域污染的噩夢。</p>
+  </header>
+
+  <section>
+    <span class="num">為什麼需要模組</span>
+    <h2>沒有模組的世界長什麼樣？</h2>
+    <p>早期 JavaScript 所有程式碼共享同一個全域作用域：兩個函式庫都叫 <code>utils</code>，後載入的直接覆蓋前一個，bug 難以追蹤。模組透過<strong>封閉自己的作用域</strong>解決這個問題。</p>
+
+    <div class="chips">
+      <div class="chip bad">無模組<small>全域污染・依賴隱式</small></div>
+      <div class="chip good">有模組<small>作用域隔離・依賴明確</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">核心好處</span>
+    <h2>模組帶來的四大收益</h2>
+
+    <table>
+      <thead>
+        <tr><th>好處</th><th>解決的問題</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>作用域隔離</strong></td>
+          <td>模組內的變數不外洩到全域，消滅命名衝突</td>
+        </tr>
+        <tr>
+          <td><strong>依賴明確</strong></td>
+          <td>透過 <code>import</code> 宣告需要什麼，一眼看出依賴關係</td>
+        </tr>
+        <tr>
+          <td><strong>可重複使用</strong></td>
+          <td>同一個模組可在多個專案引用，遵循 DRY 原則</td>
+        </tr>
+        <tr>
+          <td><strong>可維護性</strong></td>
+          <td>改動限縮在模組邊界內，不易影響無關程式碼</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">基本語法</span>
+    <h2>一個最小的模組範例</h2>
+
+    <pre><code><span class="tok-com">// math.js — 只做數學運算，不管外部</span>
+<span class="tok-key">export const</span> PI = 3.14159;
+
+<span class="tok-key">export function</span> <span class="tok-fn">circle</span>(r) {
+  <span class="tok-key">return</span> PI * r * r;
+}
+
+<span class="tok-com">// app.js — 明確宣告需要什麼</span>
+<span class="tok-key">import</span> { circle } <span class="tok-key">from</span> <span class="tok-str">'./math.js'</span>;
+
+console.<span class="tok-fn">log</span>(<span class="tok-fn">circle</span>(5)); <span class="tok-com">// 78.53975</span></code></pre>
+
+    <div class="aside">
+      <b>模組是嚴格模式：</b>ESM 模組預設在 strict mode 下執行，不需要寫 <code>"use strict"</code>，也不能用 <code>var</code> 宣告全域變數。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>模組和 IIFE（立即執行函式）有什麼關係？</summary>
+        <p>ESM 出現前，開發者用 IIFE 模擬模組作用域隔離：<code>(function(){ var private = 1; })();</code>。IIFE 建立了獨立作用域，防止內部變數污染全域。ESM 原生提供更好的機制：每個模組有獨立作用域，而且有明確的 <code>import/export</code> 語義，不需要 IIFE 這個 workaround。</p>
+      </details>
+      <details>
+        <summary>模組的單例（singleton）特性是什麼？</summary>
+        <p>在 ESM 中，同一個模組路徑不管被 import 幾次，只會執行一次，之後都回傳同一份快取。這表示模組天然是「單例」——如果模組裡有個計數器，所有引用它的地方共享同一個值。這在設計全域狀態（如 store）時很重要。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「模組是 JavaScript 組織程式碼的基本單位，核心是<span class="hl">作用域隔離</span>：模組內的變數不外洩到全域，解決了早期全域命名衝突的問題。透過 <code>export</code> 明確宣告對外介面、<code>import</code> 明確宣告依賴，讓程式碼的依賴關係一目了然，可維護性大幅提升。此外 ESM 模組有<span class="hl">單例特性</span>，同一模組無論被引入幾次都只執行一次，適合設計共享狀態。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript模組的匯入與匯出方法.html">模組匯入與匯出</a>
+      <a href="CommonJS與ESM比較.html">CommonJS vs ESM</a>
+      <a href="模組打包工具的優點.html">打包工具的優點</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

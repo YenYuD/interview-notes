@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set 與 Map 用法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 集合</div>
+    <h1>陣列去重用 Set，鍵值對升級用 <em>Map</em></h1>
+    <p class="lede"><b>Set</b> 是不重複值的集合，<b>Map</b> 是鍵可以是任意類型的鍵值對。兩者都是 ES6 引入的正規資料結構，比土炮方案更簡潔、效能更好。</p>
+  </header>
+
+  <section>
+    <span class="num">Set 核心</span>
+    <h2>唯一性集合 — 重複值自動忽略</h2>
+    <pre><code><span class="tok-key">const</span> s = <span class="tok-key">new</span> <span class="tok-fn">Set</span>([1, 2, 2, 3]);
+console.<span class="tok-fn">log</span>(s.size);   <span class="tok-com">// 3（重複的 2 只保留一個）</span>
+
+s.<span class="tok-fn">add</span>(4);            <span class="tok-com">// 新增</span>
+s.<span class="tok-fn">has</span>(2);            <span class="tok-com">// true</span>
+s.<span class="tok-fn">delete</span>(1);         <span class="tok-com">// 刪除</span>
+
+<span class="tok-com">// 快速去除陣列重複值</span>
+<span class="tok-key">const</span> unique = [...<span class="tok-key">new</span> <span class="tok-fn">Set</span>([1,1,2,3,3])];</code></pre>
+  </section>
+
+  <section>
+    <span class="num">Map 核心</span>
+    <h2>任意類型為鍵的鍵值對</h2>
+    <pre><code><span class="tok-key">const</span> m = <span class="tok-key">new</span> <span class="tok-fn">Map</span>();
+m.<span class="tok-fn">set</span>(<span class="tok-str">'name'</span>, <span class="tok-str">'Alice'</span>);
+m.<span class="tok-fn">set</span>(42, <span class="tok-str">'number key'</span>);  <span class="tok-com">// 數字當鍵</span>
+m.<span class="tok-fn">set</span>({id:1}, <span class="tok-str">'obj key'</span>);   <span class="tok-com">// 物件當鍵</span>
+
+m.<span class="tok-fn">get</span>(<span class="tok-str">'name'</span>);   <span class="tok-com">// 'Alice'</span>
+m.<span class="tok-fn">has</span>(42);       <span class="tok-com">// true</span>
+m.size;           <span class="tok-com">// 3</span>
+
+<span class="tok-com">// 遍歷</span>
+<span class="tok-key">for</span> (<span class="tok-key">const</span> [k, v] <span class="tok-key">of</span> m) console.<span class="tok-fn">log</span>(k, v);</code></pre>
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p>Map 保留<b>插入順序</b>，<code>size</code> 屬性直接告訴你元素數量，遍歷也比物件更直觀。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Set 判斷相等的機制是什麼？</summary><p>Set 使用<b>參考相等（SameValueZero）</b>，與 <code>===</code> 幾乎相同（差別只在 <code>NaN</code>：Set 把兩個 NaN 視為相等）。同樣內容的兩個物件字面量是不同參考，Set 會各自保留。</p></details>
+      <details><summary>什麼時候用 Map 而非普通物件？</summary><p>需要非字串鍵、需要保證插入順序、頻繁增刪鍵時用 Map；簡單的字串鍵靜態設定、需要 JSON 序列化時用普通物件。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Set 是只存唯一值的集合，最常用來<span class="hl">快速去除陣列重複項</span>，用 <code>[...new Set(arr)]</code> 一行搞定。Map 是鍵可以是任意類型的鍵值對，比普通物件多了<span class="hl">非字串鍵、保留插入順序、size 屬性</span>等能力，適合頻繁增刪的大型資料集。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript Map 與一般物件的差異.html">Map vs 一般物件</a>
+      <a href="JavaScript 中 Map Set 與 WeakMap WeakSet 的差異.html">Weak 版本差異</a>
+      <a href="如何將Set轉換為陣列.html">Set 轉陣列</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>switch 語句用途</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 流程控制</div>
+    <h1>多條件分支的好讀寫法，<em>但漏寫 break 就會穿透</em></h1>
+    <p class="lede"><code>switch</code> 是多個 <code>if...else if</code> 的替代方案，當同一個值需要對應多種情境時更清晰。理解<b>嚴格比對</b>與<b>穿透（fall-through）</b>是使用關鍵。</p>
+  </header>
+
+  <section>
+    <span class="num">語法結構</span>
+    <h2>switch 如何運作</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>評估表達式</strong>：switch 只計算一次表達式的值</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>嚴格比對</strong>：用 <code>===</code> 與每個 case 比較，類型不同不會匹配</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>執行 + break</strong>：找到匹配後執行程式碼，遇到 break 才停下</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>default</strong>：所有 case 都不符合時的備案（可省略）</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-key">switch</span> (fruit) {
+  <span class="tok-key">case</span> <span class="tok-str">'apple'</span>:
+    console.log(<span class="tok-str">'Apple is red.'</span>);
+    <span class="tok-key">break</span>;
+  <span class="tok-key">case</span> <span class="tok-str">'banana'</span>:
+    console.log(<span class="tok-str">'Banana is yellow.'</span>);
+    <span class="tok-key">break</span>;
+  <span class="tok-key">default</span>:
+    console.log(<span class="tok-str">'Unknown fruit.'</span>);
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">穿透行為</span>
+    <h2>break 不能忘</h2>
+    <p>省略 <code>break</code> 時，switch 會繼續執行下一個 case 的程式碼，稱為<b>穿透（fall-through）</b>。有時刻意使用，但更多時候是 bug。</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>switch 使用 <code>===</code> 比對，所以 <code>switch(1)</code> 不會匹配 <code>case '1'</code>（number vs string）。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>switch 和 if-else 如何選擇？</summary><p>當比較的是同一個變數對應的多個固定值時，switch 更清晰；如果條件是範圍比較（如 >、<）或不同變數的判斷，用 if-else 更合適。現代 JS 也常用物件字面量或 Map 取代 switch 提升可維護性。</p></details>
+      <details><summary>switch 能使用範圍比對嗎？</summary><p>不直接支援，但可以用 switch(true) 技巧：<code>switch(true){ case score >= 90: ... }</code>，雖然可行，但可讀性較差，大多數情況下 if-else 更好。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「switch 是針對同一值的多分支判斷，比多個 if-else if 更清晰。它使用<span class="hl">嚴格相等（===）</span>比對，所以類型不同的值不會匹配。每個 case 需要 break，否則會<span class="hl">穿透（fall-through）</span>繼續執行下一個 case。現代開發中，複雜的多條件分支有時用物件或 Map 取代 switch，提升可維護性。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="break與continue語句的用途.html">break 與 continue</a>
+      <a href="三元運算子及其用法.html">三元運算子</a>
+      <a href="JavaScript中的各種資料類型.html">各種資料類型</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

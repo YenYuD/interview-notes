@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abstract Class 抽象類別</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>Abstract Class：<em>樣板方法模式</em>的 TypeScript 實作</h1>
+    <p class="lede">抽象類別不能被直接實例化，它的目的是<b>同時做兩件事</b>：提供子類別共用的具體實作，以及強制子類別自己實作某些方法。Interface 只能定義形狀，Abstract Class 還能夾帶邏輯。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>核心特性：兩種成員並存</h2>
+    <pre><code><span class="tok-key">abstract class</span> <span class="tok-fn">Vehicle</span> {
+  <span class="tok-com">// 抽象方法：只有簽名，子類別必須實作</span>
+  <span class="tok-key">abstract</span> drive(): <span class="tok-fn">void</span>;
+
+  <span class="tok-com">// 具體方法：共用邏輯，子類別直接繼承</span>
+  startEngine(): <span class="tok-fn">void</span> {
+    console.log(<span class="tok-str">"Engine starting..."</span>);
+  }
+}
+
+<span class="tok-key">class</span> <span class="tok-fn">Car</span> <span class="tok-key">extends</span> <span class="tok-fn">Vehicle</span> {
+  drive(): <span class="tok-fn">void</span> { console.log(<span class="tok-str">"Driving a car"</span>); } <span class="tok-com">// ✅ 必須實作</span>
+}
+
+<span class="tok-com">// const v = new Vehicle(); ❌ 不能直接實例化抽象類別</span>
+<span class="tok-key">const</span> car = <span class="tok-key">new</span> Car();
+car.startEngine(); <span class="tok-com">// ✅ 繼承具體方法</span>
+car.drive();       <span class="tok-com">// ✅ 自己的實作</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>Abstract Class vs Interface：怎麼選</h2>
+    <table>
+      <thead><tr><th></th><th><code>abstract class</code></th><th><code>interface</code></th></tr></thead>
+      <tbody>
+        <tr><td>可以有具體實作</td><td>✅</td><td>❌</td></tr>
+        <tr><td>可以有 constructor</td><td>✅</td><td>❌</td></tr>
+        <tr><td>存取修飾詞</td><td>✅</td><td>❌（全 public）</td></tr>
+        <tr><td>一個 class 能繼承幾個</td><td>只能一個</td><td>可 implements 多個</td></tr>
+        <tr><td>用途</td><td>共用邏輯 + 強制實作</td><td>純粹定義形狀契約</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">💡</span><p>選擇依據：<b>只需要定義形狀 → interface；需要共用邏輯同時強制子類別行為 → abstract class</b>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>實際應用：Repository 模式</h2>
+    <pre><code><span class="tok-key">abstract class</span> <span class="tok-fn">BaseRepository</span>&lt;T&gt; {
+  <span class="tok-key">abstract</span> findById(id: <span class="tok-fn">string</span>): Promise&lt;T | <span class="tok-key">null</span>&gt;;
+  <span class="tok-key">abstract</span> save(entity: T): Promise&lt;<span class="tok-fn">void</span>&gt;;
+
+  <span class="tok-com">// 共用邏輯：子類別免費繼承</span>
+  <span class="tok-key">async</span> findOrThrow(id: <span class="tok-fn">string</span>): Promise&lt;T&gt; {
+    <span class="tok-key">const</span> entity = <span class="tok-key">await</span> <span class="tok-key">this</span>.findById(id);
+    <span class="tok-key">if</span> (!entity) <span class="tok-key">throw new</span> Error(<span class="tok-str">`Not found: ${id}`</span>);
+    <span class="tok-key">return</span> entity;
+  }
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼是樣板方法模式（Template Method Pattern）？</summary><p>在父類別定義演算法的骨架（步驟），但把部分步驟留給子類別實作。Abstract Class 天然支援這個模式：具體方法定義「什麼時候」呼叫，抽象方法讓子類別決定「怎麼」實作。</p></details>
+      <details><summary>可以在 abstract class 裡用 abstract 修飾 property 嗎？</summary><p>可以，<code>abstract name: string</code> 讓子類別必須宣告這個屬性。但要注意，抽象屬性沒有值（不能有初始值），子類別需要在 constructor 或直接宣告中提供值。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Abstract Class 是<span class="hl">不能直接實例化</span>的類別，用途是同時做兩件事：提供子類別可以繼承的共用邏輯（具體方法），以及<span class="hl">強制子類別必須自己實作的方法</span>（抽象方法）。它和 interface 的差別是：interface 只定義形狀、沒有實作；abstract class 可以包含實際邏輯、constructor 和存取修飾詞。當多個子類別需要共用部分邏輯但各自有獨特行為時，就用 abstract class。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="016 extends vs implements 的差異.html">extends vs implements</a>
+      <a href="010 存取修飾詞 Access Modifiers.html">存取修飾詞</a>
+      <a href="004 Interface 介面是什麼.html">Interface 介面</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>命令模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>把「動作」包成物件，<em>Undo 才可能</em></h1>
+    <p class="lede">命令模式將一個請求封裝成獨立物件，使它可以被排隊、記錄、甚至<b>撤銷（Undo）</b>。前端文字編輯器、GUI 按鈕事件、巨集錄製都靠它。</p>
+  </header>
+
+  <section>
+    <span class="num">五個角色</span>
+    <h2>Command 是核心，Invoker 觸發，Receiver 執行</h2>
+    <table>
+      <thead><tr><th>角色</th><th>職責</th></tr></thead>
+      <tbody>
+        <tr><td><b>Command</b></td><td>定義 <code>execute()</code> / <code>undo()</code> 介面</td></tr>
+        <tr><td><b>ConcreteCommand</b></td><td>實作具體操作，持有 Receiver 參考</td></tr>
+        <tr><td><b>Receiver</b></td><td>真正執行工作的物件（如 DOM 元素、API 服務）</td></tr>
+        <tr><td><b>Invoker</b></td><td>持有命令，決定何時觸發 <code>execute()</code></td></tr>
+        <tr><td><b>Client</b></td><td>組裝 Command 與 Receiver，交給 Invoker</td></tr>
+      </tbody>
+    </table>
+
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">AddTextCommand</span> {
+  <span class="tok-fn">constructor</span>(editor, text) {
+    <span class="tok-key">this</span>.editor = editor; <span class="tok-key">this</span>.text = text; <span class="tok-key">this</span>.prev = <span class="tok-str">''</span>;
+  }
+  <span class="tok-fn">execute</span>() { <span class="tok-key">this</span>.prev = <span class="tok-key">this</span>.editor.content; <span class="tok-key">this</span>.editor.content += <span class="tok-key">this</span>.text; }
+  <span class="tok-fn">undo</span>()    { <span class="tok-key">this</span>.editor.content = <span class="tok-key">this</span>.prev; }
+}
+
+<span class="tok-key">class</span> <span class="tok-fn">History</span> { <span class="tok-com">// Invoker</span>
+  <span class="tok-fn">constructor</span>() { <span class="tok-key">this</span>.stack = []; }
+  <span class="tok-fn">execute</span>(cmd) { cmd.<span class="tok-fn">execute</span>(); <span class="tok-key">this</span>.stack.push(cmd); }
+  <span class="tok-fn">undo</span>()       { <span class="tok-key">this</span>.stack.pop()?.undo(); }
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">應用場景</span>
+    <h2>Undo/Redo 是最典型的使用案例</h2>
+    <div class="chips">
+      <div class="chip good">文字編輯器<small>Ctrl+Z 撤銷每個操作</small></div>
+      <div class="chip good">繪圖工具<small>每個筆觸是一個 Command</small></div>
+      <div class="chip info">巨集指令<small>錄製一序列命令後重播</small></div>
+      <div class="chip info">GUI 按鈕<small>按鈕只知道 execute，不知道細節</small></div>
+    </div>
+
+    <div class="callout info">
+      <span class="ico">💡</span>
+      <p><b>Redux 就是命令模式：</b>每個 <code>action</code> 就是一個命令物件（含 type + payload），<code>dispatch</code> 是 Invoker，<code>reducer</code> 是 Receiver。Redux DevTools 的 time travel 正是利用命令歷史實現的 Undo。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>命令模式 vs 策略模式，核心差異？</summary>
+        <p>兩者都封裝「行為」，但目的不同。策略模式關注同一工作的不同演算法（可互換）；命令模式關注把操作變成物件，以支援佇列、記錄、Undo——操作本身是核心，不是為了互換演算法。</p>
+      </details>
+      <details>
+        <summary>如何實作多步 Undo？</summary>
+        <p>維護一個命令 stack：<code>execute</code> 時 push 到 stack；<code>undo</code> 時 pop 最後一個命令並呼叫其 <code>undo()</code>。Redo 則另外維護一個 redo stack。這正是大多數文字編輯器的實作方式。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「命令模式把一個請求封裝成包含 <span class="hl">execute 和 undo 方法的命令物件</span>。Invoker 持有命令並決定何時執行，Receiver 是真正做事的物件。這樣操作歷史可以存入 stack，要實作 Undo/Redo 只需 pop 命令後呼叫 undo。前端最直接的例子就是 Redux：每個 action 就是一個命令，Redux DevTools 的<span class="hl"> time travel 就靠這個機制</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="策略模式概念說明.html">策略模式</a>
+      <a href="觀察者模式與應用場景.html">觀察者模式</a>
+      <a href="設計模式及其重要性.html">設計模式總覽</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

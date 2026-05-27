@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 頁面導向</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>用 <em>window.location</em> 控制頁面導向：四種方法的差異</h1>
+    <p class="lede">JavaScript 提供多種導向頁面的方式，核心差異在<b>是否保留瀏覽器歷史紀錄</b>。選錯方法會讓使用者按「上一頁」回不去，或是跳轉到不預期的頁面。</p>
+  </header>
+
+  <section>
+    <span class="num">四種方法比較</span>
+    <h2>選哪個取決於你要不要讓使用者按返回鍵</h2>
+    <table>
+      <thead><tr><th>方法</th><th>行為</th><th>歷史紀錄</th><th>使用情境</th></tr></thead>
+      <tbody>
+        <tr><td><code>location.href = url</code></td><td>導向新頁面</td><td>新增一筆</td><td>一般頁面跳轉</td></tr>
+        <tr><td><code>location.replace(url)</code></td><td>導向新頁面</td><td>取代當前（無法返回）</td><td>登入後重導、防止返回到登入頁</td></tr>
+        <tr><td><code>location.assign(url)</code></td><td>導向新頁面</td><td>新增一筆</td><td>同 href，更語義化</td></tr>
+        <tr><td><code>location.reload()</code></td><td>重新載入</td><td>不變</td><td>手動刷新頁面</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">SPA 場景</span>
+    <h2>不重新載入頁面的 URL 更新：history.pushState</h2>
+    <pre><code><span class="tok-com">// 不觸發頁面載入，只改 URL + 新增歷史</span>
+history.pushState({ page: <span class="tok-str">'about'</span> }, <span class="tok-str">''</span>, <span class="tok-str">'/about'</span>);
+
+<span class="tok-com">// 取代當前歷史，不新增</span>
+history.replaceState({ page: <span class="tok-str">'home'</span> }, <span class="tok-str">''</span>, <span class="tok-str">'/home'</span>);</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>React Router、Vue Router 等前端路由庫底層就是用 <code>history.pushState</code> 實現 SPA 路由，讓 URL 變化但頁面不重新載入。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>replace() 和 href 最大的差異是什麼？</summary>
+        <p><code>replace()</code> 會取代歷史堆疊中的當前頁面，使用者點「上一頁」時不會回到這一頁；<code>href</code> 則保留，使用者可以返回。登入後重導通常用 <code>replace()</code>，避免使用者返回到登入頁。</p>
+      </details>
+      <details>
+        <summary>pushState 和直接修改 location 有何差異？</summary>
+        <p><code>pushState</code> 不觸發頁面重新載入，只改 URL 和歷史紀錄；直接設定 <code>location.href</code> 會觸發完整的頁面導向（發送新的 HTTP 請求）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「導向新頁面最常用 <span class="hl">location.href = url</span>，它會新增一筆瀏覽器歷史。如果不想讓使用者返回（例如登入後跳轉），用 <code>location.replace()</code>，它會取代而非新增歷史。SPA 框架用的是 <span class="hl">history.pushState()</span>，可以改變 URL 但不重新載入頁面，這是前端路由的核心機制。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何使用window.history API.html">window.history API</a>
+      <a href="如何在JavaScript中取得當前頁面的查詢字串值.html">取得查詢字串值</a>
+      <a href="Window物件與Document物件的差異.html">Window vs Document 物件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用 index 當 key 的後果</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 陷阱</div>
+    <h1>用 index 當 key：重排時<em>狀態對應到錯的項目</em></h1>
+    <p class="lede">陣列索引看似方便，但清單重排或在前面插入元素時，所有後續節點的 key 都改變，React 誤以為是「不同的元素」——已輸入的文字、選中狀態都會<b>對應到錯的資料</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">問題示範</span>
+    <h2>在清單前端插入一項，index key 會出什麼事</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>index 當 key（出 bug）</small>
+        原來：Apple(key=0), Banana(key=1)<br>
+        插入後：New(key=0), Apple(key=1), Banana(key=2)<br>
+        <small style="color:var(--danger)">React 以為 key=0 還是同一個 → 把 New 的 input 內容留給 Apple</small>
+      </div>
+      <div class="chip good">
+        <small>id 當 key（正確）</small>
+        Apple(key='a'), Banana(key='b')<br>
+        插入後：New(key='n'), Apple(key='a'), Banana(key='b')<br>
+        <small>React 正確識別 → Apple 的 input 跟著 Apple 走</small>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">兩種影響</span>
+    <h2>效能問題 + Bug 並存</h2>
+    <ul>
+      <li><b>效能問題</b>：React 以為每個節點都是「新的」，進行不必要的 unmount/remount，而不是移動節點。</li>
+      <li><b>狀態錯位 Bug</b>：未受控 input（DOM 存狀態）、focus 位置、CSS 動畫等都跟著位置走，而非跟著資料走。</li>
+    </ul>
+    <div class="callout tip"><span class="ico">✅</span><p>index 當 key 只在以下情況「安全」：清單是<b>靜態的</b>、不重排、不在中間增刪。但即使這樣，用 id 仍是更好的習慣。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>如果資料本身沒有唯一 id，怎麼辦？</summary><p>方案一：後端生成穩定 UUID；方案二：在前端新增資料時用 <code>crypto.randomUUID()</code> 生成並存入 state（不要在 render 函式裡生成，每次渲染都會不同）。</p></details>
+      <details><summary>為什麼 React 要用 key 而不是用節點內容比對？</summary><p>內容比對太昂貴且不精確（相同內容的節點是不同的）。key 讓開發者明確告訴 React「哪個是哪個」，是效能和正確性的最佳平衡。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「用陣列索引當 key，在清單<span class="hl">重排或在前面插入時</span>，後續節點的 key 全都移位，React 誤以為是不同的元素——導致 DOM 狀態（input 值、focus）對應到錯的資料項，同時也有效能損耗（不必要的 remount）。解法是用資料的<span class="hl">穩定唯一 id</span>。只有靜態、不重排的清單才可接受用 index。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中 `key` prop 的用途是什麼？.html">key prop 的用途</a>
+      <a href="React 中的「協調」（reconciliation）是什麼？.html">Reconciliation</a>
+      <a href="React 的反模式（anti-patterns）有哪些？.html">React 反模式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域、函式、區塊作用域差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 作用域</div>
+    <h1>變數活在哪一層，<em>就只能在那一層被讀到</em></h1>
+    <p class="lede">作用域決定變數的可見範圍。<b>全域作用域</b>無限制、<b>函式作用域</b>限在函式內、<b>區塊作用域</b>限在 <code>{}</code> 內。選錯 var/let/const 就會跨層洩漏。</p>
+  </header>
+
+  <section>
+    <span class="num">三層對照</span>
+    <h2>作用域範圍比較</h2>
+    <table>
+      <tr><th>作用域</th><th>觸發條件</th><th>適用宣告</th><th>外部可存取？</th></tr>
+      <tr><td>全域</td><td>任何函式/區塊外</td><td>var/let/const</td><td>✓ 全域可見</td></tr>
+      <tr><td>函式</td><td>在函式內宣告</td><td>var/let/const</td><td>✗ 函式外不可見</td></tr>
+      <tr><td>區塊</td><td>在 {} 內宣告</td><td><b>let/const 才有效</b>，var 會穿透</td><td>✗ 區塊外不可見</td></tr>
+    </table>
+    <pre><code><span class="tok-key">if</span> (<span class="tok-key">true</span>) {
+  <span class="tok-key">var</span>   x = <span class="tok-num">1</span>; <span class="tok-com">// 函式/全域作用域 → 區塊外可讀</span>
+  <span class="tok-key">let</span>   y = <span class="tok-num">2</span>; <span class="tok-com">// 區塊作用域 → 區塊外 ReferenceError</span>
+  <span class="tok-key">const</span> z = <span class="tok-num">3</span>; <span class="tok-com">// 區塊作用域 → 同上</span>
+}
+console.log(x); <span class="tok-com">// 1 ✓</span>
+console.log(y); <span class="tok-com">// ReferenceError ✗</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">var 的洩漏問題</span>
+    <h2>var 在迴圈中的陷阱</h2>
+    <pre><code><span class="tok-com">// var：共享同一個 i，迴圈結束後值是 3</span>
+<span class="tok-key">for</span> (<span class="tok-key">var</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-num">3</span>; i++) {
+  setTimeout(() =&gt; console.log(i), <span class="tok-num">0</span>); <span class="tok-com">// 3, 3, 3</span>
+}
+
+<span class="tok-com">// let：每次迭代獨立的區塊作用域</span>
+<span class="tok-key">for</span> (<span class="tok-key">let</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-num">3</span>; i++) {
+  setTimeout(() =&gt; console.log(i), <span class="tok-num">0</span>); <span class="tok-com">// 0, 1, 2</span>
+}</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>這是 var 在非同步回呼中最惡名昭彰的 bug。let 讓每次迭代有自己獨立的作用域，直接解決。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>IIFE 和區塊作用域有什麼關係？</summary><p>IIFE（立即執行函式表達式）是 ES6 之前製造函式作用域隔離的方式。ES6 引入 let/const 後，直接用 <code>{}</code> 就能創造區塊作用域，IIFE 的需求大幅減少。</p></details>
+      <details><summary>模組系統如何影響作用域？</summary><p>ES modules 的每個檔案都是獨立的模組作用域，頂層宣告不會洩漏為全域變數。這是現代開發避免全域污染的主要手段。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三種作用域：全域是任何地方都能存取，函式作用域限制在函式內，區塊作用域限制在 {} 內。關鍵是 <span class="hl">var 沒有區塊作用域</span>，會從 if/for 等區塊中洩漏出去；let/const 有區塊作用域，在迴圈中特別重要——var 在 for 迴圈裡所有迭代共享同一個變數，<span class="hl">let 讓每次迭代有獨立的作用域</span>，這是為什麼現在都用 let 不用 var。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript作用域概念說明.html">作用域概念說明</a>
+      <a href="詞法作用域概念說明.html">詞法作用域</a>
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let/var/const 差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

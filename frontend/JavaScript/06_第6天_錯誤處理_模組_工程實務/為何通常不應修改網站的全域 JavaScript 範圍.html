@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>為何不應污染全域 JavaScript 範圍</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 工程實務</div>
+    <h1>全域變數是<em>共用廁所</em>：人人能進，誰都可能弄髒</h1>
+    <p class="lede">瀏覽器頁面上的所有腳本共用同一個 <b>window</b> 物件。隨意在全域放變數，就是把私人資料放在公共空間——命名衝突、記憶體洩漏、安全風險，三個問題一次到位。</p>
+  </header>
+
+  <section>
+    <span class="num">為什麼不能碰</span>
+    <h2>全域範圍的五個陷阱</h2>
+    <table>
+      <thead>
+        <tr><th>風險</th><th>具體情境</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>命名衝突</td>
+          <td>你的 <code>window.data</code> 被第三方套件覆蓋，或反過來踩到別人的</td>
+        </tr>
+        <tr>
+          <td>記憶體洩漏</td>
+          <td>全域變數的生命週期等同頁面，永不回收</td>
+        </tr>
+        <tr>
+          <td>隱性耦合</td>
+          <td>函式直接讀全域變數，難以測試（依賴外部狀態）</td>
+        </tr>
+        <tr>
+          <td>安全風險</td>
+          <td>第三方腳本可讀取或竄改 window 上的敏感值</td>
+        </tr>
+        <tr>
+          <td>除錯困難</td>
+          <td>全域狀態在任何地方都可能被修改，追蹤來源極難</td>
+        </tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">// 危險：count 跑進 window，任何腳本可改</span>
+<span class="tok-key">var</span> count = <span class="tok-str">0</span>;
+
+<span class="tok-com">// 安全：用 IIFE 封裝，只暴露必要介面</span>
+(<span class="tok-key">function</span> () {
+  <span class="tok-key">let</span> count = <span class="tok-str">0</span>;              <span class="tok-com">// 外部無法直接存取</span>
+  window.<span class="tok-fn">increment</span> = () => count++;
+  window.<span class="tok-fn">getCount</span>  = () => count;
+})();</code></pre>
+  </section>
+
+  <section>
+    <span class="num">解法</span>
+    <h2>四種避免全域污染的方式</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>ES Modules</h4>
+          <p>每個 module 有獨立作用域，<code>import/export</code> 明確控制對外介面，是現代前端的首選。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>let / const + 區塊作用域</h4>
+          <p>宣告在函式或區塊內，生命週期有限，不掛在 window 上。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>IIFE（即使不用模組系統）</h4>
+          <p><code>(function(){...})()</code> 建立獨立作用域，老舊專案無模組打包時的常用手法。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot good">✓</div>
+        <div class="flow-body">
+          <h4>'use strict' 嚴格模式</h4>
+          <p>防止意外建立全域變數（未宣告直接賦值會拋 ReferenceError）。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>有時候就是需要跨腳本共用資料，正確做法是什麼？</summary>
+        <p>用一個<strong>命名空間物件</strong>（namespace object）：<code>window.MyApp = window.MyApp || {}</code>，所有共用資料掛在 <code>MyApp</code> 下，只佔一個全域名稱。更現代的做法是 ESM 模組化後用全域狀態管理（Zustand/Redux）。</p>
+      </details>
+      <details>
+        <summary>var 和 let/const 在全域行為有什麼差？</summary>
+        <p>在頂層宣告時：<code>var x = 1</code> 會把 <code>x</code> 加到 <code>window</code>；<code>let x = 1</code> 和 <code>const x = 1</code> 建立在腳本作用域，不加到 <code>window</code>，但在 module 裡更是各自獨立。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「不污染全域範圍是基本工程紀律。全域變數的問題在於：所有腳本共用 window，<span class="hl">命名衝突</span>難以避免，且全域狀態可被任意修改，導致<span class="hl">除錯困難</span>與潛在安全風險。現代解法是用 <span class="hl">ES Modules</span>——每個模組有獨立作用域，明確 export 才對外可見。舊專案可用 IIFE 封裝，或開啟 <code>'use strict'</code> 讓未宣告的賦值直接拋錯，至少能防止最低級的意外全域污染。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript檔案間如何共享程式碼.html">模組：檔案間共享程式碼</a>
+      <a href="如何組織你的程式碼.html">如何組織你的程式碼</a>
+      <a href="JavaScript垃圾回收機制.html">垃圾回收機制</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

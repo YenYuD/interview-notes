@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>block、inline、inline-block 差別</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / Display</div>
+    <h1>三種<em>排版模式</em>：決定元素如何與周圍共存</h1>
+    <p class="lede"><b>block</b>、<b>inline</b>、<b>inline-block</b> 是 display 最基礎的三個值，它們決定元素是否獨佔一行、能否設定寬高、以及 margin/padding 在四個方向是否生效。</p>
+  </header>
+
+  <section>
+    <span class="num">核心對比</span>
+    <h2>三種模式完整比較</h2>
+    <table>
+      <thead>
+        <tr><th>行為</th><th>block</th><th>inline-block</th><th>inline</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>寬度</td><td>填滿父容器</td><td>依內容決定</td><td>依內容決定</td></tr>
+        <tr><td>是否換行</td><td>獨佔一行</td><td>與其他內容並排</td><td>與其他內容並排</td></tr>
+        <tr><td>可設 width/height</td><td>✓</td><td>✓</td><td>✗（設了無效）</td></tr>
+        <tr><td>vertical-align 對齊</td><td>✗</td><td>✓</td><td>✓</td></tr>
+        <tr><td>margin/padding 水平</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>margin/padding 垂直</td><td>✓</td><td>✓</td><td>視覺上顯示但不影響行距</td></tr>
+        <tr><td>典型元素</td><td>div、p、section</td><td>按鈕、圖片</td><td>span、a、strong</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">重點記憶</span>
+    <h2>inline 的垂直限制</h2>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><code>inline</code> 元素的垂直 padding/border 雖然視覺上會顯示（佔住周圍顏色），但<strong>不影響行間距</strong>，不會推開上下行的其他元素，這是最常踩的坑。需要垂直間距時，改用 <code>inline-block</code>。</p>
+    </div>
+    <div class="chips">
+      <div class="chip good">
+        <small>float 後 inline 的變化</small>
+        inline 元素加了 float 後，行為會接近 block——可設定垂直 margin/padding
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>inline 元素之間為什麼有空白間隙？</summary>
+        <p>HTML 中相鄰的 inline 元素（如 <code>&lt;img&gt;</code>）若換行書寫，空白字元會被渲染成一個空格。解法：父元素 <code>font-size: 0</code>（再在子元素設回），或改用 flex/grid 排版。</p>
+      </details>
+      <details>
+        <summary>什麼時候用 inline-block 而不用 flex？</summary>
+        <p>單一獨立元件需要並排且設尺寸時用 inline-block（如按鈕、徽章）；需要對容器內的一群子元素進行對齊、排序、間距等複雜控制時，flex 更合適也更語意清晰。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三種模式最大差別在兩點：一是<span class="hl">是否獨佔一行</span>，block 會；二是<span class="hl">能否設定 width/height</span>，inline 不能。<code>inline-block</code> 是折衷——可以與文字並排，同時又能設定尺寸和垂直 margin。實際上 <code>inline</code> 的垂直 padding 雖然視覺顯示，但<span class="hl">不影響行距</span>，這點最容易踩坑。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="CSS 的 `display` 屬性是什麼？能舉幾個使用範例嗎？.html">display 屬性完整介紹</a>
+      <a href="描述 `float` 及其運作方式.html">float 及其運作方式</a>
+      <a href="你有嘗試過新的 CSS Flexbox 或 Grid 規範嗎？.html">CSS Flexbox 與 Grid</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

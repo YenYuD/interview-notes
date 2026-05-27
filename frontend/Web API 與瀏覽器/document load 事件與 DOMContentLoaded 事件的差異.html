@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOMContentLoaded vs load 事件</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1><em>DOMContentLoaded</em> 先、<em>load</em> 後：兩個事件的時機差異</h1>
+    <p class="lede"><code>DOMContentLoaded</code> 在 HTML 解析完成後立即觸發，<b>不等圖片和樣式</b>；<code>load</code> 要等所有資源都載入完才觸發。選錯事件會讓初始化腳本在元素不存在時執行。</p>
+  </header>
+
+  <section>
+    <span class="num">觸發時機</span>
+    <h2>頁面載入的時間軸</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">瀏覽器開始解析 HTML</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>DOMContentLoaded 觸發</b> — HTML 解析完成，DOM 樹建立，但圖片/CSS 可能還在載入</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">圖片、樣式表、iframe 等資源全部載入完成</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>window load 觸發</b> — 頁面所有資源就緒</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">用法與選擇</span>
+    <h2>什麼情況用哪個？</h2>
+    <pre><code><span class="tok-com">// DOM 準備好就能執行 → 用 DOMContentLoaded</span>
+document.addEventListener(<span class="tok-str">'DOMContentLoaded'</span>, () => {
+  document.getElementById(<span class="tok-str">'btn'</span>).addEventListener(<span class="tok-str">'click'</span>, handleClick);
+});
+
+<span class="tok-com">// 需要圖片尺寸才能計算版面 → 用 load</span>
+window.addEventListener(<span class="tok-str">'load'</span>, () => {
+  <span class="tok-key">const</span> img = document.querySelector(<span class="tok-str">'img'</span>);
+  console.log(img.naturalWidth, img.naturalHeight); <span class="tok-com">// 此時才有值</span>
+});</code></pre>
+    <table>
+      <thead><tr><th>任務</th><th>用哪個</th></tr></thead>
+      <tbody>
+        <tr><td>綁定事件監聽器、操作 DOM</td><td>DOMContentLoaded（較早，UX 更好）</td></tr>
+        <tr><td>依賴圖片尺寸的版面計算</td><td>load</td></tr>
+        <tr><td>初始化輪播、幻燈片</td><td>load（圖片載完才有意義）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>現代實務通常把 <code>&lt;script&gt;</code> 放在 <code>&lt;/body&gt;</code> 前，或加 <code>defer</code> 屬性，這樣 DOM 已解析完畢，不需要監聽 DOMContentLoaded。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>script 標籤的 async 和 defer 與這兩個事件有何關係？</summary>
+        <p><code>defer</code> 腳本在 DOMContentLoaded 之前執行；<code>async</code> 腳本載入完即執行，不保證順序。若有 <code>async</code> 腳本尚未執行，DOMContentLoaded 可能被延遲。</p>
+      </details>
+      <details>
+        <summary>可以用 jQuery 的 $(document).ready() 替代 DOMContentLoaded 嗎？</summary>
+        <p>是的，<code>$(document).ready()</code> 在底層就是監聽 DOMContentLoaded（現代瀏覽器），等價於原生寫法。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">DOMContentLoaded</span> 在 HTML 解析完成、DOM 樹建立後就觸發，不等圖片和樣式，適合用來綁定事件或操作 DOM；<span class="hl">window load</span> 要等頁面所有資源（圖片、CSS、iframe）都載入完才觸發，適合需要圖片尺寸做版面計算的場景。實務上，把 script 放 body 底部或加 defer 屬性，通常就不需要監聽這兩個事件了。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="輸入網址後到頁面顯示發生了什麼事.html">輸入網址後發生了什麼</a>
+      <a href="什麼是DOM及其結構.html">什麼是 DOM</a>
+      <a href="事件監聽器及其使用方法.html">事件監聽器使用方法</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 閉包</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式 · 作用域</div>
+    <h1>函式跑完了，<em>變數卻沒消失</em></h1>
+    <p class="lede">閉包就是：內層函式<b>記住</b>了它出生時的作用域，就算外層函式早已執行完畢，那些變數依然活著、依然可存取。靠的是 JavaScript 的<b>詞法作用域</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 私有計數器</span>
+    <h2>外層跑完，count 為什麼還在？</h2>
+    <pre><code>function <span class="tok-fn">createCounter</span>() {
+  <span class="tok-key">let</span> count = 0;        <span class="tok-com">// 沒人能從外面直接碰到它</span>
+  <span class="tok-key">return</span> () =&gt; ++count;  <span class="tok-com">// 內層函式抓住了 count</span>
+}
+<span class="tok-key">const</span> next = <span class="tok-fn">createCounter</span>();</code></pre>
+    <p><code>createCounter()</code> 早就回傳結束了，但每次呼叫 <code>next()</code>，<code>count</code> 都還記得上次的值：</p>
+
+    <div class="lab">
+      <div class="lab-label">這個按鈕背後就是一個閉包</div>
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <button class="btn-primary" id="inc">next() 加一</button>
+        <button class="btn-ghost" id="reset">重新建立計數器</button>
+        <div style="font-family:var(--mono);font-size:1.6rem;font-weight:700;color:var(--accent)" id="val">count = 0</div>
+      </div>
+      <div class="log" id="log" style="max-height:none"><div class="ln empty">// 點 next() 看 count 持續累加…</div></div>
+    </div>
+    <div class="aside"><code>count</code> 完全藏在函式裡，外部存取不到——這就是用閉包做<b>私有變數 / 資料封裝</b>的經典手法。</div>
+  </section>
+
+  <section>
+    <span class="num">為什麼能做到</span>
+    <h2>詞法作用域：寫的時候就決定了</h2>
+    <p>函式能存取哪些變數，是由它<b>在原始碼裡的位置</b>決定的，不是執行時。內層函式寫在外層裡面，就永遠握有外層變數的參考——這份參考讓那些變數不會被垃圾回收。</p>
+    <div class="callout tip"><span class="ico">✅</span><p>常見用途：<b>私有變數</b>、<b>函式工廠 / 柯里化</b>、<b>事件處理器與回呼</b>記住當下狀態、模組模式。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>迴圈裡用 var 為什麼都印出同一個值？</summary><p>因為 <code>var</code> 是函式作用域，三個閉包共用同一個變數。改用 <code>let</code>（區塊作用域，每圈各一份），或用 IIFE 包一層即可。</p></details>
+      <details><summary>閉包會造成記憶體洩漏嗎？</summary><p>會：被閉包抓住的變數無法回收。長期持有大型物件、或忘了移除的事件監聽器，都可能讓記憶體一直長。用完記得解除引用 / removeEventListener。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「閉包是<span class="hl">函式記住它出生時的詞法作用域</span>，即使外層函式已經執行完，內層函式仍能存取那些變數。它讓我能做<span class="hl">私有變數、函式工廠、回呼保存狀態</span>。要注意被閉包抓住的變數不會被回收，所以長期持有大物件或忘了移除監聽器時，可能造成記憶體洩漏。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何使用閉包建立私有變數.html">用閉包建私有變數</a>
+      <a href="../01_第1天_語法基礎與作用域/JavaScript作用域概念說明.html">作用域</a>
+      <a href="閉包的潛在陷阱.html">閉包陷阱</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  let count=0, version=1;
+  const val=document.getElementById('val'), log=document.getElementById('log');
+  function makeCounter(){ let c=0; return ()=>++c; }
+  let next=makeCounter();
+  function show(n,note){
+    const em=log.querySelector('.empty'); if(em)em.remove();
+    log.insertAdjacentHTML('beforeend', `<div class="ln c-ok">next() → ${n}${note?'  <span class="c-dim">// '+note+'</span>':''}</div>`);
+    log.scrollTop=log.scrollHeight;
+    val.textContent='count = '+n;
+  }
+  document.getElementById('inc').addEventListener('click',()=> show(next()) );
+  document.getElementById('reset').addEventListener('click',()=>{ next=makeCounter(); version++; val.textContent='count = 0'; log.innerHTML=`<div class="ln c-dim">// 第 ${version} 個全新計數器，count 重新從 0 開始</div>`; });
+</script>
+</body>
+</html>

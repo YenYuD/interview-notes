@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>key prop 的用途</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">React 核心</div>
+    <h1><code>key</code> 是清單項目的<em>身分證</em></h1>
+    <p class="lede">它讓 React 在清單變動時，認得「誰是誰」——哪些被新增、刪除、移動。用<b>陣列索引當 key</b> 在重排時會出 bug，要用<b>穩定的唯一 id</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 用 index 當 key 的災難</span>
+    <h2>在清單最前面插入一筆，會怎樣？</h2>
+    <p>每個項目有自己的輸入框（未受控狀態）。在最前面插入「新項目」，比較兩種 key 策略下，輸入內容跟不跟對：</p>
+
+    <div class="lab">
+      <div class="lab-label">key 策略</div>
+      <div class="toggle-row" id="row">
+        <button class="on bad" data-k="index">key={index}</button>
+        <button data-k="id">key={item.id}</button>
+      </div>
+      <button class="btn-primary" id="prepend">在最前面插入一筆</button>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+    <div class="aside">用 index：插入後每個項目的 index 全部位移，React 以為「內容變了」，把舊的 DOM 狀態錯配到不同資料 → 輸入框內容跑掉。用穩定 id：React 認得每筆，正確地只插入新節點。</div>
+  </section>
+
+  <section>
+    <span class="num">為什麼需要 key</span>
+    <h2>它幫 React diff 清單</h2>
+    <ul>
+      <li><b>高效更新</b>：靠 key 快速判斷誰新增、刪除、移動，最小化 DOM 操作。</li>
+      <li><b>避免 bug</b>：key 對應到正確的元件實例與其內部 state。</li>
+    </ul>
+    <div class="callout warn"><span class="ico">✕</span><p>兩個常見錯誤：①用 <b>index 當 key</b>（清單會重排/增刪時出錯）；②<b>重複的 key</b>（同一清單裡 key 必須唯一）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼情況下 index 當 key 可以接受？</summary><p>清單是<b>靜態、不重排、不增刪</b>、且項目沒有自身 state 時，用 index 沒問題。一旦會動，就要用穩定 id。</p></details>
+      <details><summary>key 要全域唯一嗎？</summary><p>不用，只要在<b>同一個清單（兄弟之間）</b>唯一即可。</p></details>
+      <details><summary>可以用 key 強制重置組件嗎？</summary><p>可以。改變一個組件的 key 會讓 React 視為全新組件、卸載重建，常用來重置表單狀態。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「key 是清單項目的<span class="hl">穩定唯一識別</span>，讓 React 在 diff 時認得誰新增、刪除、移動，把更新降到最小、也避免 state 錯配的 bug。我會用資料的 <span class="hl">唯一 id</span>，避免用陣列索引——因為重排或增刪時 index 會位移，導致渲染錯誤。另外改變 key 也能用來強制重置一個組件。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="在 React 中使用陣列索引（array indices）作為 `key` 的值有什麼後果？.html">用 index 當 key 的後果</a>
+      <a href="React 中的「協調」（reconciliation）是什麼？.html">協調 reconciliation</a>
+      <a href="你如何重置 React 組件的狀態（state）？.html">重置組件狀態</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), log=document.getElementById('log');
+  let strat='index';
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); strat=b.dataset.k; log.innerHTML=''; });
+  document.getElementById('prepend').addEventListener('click',()=>{
+    log.innerHTML='';
+    const add=(h,c)=>log.insertAdjacentHTML('beforeend',`<div class="ln ${c||''}">${h}</div>`);
+    add('原清單：[A, B, C]，各自有輸入內容','c-dim');
+    add('在最前面插入 [新] → [新, A, B, C]','c-req');
+    if(strat==='index'){
+      add('key=index：0→新, 1→A, 2→B …','c-dim');
+      add('React：key 0 的「內容」從 A 變新、key 1 從 B 變 A…','c-dim');
+      add('→ 舊的 DOM/輸入狀態被錯配到不同資料，內容跑掉 ✗','c-bad');
+    } else {
+      add('key=id：新=新id，A/B/C 各自 id 不變','c-dim');
+      add('React：認得 A/B/C 還是原本那幾筆，只是前面多一筆','c-dim');
+      add('→ 只插入「新」的節點，其餘原封不動 ✓','c-ok');
+    }
+    log.scrollTop=log.scrollHeight;
+  });
+</script>
+</body>
+</html>

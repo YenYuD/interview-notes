@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>避免提升問題的方法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 最佳實踐</div>
+    <h1>放棄 var，從根源杜絕<em>提升帶來的靜默錯誤</em></h1>
+    <p class="lede">提升問題大多源自 <code>var</code> 的不可預測行為。<b>改用 let/const</b>、<b>先宣告後使用</b>、搭配 <b>ESLint</b>，可以從根本上消滅這類 bug。</p>
+  </header>
+
+  <section>
+    <span class="num">四個實踐原則</span>
+    <h2>防範策略</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>1. 用 let/const 取代 var</strong>：let/const 有 TDZ，宣告前存取立即拋錯，不會靜默 undefined。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>2. 在作用域頂端宣告變數</strong>：讓變數宣告集中在上方，一眼看清本作用域用了哪些變數。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>3. 先宣告函式再呼叫</strong>：即使函式宣告可提升，保持先宣告再使用的習慣可讀性更好。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>4. 使用 ESLint <code>no-use-before-define</code></strong>：靜態分析自動捕捉提前使用的問題。</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">var 的問題示範</span>
+    <h2>為什麼 var 容易踩坑</h2>
+    <pre><code><span class="tok-com">// var 靜默失敗 — 不好</span>
+console.log(x); <span class="tok-com">// undefined（不報錯，容易誤判邏輯）</span>
+<span class="tok-key">var</span> x = <span class="tok-num">10</span>;
+
+<span class="tok-com">// let/const 快速失敗 — 好</span>
+console.log(y); <span class="tok-com">// ReferenceError — 立刻知道問題在哪</span>
+<span class="tok-key">let</span> y = <span class="tok-num">20</span>;</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>「快速失敗（fail fast）」是個好原則：與其靜默地得到 undefined 讓 bug 延遲爆發，不如立即拋出錯誤讓問題可見。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>ESLint 的 no-use-before-define 怎麼設定？</summary><p>在 .eslintrc 中加入 <code>"no-use-before-define": "error"</code>，它會在函式、類別、變數被使用在宣告之前時報錯。這是大多數嚴格規則集（如 airbnb）的預設配置。</p></details>
+      <details><summary>TypeScript 能解決提升問題嗎？</summary><p>TypeScript 的編譯器會在型別層面警示，但提升是 JavaScript runtime 行為，TypeScript 無法完全阻止。搭配 strict 模式的 TS + ESLint 才是最完整的防線。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「避免提升問題最根本的方法是<span class="hl">完全改用 let/const，不用 var</span>。let/const 有 TDZ，宣告前存取立刻 ReferenceError，是快速失敗的行為；var 宣告前存取只是 undefined，bug 會延遲爆發很難追。除此之外，<span class="hl">養成先宣告再使用的習慣</span>，並設定 ESLint no-use-before-define 規則，可以從工具層面自動防範。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript提升機制說明.html">提升機制說明</a>
+      <a href="提升機制可能引發的問題.html">提升引發的問題</a>
+      <a href="var、let 與 const 的提升差異說明.html">var/let/const 提升差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

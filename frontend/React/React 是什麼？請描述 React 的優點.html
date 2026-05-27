@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 是什麼</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 入門</div>
+    <h1>React：<em>宣告式、組件化</em>的 UI 函式庫，而不是框架</h1>
+    <p class="lede">React 是 Meta 開發的開源 <b>JavaScript 函式庫</b>，專注於 <b>View 層</b>。你描述資料與 UI 的對應關係，React 負責高效更新畫面；配合 React Native 還能跨平台開發行動 App。</p>
+  </header>
+
+  <section>
+    <span class="num">四大核心</span>
+    <h2>為什麼選 React？</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>宣告式（Declarative）</small>
+        描述「UI 應該長什麼樣」，React 幫你搞定 DOM 更新
+      </div>
+      <div class="chip info">
+        <small>組件化（Component-based）</small>
+        UI 拆成獨立可複用的組件，每個組件管理自身 state
+      </div>
+      <div class="chip info">
+        <small>虛擬 DOM</small>
+        最小化真實 DOM 操作，批量高效更新
+      </div>
+      <div class="chip info">
+        <small>Learn Once, Write Anywhere</small>
+        React 技能可延伸到 React Native 開發行動 App
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">函式庫 vs 框架</span>
+    <h2>React 只管 View，其餘你決定</h2>
+    <table>
+      <thead><tr><th>面向</th><th>React（函式庫）</th><th>Angular（框架）</th></tr></thead>
+      <tbody>
+        <tr><td>路由</td><td>自選（react-router、TanStack Router）</td><td>內建</td></tr>
+        <tr><td>狀態管理</td><td>自選（Redux、Zustand、Jotai）</td><td>內建 Service</td></tr>
+        <tr><td>HTTP</td><td>自選（fetch、axios）</td><td>內建 HttpClient</td></tr>
+        <tr><td>彈性</td><td>高，生態多元</td><td>低，有完整規範</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info"><span class="ico">ℹ️</span><p>「React 不是框架」是面試常考的概念區辨。它的生態系龐大，但核心只負責 UI 渲染層，架構選擇完全由開發者決定。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React 跟 Vue 有什麼差別？</summary><p>主要差別在模板語法（Vue 用 template，React 用 JSX）、學習曲線（Vue 稍緩）、社群生態（React 更大）。兩者都是組件化、虛擬 DOM。選擇取決於團隊和專案需求。</p></details>
+      <details><summary>為什麼 React 叫函式庫而不是框架？</summary><p>框架（framework）定義了應用程式的整體架構，並控制程式流程（IoC）；函式庫（library）只提供工具，開發者呼叫它。React 只管 UI 層，路由、狀態管理、HTTP 等都不在其範疇，因此是函式庫。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 是 Meta 開發的 JavaScript <span class="hl">UI 函式庫</span>（不是框架），專注 View 層。核心特點是<span class="hl">宣告式 + 組件化</span>：你描述資料與 UI 的對應關係，React 用虛擬 DOM 算出最小 DOM 變更並高效更新。豐富的生態系讓你自由選擇路由、狀態管理等工具，配合 React Native 還能開發行動 App。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的虛擬 DOM（virtual DOM）是什麼？.html">虛擬 DOM</a>
+      <a href="JSX 是什麼？它是如何運作的？.html">JSX 運作原理</a>
+      <a href="解釋 React 的單向資料流（one-way data flow）及其優點.html">單向資料流</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

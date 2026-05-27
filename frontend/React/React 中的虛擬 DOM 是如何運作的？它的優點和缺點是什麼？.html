@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>虛擬 DOM 運作原理</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">React 核心</div>
+    <h1>state 一變，React <em>只改有差的那一塊</em></h1>
+    <p class="lede">虛擬 DOM 是真實 DOM 的<b>輕量記憶體副本</b>。state 變化時 React 建一棵新樹，跟舊樹<b>比對（diff）</b>，再把差異<b>最小化地</b>套用到真實 DOM。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 改一個字，動了幾個節點？</span>
+    <h2>整棵樹重建，但 DOM 只改差異</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">Card</span>() {
+  <span class="tok-key">const</span> [count, setCount] = <span class="tok-fn">useState</span>(0);
+  <span class="tok-key">return</span> (&lt;div&gt;&lt;h3&gt;標題&lt;/h3&gt;&lt;p&gt;{count}&lt;/p&gt;&lt;/div&gt;);
+}</code></pre>
+    <p>按按鈕讓 <code>count</code> 改變。整棵虛擬 DOM 會重建，但看 React diff 後實際只碰了哪個真實節點：</p>
+
+    <div class="lab">
+      <div class="lab-label">點擊更新 state</div>
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <button class="btn-primary" id="inc">setCount(count + 1)</button>
+        <div style="background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:.8rem 1.1rem;font-family:var(--mono)">
+          &lt;h3&gt;標題&lt;/h3&gt;<br>&lt;p&gt;<span id="p" style="background:var(--accent-soft);padding:0 .3em;border-radius:3px">0</span>&lt;/p&gt;
+        </div>
+      </div>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+    <div class="aside">React 比對後發現 <code>&lt;h3&gt;</code> 沒變、只有 <code>&lt;p&gt;</code> 的文字變了，<b>所以真實 DOM 只更新那一個文字節點</b>——這就是省效能的關鍵。</div>
+  </section>
+
+  <section>
+    <span class="num">三步驟 + 取捨</span>
+    <h2>運作流程</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>建新樹</h4><p>state/props 變 → 重新執行組件，產生新的虛擬 DOM 樹。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>Diff 比對</h4><p>新樹 vs 舊樹，找出差異（協調 reconciliation）。</p></div></div>
+      <div class="flow-step"><div class="flow-dot good">3</div><div class="flow-body"><h4>最小化更新</h4><p>只把差異套到真實 DOM，並可批次合併多次更新。</p></div></div>
+    </div>
+    <div class="chips">
+      <div class="chip good">優點<small>宣告式、批次更新、跨平台(RN)</small></div>
+      <div class="chip bad">缺點<small>有抽象開銷、極端優化場景不如手動操作</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>虛擬 DOM 一定比直接操作 DOM 快嗎？</summary><p>不一定。它的價值是「自動算出最小更新 + 宣告式心智模型」，而非絕對最快。極簡頁面或高度手動優化的場景，直接操作可能更快。</p></details>
+      <details><summary>diff 為什麼能很快？</summary><p>React 用啟發式：同層比較、不同型別的節點直接整塊換、用 <code>key</code> 辨識清單項目，把 O(n³) 的樹比對降到接近 O(n)。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「虛擬 DOM 是真實 DOM 的<span class="hl">記憶體輕量副本</span>。state 變化時 React 建新樹、和舊樹<span class="hl">diff</span>，再把<span class="hl">最小差異</span>套到真實 DOM，並能批次更新。好處是效能與宣告式開發、還能跨平台到 React Native；代價是抽象開銷，極端優化場景不一定贏過手動操作。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的「協調」（reconciliation）是什麼？.html">協調 reconciliation</a>
+      <a href="在 React 中，「重新渲染」（re-rendering）是什麼意思？.html">re-rendering</a>
+      <a href="React Fiber 是什麼？它如何改進先前的做法？.html">React Fiber</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  let c=0; const p=document.getElementById('p'), log=document.getElementById('log');
+  document.getElementById('inc').addEventListener('click',()=>{
+    c++; p.textContent=c;
+    log.innerHTML =
+      '<div class="ln c-dim">state 改變 → 重建整棵虛擬 DOM 樹</div>'+
+      '<div class="ln">diff：&lt;h3&gt;標題&lt;/h3&gt; → <span class="c-dim">無變化，跳過</span></div>'+
+      '<div class="ln c-ok">diff：&lt;p&gt; 文字 '+(c-1)+' → '+c+'，只更新這個文字節點 ✓</div>';
+  });
+</script>
+</body>
+</html>

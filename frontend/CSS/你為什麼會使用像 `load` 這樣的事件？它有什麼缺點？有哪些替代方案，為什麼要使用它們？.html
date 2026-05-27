@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>load 事件 vs DOMContentLoaded</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS / JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript / 事件</div>
+    <h1><em>load</em> 等太久了——先用 <em>DOMContentLoaded</em></h1>
+    <p class="lede"><b>load</b> 事件要等圖片、CSS、字體、iframe 全部載入才觸發，<b>DOMContentLoaded</b> 只等 DOM 建好就觸發。大多數初始化邏輯只需要 DOM，不需要等到圖片載完。</p>
+  </header>
+
+  <section>
+    <span class="num">關鍵差異</span>
+    <h2>兩個事件的觸發時機</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">HTML 下載並解析完成 → <strong>DOMContentLoaded</strong> 觸發（DOM 可用）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">圖片、CSS、字體、iframe 等子資源全部載入完成 → <strong>load</strong> 觸發</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 大多數情況：DOM 建好就夠了</span>
+document.addEventListener(<span class="tok-str">'DOMContentLoaded'</span>, () => {
+  <span class="tok-com">// 操作 DOM、初始化元件</span>
+});
+
+<span class="tok-com">// 需要等所有資源（如計算圖片尺寸）</span>
+window.addEventListener(<span class="tok-str">'load'</span>, () => {
+  <span class="tok-com">// 此時所有 img、iframe、css 都載入完畢</span>
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">選擇原則</span>
+    <h2>何時用哪個？</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>DOMContentLoaded（大多數場景）</small>
+        DOM 操作、事件綁定、元件初始化、Ajax 請求啟動
+      </div>
+      <div class="chip info">
+        <small>load（特定場景）</small>
+        需要圖片真實尺寸（naturalWidth）、Lightbox 需要計算圖片大小、需要確保所有字體渲染完成
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>如果頁面有大圖或慢速載入的資源，使用 <code>load</code> 初始化 JavaScript 會讓使用者等很久才能互動——這是常見的效能陷阱。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>defer 腳本和 DOMContentLoaded 有什麼關係？</summary>
+        <p>帶有 <code>defer</code> 屬性的 script 會在 DOM 解析完成後、<code>DOMContentLoaded</code> 觸發前執行。所以如果把初始化邏輯寫在 defer 腳本裡，不需要另外監聽 DOMContentLoaded——腳本執行時 DOM 已就緒。</p>
+      </details>
+      <details>
+        <summary>async 腳本什麼時候執行？</summary>
+        <p><code>async</code> 腳本下載完就立即執行，不等 DOM 解析完成。如果需要操作 DOM，不要用 async，應用 defer 或放在 <code>&lt;/body&gt;</code> 前。async 適合不依賴 DOM 的獨立腳本（如 GA、廣告）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>load</code> 事件要等頁面所有資源（圖片、CSS、iframe）都載入完才觸發，缺點是等待時間長，使用者可能等很久才能互動。<span class="hl">大多數 JavaScript 初始化只需要 DOM 就緒</span>，應改用 <code>DOMContentLoaded</code>——HTML 解析完即觸發，不需等子資源。只有需要圖片實際尺寸或確保字體渲染完成等特定場景，才真的需要 <code>load</code>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="為什麼將 CSS `link` 放在 `head` 內、將 JS `script` 放在 `body` 之前通常是好主意？.html">CSS/JS 資源擺放順序</a>
+      <a href="什麼是漸進式渲染（progressive rendering）？.html">漸進式渲染</a>
+      <a href="撰寫高效 CSS 時有哪些常見的陷阱？.html">高效 CSS 的陷阱</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

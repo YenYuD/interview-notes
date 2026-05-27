@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>存取修飾詞 Access Modifiers</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>存取修飾詞是<em>編譯期</em>的封裝機制，不是執行期保護</h1>
+    <p class="lede">TypeScript 的 <code>public</code>、<code>protected</code>、<code>private</code> 控制「誰可以存取這個屬性」。<b>它們在編譯時強制執行</b>——但要注意，編譯成 JS 後這些限制消失了；若要真正的執行期私有，要用 ES2022 的 <code>#</code> 語法。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>三種修飾詞的存取範圍</h2>
+    <table>
+      <thead><tr><th>修飾詞</th><th>同一 class 內</th><th>子類別</th><th>外部</th></tr></thead>
+      <tbody>
+        <tr><td><code>public</code>（預設）</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td><code>protected</code></td><td>✅</td><td>✅</td><td>❌</td></tr>
+        <tr><td><code>private</code></td><td>✅</td><td>❌</td><td>❌</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>完整範例與建構子簡寫</h2>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">User</span> {
+  <span class="tok-com">// 建構子簡寫：直接在參數宣告屬性</span>
+  constructor(
+    <span class="tok-key">public</span> name: <span class="tok-fn">string</span>,
+    <span class="tok-key">protected</span> email: <span class="tok-fn">string</span>,
+    <span class="tok-key">private</span> password: <span class="tok-fn">string</span>,
+  ) {}
+
+  getInfo() {
+    <span class="tok-key">return</span> <span class="tok-str">`${this.name} / ${this.password}`</span>; <span class="tok-com">// ✅ 內部可用 private</span>
+  }
+}
+
+<span class="tok-key">class</span> <span class="tok-fn">AdminUser</span> <span class="tok-key">extends</span> <span class="tok-fn">User</span> {
+  show() {
+    console.log(<span class="tok-key">this</span>.email);    <span class="tok-com">// ✅ protected 子類別可用</span>
+    console.log(<span class="tok-key">this</span>.password); <span class="tok-com">// ❌ private 子類別不能用</span>
+  }
+}
+
+<span class="tok-key">const</span> u = <span class="tok-key">new</span> User(<span class="tok-str">"Bob"</span>, <span class="tok-str">"bob@x.com"</span>, <span class="tok-str">"secret"</span>);
+console.log(u.name);     <span class="tok-com">// ✅ public</span>
+console.log(u.email);    <span class="tok-com">// ❌ protected</span>
+console.log(u.password); <span class="tok-com">// ❌ private</span></code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>TypeScript 的 <code>private</code> 是<b>編譯期保護</b>，編譯成 JS 後屬性仍然可被存取。若需要真正的執行期私有，使用 ES2022 的 <code>#password</code>（hard private）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>TypeScript private 和 ES2022 # 有什麼差別？</summary><p>TypeScript <code>private</code> 只在編譯期檢查，JS 執行時仍可存取。ES2022 <code>#name</code> 是真正的執行期私有，即使在 JS 中也無法從外部存取，且子類別也不能繼承。</p></details>
+      <details><summary>readonly 和 private 的差別？</summary><p><code>readonly</code> 控制的是「可否修改值」（防止重新賦值）；<code>private</code> 控制的是「誰可以存取」。兩者可以同時使用：<code>private readonly id: string</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「TypeScript 有三種存取修飾詞：<span class="hl"><code>public</code> 任何地方都能存取、<code>protected</code> 僅限同一 class 及子類別、<code>private</code> 只有同一 class 內部</span>。它們是物件導向封裝的核心，在編譯期強制執行。值得注意的是，<span class="hl">TypeScript private 編譯成 JS 後保護消失</span>；若需要真正的執行期私有屬性，要改用 ES2022 的 <code>#</code> 語法。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="018 Abstract Class 抽象類別.html">Abstract Class</a>
+      <a href="016 extends vs implements 的差異.html">extends vs implements</a>
+      <a href="004 Interface 介面是什麼.html">Interface 介面</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

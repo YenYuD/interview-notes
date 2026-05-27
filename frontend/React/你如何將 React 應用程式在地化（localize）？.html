@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 應用程式在地化</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 實務</div>
+    <h1>i18n：用函式庫讓文字<em>跟著語言走</em>，不寫死在組件裡</h1>
+    <p class="lede">在地化（Localization）的核心原則是：組件裡不寫死任何文字，改用<b>翻譯鍵（key）</b>，再由 i18n 函式庫根據當前語言查找對應翻譯。<b>react-i18next</b> 是最常見的選擇。</p>
+  </header>
+
+  <section>
+    <span class="num">核心流程</span>
+    <h2>設定、注入、使用——三步驟</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>建立翻譯檔</b>：各語言各一個 JSON，key 統一，value 是各語言的翻譯</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>初始化 i18n</b>：在 <code>i18n.js</code> 設定語言資源和預設語言</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>在組件使用</b>：<code>const { t } = useTranslation();</code>，然後 <code>t('key')</code></div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// en.json</span>
+{ <span class="tok-str">"greeting"</span>: <span class="tok-str">"Hello, {{name}}!"</span>, <span class="tok-str">"save"</span>: <span class="tok-str">"Save"</span> }
+
+<span class="tok-com">// zh-TW.json</span>
+{ <span class="tok-str">"greeting"</span>: <span class="tok-str">"你好，{{name}}！"</span>, <span class="tok-str">"save"</span>: <span class="tok-str">"儲存"</span> }
+
+<span class="tok-com">// 組件裡使用</span>
+<span class="tok-key">function</span> <span class="tok-fn">Header</span>({ name }) {
+  <span class="tok-key">const</span> { t } = <span class="tok-fn">useTranslation</span>();
+  <span class="tok-key">return</span> &lt;h1&gt;{<span class="tok-fn">t</span>(<span class="tok-str">'greeting'</span>, { name })}&lt;/h1&gt;;
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">進階考量</span>
+    <h2>切換語言與懶載入翻譯</h2>
+    <pre><code><span class="tok-com">// 切換語言（i18n 物件透過 useTranslation 取得）</span>
+<span class="tok-key">const</span> { i18n } = <span class="tok-fn">useTranslation</span>();
+&lt;button onClick={() =&gt; i18n.<span class="tok-fn">changeLanguage</span>(<span class="tok-str">'zh-TW'</span>)}&gt;
+  繁體中文
+&lt;/button&gt;</code></pre>
+    <div class="aside">多語言應用建議把翻譯檔懶載入（Backend plugin 或動態 import），避免把所有語言的 JSON 打包進主 bundle，影響初始載入速度。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>在地化（l10n）和國際化（i18n）有什麼差別？</summary><p><b>i18n（Internationalization）</b>是把應用程式設計成「可支援多語言」的過程（抽出文字、日期格式等）；<b>l10n（Localization）</b>是為特定語言/地區實際翻譯和調整內容（填入翻譯檔）。i18n 是基礎建設，l10n 是實際工作。</p></details>
+      <details><summary>除了文字，i18n 還需要處理哪些？</summary><p>日期/時間格式（<code>Intl.DateTimeFormat</code>）、數字/貨幣格式（<code>Intl.NumberFormat</code>）、複數形式（英文 1 item vs 2 items）、RTL 文字方向（阿拉伯語、希伯來語）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 應用程式在地化通常用 <b>react-i18next</b>：每種語言準備一個 JSON 翻譯檔，初始化 i18n 實例後，組件裡用 <code>useTranslation</code> hook 取得 <span class="hl">t 函式</span>，把組件文字從寫死的字串改成 <code>t('key')</code>。切換語言呼叫 <code>i18n.changeLanguage</code>。實務上還需處理日期、數字格式、複數形式，以及懶載入翻譯檔避免 bundle 過大。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 是什麼？請描述 React 的優點.html">React 概述</a>
+      <a href="React 應用程式中的程式碼分割（code splitting）是什麼？.html">程式碼分割</a>
+      <a href="你如何測試 React 應用程式？.html">測試 React 應用</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

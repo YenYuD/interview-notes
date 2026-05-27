@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>null、undefined、未宣告差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 資料類型</div>
+    <h1>都是「沒有值」，但<em>null、undefined、未宣告三者本質不同</em></h1>
+    <p class="lede"><b>null</b> 是有意設定的空、<b>undefined</b> 是宣告了但沒給值、<b>未宣告</b>是根本不存在。混淆這三者是 JavaScript 新手最常踩的坑。</p>
+  </header>
+
+  <section>
+    <span class="num">核心對照</span>
+    <h2>三者一覽</h2>
+    <table>
+      <tr><th>特性</th><th><code>null</code></th><th><code>undefined</code></th><th>未宣告</th></tr>
+      <tr><td>意義</td><td>開發者明確設為空</td><td>已宣告，未賦值</td><td>變數根本不存在</td></tr>
+      <tr><td><code>typeof</code></td><td><code>'object'</code>（歷史 bug）</td><td><code>'undefined'</code></td><td><code>'undefined'</code></td></tr>
+      <tr><td><code>=== null</code></td><td>true</td><td>false</td><td>ReferenceError</td></tr>
+      <tr><td><code>== null</code></td><td>true</td><td>true</td><td>ReferenceError</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">檢查方式</span>
+    <h2>怎麼正確偵測</h2>
+    <pre><code><span class="tok-com">// 檢查 null → 嚴格相等</span>
+<span class="tok-key">const</span> foo = <span class="tok-key">null</span>;
+console.log(foo === <span class="tok-key">null</span>);  <span class="tok-com">// true ✓</span>
+
+<span class="tok-com">// 檢查 undefined → typeof 或嚴格相等</span>
+<span class="tok-key">let</span> bar;
+console.log(<span class="tok-key">typeof</span> bar === <span class="tok-str">'undefined'</span>);  <span class="tok-com">// true ✓</span>
+
+<span class="tok-com">// 檢查未宣告 → 只能用 typeof（否則 ReferenceError）</span>
+console.log(<span class="tok-key">typeof</span> undeclaredVar === <span class="tok-str">'undefined'</span>);  <span class="tok-com">// true ✓</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>不要用 <code>== null</code> 來確認是否為 null，因為它對 undefined 也回傳 true，容易誤判。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>為什麼 typeof null 是 'object'？</summary><p>這是 JavaScript 早期實作的 bug：物件在底層以 000 開頭的 bit 表示，null 的記憶體表示也恰好是全 0，被誤判為 object。已被確認是 bug 但為保持向下相容而保留至今。</p></details>
+      <details><summary>何時用 null，何時讓它保持 undefined？</summary><p>慣例上，想明確表示「此處沒有值」用 null（例如清空一個 ref）；讓變數保持 undefined 代表「還未賦值」。API 回傳空值通常用 null，可選欄位缺失才用 undefined。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「null 是開發者<span class="hl">主動設定</span>的空值，typeof 是 'object'（歷史 bug）；undefined 是<span class="hl">宣告但未賦值</span>，typeof 是 'undefined'；未宣告的變數則根本不在作用域，任何操作都會 ReferenceError。檢查 null 用嚴格相等 <code>=== null</code>，<span class="hl">不要用 == null</span>，因為它會把 undefined 也吃進來。</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中的各種資料類型.html">各種資料類型</a>
+      <a href="如何檢查變數的資料類型.html">如何檢查資料類型</a>
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let/var/const 差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

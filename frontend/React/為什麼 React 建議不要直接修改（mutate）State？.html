@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>為何不能直接修改 State</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT STATE</div>
+    <h1>直接改 state 是靜默的 bug：<em>React 偵測不到、UI 不更新</em></h1>
+    <p class="lede">React 用<b>引用比較（reference equality）</b>偵測 state 是否改變。直接修改物件或陣列的值，引用沒變，React 以為 state 沒動過，<b>不觸發重渲</b>——畫面顯示過時資料。</p>
+  </header>
+
+  <section>
+    <span class="num">問題根源</span>
+    <h2>為什麼直接 mutate 不行</h2>
+    <pre><code><span class="tok-com">// ⚠️ 直接修改：引用沒變 → React 不重渲</span>
+<span class="tok-key">const</span> [items, setItems] = <span class="tok-fn">useState</span>([1, 2, 3]);
+
+<span class="tok-com">// 錯誤：修改了陣列內容，但 items 引用不變</span>
+items.<span class="tok-fn">push</span>(4);
+<span class="tok-fn">setItems</span>(items);  <span class="tok-com">// 傳入同一個引用，React 認為沒變化</span>
+
+<span class="tok-com">// 正確：建立新陣列</span>
+<span class="tok-fn">setItems</span>([...items, 4]);  <span class="tok-com">// 新引用 → React 知道要重渲</span></code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>物件也一樣：<code>state.count = 1; setState(state)</code>  ← 傳同一個引用，<code>Object.is</code> 比較結果是相等，React 跳過重渲。</p></div>
+  </section>
+
+  <section>
+    <span class="num">正確做法</span>
+    <h2>永遠建立新的值</h2>
+    <table>
+      <thead><tr><th>操作</th><th>錯誤（mutate）</th><th>正確（新值）</th></tr></thead>
+      <tbody>
+        <tr><td>陣列新增</td><td><code>arr.push(x)</code></td><td><code>[...arr, x]</code></td></tr>
+        <tr><td>陣列刪除</td><td><code>arr.splice(i, 1)</code></td><td><code>arr.filter((_, idx) =&gt; idx !== i)</code></td></tr>
+        <tr><td>物件更新</td><td><code>obj.key = val</code></td><td><code>{ ...obj, key: val }</code></td></tr>
+        <tr><td>深層物件</td><td>直接修改巢狀屬性</td><td>用 Immer 或手動逐層展開</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>深層巢狀物件的不可變更新很繁瑣，推薦用 <b>Immer</b>（已整合在 Redux Toolkit 和 useImmer 中），讓你用「看起來是 mutate 的語法」得到不可變的結果。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>不可變（immutability）除了讓 React 偵測變化，還有什麼好處？</summary><p>1. 可以用 <code>Object.is</code> 快速比較，React.memo 和 useMemo 的優化才有效；2. 便於做 undo/redo（保留歷史快照）；3. 避免共享引用導致的意外副作用（pure function 的前提）。</p></details>
+      <details><summary>直接 mutate state 然後強制 setState(newObj) 可以嗎？</summary><p>即使你 <code>setState({ ...state })</code> 建立了新物件，但如果你<b>先</b> mutate 了 state 的屬性，React 的 devtools 和 time-travel debug 會記錄到被 mutate 的歷史快照，行為不可預測。永遠不要先 mutate 再 setState。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 用引用相等性（<code>Object.is</code>）判斷 state 是否改變。直接 mutate 物件或陣列，引用不變，React <span class="hl">不觸發重渲</span>，UI 顯示過時資料。正確做法是永遠建立新值（展開運算子 <code>...</code>、<code>map</code>、<code>filter</code>）。不可變性同時也讓 <span class="hl">React.memo 和 useMemo</span> 的優化得以生效。深層物件推薦用 Immer 簡化更新邏輯。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋在 React 中調用 `useState` 的 setter 函式時會發生什麼事.html">useState setter 行為</a>
+      <a href="React 的反模式（anti-patterns）有哪些？.html">React 反模式</a>
+      <a href="React 中的 `useMemo` hook 是什麼？什麼時候應該使用它？.html">useMemo</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

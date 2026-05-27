@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模組打包工具的優點</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">模組與建置</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">MODULE &amp; BUILD</div>
+    <h1>Webpack、Rollup、Vite——<em>打包工具</em>幫你做了哪些苦工？</h1>
+    <p class="lede">從依賴管理到效能優化，<b>模組打包工具</b>把散落的 JS/CSS/圖片整合成瀏覽器最愛的輸出格式，讓現代前端開發成為可能。</p>
+  </header>
+
+  <section>
+    <span class="num">核心優點</span>
+    <h2>打包工具解決了什麼問題</h2>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>依賴管理</h4>
+          <p>分析 <code>import</code> 依賴圖，自動解析模組順序，不用手動管理 <code>&lt;script&gt;</code> 載入順序。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>效能優化 — 減少 HTTP 請求</h4>
+          <p>把數百個 JS 模組合併成少數幾個 bundle，大幅減少瀏覽器發出的請求數（HTTP/1.1 下尤其重要）。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>Code Splitting — 按需載入</h4>
+          <p>把程式碼拆成多個 chunk，使用者訪問哪個路由才下載對應 chunk，縮短首屏時間。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">4</div>
+        <div class="flow-body">
+          <h4>Tree Shaking — 剔除死碼</h4>
+          <p>靜態分析移除未使用的匯出，bundle 只含實際需要的程式碼。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">5</div>
+        <div class="flow-body">
+          <h4>資產處理</h4>
+          <p>CSS、圖片、字型都可以透過 <code>import</code> 引入，打包器統一處理壓縮、hash 命名、CDN 上傳。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">工具比較</span>
+    <h2>Webpack vs Rollup vs Vite</h2>
+
+    <table>
+      <thead>
+        <tr><th>工具</th><th>定位</th><th>亮點</th><th>適合場景</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Webpack</td>
+          <td>全能型打包器</td>
+          <td>生態最豐富、Loader/Plugin 最多</td>
+          <td>大型複雜應用、舊專案</td>
+        </tr>
+        <tr>
+          <td>Rollup</td>
+          <td>函式庫打包器</td>
+          <td>Tree Shaking 最佳、輸出乾淨</td>
+          <td>發布 npm 套件</td>
+        </tr>
+        <tr>
+          <td>Vite</td>
+          <td>開發優先工具</td>
+          <td>開發用原生 ESM（無打包）、生產用 Rollup</td>
+          <td>現代應用開發首選</td>
+        </tr>
+        <tr>
+          <td>esbuild</td>
+          <td>極速 transpiler</td>
+          <td>Go 寫成，比 JS 工具快 10-100x</td>
+          <td>Vite 底層、CI 快速建置</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>熱模組替換（HMR）：</b>Vite 開發模式只更新改動的模組，不重新整理整頁，配合 React Fast Refresh 能在保留元件狀態下即時看到修改結果。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Code Splitting 的策略有哪些？</summary>
+        <p>主要三種：<strong>路由分割</strong>（每個頁面一個 chunk，React.lazy + Suspense）；<strong>元件分割</strong>（按需載入的大元件或功能模組）；<strong>廠商分割（vendor split）</strong>（將 node_modules 抽成獨立 chunk，利用瀏覽器快取——業務代碼常改但 vendor 較穩定）。</p>
+      </details>
+      <details>
+        <summary>為什麼 Vite 開發模式比 Webpack 快那麼多？</summary>
+        <p>Webpack 開發時仍需將所有模組打包成一個 bundle，每次修改都重新打包（即便有快取）。Vite 開發時利用瀏覽器原生 ESM，只在請求時才即時轉換被請求的模組（按需編譯），配合 esbuild 的極速轉換，啟動和 HMR 速度不受專案規模影響。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「模組打包工具的核心價值是<span class="hl">管理依賴、優化輸出</span>：它分析 import 依賴圖，合併檔案減少 HTTP 請求，同時做 Tree Shaking 剔除死碼、Code Splitting 讓頁面按需載入。現在我新專案優先用 <span class="hl">Vite</span>——開發模式利用原生 ESM 做到毫秒級 HMR，生產模式用 Rollup 輸出高度優化的 bundle；若是發布 npm 套件，Rollup 本身的 Tree Shaking 輸出最乾淨。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="模組打包中的Tree Shaking概念.html">Tree Shaking</a>
+      <a href="CommonJS與ESM比較.html">CommonJS vs ESM</a>
+      <a href="使用編譯成JavaScript語言的優缺點.html">編譯成 JS 語言的優缺點</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

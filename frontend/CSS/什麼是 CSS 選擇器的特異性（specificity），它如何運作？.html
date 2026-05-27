@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 選擇器特異性</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS 層疊</div>
+    <h1>樣式沒生效，<em>不是被覆蓋是被「贏」掉</em></h1>
+    <p class="lede">多條規則打架時，瀏覽器用「特異性」算分數決勝。記法是三欄：<b>ID － CLASS － TYPE</b>。高位永遠壓低位，再多低位也追不回。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 特異性計算機</span>
+    <h2>按一按，看誰贏</h2>
+    <p>點選擇器零件組成一條規則，下面即時算分數，並和對手 <code>.btn.primary</code>（0-2-0）比較：</p>
+
+    <div class="lab">
+      <div class="lab-label">你的選擇器</div>
+      <div class="toggle-row" style="flex-wrap:wrap">
+        <button class="btn-ghost" data-t="id">+ #id</button>
+        <button class="btn-ghost" data-t="class">+ .class / [attr] / :hover</button>
+        <button class="btn-ghost" data-t="type">+ 元素 / ::before</button>
+        <button class="btn-ghost" id="clr">清除</button>
+      </div>
+
+      <div style="font-family:var(--mono);font-size:1rem;background:var(--ink);color:oklch(90% .02 85);border-radius:10px;padding:.9rem 1.1rem;min-height:2.6rem;word-break:break-all" id="sel">（還沒選）</div>
+
+      <div class="chips" style="margin-top:1.2rem">
+        <div class="chip info">你的分數<small id="score">0 - 0 - 0</small></div>
+        <div class="chip" style="border-color:var(--line);color:var(--ink-soft)">對手 .btn.primary<small>0 - 2 - 0</small></div>
+        <div class="chip" id="verdict">—<small id="verdictSub">　</small></div>
+      </div>
+    </div>
+    <div class="aside">比較時從左到右逐欄比：ID 欄贏了就直接贏，不看後面。<code>1-0-0</code>（一個 ID）大於 <code>0-99-99</code>。</div>
+  </section>
+
+  <section>
+    <span class="num">三欄怎麼算</span>
+    <h2>ID － CLASS － TYPE</h2>
+    <table>
+      <tr><th>欄位</th><th>算什麼</th><th>例</th></tr>
+      <tr><td><b>ID</b></td><td>ID 選擇器</td><td><code>#header</code></td></tr>
+      <tr><td><b>CLASS</b></td><td>class、屬性選擇器、偽類</td><td><code>.nav</code>、<code>[type=text]</code>、<code>:hover</code></td></tr>
+      <tr><td><b>TYPE</b></td><td>元素名、偽元素</td><td><code>div</code>、<code>::before</code></td></tr>
+    </table>
+    <div class="callout warn"><span class="ico">⚠️</span><p>順位最高的其實是 <code>!important</code> &gt; 行內 <code>style</code> &gt; 特異性。特異性相同時，<b>CSS 中最後出現的</b>那條贏。</p></div>
+    <div class="callout tip"><span class="ico">✅</span><p>最佳實務：盡量寫<b>低特異性</b>的選擇器，之後才容易覆寫、不用被迫動用 <code>!important</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>:not() 或 :is() 怎麼算？</summary><p><code>:is()</code> / <code>:not()</code> 本身不計分，取其括號內<b>特異性最高的</b>那個參數來算。<code>:where()</code> 則永遠是 0，很適合寫低特異性的基底樣式。</p></details>
+      <details><summary>通用選擇器 * 算幾分？</summary><p><code>*</code> 和組合符（<code>+ &gt; ~</code>）特異性都是 0。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「特異性是瀏覽器在多條規則衝突時的計分制，分三欄 <span class="hl">ID－CLASS－TYPE</span>，高位壓低位。完整順位是 <span class="hl">!important &gt; 行內 &gt; 特異性 &gt; 來源順序</span>。我會刻意維持低特異性、少用 ID 當樣式鉤子、避免 <code>!important</code>，這樣樣式才好維護、好覆寫。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋瀏覽器如何判斷哪些元素符合 CSS 選擇器.html">瀏覽器如何匹配選擇器</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  let s={id:0,class:0,type:0}, parts=[];
+  const sel=document.getElementById('sel'), score=document.getElementById('score');
+  const verdict=document.getElementById('verdict'), verdictSub=document.getElementById('verdictSub');
+  const label={id:'#id',class:'.class',type:'el'};
+  function render(){
+    sel.textContent = parts.length ? parts.join(' ') : '（還沒選）';
+    score.textContent = `${s.id} - ${s.class} - ${s.type}`;
+    // 對手 0-2-0
+    const me=[s.id,s.class,s.type], op=[0,2,0];
+    let cmp=0;
+    for(let i=0;i<3;i++){ if(me[i]!==op[i]){ cmp = me[i]>op[i]?1:-1; break; } }
+    if(cmp>0){ verdict.className='chip good'; verdict.firstChild.textContent='你贏 ✓'; verdictSub.textContent='你的樣式生效'; }
+    else if(cmp<0){ verdict.className='chip bad'; verdict.firstChild.textContent='你輸 ✗'; verdictSub.textContent='對手樣式生效'; }
+    else { verdict.className='chip info'; verdict.firstChild.textContent='平手'; verdictSub.textContent='看誰寫在後面'; }
+  }
+  document.querySelectorAll('[data-t]').forEach(b=>b.addEventListener('click',()=>{
+    s[b.dataset.t]++; parts.push(label[b.dataset.t]); render();
+  }));
+  document.getElementById('clr').addEventListener('click',()=>{ s={id:0,class:0,type:0}; parts=[]; render(); });
+  render();
+</script>
+</body>
+</html>

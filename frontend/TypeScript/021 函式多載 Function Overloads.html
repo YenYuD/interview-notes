@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>函式多載 Function Overloads</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>函式多載讓「傳什麼型別進去，就精確知道回傳什麼型別」</h1>
+    <p class="lede">用 Union 型別時，傳 string 進去，回傳型別還是 <code>string | number</code>，不夠精確。<b>函式多載讓每種輸入對應獨立的型別簽名</b>，讓 TypeScript 根據你傳入的參數精確推斷回傳型別。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>語法結構：多載簽名 + 實作簽名</h2>
+    <pre><code><span class="tok-com">// 1. 多載簽名（只有型別定義，沒有實作）</span>
+<span class="tok-key">function</span> <span class="tok-fn">print</span>(message: <span class="tok-fn">string</span>): <span class="tok-fn">void</span>;
+<span class="tok-key">function</span> <span class="tok-fn">print</span>(messages: <span class="tok-fn">string</span>[]): <span class="tok-fn">void</span>;
+
+<span class="tok-com">// 2. 實作簽名（實際邏輯，外部不能直接以此簽名呼叫）</span>
+<span class="tok-key">function</span> <span class="tok-fn">print</span>(message: <span class="tok-fn">string</span> | <span class="tok-fn">string</span>[]): <span class="tok-fn">void</span> {
+  <span class="tok-key">if</span> (<span class="tok-key">typeof</span> message === <span class="tok-str">"string"</span>) {
+    console.log(message);
+  } <span class="tok-key">else</span> {
+    message.forEach(m =&gt; console.log(m));
+  }
+}
+
+print(<span class="tok-str">"Single"</span>);             <span class="tok-com">// ✅</span>
+print([<span class="tok-str">"First"</span>, <span class="tok-str">"Second"</span>]); <span class="tok-com">// ✅</span>
+print(42);                  <span class="tok-com">// ❌ 沒有符合 number 的多載</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>多載 vs Union：精確程度不同</h2>
+    <pre><code><span class="tok-com">// Union — 回傳型別不夠精確</span>
+<span class="tok-key">function</span> <span class="tok-fn">parse</span>(input: <span class="tok-fn">string</span> | <span class="tok-fn">number</span>): <span class="tok-fn">string</span> | <span class="tok-fn">number</span> { ... }
+<span class="tok-key">const</span> r = parse(<span class="tok-str">"hello"</span>); <span class="tok-com">// 型別：string | number（還要 narrowing）</span>
+
+<span class="tok-com">// 多載 — 傳 string 回傳 string，精確</span>
+<span class="tok-key">function</span> <span class="tok-fn">parse</span>(input: <span class="tok-fn">string</span>): <span class="tok-fn">string</span>;
+<span class="tok-key">function</span> <span class="tok-fn">parse</span>(input: <span class="tok-fn">number</span>): <span class="tok-fn">number</span>;
+<span class="tok-key">function</span> <span class="tok-fn">parse</span>(input: <span class="tok-fn">string</span> | <span class="tok-fn">number</span>): <span class="tok-fn">string</span> | <span class="tok-fn">number</span> { ... }
+<span class="tok-key">const</span> r = parse(<span class="tok-str">"hello"</span>); <span class="tok-com">// 型別：string（精確！不需 narrowing）</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>不同回傳型別的多載（DOM 實際案例）</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">createElement</span>(tag: <span class="tok-str">"div"</span>): HTMLDivElement;
+<span class="tok-key">function</span> <span class="tok-fn">createElement</span>(tag: <span class="tok-str">"span"</span>): HTMLSpanElement;
+<span class="tok-key">function</span> <span class="tok-fn">createElement</span>(tag: <span class="tok-str">"input"</span>): HTMLInputElement;
+<span class="tok-key">function</span> <span class="tok-fn">createElement</span>(tag: <span class="tok-fn">string</span>): HTMLElement {
+  <span class="tok-key">return</span> document.createElement(tag);
+}
+
+<span class="tok-key">const</span> div = createElement(<span class="tok-str">"div"</span>); <span class="tok-com">// 型別：HTMLDivElement（精確）</span></code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p><b>重要限制</b>：實作簽名對外不可見，呼叫端只能使用多載簽名列出的形式，不能以實作簽名的 union 型別直接呼叫。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼時候應該用泛型，什麼時候用多載？</summary><p>優先考慮泛型——如果不同輸入輸出的型別關係是「傳什麼進去，回傳相同型別」，用泛型更簡潔（<code>identity&lt;T&gt;(x: T): T</code>）。只有「不同輸入對應截然不同型別的輸出」時，才用多載，如 <code>createElement("div")→HTMLDivElement</code>。</p></details>
+      <details><summary>為什麼實作簽名的型別對外不可見？</summary><p>設計上的考量：實作簽名通常是較寬鬆的 union 型別（用來容納所有情況），直接暴露會讓呼叫端的型別推斷變得模糊。TypeScript 強制你寫明確的多載簽名，是為了保證呼叫端的型別精確。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「函式多載讓同一個函式對不同輸入提供不同的精確型別簽名。語法分兩部分：<span class="hl">多載簽名只定義型別，實作簽名才有邏輯</span>，且實作簽名對外不可見。相較於 Union 型別，多載的優勢是<span class="hl">傳入什麼型別，TypeScript 就推斷出對應的精確回傳型別</span>，不需要呼叫端再做 narrowing。使用順序：先考慮泛型，不同輸入對應不同型別輸出時才用多載。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="011 泛型 Generics 是什麼.html">泛型 Generics</a>
+      <a href="007 箭頭函式 Arrow Functions.html">箭頭函式</a>
+      <a href="015 Union 聯合型別 vs Intersection 交叉型別.html">Union vs Intersection</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

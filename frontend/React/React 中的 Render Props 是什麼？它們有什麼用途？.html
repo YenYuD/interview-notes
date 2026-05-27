@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Render Props 模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 模式</div>
+    <h1>Render Props：把「<em>渲染決定權</em>」交給呼叫者</h1>
+    <p class="lede">Render Props 是一種共享邏輯的模式：把值為<b>函式的 prop</b> 傳給組件，由該函式決定要渲染什麼。邏輯封裝在組件裡，UI 由外部決定，做到<b>關注點分離</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>「你給我資料，我決定怎麼畫」</h2>
+    <pre><code><span class="tok-com">// MouseTracker 封裝邏輯，render prop 決定 UI</span>
+<span class="tok-key">function</span> <span class="tok-fn">MouseTracker</span>({ render }) {
+  <span class="tok-key">const</span> [pos, setPos] = <span class="tok-fn">useState</span>({ x: 0, y: 0 });
+
+  <span class="tok-key">return</span> (
+    &lt;div <span class="tok-fn">onMouseMove</span>={e =&gt; <span class="tok-fn">setPos</span>({ x: e.clientX, y: e.clientY })}&gt;
+      {<span class="tok-fn">render</span>(pos)}  <span class="tok-com">{/* 把資料吐給外部決定渲染 */}</span>
+    &lt;/div&gt;
+  );
+}
+
+<span class="tok-com">// 使用端可隨意決定要顯示什麼</span>
+&lt;MouseTracker render={({ x, y }) =&gt; &lt;p&gt;({x}, {y})&lt;/p&gt;} /&gt;</code></pre>
+    <div class="aside">「Render Prop」不一定要叫做 <code>render</code>，也常見 <code>children</code> 函式（Children as Function 模式）。</div>
+  </section>
+
+  <section>
+    <span class="num">現代替代</span>
+    <h2>Render Props vs Custom Hooks</h2>
+    <table>
+      <thead><tr><th>方式</th><th>優點</th><th>缺點</th></tr></thead>
+      <tbody>
+        <tr><td>Render Props</td><td>與類別組件相容；UI 控制明確</td><td>巢狀深時產生「wrapper hell」</td></tr>
+        <tr><td>Custom Hook</td><td>簡潔、可組合；Hooks 時代首選</td><td>只能用在功能組件</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info"><span class="ico">ℹ️</span><p>React Hooks 推出後，大多數 Render Props 場景都可以用自定義 Hook 取代，程式碼更簡潔。但在需要支援類別組件或需要明確控制渲染結構時，Render Props 仍有用武之地。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Render Props 和 HOC 解決同樣的問題嗎？</summary><p>是，兩者都是共享邏輯的模式。HOC 在元件外包裹一層，Render Props 把控制權傳回給呼叫者。現代 React 首選 Custom Hook，但了解 Render Props 對讀懂舊程式碼仍重要。</p></details>
+      <details><summary>Children as Function 是什麼？</summary><p>把 <code>children</code> 當成函式傳入：<code>&lt;Tracker&gt;{(data) =&gt; &lt;span&gt;{data}&lt;/span&gt;}&lt;/Tracker&gt;</code>，組件內部 <code>this.props.children(data)</code> 呼叫它，本質和 Render Props 相同。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Render Props 是傳一個<span class="hl">值為函式的 prop</span>，組件把資料傳給這個函式，由呼叫者決定如何渲染。好處是邏輯封裝在組件裡，UI 完全彈性。Hooks 出現後大多改用 Custom Hook 取代，因為更簡潔；但在需要<span class="hl">明確控制渲染結構</span>或搭配類別組件時，Render Props 仍是有效選擇。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的高階組件（higher order components, HOCs）是什麼？.html">高階組件（HOC）</a>
+      <a href="解釋 React 中的組合模式（composition pattern）.html">組合模式</a>
+      <a href="在 React 中使用 Hooks 有什麼優點？.html">Hooks 的優點</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

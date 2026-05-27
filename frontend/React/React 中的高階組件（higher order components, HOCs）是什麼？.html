@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高階組件 HOC</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 模式</div>
+    <h1>HOC：把組件丟進去，得到一個<em>功能增強的新組件</em></h1>
+    <p class="lede">高階組件（Higher Order Component）是接收組件、回傳增強組件的<b>函式</b>。命名慣例以 <code>with</code> 開頭。它解決「如何在不修改原組件的情況下複用邏輯」，但 Hooks 時代已有更簡潔的替代方案。</p>
+  </header>
+
+  <section>
+    <span class="num">模式</span>
+    <h2>HOC 的結構</h2>
+    <pre><code><span class="tok-com">// withAuth：檢查登入才渲染，否則跳轉</span>
+<span class="tok-key">function</span> <span class="tok-fn">withAuth</span>(WrappedComponent) {
+  <span class="tok-key">return</span> <span class="tok-key">function</span> <span class="tok-fn">AuthenticatedComponent</span>(props) {
+    <span class="tok-key">const</span> isLoggedIn = <span class="tok-fn">useAuth</span>();
+
+    <span class="tok-key">if</span> (!isLoggedIn) <span class="tok-key">return</span> &lt;Redirect to=<span class="tok-str">"/login"</span> /&gt;;
+    <span class="tok-key">return</span> &lt;WrappedComponent {...props} /&gt;;
+  };
+}
+
+<span class="tok-com">// 使用：包裹後得到需要登入的版本</span>
+<span class="tok-key">const</span> ProtectedDashboard = <span class="tok-fn">withAuth</span>(Dashboard);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">HOC vs Custom Hook vs Render Props</span>
+    <h2>三種複用邏輯的方式比較</h2>
+    <table>
+      <thead><tr><th>方式</th><th>優點</th><th>缺點</th></tr></thead>
+      <tbody>
+        <tr><td>HOC</td><td>可包裹類別組件；能包裹 JSX 結構</td><td>多層包裹時組件樹深；props 命名衝突；難以追蹤來源</td></tr>
+        <tr><td>Custom Hook</td><td>簡潔；組合自由；Hooks 時代首選</td><td>只能用在功能組件</td></tr>
+        <tr><td>Render Props</td><td>明確控制渲染結構</td><td>巢狀深時「wrapper hell」</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>Hooks 推出後，HOC 的主要使用場景已大量被 Custom Hook 取代。但在舊專案維護、或需要包裹整個組件（如 <code>React.memo</code>、<code>connect</code>）時，HOC 仍是有效工具。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>HOC 有什麼常見的坑？</summary><p>1. props 命名衝突（HOC 注入的 prop 覆蓋了原有的）；2. 靜態方法不會自動複製（需用 <code>hoist-non-react-statics</code>）；3. ref 無法穿透（需搭配 forwardRef）；4. DevTools 中組件名稱難以辨識。</p></details>
+      <details><summary>React.memo 算是 HOC 嗎？</summary><p>廣義上是，<code>React.memo(Component)</code> 接受組件回傳增強組件（加上淺比較 props 的優化）。這是 React 內建的 HOC 典型應用。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「HOC 是接收組件回傳增強組件的函式，用來複用組件邏輯。典型用途有身份驗證保護、日誌注入、主題包裹等。<span class="hl">命名以 with 開頭</span>是慣例。Hooks 出現後大多數場景改用 Custom Hook 取代，因為更簡潔、沒有 props 污染問題；但 <code>React.memo</code>、<code>connect</code>（Redux）等仍是常見的 HOC 應用。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 Render Props 是什麼？它們有什麼用途？.html">Render Props 模式</a>
+      <a href="在 React 中使用 Hooks 有什麼優點？.html">Hooks 的優點</a>
+      <a href="解釋 React 中的組合模式（composition pattern）.html">組合模式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

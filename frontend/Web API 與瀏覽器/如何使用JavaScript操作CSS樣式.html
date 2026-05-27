@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 操作 CSS 樣式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>JS 操作樣式：<em>classList</em> 優先，<em>style</em> 屬性備用</h1>
+    <p class="lede">JavaScript 有多種方式修改元素的樣式，但最佳實踐是用 <b>classList</b> 切換預定義的 CSS 類別，保持關注點分離——<b>樣式交給 CSS，邏輯交給 JS</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">三種方式</span>
+    <h2>從推薦到備用的順序</h2>
+    <pre><code><span class="tok-com">// 1. 推薦：切換 CSS 類別</span>
+el.classList.add(<span class="tok-str">'active'</span>);
+el.classList.remove(<span class="tok-str">'hidden'</span>);
+el.classList.toggle(<span class="tok-str">'dark-mode'</span>);
+
+<span class="tok-com">// 2. 動態計算的樣式：直接設 style 屬性</span>
+el.style.width = <span class="tok-str">`${calculatedWidth}px`</span>;
+el.style.backgroundColor = userSelectedColor;
+
+<span class="tok-com">// 3. 全域主題：修改 CSS 變數</span>
+document.documentElement.style.setProperty(<span class="tok-str">'--primary-color'</span>, <span class="tok-str">'#007bff'</span>);
+
+<span class="tok-com">// 讀取計算後樣式（包含繼承的）</span>
+<span class="tok-key">const</span> computed = getComputedStyle(el);
+computed.getPropertyValue(<span class="tok-str">'--primary-color'</span>);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">選擇原則</span>
+    <h2>什麼情況用哪種方式</h2>
+    <table>
+      <thead><tr><th>情況</th><th>建議方式</th></tr></thead>
+      <tbody>
+        <tr><td>狀態切換（active、hover、open）</td><td>classList.toggle/add/remove</td></tr>
+        <tr><td>動態計算的值（使用者拖動設大小）</td><td>element.style.xxx = value</td></tr>
+        <tr><td>全站主題顏色切換</td><td>修改 CSS 自訂屬性（變數）</td></tr>
+        <tr><td>動態載入樣式表</td><td>建立 link 元素並插入 head</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>CSS 自訂屬性（<code>--variable-name</code>）是實現主題切換（dark mode）的最優雅方式：只改一個 CSS 變數，整頁樣式連帶更新。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>getComputedStyle 和 element.style 有何不同？</summary>
+        <p><code>element.style</code> 只回傳內聯樣式（直接寫在 style 屬性的）；<code>getComputedStyle()</code> 回傳最終計算值，包含從 CSS 繼承的樣式，是唯讀的。</p>
+      </details>
+      <details>
+        <summary>element.style.backgroundColor 和 CSS 的 background-color 命名有什麼差異？</summary>
+        <p>CSS 屬性名用連字號（kebab-case），JS 的 style 物件用駝峰命名（camelCase）：<code>background-color</code> → <code>backgroundColor</code>。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 操作樣式有三種方式：<span class="hl">classList</span> 最推薦，透過切換預定義的 CSS 類別保持關注點分離；需要動態計算的值（如使用者拖動設寬度）才直接用 <code>element.style</code>；全站主題切換最優雅的方式是修改<span class="hl"> CSS 自訂屬性</span>。讀取最終計算樣式要用 <code>getComputedStyle()</code>，element.style 只看到內聯樣式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="使用JavaScript新增移除修改HTML元素.html">JS 操作 DOM 元素</a>
+      <a href="什麼是DOM及其結構.html">什麼是 DOM</a>
+      <a href="DOM中屬性與屬性值的差異.html">DOM Attribute vs Property</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

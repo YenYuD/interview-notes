@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>輸入驗證與安全性</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全 · 輸入驗證</div>
+    <h1>所有注入攻擊都有同一個根因：<em>信任使用者輸入</em></h1>
+    <p class="lede">SQL injection、XSS、Command injection——這些攻擊的共同前提是應用程式沒有驗證輸入就直接使用。<b>輸入驗證是安全防線的第一道閘，server 端驗證是唯一真正可靠的保障</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">Client vs Server</span>
+    <h2>兩端驗證，各有職責</h2>
+    <div class="chips">
+      <div class="chip info">Client 端驗證<small>即時回饋 UX，能被繞過（開 DevTools 就行），不能作為安全依據</small></div>
+      <div class="chip good">Server 端驗證<small>唯一可靠的安全關卡，任何輸入都必須在 server 重新驗證</small></div>
+    </div>
+
+    <pre><code><span class="tok-com">// ❌ 只靠 client 端 — 攻擊者可直接送 HTTP request 繞過</span>
+<span class="tok-fn">&lt;input</span> type="email" required pattern="..."<span class="tok-fn">&gt;</span>
+
+<span class="tok-com">// ✅ Server 端重新驗證（Node.js + express-validator）</span>
+app.<span class="tok-fn">post</span>(<span class="tok-str">'/submit'</span>, [
+  <span class="tok-fn">body</span>(<span class="tok-str">'email'</span>).<span class="tok-fn">isEmail</span>(),
+  <span class="tok-fn">body</span>(<span class="tok-str">'age'</span>).<span class="tok-fn">isInt</span>({ min: 0, max: 120 }),
+], (req, res) => {
+  <span class="tok-key">const</span> errors = <span class="tok-fn">validationResult</span>(req);
+  <span class="tok-key">if</span> (!errors.<span class="tok-fn">isEmpty</span>()) <span class="tok-key">return</span> res.<span class="tok-fn">status</span>(400).<span class="tok-fn">json</span>({ errors });
+  <span class="tok-com">// 繼續處理已驗證的輸入</span>
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">驗證策略</span>
+    <h2>白名單 vs 黑名單，淨化 vs 拒絕</h2>
+    <table>
+      <tr><th>策略</th><th>作法</th><th>適用情境</th></tr>
+      <tr><td><b>白名單驗證</b></td><td>只接受符合規則的格式（如 email regex、isAlphanumeric）</td><td>結構化欄位（帳號、電話、日期）</td></tr>
+      <tr><td><b>淨化 Sanitize</b></td><td>移除／轉義危險字元，保留內容</td><td>需允許 HTML 輸入的富文字欄位</td></tr>
+      <tr><td><b>拒絕黑名單</b></td><td>過濾 <code>&lt;script&gt;</code> 等關鍵字</td><td>不推薦，攻擊者容易繞過</td></tr>
+    </table>
+
+    <div class="callout warn"><span class="ico">⚠</span><p><b>注意長度與型別</b>：驗證格式還不夠，還要限制字串長度（防緩衝區溢位）、型別（數字欄位確認是整數），以及必填欄位不為空。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>輸入驗證和輸出跳脫有什麼不同？</summary><p>驗證是在<b>進入系統時</b>確認格式合法；輸出跳脫是在<b>呈現到頁面時</b>把特殊字元轉換為安全文字。兩者互補，缺一不可——驗證擋不住所有非法字元，輸出跳脫才是 XSS 的根本防禦。</p></details>
+      <details><summary>使用 ORM 還需要輸入驗證嗎？</summary><p>仍需要。ORM 防 SQL injection，但不防 XSS（輸出問題）、不防業務邏輯錯誤（如年齡為負數）。驗證層和 ORM 解決不同問題。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「幾乎所有注入攻擊都是因為信任使用者輸入造成的。我的原則是：<span class="hl">client 端驗證只為 UX，server 端驗證才是安全關卡</span>，兩者都必須做。策略上優先用<span class="hl">白名單</span>（只接受已知合法格式），需要 HTML 輸入才用 sanitize-html 等函式庫淨化。輸入驗證是第一道防線，但不能取代輸出跳脫和參數化查詢——各層各司其職。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="跨站腳本攻擊XSS及防範方法.html">XSS 攻擊與防範</a>
+      <a href="防止JavaScript應用程式中的SQL注入漏洞.html">SQL Injection 防範</a>
+      <a href="JavaScript敏感資料處理最佳實踐.html">敏感資料處理</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

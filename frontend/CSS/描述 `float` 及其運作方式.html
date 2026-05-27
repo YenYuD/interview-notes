@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>float 的運作方式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 版面</div>
+    <h1><em>float</em>：仍在文件流中，卻讓父容器「看不見」它</h1>
+    <p class="lede"><b>float</b> 讓元素浮靠左右、文字環繞，但父容器不會包住浮動子元素（高度塌陷）。<b>clearfix</b> 是解決高度塌陷的經典技巧。Flexbox/Grid 出現後，float 用於版面排版的場景大幅減少。</p>
+  </header>
+
+  <section>
+    <span class="num">核心行為</span>
+    <h2>float 和 position: absolute 的關鍵差異</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>float</small>
+        仍在文件流中；周圍文字和行內元素會<strong>環繞</strong>它排列；父容器高度塌陷
+      </div>
+      <div class="chip info">
+        <small>position: absolute</small>
+        完全脫離文件流；其他元素不感知它的存在；父容器更不會展開
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><strong>高度塌陷</strong>：若父容器內只有浮動子元素，父容器高度會縮為 0，後續元素會跑到錯誤位置。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">清除浮動</span>
+    <h2>Clearfix 技巧（經典解法）</h2>
+    <pre><code><span class="tok-com">/* 方法一：偽元素 clearfix */</span>
+<span class="tok-key">.clearfix::after</span> {
+  content: <span class="tok-str">''</span>;
+  display: block;
+  clear: both;
+}
+
+<span class="tok-com">/* 方法二：overflow（建立新 BFC） */</span>
+<span class="tok-key">.parent</span> {
+  overflow: hidden; <span class="tok-com">/* 或 overflow: auto */</span>
+}</code></pre>
+    <div class="aside">
+      <strong>方法三（現代）：</strong>直接改用 Flexbox 或 Grid，根本不需要 float，也不需要 clearfix。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>float 還有哪些現代用途？</summary>
+        <p>主要剩下「文繞圖」效果（文字環繞圖片），這是 Flexbox/Grid 原生不支援的排版效果。配合 <code>shape-outside</code> 還可以做不規則文字環繞。</p>
+      </details>
+      <details>
+        <summary>CSS <code>clear</code> 屬性怎麼用？</summary>
+        <p><code>clear: left</code> 讓元素移到左浮動元素之下；<code>clear: right</code> 移到右浮動之下；<code>clear: both</code> 移到所有浮動元素之下。通常在需要「打斷浮動」的元素或容器的 <code>::after</code> 偽元素上使用。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>float</code> 讓元素靠左或靠右，行內內容會環繞它排列，但元素<span class="hl">仍在文件流中</span>，這點和 <code>position: absolute</code> 不同。主要問題是<span class="hl">父容器高度塌陷</span>——父元素不包住浮動子元素。解法是 <code>clearfix</code>（偽元素 <code>::after</code> 加 <code>clear: both</code>）或對父元素設 <code>overflow: hidden</code> 建立新 BFC。現代版面我都用 <span class="hl">Flexbox 或 Grid</span>，float 只在「文繞圖」時才需要。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="有哪些清除浮動的技術，各自適合什麼情境？.html">清除浮動的各種技術</a>
+      <a href="描述區塊格式化上下文（BFC）及其運作方式.html">BFC 區塊格式化上下文</a>
+      <a href="你有嘗試過新的 CSS Flexbox 或 Grid 規範嗎？.html">CSS Flexbox 與 Grid</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

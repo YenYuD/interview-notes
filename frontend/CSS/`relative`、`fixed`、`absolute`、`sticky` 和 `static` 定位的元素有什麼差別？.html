@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>position 定位</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS 版面</div>
+    <h1>五種 <code>position</code>，差在<em>「相對誰」和「佔不佔位」</em></h1>
+    <p class="lede">static / relative / absolute / fixed / sticky。關鍵兩問：它的 top/left 是相對誰算的？它還佔不佔原本的空間？</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 切換看方塊怎麼動</span>
+    <h2>同一個方塊，五種定位</h2>
+    <p>灰框是「可捲動的容器」，藍方塊套用你選的 position（含 <code>top:8px; left:8px</code>）。試著捲動容器看 fixed / sticky 的差異：</p>
+
+    <div class="lab">
+      <div class="lab-label">position 值</div>
+      <div class="toggle-row" id="row" style="flex-wrap:wrap">
+        <button class="on" data-p="static">static</button>
+        <button data-p="relative">relative</button>
+        <button data-p="absolute">absolute</button>
+        <button data-p="fixed">fixed</button>
+        <button data-p="sticky">sticky</button>
+      </div>
+
+      <div id="scroller" style="position:relative;height:180px;overflow:auto;background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:10px">
+        <div style="height:380px;position:relative">
+          <span style="font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)">↑ 容器內容（可捲動）</span>
+          <div id="ghost" style="display:none;width:96px;height:48px;border:2px dashed var(--line);border-radius:6px;margin-top:8px"></div>
+          <div id="box" style="width:96px;height:48px;background:var(--info-soft);border:2px solid var(--info);border-radius:6px;display:grid;place-items:center;font-family:var(--mono);font-size:.7rem;color:var(--info);margin-top:8px">box</div>
+        </div>
+      </div>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">速查</span>
+    <h2>五種一次看懂</h2>
+    <table>
+      <tr><th>值</th><th>相對誰定位</th><th>佔原位？</th></tr>
+      <tr><td><code>static</code></td><td>正常流（top/left 無效）</td><td>佔</td></tr>
+      <tr><td><code>relative</code></td><td>自己原本的位置</td><td><b>佔</b>（留下空位）</td></tr>
+      <tr><td><code>absolute</code></td><td>最近的已定位祖先</td><td>不佔（脫離流）</td></tr>
+      <tr><td><code>fixed</code></td><td>視窗 viewport</td><td>不佔（捲動不動）</td></tr>
+      <tr><td><code>sticky</code></td><td>到臨界值前像 relative，之後像 fixed</td><td>佔</td></tr>
+    </table>
+    <div class="callout info"><span class="ico">💡</span><p><code>absolute</code> 的「最近已定位祖先」是關鍵——所以常見手法是給父層加 <code>position:relative</code>，當作子層絕對定位的座標原點。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>sticky 沒生效，為什麼？</summary><p>常見原因：沒設定位方向（要有 <code>top</code> 等）、父層有 <code>overflow:hidden/auto</code> 把它的黏附範圍裁掉、或父層高度不足以讓它「黏」。</p></details>
+      <details><summary>absolute 和 fixed 差在哪？</summary><p>參考系不同：absolute 相對「最近已定位祖先」，fixed 相對「視窗」，所以 fixed 捲動時固定不動，常用於回到頂部按鈕、固定導覽列。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會用兩個問題區分：<span class="hl">相對誰、佔不佔位</span>。static 是預設、走正常流；relative 相對自己微調但保留原位；absolute 脫離流、相對<span class="hl">最近已定位祖先</span>；fixed 相對視窗、捲動不動；sticky 是 relative 與 fixed 的混合，超過臨界值才黏住。實務上常用『父 relative ＋ 子 absolute』來定位。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="描述 `z-index` 以及堆疊上下文的形成方式.html">z-index 堆疊</a>
+      <a href="有什麼理由讓你選擇使用 `translate()` 而非 `absolute` 定位，或反之？為什麼？.html">translate vs absolute</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), box=document.getElementById('box'), ghost=document.getElementById('ghost'), log=document.getElementById('log');
+  const info={
+    static:['static（預設）','走正常流，top/left/z-index 全部無效。'],
+    relative:['relative','相對「自己原本的位置」偏移，原位仍留著空位（佔位）。'],
+    absolute:['absolute','脫離流、不佔位，相對「最近已定位祖先」定位。'],
+    fixed:['fixed','脫離流，相對「視窗」定位，捲動時不動。'],
+    sticky:['sticky','捲到臨界值前像 relative，之後黏住像 fixed。']
+  };
+  function render(p){
+    box.style.position = p==='static' ? 'static' : p;
+    box.style.top='8px'; box.style.left='8px';
+    if(p==='static'){ box.style.top=''; box.style.left=''; }
+    ghost.style.display = p==='relative' ? 'block' : 'none';
+    const [t,d]=info[p];
+    log.innerHTML=`<div class="ln c-dim">position: ${t}</div><div class="ln c-ok">→ ${d}</div>`;
+  }
+  row.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    render(b.dataset.p);
+  });
+  render('static');
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>break 與 continue</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 流程控制</div>
+    <h1>迴圈控制的兩個開關：<em>break 終止，continue 跳過</em></h1>
+    <p class="lede"><b>break</b> 讓迴圈提前結束；<b>continue</b> 跳過本次迭代、直接進入下一輪。理解差異，才能正確實作搜尋中斷、條件過濾等常見邏輯。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>break vs continue</h2>
+    <div class="chips">
+      <div class="chip bad"><small>break</small>立即<b>跳出</b>整個迴圈或 switch</div>
+      <div class="chip info"><small>continue</small>跳過本次迭代，<b>繼續</b>下一輪</div>
+    </div>
+    <pre><code><span class="tok-com">// break — 找到目標就停</span>
+<span class="tok-key">for</span> (<span class="tok-key">let</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-num">10</span>; i++) {
+  <span class="tok-key">if</span> (i === <span class="tok-num">5</span>) <span class="tok-key">break</span>;
+  console.log(i); <span class="tok-com">// 0 1 2 3 4</span>
+}
+
+<span class="tok-com">// continue — 跳過特定值</span>
+<span class="tok-key">for</span> (<span class="tok-key">let</span> i = <span class="tok-num">0</span>; i &lt; <span class="tok-num">10</span>; i++) {
+  <span class="tok-key">if</span> (i === <span class="tok-num">5</span>) <span class="tok-key">continue</span>;
+  console.log(i); <span class="tok-com">// 0 1 2 3 4 6 7 8 9</span>
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">switch 中的 break</span>
+    <h2>防止穿透行為</h2>
+    <p>switch 語句中，若省略 <code>break</code> 會發生<b>穿透（fall-through）</b>：從匹配的 case 繼續執行下一個 case，直到遇到 break 或 switch 結束。</p>
+    <pre><code><span class="tok-key">let</span> day = <span class="tok-num">2</span>;
+<span class="tok-key">switch</span> (day) {
+  <span class="tok-key">case</span> <span class="tok-num">1</span>: console.log(<span class="tok-str">'Monday'</span>); <span class="tok-key">break</span>;
+  <span class="tok-key">case</span> <span class="tok-num">2</span>: console.log(<span class="tok-str">'Tuesday'</span>); <span class="tok-key">break</span>; <span class="tok-com">// 若省略 break，會繼續印 Wednesday</span>
+  <span class="tok-key">case</span> <span class="tok-num">3</span>: console.log(<span class="tok-str">'Wednesday'</span>); <span class="tok-key">break</span>;
+}</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>穿透行為偶爾被刻意利用（如多個 case 共用同一段邏輯），但要加上清楚的注解，否則容易被誤判為 bug。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>巢狀迴圈中，break 只跳出哪一層？</summary><p>只跳出最近的一層迴圈。若要跳出外層迴圈，可以使用標籤（label）語法：<code>outer: for(...){ inner: for(...){ break outer; } }</code>，但實務上較少見。</p></details>
+      <details><summary>forEach 中能用 break 嗎？</summary><p>不能。forEach 是函式呼叫而非迴圈語法，break/continue 都無法用。想提前中止，改用傳統 for 迴圈，或用 <code>some()</code>/<code>every()</code> 利用回傳值中斷。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">break 是完全終止迴圈或 switch</span>，continue 是跳過目前這次迭代繼續下一輪。switch 中每個 case 通常需要 break 防止穿透行為。需要注意的是，<span class="hl">forEach 裡無法使用 break</span>，如果需要提前中斷迭代，應改用 for...of 或 some()/every()。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="switch語句的用途.html">switch 語句</a>
+      <a href="三元運算子及其用法.html">三元運算子</a>
+      <a href="JavaScript作用域概念說明.html">作用域概念</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

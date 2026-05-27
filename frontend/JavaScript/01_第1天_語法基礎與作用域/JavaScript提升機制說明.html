@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoisting 提升機制</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">語法 · 作用域</div>
+    <h1>宣告前就用變數，<em>有時 undefined，有時直接報錯</em></h1>
+    <p class="lede">提升（Hoisting）是引擎在執行前先「登記」作用域內的宣告。重點是：<b>var 會被初始化成 undefined，let/const 不會</b>——後者在宣告前是「暫時性死區」。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 宣告前存取會怎樣</span>
+    <h2>同一行 <code>console.log(x)</code>，四種宣告四種命運</h2>
+
+    <div class="lab">
+      <div class="lab-label">選宣告方式</div>
+      <div class="toggle-row" id="row" style="flex-wrap:wrap">
+        <button class="on" data-k="var">var x</button>
+        <button data-k="let">let x</button>
+        <button data-k="const">const x</button>
+        <button data-k="func">function foo()</button>
+      </div>
+      <pre style="margin-top:0"><code id="code"></code></pre>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+    <div class="aside"><b>暫時性死區（TDZ）</b>：let / const 從區塊開頭到宣告處之間，變數存在但不可存取，碰它就 <code>ReferenceError</code>。</div>
+  </section>
+
+  <section>
+    <span class="num">速查表</span>
+    <h2>「宣告前存取」的行為</h2>
+    <table>
+      <tr><th>宣告</th><th>宣告前存取</th></tr>
+      <tr><td><code>var foo</code></td><td><code>undefined</code></td></tr>
+      <tr><td><code>let / const foo</code></td><td><b style="color:var(--bad)">ReferenceError</b>（TDZ）</td></tr>
+      <tr><td><code>class Foo</code></td><td><b style="color:var(--bad)">ReferenceError</b>（TDZ）</td></tr>
+      <tr><td><code>var bar = function(){}</code></td><td><code>undefined</code>（只提升變數）</td></tr>
+      <tr><td><code>function foo(){}</code></td><td><b style="color:var(--good)">正常可呼叫</b>（連定義一起提升）</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>實務上避開所有提升陷阱的方法很簡單：<b>不用 var、用 let/const，並在作用域頂端先宣告</b>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>函式宣告和函式表達式差在哪？</summary><p>函式宣告 <code>function foo(){}</code> 連同定義整個提升，宣告前就能呼叫；函式表達式 <code>var foo = function(){}</code> 只提升變數，宣告前是 undefined，呼叫會 TypeError。</p></details>
+      <details><summary>「提升」是真的把程式碼搬上去嗎？</summary><p>不是。引擎在編譯階段先在作用域建立好變數紀錄（var 設 undefined、let/const 標記為不可用），只是行為看起來像宣告被移到頂端。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「提升是引擎在執行前先登記作用域內的宣告。<span class="hl">var 會初始化成 undefined</span>，所以宣告前讀到 undefined；<span class="hl">let / const / class 不初始化</span>，宣告前讀到會 ReferenceError，這段叫暫時性死區。函式宣告連定義一起提升、可提前呼叫，函式表達式則不行。實務上我一律用 let/const 並在頂端宣告來避免這些坑。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let / var / const</a>
+      <a href="var、let 與 const 的提升差異說明.html">三者提升差異</a>
+      <a href="避免提升問題的方法.html">避免提升問題</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), code=document.getElementById('code'), log=document.getElementById('log');
+  const data={
+    var:['console.log(x); // ?\nvar x = 1;','undefined','宣告被提升、初始化留在原地 → 讀到 undefined','c-req'],
+    let:['console.log(x); // ?\nlet x = 1;','ReferenceError','在暫時性死區，宣告前不可存取','c-bad'],
+    const:['console.log(x); // ?\nconst x = 1;','ReferenceError','同 let，在暫時性死區','c-bad'],
+    func:['foo(); // ?\nfunction foo(){ return \'ok\'; }','\'ok\'','函式宣告連定義整個提升 → 可提前呼叫','c-ok'],
+  };
+  function render(k){
+    const [src,res,why,cls]=data[k];
+    code.textContent=src;
+    log.innerHTML=`<div class="ln c-dim">宣告前存取的結果：</div><div class="ln ${cls}">→ ${res}</div><div class="ln c-dim">// ${why}</div>`;
+  }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(b.dataset.k); });
+  render('var');
+</script>
+</body>
+</html>

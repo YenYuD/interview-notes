@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>淺拷貝與深拷貝</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 記憶體</div>
+    <h1>修改「副本」卻改到「原本」？<em>你用的是淺拷貝</em></h1>
+    <p class="lede"><b>淺拷貝</b>只複製第一層——巢狀物件還是共享同一個記憶體位置。<b>深拷貝</b>遞迴複製所有層級，副本和原本完全獨立。這個差異在 React state 管理中非常關鍵。</p>
+  </header>
+
+  <section>
+    <span class="num">踩雷示範</span>
+    <h2>淺拷貝的陷阱：巢狀物件仍共享</h2>
+    <pre><code><span class="tok-key">const</span> obj = { a: 1, b: { c: 2 } };
+<span class="tok-key">const</span> shallow = { ...obj };
+
+shallow.a = 99;
+console.<span class="tok-fn">log</span>(obj.a);    <span class="tok-com">// 1 ← 沒影響（原始值）</span>
+
+shallow.b.c = 99;
+console.<span class="tok-fn">log</span>(obj.b.c); <span class="tok-com">// 99 ← 被改了！（物件共享參考）</span></code></pre>
+    <div class="aside">第一層的原始值（數字、字串、boolean）是值複製，互不影響；第一層的物件或陣列只複製「指向它的指標」，兩份資料指向同一個東西。</div>
+  </section>
+
+  <section>
+    <span class="num">深拷貝</span>
+    <h2>副本完全獨立，改一個不影響另一個</h2>
+    <pre><code><span class="tok-key">const</span> obj = { a: 1, b: { c: 2 } };
+
+<span class="tok-com">// structuredClone：現代推薦</span>
+<span class="tok-key">const</span> deep = <span class="tok-fn">structuredClone</span>(obj);
+deep.b.c = 99;
+console.<span class="tok-fn">log</span>(obj.b.c); <span class="tok-com">// 2 ← 完全不受影響</span>
+
+<span class="tok-com">// JSON 方法（僅適用純資料）</span>
+<span class="tok-key">const</span> json = JSON.<span class="tok-fn">parse</span>(JSON.<span class="tok-fn">stringify</span>(obj));</code></pre>
+    <table>
+      <thead><tr><th>方法</th><th>類型</th><th>主要限制</th></tr></thead>
+      <tbody>
+        <tr><td><code>{ ...obj }</code></td><td>淺</td><td>巢狀物件共享參考</td></tr>
+        <tr><td><code>Object.assign()</code></td><td>淺</td><td>同上</td></tr>
+        <tr><td><code>structuredClone()</code></td><td>深</td><td>不支援函式</td></tr>
+        <tr><td><code>JSON.parse(stringify)</code></td><td>深</td><td>函式/循環參考不支援</td></tr>
+        <tr><td><code>_.cloneDeep()</code></td><td>深</td><td>需要 Lodash</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React 中為什麼關心淺拷貝 vs 深拷貝？</summary><p>React 的 state 比較用的是淺比較（reference equality）。如果你直接改了巢狀物件的屬性但沒有改外層物件的參考，React 會認為 state 沒有改變而不重新渲染。正確做法是每層都建立新物件，讓參考改變。</p></details>
+      <details><summary>什麼是 structural sharing（結構共享）？</summary><p>Immer 等函式庫利用 Proxy 讓你用可變語法寫不可變更新，內部只建立「有修改到的路徑上」的新物件，未修改的部分繼續共享原始參考，兼顧效能與不可變原則。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「淺拷貝只複製第一層，巢狀物件仍共享參考——改副本的巢狀屬性會改到原本。<span class="hl">深拷貝遞迴複製所有層級，副本完全獨立</span>。現代 JavaScript 推薦用 <code>structuredClone()</code> 做深拷貝；需要相容舊環境或處理函式時用 Lodash。在 React 中這個概念很重要，因為 state 更新需要改變物件參考才能觸發重新渲染。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="複製物件與陣列的方法.html">複製物件與陣列的方法</a>
+      <a href="展開運算子及其用法.html">展開運算子用法</a>
+      <a href="使用展開運算子於陣列與物件的優勢.html">展開運算子優勢</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

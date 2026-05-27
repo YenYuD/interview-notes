@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>函式提升概念</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 提升</div>
+    <h1>function 宣告先呼叫沒問題，<em>function 表達式卻會報錯</em></h1>
+    <p class="lede"><b>函式宣告</b>（function declaration）連定義一起提升，所以可以先呼叫再宣告；<b>函式表達式</b>（function expression）和箭頭函式只有變數名稱提升，定義不提升，先呼叫會噴 TypeError。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>宣告 vs 表達式的提升</h2>
+    <div class="chips">
+      <div class="chip good"><small>函式宣告</small>定義完整提升，可先呼叫</div>
+      <div class="chip bad"><small>函式表達式</small>只有變數名提升（undefined），先呼叫 → TypeError</div>
+      <div class="chip bad"><small>箭頭函式</small>同函式表達式，不完整提升</div>
+    </div>
+    <pre><code><span class="tok-com">// 函式宣告 — 可以先呼叫</span>
+hoisted(); <span class="tok-com">// ✓ "This function is hoisted"</span>
+<span class="tok-key">function</span> hoisted() {
+  console.log(<span class="tok-str">'This function is hoisted'</span>);
+}
+
+<span class="tok-com">// 函式表達式 — 先呼叫會 TypeError</span>
+notHoisted(); <span class="tok-com">// ✗ TypeError: notHoisted is not a function</span>
+<span class="tok-key">var</span> notHoisted = <span class="tok-key">function</span>() {
+  console.log(<span class="tok-str">'Not hoisted'</span>);
+};</code></pre>
+  </section>
+
+  <section>
+    <span class="num">為何如此</span>
+    <h2>引擎處理的順序</h2>
+    <p>函式宣告在編譯期間連函式本體一起放進作用域。函式表達式只是把函式賦值給一個變數，變數本身（var）會提升，但賦值要等到執行到那一行才發生。</p>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>用 <code>let</code>/<code>const</code> 定義函式表達式，在 TDZ 內呼叫會得到 ReferenceError（而非 var 的 TypeError）。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>function 宣告放在 if 區塊內，還會提升嗎？</summary><p>行為因環境而異，存在瀏覽器相容性問題。非嚴格模式下各引擎行為不一致；嚴格模式下函式宣告限制在區塊作用域。建議避免在 if/for 等區塊內使用函式宣告。</p></details>
+      <details><summary>函式宣告和函式表達式在使用上有什麼最佳實踐？</summary><p>現代開發通常傾向使用 const + 箭頭函式（const fn = () => {}），可讀性好且不會被提升造成誤解。若需要具名函式（方便除錯 stack trace），則用函式宣告。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">函式宣告完整提升</span>，連函式本體都在編譯期進入作用域，所以可以在程式碼前面呼叫。<span class="hl">函式表達式不完整提升</span>，只有變數名稱被提升（值是 undefined），在賦值前呼叫會 TypeError 而非 ReferenceError。這是兩者的關鍵差異，也是為什麼說函式宣告可以先用後宣告，表達式不行。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript提升機制說明.html">提升機制說明</a>
+      <a href="提升對函式宣告與表達式的影響.html">提升對宣告與表達式的影響</a>
+      <a href="var、let 與 const 的提升差異說明.html">var/let/const 提升差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

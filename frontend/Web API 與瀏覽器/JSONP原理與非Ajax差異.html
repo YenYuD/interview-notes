@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSONP 原理</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>JSONP：用 <em>&lt;script&gt; 標籤繞過同源政策</em>的古老技巧</h1>
+    <p class="lede">JSONP 是 CORS 出現前跨域取資料的常見手法，<b>利用 script 標籤不受同源限制</b>的特性。了解它有助於讀懂舊程式碼，也是面試考點。</p>
+  </header>
+
+  <section>
+    <span class="num">運作原理</span>
+    <h2>JSONP 怎麼繞過同源政策？</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">客戶端動態建立 <code>&lt;script src="https://api.example.com/data?callback=handleData"&gt;</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">伺服器回傳 <code>handleData({"name":"John"})</code>——一段呼叫回調函式的 JS 程式碼</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">瀏覽器執行該腳本，觸發預先定義的 <code>handleData()</code> 函式，取得資料</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">handleData</span>(data) {
+  console.log(data); <span class="tok-com">// { name: "John" }</span>
+}
+
+<span class="tok-key">const</span> script = document.createElement(<span class="tok-str">'script'</span>);
+script.src = <span class="tok-str">'https://api.example.com/data?callback=handleData'</span>;
+document.body.appendChild(script);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">JSONP vs AJAX</span>
+    <h2>兩者有什麼本質上的差別？</h2>
+    <table>
+      <thead><tr><th>面向</th><th>JSONP</th><th>AJAX（fetch/XHR）</th></tr></thead>
+      <tbody>
+        <tr><td>傳輸機制</td><td><code>&lt;script&gt;</code> 標籤</td><td>XMLHttpRequest / fetch()</td></tr>
+        <tr><td>HTTP 方法</td><td>僅限 GET</td><td>GET、POST、PUT、DELETE…</td></tr>
+        <tr><td>同源政策</td><td>天然繞過</td><td>需要 CORS 許可</td></tr>
+        <tr><td>錯誤處理</td><td>非常有限</td><td>完整 catch/onerror</td></tr>
+        <tr><td>安全性</td><td>有 XSS 風險</td><td>可搭配 CORS 安全控管</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>現代開發<b>不建議使用 JSONP</b>。CORS 是更安全、更彈性的跨域解法；若需跨域，優先用 CORS。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>JSONP 為什麼有 XSS 風險？</summary>
+        <p>伺服器回傳的是可執行的 JavaScript，若外部伺服器遭入侵或被替換成惡意腳本，瀏覽器會直接執行，攻擊者可竊取 Cookie 或操作 DOM。</p>
+      </details>
+      <details>
+        <summary>CORS 和 JSONP 如何選擇？</summary>
+        <p>能控制伺服器端就用 CORS：在回應標頭加 <code>Access-Control-Allow-Origin</code>，安全且支援所有 HTTP 方法。JSONP 只在維護無法修改的舊 API 時才考慮。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JSONP 是利用 <span class="hl">&lt;script&gt; 標籤不受同源政策限制</span>的特性來跨域取資料。流程是：動態插入一個 script 標籤，src 帶上 callback 函式名稱，伺服器回傳呼叫該函式的 JS，瀏覽器執行後就拿到資料了。但它<span class="hl">只支援 GET、沒有錯誤處理、有 XSS 安全風險</span>，現代開發應改用 CORS。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋JavaScript的同源政策.html">同源政策是什麼</a>
+      <a href="使用Fetch API發送HTTP請求.html">使用 Fetch API</a>
+      <a href="詳細解釋AJAX.html">AJAX 完整說明</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

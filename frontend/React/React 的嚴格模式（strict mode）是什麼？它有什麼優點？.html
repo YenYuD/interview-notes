@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React StrictMode</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 開發工具</div>
+    <h1>StrictMode：在開發期故意<em>執行兩次</em>，提早暴露潛在問題</h1>
+    <p class="lede"><code>&lt;React.StrictMode&gt;</code> 是開發環境專用的工具組件，<b>不渲染任何可見 UI</b>，也<b>不影響 production</b>。它的主要手段是刻意雙重調用 render 和 effect，讓非純函式的問題立刻現形。</p>
+  </header>
+
+  <section>
+    <span class="num">它做什麼</span>
+    <h2>四種主動檢測</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>雙重調用 render 函式</b>：在 React 18+，開發模式下 render 會被呼叫兩次，逼出不純的 render（如直接修改外部變數）。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>雙重執行 Effect</b>：React 18+ 在 Strict Mode 下，<code>useEffect</code> 會 mount → unmount → remount，確認 cleanup 正確。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>偵測已棄用 API</b>：如 <code>componentWillMount</code>、字串 ref、<code>findDOMNode</code> 等，在 console 發出警告。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>警告 context 舊版 API</b>：偵測使用 Legacy Context API 的組件。</div>
+      </div>
+    </div>
+    <div class="callout tip"><span class="ico">✅</span><p>建議在根元件用 <code>&lt;React.StrictMode&gt;</code> 包裹整個 App，只在開發階段生效，不影響 production 效能。</p></div>
+  </section>
+
+  <section>
+    <span class="num">常見誤解</span>
+    <h2>Effect 執行兩次不是 bug</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p>React 18 Strict Mode 下，<code>useEffect</code> 的確會跑兩次（mount / unmount / remount）。這是刻意設計，用來測試你的 cleanup 是否完整。如果你的 effect 跑兩次結果不同，表示你的 cleanup 函式有問題，而不是 Strict Mode 有 bug。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Strict Mode 會影響效能嗎？</summary><p>只在開發環境生效，production build 會自動移除 Strict Mode 的額外行為。所以對 production 效能零影響。</p></details>
+      <details><summary>可以只對某個子樹啟用 Strict Mode 嗎？</summary><p>可以，<code>&lt;StrictMode&gt;</code> 只影響其後代組件，你可以只包裹需要檢查的子樹。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「StrictMode 是開發環境的診斷工具，<span class="hl">不渲染 UI 也不影響 production</span>。它的核心手法是雙重執行 render 和 effect，逼出非純 render 和沒有正確 cleanup 的 effect。同時也會偵測已棄用 API（如 componentWillMount）並在 console 警告。實務上應在整個 App 根層啟用，讓問題在開發期提早浮現。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="`useEffect` 的依賴陣列（dependency array）會影響什麼？.html">useEffect 依賴陣列</a>
+      <a href="React 的反模式（anti-patterns）有哪些？.html">React 反模式</a>
+      <a href="你如何除錯（debug）React 應用程式？.html">除錯 React 應用</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

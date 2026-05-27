@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型鏈</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">物件 · 原型</div>
+    <h1>物件身上沒有的方法，<em>它會「往上」找</em></h1>
+    <p class="lede">存取屬性時，JS 先看物件自己，沒有就<b>沿著原型一層層往上找</b>，直到找到、或到鏈的盡頭 <code>null</code>。這條路徑就是原型鏈，也是 JS 繼承的本質。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 查找路徑視覺化</span>
+    <h2>呼叫一個方法，JS 跑了幾層？</h2>
+    <pre><code><span class="tok-key">const</span> arr = [1, 2, 3];
+arr.<span class="tok-fn">toString</span>();  <span class="tok-com">// arr 自己沒有 toString…</span></code></pre>
+    <p>點下方方法，看 JS 沿原型鏈往上找到哪一層才命中：</p>
+
+    <div class="lab">
+      <div class="lab-label">在 [1,2,3] 上呼叫</div>
+      <div class="toggle-row" id="row" style="flex-wrap:wrap">
+        <button class="on" data-k="push">arr.push()</button>
+        <button data-k="toString">arr.toString()</button>
+        <button data-k="hasOwn">arr.hasOwnProperty()</button>
+        <button data-k="missing">arr.fly()</button>
+      </div>
+      <div class="flow" id="flow"></div>
+    </div>
+    <div class="aside">每往上一層就是一次查找成本。鏈尾是 <code>Object.prototype</code>，再上去就是 <code>null</code>——找不到就回傳 <code>undefined</code>（或方法呼叫報錯）。</div>
+  </section>
+
+  <section>
+    <span class="num">運作方式</span>
+    <h2>三步驟</h2>
+    <ol>
+      <li>先找<b>物件自己</b>的屬性。</li>
+      <li>沒有 → 找它的<b>原型</b>（<code>__proto__</code> / <code>建構子.prototype</code>）。</li>
+      <li>還沒有 → 找原型的原型…一路到 <code>null</code> 為止。</li>
+    </ol>
+    <div class="callout tip"><span class="ico">✅</span><p>把方法掛在 <code>Person.prototype</code> 上，<b>所有實例共用同一份</b>，不必每個物件各存一份，省記憶體——這就是原型的價值。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>__proto__ 和 prototype 差在哪？</summary><p><code>prototype</code> 是「函式」上的屬性，建立實例時當作它們的原型；<code>__proto__</code>（即 <code>[[Prototype]]</code>）是「物件」實際指向的原型。<code>new Person()</code> 後，實例的 <code>__proto__ === Person.prototype</code>。</p></details>
+      <details><summary>怎麼只查自有屬性、不含繼承的？</summary><p>用 <code>obj.hasOwnProperty(key)</code> 或 <code>Object.hasOwn(obj, key)</code>；<code>for...in</code> 會跑到繼承屬性，要小心。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「原型鏈是 JS 的繼承機制。存取屬性時，引擎<span class="hl">先找物件自己，沒有就沿原型往上找</span>，直到命中或到 <span class="hl">null</span>。把共用方法放在 <code>prototype</code> 上，所有實例共享同一份、省記憶體。實例的 <code>__proto__</code> 指向建構子的 <code>prototype</code>，這串連起來就是原型鏈。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript原型繼承原理解析.html">原型繼承原理</a>
+      <a href="經典繼承與原型繼承差異.html">經典 vs 原型繼承</a>
+      <a href="new關鍵字的用途.html">new 關鍵字</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), flow=document.getElementById('flow');
+  // 每層：名稱 + 是否命中
+  const chains={
+    push:[['arr 自己','miss'],['Array.prototype','hit: push 在這']],
+    toString:[['arr 自己','miss'],['Array.prototype','miss'],['Object.prototype','hit: toString 在這']],
+    hasOwn:[['arr 自己','miss'],['Array.prototype','miss'],['Object.prototype','hit: hasOwnProperty 在這']],
+    missing:[['arr 自己','miss'],['Array.prototype','miss'],['Object.prototype','miss'],['null','到底了：找不到 → TypeError']],
+  };
+  function render(k){
+    const steps=chains[k];
+    flow.innerHTML = steps.map((s,i)=>{
+      const hit = s[1].startsWith('hit') || s[1].startsWith('到底');
+      const isFail = s[1].startsWith('到底');
+      const dotCls = (s[1].startsWith('hit'))?'flow-dot good':'flow-dot';
+      const mark = s[1].startsWith('hit')?'✓':(isFail?'✗':(i+1));
+      return `<div class="flow-step"><div class="${dotCls}" ${isFail?'style="background:var(--bad)"':''}>${mark}</div>`+
+             `<div class="flow-body"><h4>${s[0]}</h4><p>${s[1]==='miss'?'沒有這個方法，繼續往上 ↑':s[1]}</p></div></div>`;
+    }).join('');
+  }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(b.dataset.k); });
+  render('push');
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>getter 與 setter</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1>屬性背後的<em>守門員</em>：getter 與 setter</h1>
+    <p class="lede">getter 和 setter 讓你<b>攔截屬性的讀取與寫入</b>，在不改變呼叫語法的前提下，偷偷加上驗證、轉換或計算邏輯。</p>
+  </header>
+
+  <section>
+    <span class="num">核心語法</span>
+    <h2>用 get / set 定義存取器屬性</h2>
+    <pre><code><span class="tok-key">const</span> person = {
+  _name: <span class="tok-str">'John'</span>,
+
+  <span class="tok-key">get</span> <span class="tok-fn">name</span>() {              <span class="tok-com">// 讀取時觸發</span>
+    <span class="tok-key">return</span> <span class="tok-key">this</span>._name;
+  },
+  <span class="tok-key">set</span> <span class="tok-fn">name</span>(val) {           <span class="tok-com">// 寫入時觸發</span>
+    <span class="tok-key">if</span> (val.trim().length > 0) <span class="tok-key">this</span>._name = val;
+    <span class="tok-key">else</span> console.log(<span class="tok-str">'Invalid name'</span>);
+  }
+};
+
+console.log(person.name);   <span class="tok-com">// 'John'  ← getter</span>
+person.name = <span class="tok-str">'Jane'</span>;       <span class="tok-com">// ← setter，帶驗證</span>
+person.name = <span class="tok-str">''</span>;          <span class="tok-com">// 'Invalid name'</span></code></pre>
+    <div class="aside">下劃線 <code>_name</code> 是慣例，暗示「內部屬性，請透過 getter/setter 存取」。</div>
+  </section>
+
+  <section>
+    <span class="num">四種典型用途</span>
+    <h2>為何需要 getter / setter？</h2>
+    <div class="chips">
+      <div class="chip info">
+        <strong>封裝實作</strong>
+        <small>外界只看 <code>obj.name</code>，內部儲存格式可任意改變</small>
+      </div>
+      <div class="chip info">
+        <strong>資料驗證</strong>
+        <small>setter 可在賦值前檢查合法性，拒絕無效資料</small>
+      </div>
+      <div class="chip good">
+        <strong>計算屬性</strong>
+        <small>getter 可根據其他屬性即時計算（如 <code>fullName</code> = 名 + 姓）</small>
+      </div>
+      <div class="chip info">
+        <strong>副作用</strong>
+        <small>setter 可觸發 log、事件通知、UI 更新等</small>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>getter / setter 和 Object.defineProperty 的關係？</summary><p>兩者等效。<code>get name(){}</code> 語法是 <code>Object.defineProperty(obj, 'name', { get(){ … } })</code> 的語法糖，都定義存取器屬性（accessor property），而非資料屬性（data property）。</p></details>
+      <details><summary>getter 只定義不定義 setter，會怎樣？</summary><p>對該屬性賦值會靜默失敗（非嚴格模式），或在嚴格模式下拋 TypeError。</p></details>
+      <details><summary>在 class 裡也能用 getter / setter 嗎？</summary><p>可以，語法完全相同，寫在 class 主體內即可。它們會定義在類別的 <code>prototype</code> 上。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「getter 和 setter 讓我在物件屬性的讀取和寫入之間插入邏輯，<span class="hl">外部呼叫語法（點記法）完全不變</span>。getter 適合做計算屬性，setter 適合加驗證或觸發副作用。底層等同 <code>Object.defineProperty</code> 設定存取器屬性。在需要封裝內部狀態、又想保持簡潔 API 時很實用。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript物件屬性標誌與描述符.html">屬性標誌與描述符</a>
+      <a href="JavaScript中建立物件的多種方法.html">建立物件的多種方法</a>
+      <a href="物件屬性存取：點記法與中括號記法差異.html">點記法 vs 中括號記法</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>展開運算子用法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 展開運算子</div>
+    <h1>三個點，<em>把可迭代物件攤開的魔法</em></h1>
+    <p class="lede"><b>展開運算子（Spread operator）</b>用 <code>...</code> 把陣列、字串、Set 等可迭代物件的元素「攤開」到新的陣列或函式呼叫中。複製、合併、傳參——三種最常見的應用場景。</p>
+  </header>
+
+  <section>
+    <span class="num">四種用法</span>
+    <h2>陣列、物件、字串、函式參數</h2>
+    <pre><code><span class="tok-com">// 1. 複製陣列（淺層）</span>
+<span class="tok-key">const</span> copy = [...[1, 2, 3]];          <span class="tok-com">// [1, 2, 3]</span>
+
+<span class="tok-com">// 2. 合併陣列</span>
+<span class="tok-key">const</span> merged = [...[1,2], ...[3,4]];  <span class="tok-com">// [1, 2, 3, 4]</span>
+
+<span class="tok-com">// 3. 物件展開（淺層複製／合併）</span>
+<span class="tok-key">const</span> newObj = { ...obj1, ...obj2 };
+
+<span class="tok-com">// 4. 函式呼叫傳陣列</span>
+Math.<span class="tok-fn">max</span>(...[3, 1, 4, 1, 5]);         <span class="tok-com">// 5（取代 apply）</span>
+
+<span class="tok-com">// 5. 字串拆成字元陣列</span>
+[...<span class="tok-str">'hello'</span>];                         <span class="tok-com">// ['h','e','l','l','o']</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">限制</span>
+    <h2>不是所有東西都能展開</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>可以展開</small>
+        陣列、字串、Set、Map、Generator
+      </div>
+      <div class="chip bad">
+        <small>不能展開進陣列</small>
+        普通物件（非 iterable）
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 物件不能展開進陣列</span>
+[...{ a: 1 }]; <span class="tok-com">// ❌ TypeError: not iterable</span>
+
+<span class="tok-com">// 但陣列可以展開進物件（取 index 為鍵）</span>
+{ ...[1, 2, 3] }; <span class="tok-com">// ✅ { 0: 1, 1: 2, 2: 3 }</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>展開運算子是<b>淺層複製</b>——巢狀物件或陣列只複製參考，不複製內容。需要深拷貝時改用 <code>structuredClone()</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>展開運算子和 Object.assign() 有什麼差異？</summary><p>兩者都是淺層複製。差別在：<code>Object.assign()</code> 會觸發目標物件的 setter；展開則不會，直接定義屬性。另外 <code>Object.assign()</code> 回傳目標物件（有副作用），展開則建立全新物件。</p></details>
+      <details><summary>展開進陣列和 concat() 的差異？</summary><p>功能幾乎相同，但展開語法更直觀且能在任意位置插入：<code>[...a, 0, ...b]</code>。<code>concat</code> 在需要鏈式操作時更適合。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「展開運算子（<code>...</code>）把可迭代物件展開成個別元素。最常用在三個地方：<span class="hl">複製陣列或物件（淺層）、合併多個陣列或物件、把陣列當函式參數傳入</span>。要注意它是淺層複製，巢狀物件共用同一個參考；需要深拷貝時要另外處理。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript展開語法與剩餘語法的差異與優點.html">展開 vs 剩餘語法</a>
+      <a href="使用展開運算子於陣列與物件的優勢.html">展開運算子優勢</a>
+      <a href="淺拷貝與深拷貝差異說明.html">淺拷貝與深拷貝</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

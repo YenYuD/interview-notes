@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多語言網站設計注意事項</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">HTML / i18n</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">HTML / 國際化</div>
+    <h1>多語言網站的陷阱比你想的<em>多得多</em></h1>
+    <p class="lede">多語言網站（i18n）不只是翻譯文字。<b>文字長度差異、閱讀方向、日期格式、文字不能放圖片</b>——每一項都是實際踩過才知道的坑。</p>
+  </header>
+
+  <section>
+    <span class="num">技術實作</span>
+    <h2>SEO 與語言宣告</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><code>&lt;html lang="zh-TW"&gt;</code> — 宣告頁面語言，影響螢幕閱讀器和搜尋引擎</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">URL 包含語系（<code>/en-us/page</code> 或 <code>en.example.com</code>）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><code>&lt;link rel="alternate" hreflang="..."&gt;</code> — 告知搜尋引擎各語言版本 URL</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><code>hreflang="x-default"</code> — 指定無法匹配語言時的備用頁面</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">設計踩坑</span>
+    <h2>翻譯後版面常出的問題</h2>
+    <table>
+      <thead>
+        <tr><th>問題</th><th>說明</th><th>解法</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>文字長度差異</td><td>德語/法語比英語長 20-40%，按鈕、標籤可能超出</td><td>避免固定寬度，用 min-width + padding</td></tr>
+        <tr><td>閱讀方向（RTL）</td><td>阿拉伯語、希伯來語從右到左書寫</td><td>用 <code>dir="rtl"</code> 和 CSS logical properties</td></tr>
+        <tr><td>字串串接</td><td><code>"The date is " + date</code> 在不同語言語順不同</td><td>使用 i18n 翻譯函式 <code>t('date_msg', {date})</code></td></tr>
+        <tr><td>文字放圖片</td><td>每種語言需要不同版本的圖片</td><td>改用 CSS 疊加文字，或純文字排版</td></tr>
+        <tr><td>日期/貨幣格式</td><td>美式 May 31, 2024 vs 歐式 31 May 2024</td><td>用 <code>Intl.DateTimeFormat</code> 依語系格式化</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">進階注意</span>
+    <h2>語系 vs 語言的差異</h2>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>注意區分<strong>語言（language）</strong>和<strong>語系（locale）</strong>：同一種語言在不同國家有差異。<code>en-US</code>（美式英語）和 <code>en-GB</code>（英式英語）拼法不同；<code>zh-TW</code>（繁體中文）和 <code>zh-CN</code>（簡體中文）字形完全不同，不能混用。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>CSS Logical Properties 是什麼？為什麼 RTL 需要它？</summary>
+        <p>傳統 CSS 用 <code>margin-left</code>、<code>padding-right</code> 等方向性屬性，RTL 語言時需要寫大量覆蓋。CSS Logical Properties（如 <code>margin-inline-start</code>、<code>padding-block-end</code>）用邏輯方向（block/inline）而非物理方向，自動隨 <code>dir</code> 屬性切換，讓 LTR/RTL 共用一套 CSS。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「多語言網站有幾個容易踩的坑：首先是<span class="hl">文字長度差異</span>——德文比英文長很多，按鈕、標籤要避免固定寬度；其次是<span class="hl">不要串接翻譯字串</span>（語順不同的語言會出錯），要用帶參數的翻譯函式；閱讀方向（RTL）要用 <code>dir="rtl"</code> 和 CSS Logical Properties；日期、貨幣要用 <code>Intl</code> API 依語系格式化；文字絕對不能放在點陣圖裡。SEO 面要設 <code>hreflang</code>，<code>lang</code> 屬性也要正確設定。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你如何提供包含多語言內容的頁面？.html">多語言頁面的提供方式</a>
+      <a href="doctype 有什麼作用？.html">DOCTYPE 的作用</a>
+      <a href="有哪些不同的方式可以在視覺上隱藏內容（同時讓螢幕閱讀器仍可存取）？.html">視覺隱藏內容的技術</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

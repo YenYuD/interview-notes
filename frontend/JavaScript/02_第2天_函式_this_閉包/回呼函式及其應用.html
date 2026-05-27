@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回呼函式及其應用</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式・非同步</div>
+    <h1>把「接下來要做什麼」當參數傳進去：<em>Callback 回呼函式</em></h1>
+    <p class="lede"><b>回呼函式</b>是作為參數傳入另一個函式，並在某件事完成後被呼叫的函式。它是 JavaScript<b>非同步程式設計</b>的基石，也是理解 Promise / async-await 的前提。</p>
+  </header>
+
+  <section>
+    <span class="num">同步 vs 非同步</span>
+    <h2>兩種使用情境</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>同步回呼：立即執行</small>
+        <pre><code>[1, 2, 3].forEach(n =&gt; console.log(n));
+// 立即依序輸出 1, 2, 3</code></pre>
+      </div>
+      <div class="chip info">
+        <small>非同步回呼：等完成再執行</small>
+        <pre><code>setTimeout(() =&gt; {
+  console.log('1 秒後才執行');
+}, 1000);</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">三大應用場景</span>
+    <h2>回呼函式在哪裡出現？</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>事件處理</strong> — 告訴瀏覽器「使用者點擊時執行這個」
+          <pre><code>btn.addEventListener('click', () =&gt; doSomething());</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>計時器</strong> — <code>setTimeout</code> / <code>setInterval</code>
+          <pre><code>setInterval(() =&gt; updateClock(), 1000);</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>陣列高階方法</strong> — 把操作邏輯外包
+          <pre><code>const evens = [1,2,3,4].filter(n =&gt; n % 2 === 0);</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>回呼函式巢狀太深會造成<b>Callback Hell（回呼地獄）</b>，程式碼難以維護。現代 JavaScript 用 <b>Promise</b> 和 <b>async/await</b> 解決這個問題。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>回呼地獄（Callback Hell）是什麼？怎麼解？</summary><p>多個非同步操作依序串接時，回呼不斷巢狀縮排，形如金字塔，難以閱讀和錯誤處理。解法：Promise 鏈式（<code>.then</code>）或 async/await 扁平化。</p></details>
+      <details><summary>回呼和 Promise 的錯誤處理有什麼不同？</summary><p>傳統回呼慣例用 Node.js 風格 <code>(err, data)</code> 第一個參數傳錯誤，容易被忽略；Promise 用 <code>.catch()</code> 或 try/catch 更統一，且錯誤未處理時有明確警告。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「回呼函式是<span class="hl">作為參數傳入、在特定時機被呼叫</span>的函式。它是 JavaScript 非同步程式設計的基礎——事件監聽、setTimeout、AJAX 都依賴它。缺點是多層巢狀會形成<span class="hl">回呼地獄</span>，可讀性差且難處理錯誤。這也是 Promise 和 async/await 出現的原因。現代程式碼我優先用 async/await，但理解回呼是理解整個非同步模型的基礎。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中高階函式的定義.html">高階函式定義</a>
+      <a href="JavaScript匿名函式的典型應用.html">匿名函式的典型應用</a>
+      <a href="事件處理器中this綁定概念解析.html">事件處理器中 this 綁定</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

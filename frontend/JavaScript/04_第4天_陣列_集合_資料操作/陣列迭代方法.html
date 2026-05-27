@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陣列迭代方法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 陣列</div>
+    <h1>同樣是跑陣列，<em>選對方法才是主角</em></h1>
+    <p class="lede">JavaScript 的陣列迭代不只一條路：<b>for 迴圈</b>給你完整控制，<b>forEach / map / filter / reduce</b> 讓意圖一目了然，<b>for...of</b> 兼顧彈性與可讀性。</p>
+  </header>
+
+  <section>
+    <span class="num">方法速查</span>
+    <h2>六種主流迭代方式一覽</h2>
+    <table>
+      <thead><tr><th>方法</th><th>回傳值</th><th>可中斷？</th><th>最適情境</th></tr></thead>
+      <tbody>
+        <tr><td><code>for</code></td><td>—</td><td>✅ break</td><td>完全自訂控制、需要跳索引</td></tr>
+        <tr><td><code>for...of</code></td><td>—</td><td>✅ break</td><td>可迭代物件，語法簡潔</td></tr>
+        <tr><td><code>forEach</code></td><td>undefined</td><td>❌</td><td>純副作用操作</td></tr>
+        <tr><td><code>map</code></td><td>新陣列</td><td>❌</td><td>轉換每個元素</td></tr>
+        <tr><td><code>filter</code></td><td>新陣列</td><td>❌</td><td>篩選符合條件的元素</td></tr>
+        <tr><td><code>reduce</code></td><td>單一值</td><td>❌</td><td>累積成一個結果</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">核心範例</span>
+    <h2>map → filter → reduce 的鏈式思維</h2>
+    <pre><code><span class="tok-com">// 原始資料</span>
+<span class="tok-key">const</span> nums = [1, 2, 3, 4, 5];
+
+<span class="tok-com">// map：每個元素乘 2</span>
+nums.<span class="tok-fn">map</span>(n => n * 2);       <span class="tok-com">// [2, 4, 6, 8, 10]</span>
+
+<span class="tok-com">// filter：只留偶數</span>
+nums.<span class="tok-fn">filter</span>(n => n % 2 === 0); <span class="tok-com">// [2, 4]</span>
+
+<span class="tok-com">// reduce：加總</span>
+nums.<span class="tok-fn">reduce</span>((acc, n) => acc + n, 0); <span class="tok-com">// 15</span></code></pre>
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p><code>map</code> / <code>filter</code> / <code>reduce</code> 都<b>不修改原陣列</b>，符合函式式編程的不可變原則。需要中途跳出迴圈時，改用 <code>for...of</code> + <code>break</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">取得索引</span>
+    <h2>迭代時拿到 index 的三種姿勢</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>推薦</small>
+        <code>arr.forEach((el, i) => ...)</code>
+      </div>
+      <div class="chip good">
+        <small>for...of + entries</small>
+        <code>for (const [i, el] of arr.entries())</code>
+      </div>
+      <div class="chip info">
+        <small>傳統</small>
+        <code>for (let i = 0; i &lt; arr.length; i++)</code>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>forEach 和 map 最大的差別？</summary><p><code>forEach</code> 回傳 <code>undefined</code>，純粹執行副作用；<code>map</code> 回傳<b>新陣列</b>，不改動原始資料。如果你不需要新陣列，用 <code>forEach</code> 語意更清晰。</p></details>
+      <details><summary>reduce 怎麼用來「把陣列轉物件」？</summary><p><code>arr.reduce((acc, item) =&gt; ({ ...acc, [item.id]: item }), {})</code>——初始值給空物件，每輪把元素合併進去，是常見的 normalize 技巧。</p></details>
+      <details><summary>哪些方法可以提早終止？</summary><p><code>forEach</code>、<code>map</code>、<code>filter</code>、<code>reduce</code> 都<b>無法</b>用 break 中斷。需要提早終止時，用 <code>for</code> / <code>for...of</code> + <code>break</code>，或用 <code>Array.prototype.some</code>（找到就停）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JavaScript 有六種常見的陣列迭代方式。我傾向依語意選擇：<span class="hl">需要轉換用 map，篩選用 filter，累積用 reduce，純副作用用 forEach</span>；需要提早中斷時才回頭用 <code>for...of</code> 或傳統 <code>for</code> 迴圈。這樣程式碼的意圖會比較清晰。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何在陣列迭代中取得元素索引.html">迭代時取得索引</a>
+      <a href="陣列元素的新增、刪除與更新方法.html">陣列新增刪除更新</a>
+      <a href="JavaScript中遍歷物件屬性與陣列元素的語法.html">遍歷物件與陣列語法</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

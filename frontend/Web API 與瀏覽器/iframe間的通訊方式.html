@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iframe 跨框架通訊</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>iframe 跨框架通訊：<em>postMessage</em> 是唯一安全選項</h1>
+    <p class="lede">iframe 與父頁面可能來自不同網域，受同源政策限制，無法直接存取彼此的 DOM。<b>postMessage API</b> 提供安全的跨來源訊息傳遞機制，是業界標準解法。</p>
+  </header>
+
+  <section>
+    <span class="num">postMessage 用法</span>
+    <h2>發送方指定目標來源，接收方驗證來源</h2>
+    <pre><code><span class="tok-com">// 父頁面 → 發送給 iframe</span>
+<span class="tok-key">const</span> iframe = document.querySelector(<span class="tok-str">'iframe'</span>);
+iframe.contentWindow.postMessage(
+  { type: <span class="tok-str">'UPDATE'</span>, data: 42 },
+  <span class="tok-str">'https://iframe.example.com'</span>  <span class="tok-com">// 指定目標來源（不要用 '*'）</span>
+);
+
+<span class="tok-com">// iframe 內部 → 接收訊息</span>
+window.addEventListener(<span class="tok-str">'message'</span>, (event) => {
+  <span class="tok-com">// 驗證來源！防止惡意頁面注入</span>
+  <span class="tok-key">if</span> (event.origin !== <span class="tok-str">'https://parent.example.com'</span>) <span class="tok-key">return</span>;
+  console.log(event.data); <span class="tok-com">// { type: 'UPDATE', data: 42 }</span>
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">安全要點</span>
+    <h2>兩個必做的安全檢查</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>發送時</small>
+        <p>第二個參數指定確切來源，<b>不要用 <code>'*'</code></b>，否則任何頁面都能收到訊息</p>
+      </div>
+      <div class="chip good">
+        <small>接收時</small>
+        <p>驗證 <code>event.origin</code>，確保訊息來自預期的可信來源</p>
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>不驗證 <code>event.origin</code> 是嚴重的安全漏洞，惡意網站可以嵌入你的 iframe 並注入偽造訊息。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>同源的 iframe 有什麼捷徑？</summary>
+        <p>同源時可以直接用 <code>iframe.contentDocument</code> 或 <code>iframe.contentWindow</code> 存取 iframe 的 DOM 和 JS，不需要 postMessage。但跨來源就只能用 postMessage。</p>
+      </details>
+      <details>
+        <summary>除了 postMessage，還有其他跨框架通訊方式嗎？</summary>
+        <p>可以用 URL hash（讀取 <code>location.hash</code>）做單向傳遞，但功能有限且不安全。現代開發幾乎只用 postMessage。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「iframe 和父頁面跨域通訊的標準方式是 <span class="hl">window.postMessage()</span>。父頁面用 <code>iframe.contentWindow.postMessage(data, targetOrigin)</code> 發送，目標方監聽 message 事件接收。安全關鍵是：<span class="hl">發送時指定精確的 targetOrigin，接收時驗證 event.origin</span>，兩步缺一不可，否則會有跨站訊息注入的風險。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋JavaScript的同源政策.html">同源政策說明</a>
+      <a href="解釋 WebSocket API 概念.html">WebSocket API</a>
+      <a href="JSONP原理與非Ajax差異.html">JSONP 繞過同源政策</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

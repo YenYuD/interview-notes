@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 模組：檔案間共享程式碼</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 模組系統</div>
+    <h1>ESM 與 CommonJS：<em>兩套模組</em>，一張對照表</h1>
+    <p class="lede">現代瀏覽器與 Node.js 各有偏好，<b>ES Modules（ESM）</b> 是語言標準，<b>CommonJS</b> 是 Node.js 的傳統格式。面試考的不只是語法，而是你知不知道兩者的差異與選擇時機。</p>
+  </header>
+
+  <section>
+    <span class="num">語法對照</span>
+    <h2>ESM vs CommonJS 一眼看清</h2>
+    <table>
+      <thead>
+        <tr><th>特性</th><th>ES Modules (ESM)</th><th>CommonJS (CJS)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>匯出</td>
+          <td><code>export</code> / <code>export default</code></td>
+          <td><code>module.exports</code></td>
+        </tr>
+        <tr>
+          <td>匯入</td>
+          <td><code>import { fn } from './m.js'</code></td>
+          <td><code>const fn = require('./m.js')</code></td>
+        </tr>
+        <tr>
+          <td>載入時機</td>
+          <td>靜態分析，編譯時確定</td>
+          <td>執行時動態載入</td>
+        </tr>
+        <tr>
+          <td>Tree Shaking</td>
+          <td>支援（未用到的 export 可被移除）</td>
+          <td>不支援</td>
+        </tr>
+        <tr>
+          <td>環境</td>
+          <td>現代瀏覽器、Node.js（需 .mjs 或 type:module）</td>
+          <td>Node.js 預設</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">命名匯出 vs 預設匯出</span>
+    <h2>export vs export default</h2>
+    <pre><code><span class="tok-com">// utils.js — 命名匯出（可多個）</span>
+<span class="tok-key">export function</span> <span class="tok-fn">add</span>(a, b) { <span class="tok-key">return</span> a + b; }
+<span class="tok-key">export const</span> PI = <span class="tok-str">3.14</span>;
+
+<span class="tok-com">// main.js — 具名匯入（需大括號）</span>
+<span class="tok-key">import</span> { add, PI } <span class="tok-key">from</span> <span class="tok-str">'./utils.js'</span>;
+
+<span class="tok-com">// math.js — 預設匯出（只能一個）</span>
+<span class="tok-key">export default function</span> <span class="tok-fn">subtract</span>(a, b) { <span class="tok-key">return</span> a - b; }
+
+<span class="tok-com">// 匯入預設匯出（不需大括號，可自訂名稱）</span>
+<span class="tok-key">import</span> subtract <span class="tok-key">from</span> <span class="tok-str">'./math.js'</span>;</code></pre>
+    <div class="chips">
+      <div class="chip good">命名匯出<small>可 Tree Shake、IDE 自動補全友善</small></div>
+      <div class="chip info">預設匯出<small>匯入端可任意命名，但需自律維持一致</small></div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>實務建議：</b>函式庫與工具模組優先用<strong>命名匯出</strong>，讓打包工具可以 Tree Shake；React 元件慣例用<strong>預設匯出</strong>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>為什麼 ESM 支援 Tree Shaking 而 CommonJS 不支援？</summary>
+        <p>ESM 的 import/export 是<strong>靜態宣告</strong>，打包工具在編譯時就能分析哪些 export 有被引用。CommonJS 的 require 是函式呼叫，可以在 if/loop 裡動態決定，打包工具無法在編譯時確定依賴，因此無法安全移除未用到的程式碼。</p>
+      </details>
+      <details>
+        <summary>ESM 能動態載入模組嗎？</summary>
+        <p>可以，用 <code>import()</code> 函式（Dynamic Import）：<code>const mod = await import('./heavy.js')</code>。回傳 Promise，常用於程式碼分割（Code Splitting）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JavaScript 有兩套主流模組系統：<span class="hl">ES Modules</span> 是語言標準，使用 import/export，靜態分析讓打包工具可以 Tree Shake；<span class="hl">CommonJS</span> 是 Node.js 傳統格式，用 require/module.exports，動態載入但無法 Tree Shake。現代前端專案基本都用 ESM，Node.js 則視專案而定，package.json 的 <code>type: "module"</code> 可切換預設行為。命名匯出比預設匯出更適合大型專案維護。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何組織你的程式碼.html">如何組織你的程式碼</a>
+      <a href="為何通常不應修改網站的全域 JavaScript 範圍.html">避免污染全域範圍</a>
+      <a href="JavaScript錯誤類型.html">JavaScript 錯誤類型</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

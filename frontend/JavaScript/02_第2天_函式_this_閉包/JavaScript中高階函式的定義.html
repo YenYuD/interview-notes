@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高階函式（Higher-Order Function）</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式・函式式程式設計</div>
+    <h1>接受函式、也能回傳函式：<em>Higher-Order Function</em></h1>
+    <p class="lede"><b>高階函式</b>（Higher-Order Function）是「把函式當一等公民」的核心：它可以<b>接收函式作為參數</b>，或<b>回傳一個新函式</b>。<code>map</code>、<code>filter</code>、<code>reduce</code> 就是最日常的例子。</p>
+  </header>
+
+  <section>
+    <span class="num">定義</span>
+    <h2>符合其中一條就算</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>接受函式作為參數</strong> — 例如 <code>arr.map(fn)</code>，把轉換邏輯交給外部決定</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>回傳函式作為結果</strong> — 例如 <code>multiplier(2)</code> 回傳「乘以 2」的函式，延遲執行</div>
+      </div>
+    </div>
+
+    <div class="chips">
+      <div class="chip good">
+        <small>函式作為參數（map）</small>
+        <pre><code>['a','b','c'].map(x =&gt; x.toUpperCase());
+// ['A', 'B', 'C']</code></pre>
+      </div>
+      <div class="chip info">
+        <small>回傳函式（工廠模式）</small>
+        <pre><code>function multiplier(n) {
+  return (x) =&gt; x * n;
+}
+const double = multiplier(2);
+double(5); // 10</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實務延伸</span>
+    <h2>高階函式讓程式碼更宣告式</h2>
+    <p>命令式寫法需要手動管理迴圈；高階函式讓你只描述「做什麼」，不管「怎麼做」：</p>
+    <pre><code>// 命令式：逐行告訴電腦怎麼做
+const result = [];
+for (let i = 0; i &lt; names.length; i++) {
+  result.push(names[i].toUpperCase());
+}
+
+// 宣告式：告訴電腦你要什麼
+const result = names.map(n =&gt; n.toUpperCase());</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>常見的高階函式：<code>Array.map</code> / <code>filter</code> / <code>reduce</code> / <code>forEach</code>，以及 <code>Function.prototype.bind</code>（回傳新函式）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>高階函式和閉包有什麼關係？</summary><p>高階函式回傳的函式通常就是閉包——它「記住」了外層函式的變數。例如 <code>multiplier(2)</code> 回傳的函式閉包住了 <code>n=2</code>。</p></details>
+      <details><summary>reduce 是高階函式嗎？請說明。</summary><p>是。<code>reduce(fn, initialValue)</code> 接受一個 reducer 函式作為參數，符合「接受函式為參數」的定義。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「高階函式是<span class="hl">接受函式作為參數，或回傳函式作為結果</span>的函式。JavaScript 中最常見的例子是 <code>map</code>、<code>filter</code>、<code>reduce</code>，它們把操作邏輯抽象化，讓程式碼從命令式變成宣告式。高階函式也常和閉包搭配，例如<span class="hl">回傳的函式閉包住了外層的狀態</span>，實現工廠函式、memoize、decorator 等模式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript匿名函式的典型應用.html">匿名函式的典型應用</a>
+      <a href="回呼函式及其應用.html">回呼函式及其應用</a>
+      <a href="如何使用閉包建立私有變數.html">閉包建立私有變數</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>async / await</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · async/await</div>
+    <h1>讓非同步程式碼<em>讀起來像同步</em>的語法糖</h1>
+    <p class="lede">async/await 是 ES2017 對 Promise 的語法包裝。<b>底層仍是 Promise</b>，但寫起來像同步，用 try/catch 統一錯誤，告別 .then() 鏈結。</p>
+  </header>
+
+  <section>
+    <span class="num">核心語意</span>
+    <h2>兩個關鍵字各做什麼</h2>
+    <table>
+      <tr><th>關鍵字</th><th>放在哪裡</th><th>效果</th></tr>
+      <tr><td><code>async</code></td><td>函式宣告前</td><td>函式自動回傳 Promise；允許在內部使用 <code>await</code></td></tr>
+      <tr><td><code>await</code></td><td>async 函式內</td><td>暫停函式執行直到 Promise settled，回傳 fulfilled 的值；rejected 則拋出例外</td></tr>
+    </table>
+    <pre><code><span class="tok-key">async function</span> <span class="tok-fn">getUser</span>() {
+  <span class="tok-key">const</span> res  = <span class="tok-key">await</span> <span class="tok-fn">fetch</span>(<span class="tok-str">'/api/user'</span>);   <span class="tok-com">// 等 fetch 完成</span>
+  <span class="tok-key">const</span> user = <span class="tok-key">await</span> res.<span class="tok-fn">json</span>();             <span class="tok-com">// 等 JSON 解析完成</span>
+  <span class="tok-key">return</span> user;                                 <span class="tok-com">// 自動包成 fulfilled Promise</span>
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">對比 Promise 鏈</span>
+    <h2>同樣邏輯，兩種寫法</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>Promise 鏈寫法</small>
+        <pre style="margin:0;font-size:.68rem">fetch('/api/user')
+  .then(res => res.json())
+  .then(user => fetch(`/api/posts?uid=${user.id}`))
+  .then(res => res.json())
+  .then(posts => console.log(posts))
+  .catch(err => console.error(err));</pre>
+      </div>
+      <div class="chip good">
+        <small>async/await 寫法</small>
+        <pre style="margin:0;font-size:.68rem">async function loadPosts() {
+  try {
+    const r1   = await fetch('/api/user');
+    const user = await r1.json();
+    const r2   = await fetch(`/api/posts?uid=${user.id}`);
+    const posts = await r2.json();
+    console.log(posts);
+  } catch (err) {
+    console.error(err);
+  }
+}</pre>
+      </div>
+    </div>
+    <div class="aside">async/await 寫法在<b>有條件判斷、迴圈內 await</b> 時優勢最明顯；純線性串接時兩種差異不大。</div>
+  </section>
+
+  <section>
+    <span class="num">常見陷阱</span>
+    <h2>新手最容易踩的坑</h2>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>在迴圈中依序 await 沒問題，但如果你用 <code>forEach</code> + async callback，<code>forEach</code> 不會等待 Promise，導致迴圈結束前非同步操作都還沒完成。請改用 <code>for...of</code> 或 <code>Promise.all</code>。</p>
+    </div>
+    <pre><code><span class="tok-com">// 錯誤：forEach 不會等 await</span>
+items.<span class="tok-fn">forEach</span>(<span class="tok-key">async</span> (item) => {
+  <span class="tok-key">await</span> <span class="tok-fn">process</span>(item); <span class="tok-com">// ← 這些 Promise 全部同時跑，forEach 不 await</span>
+});
+
+<span class="tok-com">// 正確：for...of 會等每個 await</span>
+<span class="tok-key">for</span> (<span class="tok-key">const</span> item <span class="tok-key">of</span> items) {
+  <span class="tok-key">await</span> <span class="tok-fn">process</span>(item);
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>async 函式一定回傳 Promise 嗎？即使 return 普通值？</summary>
+        <p>是的。return 任何值都會被自動包成 <code>Promise.resolve(value)</code>；拋出例外則成為 <code>Promise.reject(error)</code>。</p>
+      </details>
+      <details>
+        <summary>await 只能等 Promise 嗎？</summary>
+        <p>不是。await 可以接任何值——若傳入非 Promise，會直接回傳該值（等同 <code>await Promise.resolve(value)</code>）。但多此一舉，通常只對 Promise 用 await。</p>
+      </details>
+      <details>
+        <summary>如何用 async/await 做平行請求？</summary>
+        <p>不要依序 await，改成先建立所有 Promise，再用 <code>Promise.all</code> 等待：<code>const [a, b] = await Promise.all([fetchA(), fetchB()]);</code></p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「async/await 是 ES2017 對 Promise 的語法糖，<span class="hl">底層仍是 Promise</span>。在 async 函式內用 await 可以暫停執行直到 Promise 完成，讓非同步程式碼讀起來像同步。最大優點是用 <span class="hl">try/catch</span> 統一錯誤處理，以及在條件判斷和迴圈裡的可讀性明顯優於 Promise 鏈。要注意的是 forEach 不支援 await，平行請求要用 Promise.all。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="微任務佇列概念解析.html">微任務佇列</a>
+      <a href="JavaScript事件迴圈介紹.html">事件迴圈介紹</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

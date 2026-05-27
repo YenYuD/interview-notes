@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hooks 的優點</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT HOOKS</div>
+    <h1>Hooks 讓邏輯可以<em>脫離組件複用</em>——這是類別組件做不到的</h1>
+    <p class="lede">React 16.8 引入 Hooks，解決了類別組件的三個痛點：<b>有狀態邏輯難以複用</b>、<b>複雜組件難以理解</b>（生命週期方法把不相關邏輯混在一起）、<b>類別語法對人和機器都不友善</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">五大優點</span>
+    <h2>為什麼 Hooks 比類別組件好</h2>
+    <table>
+      <thead><tr><th>優點</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>邏輯可複用</td><td>Custom Hook 把有狀態邏輯抽離，跨組件共用，告別 HOC 包裹地獄</td></tr>
+        <tr><td>按關注點組織程式碼</td><td>相關邏輯放在同一個 Hook 裡，而不是分散在 <code>componentDidMount</code>/<code>componentDidUpdate</code></td></tr>
+        <tr><td>消除 <code>this</code></td><td>函式組件不需要 <code>this</code>，不需要 <code>.bind</code>，邏輯更直覺</td></tr>
+        <tr><td>更好的 TypeScript 支援</td><td>函式比類別更容易推斷型別</td></tr>
+        <tr><td>更容易測試</td><td>Custom Hook 可以獨立用 <code>renderHook</code> 測試，不需要掛載完整組件</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">Custom Hook 的力量</span>
+    <h2>把有狀態邏輯封裝成可複用的 Hook</h2>
+    <pre><code><span class="tok-com">// 自定義 Hook：封裝 fetch 邏輯</span>
+<span class="tok-key">function</span> <span class="tok-fn">useFetch</span>(url) {
+  <span class="tok-key">const</span> [data, setData]     = <span class="tok-fn">useState</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">const</span> [loading, setLoading] = <span class="tok-fn">useState</span>(<span class="tok-key">true</span>);
+  <span class="tok-key">const</span> [error, setError]   = <span class="tok-fn">useState</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-fn">useEffect</span>(() =&gt; {
+    <span class="tok-fn">fetch</span>(url)
+      .then(r =&gt; r.<span class="tok-fn">json</span>())
+      .then(setData)
+      .catch(setError)
+      .finally(() =&gt; <span class="tok-fn">setLoading</span>(<span class="tok-key">false</span>));
+  }, [url]);
+
+  <span class="tok-key">return</span> { data, loading, error };
+}
+
+<span class="tok-com">// 任何組件一行取用</span>
+<span class="tok-key">const</span> { data, loading } = <span class="tok-fn">useFetch</span>(<span class="tok-str">'/api/users'</span>);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Hooks 可以完全取代類別組件嗎？</summary><p>幾乎可以。唯一的例外是 Error Boundary 目前仍只能用類別組件實作。其他所有場景（包含複雜 state、生命週期）都可以用 Hooks 取代。</p></details>
+      <details><summary>Custom Hook 和普通函式有什麼差別？</summary><p>Custom Hook 函式名必須以 <code>use</code> 開頭，且可以在內部呼叫其他 Hook。普通函式不能呼叫 Hook（違反 Hooks 規則）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Hooks 解決了類別組件的三大痛點：有狀態邏輯可以提取成 <span class="hl">Custom Hook 複用</span>（取代 HOC 包裹地獄）；相關邏輯不再分散在不同生命週期方法中；以及消除了令人困惑的 <span class="hl"><code>this</code></span> 綁定問題。Custom Hook 讓組件間共享複雜邏輯變得和寫一個函式一樣自然。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React Hooks 的規則是什麼？.html">Hooks 的規則</a>
+      <a href="React 中的高階組件（higher order components, HOCs）是什麼？.html">高階組件 HOC</a>
+      <a href="你如何測試 React 應用程式？.html">測試 React 應用</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

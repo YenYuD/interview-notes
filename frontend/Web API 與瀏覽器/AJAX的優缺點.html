@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJAX 優缺點</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>AJAX：<em>不重新載入頁面</em>就能更新資料的技術</h1>
+    <p class="lede">AJAX 讓網頁在背景向伺服器交換資料，<b>只更新需要的部分</b>，不必整頁刷新。現代實作幾乎都用 <b>fetch()</b> API，但掌握優缺點對面試至關重要。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>AJAX 是什麼？</h2>
+    <p>AJAX（Asynchronous JavaScript and XML）是一種<b>非同步通訊技術</b>，讓頁面在不重新載入的情況下，於背景向伺服器發送與接收資料。實務上現在幾乎都用 JSON 而非 XML。</p>
+    <div class="callout info">
+      <span class="ico">ℹ</span>
+      <p>傳統實作用 <code>XMLHttpRequest</code>，現代開發更常用 Promise-based 的 <code>fetch()</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">優缺點對照</span>
+    <h2>什麼時候該用、什麼時候要小心</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>優點</small>
+        <p>部分頁面更新，體驗更流暢</p>
+      </div>
+      <div class="chip good">
+        <small>優點</small>
+        <p>減少伺服器負載與頻寬消耗</p>
+      </div>
+      <div class="chip good">
+        <small>優點</small>
+        <p>保留客戶端狀態（捲動位置、表單輸入）</p>
+      </div>
+      <div class="chip bad">
+        <small>缺點</small>
+        <p>依賴 JavaScript，禁用時失效</p>
+      </div>
+      <div class="chip bad">
+        <small>缺點</small>
+        <p>SEO 挑戰：搜尋引擎難以索引動態內容</p>
+      </div>
+      <div class="chip bad">
+        <small>缺點</small>
+        <p>書籤與瀏覽器前進/後退按鈕可能失效</p>
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>若直接將伺服器回傳的 HTML 插入頁面而未做消毒，容易引發 <b>XSS</b> 安全漏洞。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">使用情境</span>
+    <h2>適合 AJAX 的場景</h2>
+    <table>
+      <thead><tr><th>場景</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>即時搜尋建議</td><td>輸入時即時查詢，不刷頁</td></tr>
+        <tr><td>表單驗證（如重複帳號）</td><td>後端即時回饋，送出前確認</td></tr>
+        <tr><td>無限捲動載入</td><td>滾到底部自動抓取下一頁資料</td></tr>
+        <tr><td>聊天訊息更新</td><td>背景輪詢或 WebSocket 搭配</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>AJAX 和 fetch() 有什麼關係？</summary>
+        <p>AJAX 是概念，fetch() 是實作 AJAX 的現代工具。fetch() 基於 Promise，語法比 XMLHttpRequest 簡潔，也支援 async/await。</p>
+      </details>
+      <details>
+        <summary>AJAX 如何解決 SEO 問題？</summary>
+        <p>可採用伺服器端渲染（SSR）或預渲染（Prerendering），讓搜尋引擎爬取到完整 HTML，再由前端接管互動。</p>
+      </details>
+      <details>
+        <summary>AJAX 的安全風險如何防範？</summary>
+        <p>永遠對使用者輸入做消毒（sanitize）；避免把伺服器回傳的字串直接插入 innerHTML；使用 HTTPS 防止中間人攔截。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「AJAX 是讓頁面<span class="hl">不重新整理就能向伺服器取資料</span>的技術，現在通常用 fetch() 實作。優點是體驗更流暢、減少不必要的資料傳輸；缺點是依賴 JavaScript、SEO 較困難，書籤功能也可能失效。<span class="hl">安全上要注意 XSS</span>，插入資料前要先做消毒。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="詳細解釋AJAX.html">AJAX 完整運作機制</a>
+      <a href="使用Fetch API發送HTTP請求.html">使用 Fetch API 發送 HTTP 請求</a>
+      <a href="XMLHttpRequest與fetch在JavaScript與瀏覽器中的差異.html">XHR vs fetch() 比較</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

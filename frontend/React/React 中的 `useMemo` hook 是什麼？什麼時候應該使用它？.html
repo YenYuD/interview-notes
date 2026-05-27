@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useMemo</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">React Hooks</div>
+    <h1><code>useMemo</code>：依賴沒變，<em>就別再算一次</em></h1>
+    <p class="lede">把昂貴計算的結果<b>記憶（快取）</b>起來，只有依賴改變時才重算。也能<b>穩定物件/陣列的引用</b>，避免下游組件被連累重渲染。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 重算 vs 重用</span>
+    <h2>無關的 state 變了，要不要重算？</h2>
+    <pre><code><span class="tok-key">const</span> sorted = <span class="tok-fn">useMemo</span>(() =&gt; expensiveSort(list), [list]);</code></pre>
+    <p>組件有兩個 state：<code>list</code>（昂貴排序的來源）和不相關的 <code>theme</code>。切換有沒有用 useMemo，再點「只改 theme」：</p>
+
+    <div class="lab">
+      <div class="lab-label">是否用 useMemo 包住排序</div>
+      <div class="toggle-row" id="row">
+        <button class="on bad" data-m="off">沒用 useMemo</button>
+        <button data-m="on">用 useMemo([list])</button>
+      </div>
+      <button class="btn-primary" id="theme">只改 theme（與 list 無關）</button>
+      <div class="log" id="log" style="max-height:none"><div class="ln empty">// 點按鈕看 expensiveSort 有沒有被呼叫…</div></div>
+    </div>
+    <div class="aside">沒 useMemo：每次渲染都重跑昂貴排序，即使 list 根本沒變。用了 useMemo：依賴 <code>[list]</code> 沒變就<b>直接回傳上次結果</b>。</div>
+  </section>
+
+  <section>
+    <span class="num">什麼時候用</span>
+    <h2>兩個時機</h2>
+    <ul>
+      <li><b>昂貴計算</b>：排序、過濾大陣列、複雜運算，避免每次渲染都重跑。</li>
+      <li><b>穩定引用</b>：把物件/陣列傳給 <code>React.memo</code> 子組件或當 <code>useEffect</code> 依賴時，保持引用不變。</li>
+    </ul>
+    <div class="callout warn"><span class="ico">⚠️</span><p>別過度使用。memo 本身也有成本，廉價計算硬包反而增加複雜度與記憶體。<b>先量測，有問題再優化。</b>記住值用 <code>useMemo</code>，記住函式用 <code>useCallback</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>useMemo 和 useCallback 差在哪？</summary><p><code>useMemo(fn, deps)</code> 記住 fn 的<b>回傳值</b>；<code>useCallback(fn, deps)</code> 記住<b>函式本身</b>。其實 <code>useCallback(fn, d) === useMemo(() => fn, d)</code>。</p></details>
+      <details><summary>useMemo 保證一定不重算嗎？</summary><p>不保證。React 可能在記憶體吃緊時丟棄快取重算，所以別把它當「只執行一次」的語意依賴，計算要是純函式。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">useMemo 記住昂貴計算的結果</span>，依賴沒變就重用、不重算；也能<span class="hl">穩定物件/陣列引用</span>，避免傳給 memo 子組件或當 effect 依賴時造成多餘重渲染。但它有成本，我只在<span class="hl">實際量到效能問題</span>時才用，廉價計算不包。記住值用 useMemo、記住函式用 useCallback。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 `useCallback` hook 是什麼？什麼時候應該使用它？.html">useCallback</a>
+      <a href="在 React 中，「重新渲染」（re-rendering）是什麼意思？.html">re-rendering</a>
+      <a href="如何優化 React Context 的效能以減少重新渲染？.html">優化 Context 效能</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), log=document.getElementById('log');
+  let useM=false, calls=0;
+  function reset(){ calls=0; log.innerHTML='<div class="ln empty">// 點按鈕看 expensiveSort 有沒有被呼叫…</div>'; }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); useM=b.dataset.m==='on'; reset(); });
+  document.getElementById('theme').addEventListener('click',()=>{
+    const em=log.querySelector('.empty'); if(em)em.remove();
+    if(useM){
+      log.insertAdjacentHTML('beforeend','<div class="ln c-dim">theme 改變 → 組件重渲染</div><div class="ln c-ok">useMemo：[list] 沒變 → 重用上次排序結果，<b>不呼叫 expensiveSort</b> ✓</div>');
+    } else {
+      calls++;
+      log.insertAdjacentHTML('beforeend',`<div class="ln c-dim">theme 改變 → 組件重渲染</div><div class="ln c-bad">expensiveSort() 又被呼叫了（第 ${calls} 次，明明 list 沒變）✗</div>`);
+    }
+    log.scrollTop=log.scrollHeight;
+  });
+</script>
+</body>
+</html>

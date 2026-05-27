@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>觀察者模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>一對多的<em>訂閱通知</em>機制</h1>
+    <p class="lede">觀察者模式讓 <b>Subject（主體）</b> 的狀態改變時，自動廣播給所有已訂閱的 <b>Observer</b>，是事件驅動架構與狀態管理的核心概念。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>Subject 廣播，Observer 被動接收</h2>
+    <p>觀察者模式定義「一對多」依賴關係：一個 Subject 維護一份觀察者清單，狀態改變時呼叫每個觀察者的 <code>update()</code>。雙方透過介面耦合，不需要知道對方的具體實作。</p>
+    <table>
+      <thead><tr><th>角色</th><th>職責</th><th>前端對應</th></tr></thead>
+      <tbody>
+        <tr><td>Subject</td><td>持有狀態、管理訂閱、觸發通知</td><td>EventEmitter、Redux store</td></tr>
+        <tr><td>Observer</td><td>實作 <code>update()</code>，被動接收通知</td><td>React component、DOM listener</td></tr>
+        <tr><td>subscribe</td><td>觀察者向 Subject 登記</td><td><code>addEventListener</code></td></tr>
+        <tr><td>unsubscribe</td><td>取消訂閱，避免記憶體洩漏</td><td><code>removeEventListener</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">實作</span>
+    <h2>最小可運作實作</h2>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">Subject</span> {
+  <span class="tok-fn">constructor</span>() { <span class="tok-key">this</span>.observers = []; }
+
+  <span class="tok-fn">subscribe</span>(obs)   { <span class="tok-key">this</span>.observers.push(obs); }
+  <span class="tok-fn">unsubscribe</span>(obs) {
+    <span class="tok-key">this</span>.observers = <span class="tok-key">this</span>.observers.filter(o => o !== obs);
+  }
+  <span class="tok-fn">notify</span>(data) {
+    <span class="tok-key">this</span>.observers.forEach(o => o.<span class="tok-fn">update</span>(data));
+  }
+}
+
+<span class="tok-key">class</span> <span class="tok-fn">Observer</span> {
+  <span class="tok-fn">constructor</span>(name) { <span class="tok-key">this</span>.name = name; }
+  <span class="tok-fn">update</span>(data) { console.log(`${<span class="tok-key">this</span>.name} 收到：${data}`); }
+}
+
+<span class="tok-key">const</span> store = <span class="tok-key">new</span> Subject();
+<span class="tok-key">const</span> viewA = <span class="tok-key">new</span> Observer(<span class="tok-str">'ViewA'</span>);
+store.subscribe(viewA);
+store.notify(<span class="tok-str">'price=100'</span>); <span class="tok-com">// ViewA 收到：price=100</span></code></pre>
+
+    <div class="callout info">
+      <span class="ico">💡</span>
+      <p><b>前端常見應用</b>：<code>addEventListener</code> 就是觀察者模式的瀏覽器原生實作；React 的 Context、Redux、MobX、RxJS Observable 也都以此為基礎。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">互動實驗</span>
+    <h2>訂閱 / 發佈通知模擬</h2>
+    <div class="lab">
+      <div class="lab-label">Live Demo</div>
+      <div class="toggle-row" id="obs-toggle">
+        <button class="on" data-obs="A">觀察者 A</button>
+        <button class="on" data-obs="B">觀察者 B</button>
+        <button class="on" data-obs="C">觀察者 C</button>
+      </div>
+      <p style="font-size:0.88rem;color:var(--ink-soft);margin-bottom:1rem;">點擊按鈕切換訂閱狀態，再按「發布通知」觀察誰會收到。</p>
+      <button class="btn-primary" id="notify-btn">發布通知</button>
+      <div class="log" id="obs-log">
+        <span class="ln empty">等待發布…</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>觀察者模式 vs 發佈/訂閱模式（Pub/Sub）有何不同？</summary>
+        <p>觀察者模式中 Subject 直接持有觀察者清單，雙方互相知道對方存在（鬆耦合但非完全解耦）。Pub/Sub 引入「事件中介者（Event Bus/Broker）」，發佈者與訂閱者完全解耦，互不知道對方存在，適合跨模組、跨系統通訊。</p>
+      </details>
+      <details>
+        <summary>使用觀察者模式時常見的記憶體洩漏問題？</summary>
+        <p>若 Observer 在銷毀前沒有呼叫 <code>unsubscribe</code>，Subject 仍持有其參考，GC 無法回收。React 的 <code>useEffect</code> 清除函式、Vue 的 <code>beforeDestroy</code> 都是對應的防護機制。</p>
+      </details>
+      <details>
+        <summary>React 的 useState / useReducer 算觀察者模式嗎？</summary>
+        <p>廣義上算。React Fiber 是 Subject，持有訂閱該 state 的所有 component；狀態改變時 React 排程 re-render（即通知觀察者）。只是 React 將這層抽象化成 hooks API，開發者不直接操作訂閱清單。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「觀察者模式定義一對多的依賴：<span class="hl">Subject 維護訂閱者清單</span>，狀態改變時批次呼叫每個觀察者的 update 方法。前端常見例子是 addEventListener、Redux store，以及 RxJS 的 Observable。使用時要注意<span class="hl">在元件銷毀時取消訂閱</span>，避免記憶體洩漏。和 Pub/Sub 的差別在於 Pub/Sub 多了一層 Event Broker，讓發佈與訂閱方完全解耦。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="單例模式概念說明.html">單例模式</a>
+      <a href="策略模式概念說明.html">策略模式</a>
+      <a href="設計模式及其重要性.html">設計模式總覽</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // Observer pattern demo
+  const subscribed = new Set(['A', 'B', 'C']);
+  let count = 0;
+
+  document.querySelectorAll('#obs-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const obs = btn.dataset.obs;
+      if (subscribed.has(obs)) {
+        subscribed.delete(obs);
+        btn.classList.remove('on');
+      } else {
+        subscribed.add(obs);
+        btn.classList.add('on');
+      }
+    });
+  });
+
+  document.getElementById('notify-btn').addEventListener('click', () => {
+    const log = document.getElementById('obs-log');
+    const empties = log.querySelectorAll('.empty');
+    empties.forEach(e => e.remove());
+
+    count++;
+    const ts = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+
+    const header = document.createElement('span');
+    header.className = 'ln c-req';
+    header.textContent = `[${ts}] 事件 #${count} 發布`;
+    log.appendChild(header);
+
+    if (subscribed.size === 0) {
+      const none = document.createElement('span');
+      none.className = 'ln c-bad';
+      none.textContent = '  → 無訂閱者，通知被忽略';
+      log.appendChild(none);
+    } else {
+      subscribed.forEach(obs => {
+        const ln = document.createElement('span');
+        ln.className = 'ln c-ok';
+        ln.textContent = `  → 觀察者 ${obs} 收到通知 ✓`;
+        log.appendChild(ln);
+      });
+    }
+
+    log.scrollTop = log.scrollHeight;
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useId hook</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT HOOKS</div>
+    <h1><code>useId</code>：產生<em>唯一且穩定的 ID</em>，再也不怕表單無障礙問題</h1>
+    <p class="lede">表單的 <code>&lt;label htmlFor&gt;</code> 必須對應 <code>&lt;input id&gt;</code>，若組件被多次渲染就會 ID 衝突。<b>useId</b>（React 18+）自動產生在整個應用程式中唯一的 ID，且對 <b>SSR 水合友善</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">核心用法</span>
+    <h2>表單無障礙 label-input 配對</h2>
+    <pre><code><span class="tok-key">import</span> { useId } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">function</span> <span class="tok-fn">PasswordField</span>() {
+  <span class="tok-key">const</span> id = <span class="tok-fn">useId</span>();  <span class="tok-com">// 每個實例得到唯一 ID</span>
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;label htmlFor={id}&gt;密碼&lt;/label&gt;
+      &lt;input id={id} type=<span class="tok-str">"password"</span> /&gt;
+    &lt;/div&gt;
+  );
+}
+
+<span class="tok-com">// 同一頁放兩個 PasswordField，ID 各自不同，不衝突</span>
+&lt;PasswordField /&gt;
+&lt;PasswordField /&gt;</code></pre>
+    <div class="aside">一個組件裡可以呼叫多次 <code>useId</code>，或加後綴區分：<code>const id = useId(); const nameId = `${id}-name`; const emailId = `${id}-email`;</code></div>
+  </section>
+
+  <section>
+    <span class="num">為什麼不用亂數或計數器</span>
+    <h2>SSR 水合要求伺服器與用戶端 ID 一致</h2>
+    <div class="chips">
+      <div class="chip bad"><small>Math.random()</small>伺服器和客戶端產生不同值 → 水合不匹配警告</div>
+      <div class="chip bad"><small>全域計數器</small>元件樹渲染順序若不同 → SSR/CSR ID 不同</div>
+      <div class="chip good"><small>useId</small>基於組件在樹中的位置，伺服器與客戶端保證一致</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>useId 可以用來當清單的 key 嗎？</summary><p>不行，<code>useId</code> 是給單一組件實例用的，在每次渲染保持穩定。清單的 key 應使用資料本身的穩定 id，而不是 useId。</p></details>
+      <details><summary>React 18 之前如何解決這個問題？</summary><p>常見做法：用套件（如 <code>nanoid</code>）在 state 初始化時產生 ID；或用 <code>useRef</code> 加計數器；但這些方式在 SSR 都有水合不匹配的風險，<code>useId</code> 才是官方正解。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>useId</code> 是 React 18 引入的 hook，用來產生<span class="hl">全應用程式唯一且 SSR 友善的 ID</span>。最常見的場景是表單無障礙：把 <code>label htmlFor</code> 和 <code>input id</code> 綁到同一個 <code>useId</code> 回傳值，即使組件被多次渲染也不會 ID 衝突。不能用 Math.random 或計數器，因為 SSR 和客戶端的值會不同，造成水合錯誤。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋什麼是 React 水合（hydration）.html">React 水合（Hydration）</a>
+      <a href="React Hooks 的規則是什麼？.html">Hooks 規則</a>
+      <a href="受控（controlled）與非受控（uncontrolled）React 組件有什麼區別？.html">受控 vs 非受控組件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

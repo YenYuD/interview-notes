@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 錯誤類型</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 錯誤處理</div>
+    <h1>三種錯誤，<em>只有一種</em>會讓引擎拒絕執行</h1>
+    <p class="lede">面試官問「JS 有哪些錯誤類型」，多數人只說 <b>TypeError</b>，其實分三層：語法錯誤在解析期就掛掉，Runtime 錯誤在執行中爆炸，邏輯錯誤最狡猾——程式跑完但結果是錯的。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>三種錯誤各自的生命週期</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>類型</th>
+          <th>何時發生</th>
+          <th>典型例子</th>
+          <th>能 catch？</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>語法錯誤 SyntaxError</strong></td>
+          <td>解析（Parse）階段，程式碼未執行</td>
+          <td>少了括號、引號不成對</td>
+          <td>不能（程式根本跑不起來）</td>
+        </tr>
+        <tr>
+          <td><strong>執行時錯誤 Runtime Error</strong></td>
+          <td>執行期間，邏輯觸發</td>
+          <td><code>null.property</code>（TypeError）</td>
+          <td>可以，用 try…catch</td>
+        </tr>
+        <tr>
+          <td><strong>邏輯錯誤 Logic Error</strong></td>
+          <td>執行完成，但結果有誤</td>
+          <td><code>if (x = 1)</code> 寫成賦值</td>
+          <td>無錯誤可 catch，靠測試/debugger</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">常見 Runtime Error 子類型</span>
+    <h2>ReferenceError、TypeError、RangeError</h2>
+    <div class="chips">
+      <div class="chip bad">TypeError<small>存取 null/undefined 的屬性</small></div>
+      <div class="chip bad">ReferenceError<small>變數未宣告就使用</small></div>
+      <div class="chip bad">RangeError<small>陣列長度為負數、遞迴爆棧</small></div>
+      <div class="chip bad">SyntaxError<small>JSON.parse 格式不合法</small></div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>邏輯錯誤最難發現：</b>例如 <code>if ((isAdmin = true))</code>，引擎不會報錯，但每次都會進 if 區塊，因為賦值的結果是 <code>true</code>。</p>
+    </div>
+    <pre><code><span class="tok-com">// Runtime Error：可被 catch</span>
+<span class="tok-key">try</span> {
+  <span class="tok-key">let</span> obj = <span class="tok-key">null</span>;
+  console.<span class="tok-fn">log</span>(obj.property);
+} <span class="tok-key">catch</span> (e) {
+  console.<span class="tok-fn">log</span>(e <span class="tok-key">instanceof</span> TypeError); <span class="tok-com">// true</span>
+}
+
+<span class="tok-com">// 邏輯錯誤：不報錯但結果錯</span>
+<span class="tok-key">let</span> isAdmin = <span class="tok-key">false</span>;
+<span class="tok-key">if</span> ((isAdmin = <span class="tok-key">true</span>)) {  <span class="tok-com">// 應為 ===，不是 =</span>
+  console.<span class="tok-fn">log</span>(<span class="tok-str">'Access granted'</span>); <span class="tok-com">// 永遠執行</span>
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>SyntaxError 能用 try…catch 包住嗎？</summary>
+        <p>不行。SyntaxError 在 parse 階段就發生，程式根本沒機會跑到 try 那行。唯一例外是 <code>eval()</code> 或 <code>JSON.parse()</code> 執行時產生的 SyntaxError，那時已進入 runtime，可以 catch。</p>
+      </details>
+      <details>
+        <summary>instanceof TypeError vs error.name === 'TypeError' 有什麼差？</summary>
+        <p><code>instanceof</code> 在跨 iframe/realm 時可能失效（不同的 Error 建構子）；<code>error.name</code> 是字串比對，不受此限。實務上優先用 <code>instanceof</code>，跨 realm 場景再改用 <code>name</code>。</p>
+      </details>
+      <details>
+        <summary>如何找出邏輯錯誤？</summary>
+        <p>三招：(1) <strong>debugger</strong> 加中斷點逐行追蹤值；(2) 撰寫單元測試，讓預期結果不符合時紅燈；(3) <code>console.assert()</code> 在條件不符時印錯誤訊息。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JavaScript 的錯誤分三類：<span class="hl">語法錯誤</span>在解析期發生，程式無法執行，例如括號沒配對；<span class="hl">執行時錯誤</span>（Runtime Error）在執行過程中拋出，例如存取 null 的屬性，可以用 try…catch 捕捉；<span class="hl">邏輯錯誤</span>最棘手，程式跑完但結果不對，不會有任何例外，需要靠測試與 debugger 才能找出來。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何使用trycatch區塊處理錯誤.html">如何使用 try…catch 處理錯誤</a>
+      <a href="JavaScript錯誤傳播概念解析.html">錯誤傳播概念</a>
+      <a href="如何建立自訂錯誤物件.html">自訂錯誤物件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Hooks 規則</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT HOOKS</div>
+    <h1>Hooks 有兩條鐵律——<em>違反就壞掉</em>，且 lint 會抓到你</h1>
+    <p class="lede">React 用呼叫順序追蹤每個 Hook 的狀態，若順序在不同渲染間改變，<b>狀態就會對應到錯的 Hook</b>。兩條規則確保順序永遠穩定。</p>
+  </header>
+
+  <section>
+    <span class="num">規則一</span>
+    <h2>只在最頂層呼叫 Hook</h2>
+    <p>不要在迴圈、條件判斷或巢狀函式裡呼叫 Hook。</p>
+    <div class="chips">
+      <div class="chip good">
+        <small>正確</small>
+        <code>// 始終在函式最上層</code><br>
+        <code>const [x, setX] = useState(0);</code><br>
+        <code>useEffect(() => {}, []);</code>
+      </div>
+      <div class="chip bad">
+        <small>錯誤 — 在 if 裡</small>
+        <code>if (condition) {</code><br>
+        <code>&nbsp;&nbsp;const [x] = useState(0); // ✗</code><br>
+        <code>}</code>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>如果某次渲染 <code>condition</code> 為 false，這個 Hook 被跳過，後面所有 Hook 的索引位移，狀態全部亂掉。</p></div>
+  </section>
+
+  <section>
+    <span class="num">規則二</span>
+    <h2>只在 React 函式中呼叫 Hook</h2>
+    <p>有效的呼叫場所只有兩個：</p>
+    <ul>
+      <li><b>功能組件（Function Component）</b>的函式主體</li>
+      <li><b>自定義 Hook（Custom Hook）</b>的函式主體（函式名稱必須以 <code>use</code> 開頭）</li>
+    </ul>
+    <div class="callout tip"><span class="ico">✅</span><p>安裝 <code>eslint-plugin-react-hooks</code> 並開啟 <code>rules-of-hooks: error</code>，lint 會在 CI 就擋下違規，不需靠記憶。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>為什麼 React 用呼叫順序追蹤 Hook，而不是名稱或 key？</summary><p>設計決策：用順序讓 API 更簡潔（不需傳 key）。代價就是順序必須穩定，因此有了這兩條規則。</p></details>
+      <details><summary>自定義 Hook 一定要以 use 開頭嗎？</summary><p>是的。這是 eslint-plugin-react-hooks 辨識自定義 Hook 的依據。不以 <code>use</code> 開頭的函式，lint 不會檢查裡面的 Hook 呼叫。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React Hooks 有兩條規則：第一，<span class="hl">只在最頂層呼叫</span>，不能在迴圈或條件裡，因為 React 靠呼叫順序追蹤每個 Hook 的狀態，順序若不穩定狀態就會錯位；第二，<span class="hl">只在功能組件或自定義 Hook 內呼叫</span>，確保 React 能管理生命週期。實務上裝 eslint-plugin-react-hooks 就能自動檢查。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="在 React 中使用 Hooks 有什麼優點？.html">Hooks 的優點</a>
+      <a href="React 中的 `useEffect` 和 `useLayoutEffect` 有什麼區別？.html">useEffect vs useLayoutEffect</a>
+      <a href="React 中的 `useReducer` hook 是什麼？什麼時候應該使用它？.html">useReducer</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

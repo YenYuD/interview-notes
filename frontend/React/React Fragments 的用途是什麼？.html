@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Fragments</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 基礎</div>
+    <h1>Fragment：回傳多個元素，卻<em>不污染 DOM</em></h1>
+    <p class="lede">React 組件只能回傳一個根元素，但加多餘的 <code>&lt;div&gt;</code> 包裹會破壞 CSS 結構、增加 DOM 節點。<b>Fragment</b> 讓你把多個元素組成一組，<b>不產生任何實際 DOM 節點</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">兩種寫法</span>
+    <h2>簡寫 vs 完整語法</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>簡寫（99% 情況）</small>
+        <code>&lt;&gt;...&lt;/&gt;</code>
+      </div>
+      <div class="chip info">
+        <small>完整語法（需要 key 時）</small>
+        <code>&lt;React.Fragment key={id}&gt;...&lt;/React.Fragment&gt;</code>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 渲染清單時需要 key，必須用完整語法</span>
+{items.<span class="tok-fn">map</span>(item =&gt; (
+  &lt;React.Fragment key={item.id}&gt;
+    &lt;dt&gt;{item.term}&lt;/dt&gt;
+    &lt;dd&gt;{item.desc}&lt;/dd&gt;
+  &lt;/React.Fragment&gt;
+))}</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>簡寫 <code>&lt;&gt;</code> 不支援 <code>key</code> 屬性，在列表渲染時必須改用 <code>&lt;React.Fragment key={...}&gt;</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">為什麼重要</span>
+    <h2>三個不多包 div 的理由</h2>
+    <ul>
+      <li><b>保持語義</b>：在 <code>&lt;table&gt;</code>、<code>&lt;dl&gt;</code>、<code>&lt;ul&gt;</code> 等結構中，多餘的 <code>&lt;div&gt;</code> 會讓 HTML 不合法。</li>
+      <li><b>CSS 不受干擾</b>：Flexbox/Grid 計算子元素時，多餘的包裹層會破壞排版。</li>
+      <li><b>效能微幅提升</b>：更少的 DOM 節點 = 更少的記憶體和渲染時間。</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Fragment 和空 div 在效能上差多少？</summary><p>Fragment 完全不產生 DOM 節點，大型清單中節省的節點數可觀。但對一般小型組件而言差距極小，主要價值在語義正確性而非效能。</p></details>
+      <details><summary>可以在 Fragment 上加 className 或 style 嗎？</summary><p>不行，Fragment 不產生 DOM 元素，因此無法附加任何 CSS 屬性。需要樣式時還是得用真實的 HTML 標籤。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Fragment 讓組件可以回傳多個同層元素，<span class="hl">不產生額外的 DOM 節點</span>。這在渲染 table 列、dl 術語等需要嚴格 HTML 結構的場景特別重要——多包一層 div 會讓 HTML 不合法。日常用簡寫 <code>&lt;&gt;&lt;/&gt;</code>，需要 <code>key</code> 的清單則用 <code>React.Fragment</code> 完整語法。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中 `key` prop 的用途是什麼？.html">key prop 的用途</a>
+      <a href="JSX 是什麼？它是如何運作的？.html">JSX 運作原理</a>
+      <a href="React Node、React Element 和 React Component 之間有什麼區別？.html">Node / Element / Component</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

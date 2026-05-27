@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Hydration 水合</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT SSR</div>
+    <h1>水合（Hydration）：靜態 HTML 「活過來」的<em>接管過程</em></h1>
+    <p class="lede">SSR 把 HTML 傳給瀏覽器，頁面可以立即顯示——但還不能互動。<b>Hydration</b> 是 React 在客戶端「認出」伺服器生成的 HTML、附加事件處理器、初始化 state 的過程，讓頁面從<b>靜態變為可互動</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">水合流程</span>
+    <h2>三個階段</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>伺服器生成 HTML</b>：含完整內容，瀏覽器接收後立即顯示（可見但不可互動）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>載入並執行 JavaScript</b>：React bundle 下載並解析</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>水合</b>：React 「認出」已有的 DOM 節點，附加事件監聽器，不重新建立節點 → 頁面可互動</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// React 18 的 SSR 入口</span>
+<span class="tok-key">import</span> { hydrateRoot } <span class="tok-key">from</span> <span class="tok-str">'react-dom/client'</span>;
+<span class="tok-fn">hydrateRoot</span>(document.<span class="tok-fn">getElementById</span>(<span class="tok-str">'root'</span>), &lt;App /&gt;);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">水合不匹配</span>
+    <h2>最常見的 SSR 陷阱</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p>如果伺服器和客戶端渲染的 HTML 不同，React 會警告 <b>Hydration Mismatch</b>。常見原因：<code>typeof window</code> 判斷、<code>Date.now()</code>、<code>Math.random()</code>、瀏覽器特有的狀態。解法：確保 SSR 和 CSR 邏輯完全一致，或用 <code>useEffect</code> 把客戶端專屬邏輯延後。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>水合期間頁面可以互動嗎？</summary><p>不能。這段時間叫做「hydration gap」——使用者看得到內容，但事件處理器尚未附加。使用者的互動（點擊、輸入）不會有反應，這是 SSR 的已知 UX 問題。React 18 的 Selective Hydration 和 Streaming SSR 在緩解這個問題。</p></details>
+      <details><summary>React 18 的 Selective Hydration 是什麼？</summary><p>React 18 允許把 SSR 輸出串流（streaming）傳給瀏覽器，並且<b>優先水合使用者正在互動的區域</b>。搭配 <code>&lt;Suspense&gt;</code> 邊界，重要區域先水合，其他區域延後，改善互動延遲。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「水合是 SSR 的後半段：瀏覽器接收到伺服器的靜態 HTML 後，React 在客戶端載入並<span class="hl">認出現有 DOM 節點</span>，附加事件處理器，不重新建立節點，讓頁面從可見變為<span class="hl">可互動</span>。最常見的問題是水合不匹配——伺服器和客戶端渲染結果不同時 React 會警告。React 18 的 Selective Hydration 讓重要區域優先水合，改善互動延遲。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋 React 應用程式的伺服器端渲染（SSR）及其優點.html">SSR</a>
+      <a href="解釋 React 應用程式的靜態生成（SSG）及其優點.html">SSG</a>
+      <a href="React Suspense 是什麼？它實現了什麼功能？.html">React Suspense</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>程式碼覆蓋率與測試品質</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>覆蓋率 100%，不代表<em>沒有 Bug</em></h1>
+    <p class="lede">程式碼覆蓋率是指引工具，不是品質保證書。<b>80% 有意義的測試</b>遠比 100% 走形式的測試更有價值。理解覆蓋率的四種面向，才能正確解讀數字。</p>
+  </header>
+
+  <section>
+    <span class="num">四種覆蓋率</span>
+    <h2>數字背後代表什麼</h2>
+    <table>
+      <tr><th>類型</th><th>意義</th><th>重要性</th></tr>
+      <tr><td><b>Statement 語句</b></td><td>每一行語句是否跑過</td><td>基本</td></tr>
+      <tr><td><b>Branch 分支</b></td><td>if/else、三元運算子的每個分支</td><td>⭐ 高</td></tr>
+      <tr><td><b>Function 函式</b></td><td>每個函式是否至少被呼叫過一次</td><td>中</td></tr>
+      <tr><td><b>Line 行</b></td><td>每一行原始碼是否執行</td><td>基本</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">💡</span><p><b>Branch Coverage 最有意義</b>——光語句 100% 也可能漏掉 <code>else</code> 分支的 bug。</p></div>
+  </section>
+
+  <section>
+    <span class="num">範例說明</span>
+    <h2>同一個函式，不同覆蓋率結果</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">isEven</span>(num) {
+  <span class="tok-key">if</span> (num % 2 === 0) {
+    <span class="tok-key">return</span> <span class="tok-key">true</span>;
+  } <span class="tok-key">else</span> {
+    <span class="tok-key">return</span> <span class="tok-key">false</span>;
+  }
+}</code></pre>
+    <p>如果只測 <code>isEven(2)</code>（偶數路徑），Statement Coverage 是 80%，但 <b>Branch Coverage 只有 50%</b>——<code>else</code> 分支根本沒跑到。同時測 <code>isEven(2)</code> 和 <code>isEven(3)</code> 才達到 Branch 100%。</p>
+
+    <p>用 Jest 跑覆蓋率：</p>
+    <pre><code>jest --coverage</code></pre>
+    <p>會產出 HTML 報告，標出哪些行/分支沒被覆蓋到（紅色）。</p>
+  </section>
+
+  <section>
+    <span class="num">正確心態</span>
+    <h2>覆蓋率的限制</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>覆蓋率能做到</small>
+        <p>找到「完全沒測到」的死角</p>
+        <p>引導你補邊界條件</p>
+        <p>作為 CI gate（如：低於 80% 就擋</p>
+      </div>
+      <div class="chip bad">
+        <small>覆蓋率做不到</small>
+        <p>保證邏輯正確（可以跑過但斷言弱）</p>
+        <p>驗證業務需求是否被滿足</p>
+        <p>取代 code review 或靜態分析</p>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>「為了提高覆蓋率而寫的測試」和「為了防 bug 而寫的測試」是不同的東西。前者只是湊數字。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>你們專案的覆蓋率門檻設多少？</summary><p>業界常見 70–80%。太低沒保護力，太高（強制 100%）會讓開發者為了指標寫無意義的測試。建議設 Branch Coverage 門檻，比 Statement Coverage 更有意義。</p></details>
+      <details><summary>Istanbul 是什麼？和 Jest 是什麼關係？</summary><p>Istanbul（現在叫 nyc）是 Node.js 覆蓋率工具。Jest 內部用 Istanbul 來計算覆蓋率，跑 <code>jest --coverage</code> 其實是呼叫 Istanbul 產出報告。你不需要另外裝 Istanbul，Jest 已經包含。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「覆蓋率是指引，不是目標。我看覆蓋率主要是<span class="hl">找沒被測到的死角</span>，特別是 Branch Coverage——只測 if 沒測 else 是很常見的漏洞。實務上我會把 Branch Coverage 設在 CI 的 70–80% 門檻，低於就 fail build。但<span class="hl">100% 覆蓋率不代表沒 bug</span>，還是要確保斷言夠強、邊界條件都有測到，而不只是讓程式碼跑過去。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何為JavaScript編寫單元測試.html">撰寫單元測試</a>
+      <a href="撰寫可維護且有效測試的最佳實踐.html">測試最佳實踐</a>
+      <a href="單元測試整合測試與端對端測試差異.html">測試金字塔</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

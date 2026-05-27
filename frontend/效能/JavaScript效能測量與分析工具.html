@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 效能測量工具</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>先量再優化，<em>別憑感覺猜瓶頸</em></h1>
+    <p class="lede">效能問題不靠直覺，靠<b>數據</b>。Chrome DevTools、Lighthouse、WebPageTest 各有定位：從單次剖析到跨地點壓測，選對工具才能找到真正的慢點。</p>
+  </header>
+
+  <section>
+    <span class="num">工具全覽</span>
+    <h2>四種工具的定位</h2>
+    <table>
+      <tr><th>工具</th><th>最強項</th><th>何時用</th></tr>
+      <tr><td>Chrome DevTools Performance</td><td>Call stack、重排、JS 執行熱點</td><td>本地調查單一互動卡頓</td></tr>
+      <tr><td>Lighthouse</td><td>LCP、TBT、CLS 指標 + 改善建議</td><td>每次 PR 前跑一次當基線</td></tr>
+      <tr><td>WebPageTest</td><td>真實裝置 × 全球節點 × 網路模擬</td><td>上線前驗收 / 多地點對比</td></tr>
+      <tr><td>Performance API</td><td>程式碼內嵌量測、User Timing</td><td>量測特定函式或流程耗時</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">關鍵操作</span>
+    <h2>DevTools Performance 三步走</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Ctrl+Shift+I → Performance</b> — 打開面板，按「記錄」前先停用快取（Network → Disable cache）。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>操作後停止錄製</b> — 重現問題場景（滾動、點擊、送出表單），再按「停止」。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>看火焰圖（Flame chart）</b> — 找長條：主執行緒佔滿 → JS 問題；Layout/Paint 佔多 → DOM 問題。</div>
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>程式碼內嵌量測用 <code>performance.mark('start')</code> / <code>performance.measure('task','start','end')</code>，比 <code>console.time</code> 更精準，並自動整合進 DevTools Timeline。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實用片段</span>
+    <h2>User Timing API</h2>
+    <pre><code><span class="tok-com">// 量測一段邏輯的耗時</span>
+<span class="tok-key">performance</span>.mark(<span class="tok-str">'parse-start'</span>);
+doHeavyParsing();
+<span class="tok-key">performance</span>.mark(<span class="tok-str">'parse-end'</span>);
+<span class="tok-key">performance</span>.measure(<span class="tok-str">'parsing'</span>, <span class="tok-str">'parse-start'</span>, <span class="tok-str">'parse-end'</span>);
+
+<span class="tok-key">const</span> [entry] = performance.getEntriesByName(<span class="tok-str">'parsing'</span>);
+console.log(entry.duration + <span class="tok-str">' ms'</span>);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Lighthouse 分數低，先看哪個指標？</summary><p>先看 LCP（最大內容繪製）和 TBT（總封鎖時間）——前者影響使用者「感覺快不快」，後者反映主執行緒被佔據程度。CLS 影響視覺穩定性也不能忽略。</p></details>
+      <details><summary>production 環境如何持續監控效能？</summary><p>使用 Real User Monitoring（RUM）方案（如 web-vitals.js + Analytics 或 Sentry Performance），收集真實用戶的 Core Web Vitals，而非只靠 lab data。</p></details>
+      <details><summary>Performance.now() 和 Date.now() 差在哪？</summary><p><code>performance.now()</code> 回傳高精度浮點毫秒（精準到微秒）且不受系統時鐘調整影響，適合效能量測；<code>Date.now()</code> 回傳整數毫秒且可被 NTP 校正，適合時間戳。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「效能優化前我一定先量測。<span class="hl">本地調查用 Chrome DevTools Performance 的火焰圖</span>找 JS 熱點和長重排；<span class="hl">Lighthouse 跑 Core Web Vitals</span> 當每次上線的基線；WebPageTest 做跨地點、真實網路的壓測。程式碼層面我會用 <span class="hl">performance.mark/measure</span> 精確量測特定函式，才不會憑感覺亂優化。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript應用程式常見效能瓶頸.html">效能瓶頸</a>
+      <a href="優化網路請求提升效能.html">優化網路請求</a>
+      <a href="減少重排與重繪的技巧.html">減少重排與重繪</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>靜態類別成員</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 類別</div>
+    <h1>屬於類別、不屬於實例：<em>static 成員</em>的三種用途</h1>
+    <p class="lede"><code>static</code> 方法和屬性掛在<b>類別本身</b>上，不需要實例化就能呼叫，也不會浪費每個實例的記憶體，最適合工具函式、共用常數和 Singleton 模式。</p>
+  </header>
+
+  <section>
+    <span class="num">基本語法</span>
+    <h2>static 只能從類別呼叫</h2>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">MathUtils</span> {
+  <span class="tok-key">static</span> PI = 3.14159;
+
+  <span class="tok-key">static</span> <span class="tok-fn">add</span>(a, b) { <span class="tok-key">return</span> a + b; }
+}
+
+console.log(MathUtils.PI);         <span class="tok-com">// 3.14159 ✓</span>
+console.log(MathUtils.<span class="tok-fn">add</span>(2, 3)); <span class="tok-com">// 5 ✓</span>
+
+<span class="tok-key">const</span> m = <span class="tok-key">new</span> MathUtils();
+console.log(m.PI);      <span class="tok-com">// undefined ✗ 實例無法存取</span>
+m.<span class="tok-fn">add</span>(1, 2);          <span class="tok-com">// TypeError ✗</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">三種典型用途</span>
+    <h2>為何要用 static？</h2>
+    <div class="chips">
+      <div class="chip info">
+        <strong>工具函式（Utility）</strong>
+        <small>不依賴實例狀態的純函式，如 <code>Math.max()</code>、<code>Object.assign()</code></small>
+      </div>
+      <div class="chip info">
+        <strong>命名空間常數</strong>
+        <small>把相關常數集中在類別下，如 <code>Config.API_KEY</code>，避免全域汙染</small>
+      </div>
+      <div class="chip good">
+        <strong>Singleton 模式</strong>
+        <small>用 static 屬性快取唯一實例，<code>getInstance()</code> 保證全程只有一個</small>
+      </div>
+    </div>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">Singleton</span> {
+  <span class="tok-key">static</span> #instance = <span class="tok-key">null</span>; <span class="tok-com">// 私有靜態屬性（ES2022）</span>
+
+  <span class="tok-key">static</span> <span class="tok-fn">getInstance</span>() {
+    <span class="tok-key">if</span> (!<span class="tok-key">this</span>.#instance) <span class="tok-key">this</span>.#instance = <span class="tok-key">new</span> Singleton();
+    <span class="tok-key">return</span> <span class="tok-key">this</span>.#instance;
+  }
+}
+console.log(Singleton.<span class="tok-fn">getInstance</span>() === Singleton.<span class="tok-fn">getInstance</span>()); <span class="tok-com">// true</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>static 方法裡的 this 指向什麼？</summary><p>指向<strong>類別本身</strong>（即建構函式），不是實例。可以用 <code>this.staticProp</code> 存取其他靜態成員，子類別繼承後 this 指向子類別。</p></details>
+      <details><summary>靜態屬性和 prototype 上的屬性有何差異？</summary><p>靜態屬性在類別（建構函式）本身上，不在 prototype 上；prototype 上的屬性所有實例共享存取，但靜態屬性只能透過類別名稱存取。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>static</code> 成員屬於類別本身，不屬於任何實例。最常見的用途是<span class="hl">工具函式</span>（不依賴 this）和<span class="hl">命名空間常數</span>（如 Math.PI），也能實作 Singleton 模式。在 static 方法裡 <code>this</code> 指向類別本身，子類別繼承後 this 則指向子類別。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="ES2015類別繼承概念說明.html">extends 與 super</a>
+      <a href="JavaScript ES2015 類別與 ES5 函式建構子差異.html">class vs ES5 建構子</a>
+      <a href="如何建立建構子函式.html">如何建立建構子函式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

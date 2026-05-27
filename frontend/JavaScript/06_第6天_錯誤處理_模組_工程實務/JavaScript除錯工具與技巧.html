@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 除錯工具與技巧</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 工程實務</div>
+    <h1><em>console.log</em> 之外，專業除錯的工具箱</h1>
+    <p class="lede">人人都會 <b>console.log</b>，但面試官想看的是你能否善用 <b>debugger</b>、斷點與 DevTools，有系統地縮小問題範圍，而不是靠猜。</p>
+  </header>
+
+  <section>
+    <span class="num">工具層次</span>
+    <h2>從語言內建到瀏覽器工具</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>console API</h4>
+          <p><code>log</code> / <code>warn</code> / <code>error</code> / <code>table</code> / <code>group</code> / <code>time…timeEnd</code>——快速印值，<code>table</code> 特別適合物件陣列。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>debugger 陳述式</h4>
+          <p>在原始碼插入 <code>debugger;</code>，DevTools 開啟時會在此暫停執行，可逐行步進、檢查 scope 中所有變數。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>DevTools 斷點</h4>
+          <p>在 Sources 面板點行號設定斷點，無需修改原始碼。還有條件斷點（右鍵 → Add conditional breakpoint）、XHR 斷點、Event Listener 斷點。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">4</div>
+        <div class="flow-body">
+          <h4>Network / Performance 面板</h4>
+          <p>Network 觀察 API 請求與回應；Performance 錄製時間軸找 CPU 瓶頸與長任務（Long Task）。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實用技巧</span>
+    <h2>幾個 console 用法升級</h2>
+    <pre><code><span class="tok-com">// 物件陣列一眼看清楚</span>
+console.<span class="tok-fn">table</span>([{ name: <span class="tok-str">'Alice'</span>, age: 30 }, { name: <span class="tok-str">'Bob'</span>, age: 25 }]);
+
+<span class="tok-com">// 測量耗時</span>
+console.<span class="tok-fn">time</span>(<span class="tok-str">'fetch'</span>);
+<span class="tok-key">await</span> <span class="tok-fn">fetch</span>(<span class="tok-str">'/api/data'</span>);
+console.<span class="tok-fn">timeEnd</span>(<span class="tok-str">'fetch'</span>);   <span class="tok-com">// fetch: 123.45ms</span>
+
+<span class="tok-com">// 條件斷言，條件為 false 才印錯誤</span>
+console.<span class="tok-fn">assert</span>(user.id !== <span class="tok-key">null</span>, <span class="tok-str">'user.id 不應為 null'</span>, user);</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>Source Maps：</b>打包後的程式碼難以閱讀，確保開發環境有 source map，DevTools 就能顯示原始 TS/JSX 位置，斷點才有意義。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>debugger 和直接設斷點有什麼差別？何時用哪個？</summary>
+        <p><code>debugger</code> 寫進程式碼，版本控制可見，適合追蹤特定條件（配合 if）；DevTools 斷點不修改原始碼，適合快速實驗，且有條件斷點、log point 等進階功能。正式程式碼記得移除 <code>debugger</code>。</p>
+      </details>
+      <details>
+        <summary>非同步程式碼的斷點怎麼設？</summary>
+        <p>在 <code>await</code> 那行設斷點，步進時選「Step Over」跨過 async 等待，或「Step Into」進入 async 函式內部。也可在 Sources 面板勾選「Async」讓 call stack 顯示完整非同步鏈。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「除錯時我會分層：先用 <span class="hl">console.table / time</span> 快速縮小範圍；更複雜的問題在 DevTools 設<span class="hl">條件斷點</span>，配合 Scope 面板逐行觀察變數值；效能問題則開 <span class="hl">Performance 面板</span>錄製找長任務。我也會確保開發環境啟用 source map，讓 DevTools 顯示原始碼而非打包後的程式碼，這樣斷點才真正有效。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript錯誤類型.html">JavaScript 錯誤類型</a>
+      <a href="如何使用trycatch區塊處理錯誤.html">如何使用 try…catch</a>
+      <a href="JavaScript垃圾回收機制.html">垃圾回收機制</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

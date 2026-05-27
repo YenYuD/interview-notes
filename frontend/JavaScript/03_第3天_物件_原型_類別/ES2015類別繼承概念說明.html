@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ES2015 類別繼承</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 類別</div>
+    <h1>讓子類別站在巨人肩上：<em>extends 與 super</em></h1>
+    <p class="lede">ES2015 的繼承語法讓你用 <b>extends</b> 宣告父子關係，再用 <b>super()</b> 呼叫父類別建構子，比 ES5 手動串原型鏈直覺許多。</p>
+  </header>
+
+  <section>
+    <span class="num">核心語法</span>
+    <h2>extends + super 的三個場景</h2>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">Animal</span> {
+  <span class="tok-fn">constructor</span>(name) { <span class="tok-key">this</span>.name = name; }
+  <span class="tok-fn">speak</span>() { console.log(<span class="tok-str">`${this.name} makes a noise.`</span>); }
+}
+
+<span class="tok-key">class</span> <span class="tok-fn">Dog</span> <span class="tok-key">extends</span> Animal {
+  <span class="tok-fn">constructor</span>(name, breed) {
+    <span class="tok-key">super</span>(name);        <span class="tok-com">// ① 呼叫父類別建構子，必須在 this 之前</span>
+    <span class="tok-key">this</span>.breed = breed;
+  }
+  <span class="tok-fn">speak</span>() {
+    <span class="tok-key">super</span>.speak();      <span class="tok-com">// ② 呼叫父類別方法</span>
+    console.log(<span class="tok-str">`${this.name} barks.`</span>);
+  }
+}</code></pre>
+    <div class="aside"><code>super()</code> 必須在子類別建構子使用 <code>this</code> 之前呼叫，否則會拋出 ReferenceError。</div>
+  </section>
+
+  <section>
+    <span class="num">三種繼承行為</span>
+    <h2>繼承、擴充、覆寫</h2>
+    <div class="chips">
+      <div class="chip info">
+        <strong>繼承</strong>
+        <small>子類別自動擁有父類別的屬性與方法，無需重複定義</small>
+      </div>
+      <div class="chip good">
+        <strong>擴充</strong>
+        <small>子類別加入父類別沒有的新屬性（如 <code>breed</code>）或新方法</small>
+      </div>
+      <div class="chip info">
+        <strong>覆寫（Override）</strong>
+        <small>子類別重新定義同名方法，並可選擇是否透過 <code>super.method()</code> 呼叫原版</small>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>子類別省略 constructor 會怎樣？</summary><p>若子類別未定義 <code>constructor</code>，JS 會自動插入一個預設版本，內部只做 <code>super(...args)</code>，效果等同繼承父類別的建構子。</p></details>
+      <details><summary>class 繼承和 ES5 原型繼承有何本質差異？</summary><p>沒有本質差異，<code>class extends</code> 只是語法糖，底層仍是把子類別的 <code>prototype</code> 的 <code>[[Prototype]]</code> 指向父類別的 <code>prototype</code>。</p></details>
+      <details><summary>可以繼承內建物件（如 Array）嗎？</summary><p>ES2015 可以，<code>class MyArr extends Array {}</code> 可正常繼承 Array 的方法與行為；但 ES5 手動繼承內建物件有已知的限制與 bug。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「ES2015 類別繼承用 <span class="hl">extends</span> 宣告父子關係，子類別會自動繼承父類別的所有屬性與方法。建構子裡必須先呼叫 <span class="hl">super()</span> 才能用 <code>this</code>，因為 super 負責初始化父類別部分的狀態。想擴充或覆寫父類別方法時，也可以用 <code>super.method()</code> 呼叫原版實作再加工。底層本質仍是原型鏈，class 只是更易讀的語法糖。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript ES2015 類別與 ES5 函式建構子差異.html">class vs ES5 建構子</a>
+      <a href="JavaScript原型繼承原理解析.html">原型繼承原理</a>
+      <a href="為何在JavaScript中使用靜態類別成員.html">靜態類別成員</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

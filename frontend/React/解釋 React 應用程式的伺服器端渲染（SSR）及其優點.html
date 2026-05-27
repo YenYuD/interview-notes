@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伺服器端渲染 SSR</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 渲染策略</div>
+    <h1>SSR：伺服器先把 HTML 算好，<em>用戶端再接管互動</em></h1>
+    <p class="lede">SSR（Server-side Rendering）在每次請求時於伺服器渲染 React 組件，把完整 HTML 傳給瀏覽器。用戶端接收 HTML 後，React <b>水合（hydrate）</b>讓頁面變得可互動。好處是<b>更快的首屏顯示</b>與更好的 SEO。</p>
+  </header>
+
+  <section>
+    <span class="num">流程</span>
+    <h2>SSR + Hydration 四步驟</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">瀏覽器發送請求</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">伺服器執行 React 組件，生成完整 HTML（含資料）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">瀏覽器接收 HTML，<b>立即顯示內容</b>（此時還不可互動）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">React 水合：附加事件處理器，頁面變得可互動</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">SSR vs CSR</span>
+    <h2>什麼時候選 SSR</h2>
+    <table>
+      <thead><tr><th>面向</th><th>SSR</th><th>CSR（純前端）</th></tr></thead>
+      <tbody>
+        <tr><td>首屏時間</td><td>快（伺服器直接回 HTML）</td><td>慢（需先下載 JS 再渲染）</td></tr>
+        <tr><td>SEO</td><td>佳（HTML 完整）</td><td>差（爬蟲看到空殼）</td></tr>
+        <tr><td>伺服器負擔</td><td>每次請求都要算</td><td>無</td></tr>
+        <tr><td>TTFB（Time to First Byte）</td><td>稍慢（伺服器要計算）</td><td>快</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info"><span class="ico">ℹ️</span><p>SSR 不等於「任何時候都更好」。對於需要個人化資料、且伺服器有充足運算力的頁面，SSR 是好選擇；純互動的管理後台用 CSR 就夠了。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>SSR 和 SSG 哪個更好？</summary><p>取決於內容更新頻率。SSG 速度更快（CDN 直出），但建置後不更新；SSR 每次請求都能拿到最新資料，但有伺服器運算成本。ISR 是折衷方案。</p></details>
+      <details><summary>水合不匹配（Hydration Mismatch）是什麼？怎麼解決？</summary><p>伺服器渲染的 HTML 和客戶端 React 組件產生的 HTML 不同，React 會警告並重新渲染。常見原因：用了 <code>typeof window</code>、<code>Date.now()</code>、<code>Math.random()</code>。解法：確保 SSR 和 CSR 的邏輯完全一致，或用 <code>suppressHydrationWarning</code>（謹慎使用）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「SSR 在每次請求時由伺服器渲染完整 HTML 傳給瀏覽器，使用者<span class="hl">立即看到內容</span>（即使 JS 還沒載入）。好處是首屏更快、SEO 更好；代價是伺服器每次請求都要計算。之後 React 在客戶端<span class="hl">水合（hydrate）</span>，附加事件處理器讓頁面可互動。Next.js 的 <code>getServerSideProps</code> 是典型實作。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋什麼是 React 水合（hydration）.html">水合（Hydration）</a>
+      <a href="解釋 React 應用程式的靜態生成（SSG）及其優點.html">SSG</a>
+      <a href="React 應用程式中的程式碼分割（code splitting）是什麼？.html">程式碼分割</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

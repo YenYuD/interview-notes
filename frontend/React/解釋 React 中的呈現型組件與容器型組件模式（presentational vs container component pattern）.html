@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>呈現型 vs 容器型組件</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 設計模式</div>
+    <h1>呈現型 vs 容器型：把「<em>長什麼樣</em>」和「<em>怎麼運作</em>」分開</h1>
+    <p class="lede">這個模式把組件拆成兩個職責：<b>呈現型組件</b>只管渲染 UI（靠 props 拿資料）；<b>容器型組件</b>只管業務邏輯（獲取資料、管理 state，再透過 props 往下餵）。關注點清晰，測試也更容易。</p>
+  </header>
+
+  <section>
+    <span class="num">對比</span>
+    <h2>兩種組件的特徵</h2>
+    <table>
+      <thead><tr><th>面向</th><th>呈現型（Presentational）</th><th>容器型（Container）</th></tr></thead>
+      <tbody>
+        <tr><td>關注</td><td>UI 外觀</td><td>業務邏輯 / 資料</td></tr>
+        <tr><td>State</td><td>幾乎沒有（最多 UI 狀態）</td><td>有，管理資料狀態</td></tr>
+        <tr><td>資料來源</td><td>全部從 props 來</td><td>從 API、Redux、Context 等獲取</td></tr>
+        <tr><td>可複用性</td><td>高（不綁邏輯）</td><td>低（綁定特定資料源）</td></tr>
+        <tr><td>測試</td><td>只需傳入 props，極易測試</td><td>需要 mock API / store</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">範例</span>
+    <h2>UserList：拆成兩個</h2>
+    <pre><code><span class="tok-com">// 呈現型：只管渲染，props 告訴我什麼就顯示什麼</span>
+<span class="tok-key">function</span> <span class="tok-fn">UserList</span>({ users, onSelect }) {
+  <span class="tok-key">return</span> &lt;ul&gt;{users.<span class="tok-fn">map</span>(u =&gt;
+    &lt;li key={u.id} onClick={() =&gt; <span class="tok-fn">onSelect</span>(u)}&gt;{u.name}&lt;/li&gt;
+  )}&lt;/ul&gt;;
+}
+
+<span class="tok-com">// 容器型：負責獲取資料和邏輯</span>
+<span class="tok-key">function</span> <span class="tok-fn">UserListContainer</span>() {
+  <span class="tok-key">const</span> [users, setUsers] = <span class="tok-fn">useState</span>([]);
+  <span class="tok-fn">useEffect</span>(() =&gt; { <span class="tok-fn">fetchUsers</span>().<span class="tok-fn">then</span>(setUsers); }, []);
+  <span class="tok-key">const</span> handleSelect = user =&gt; console.<span class="tok-fn">log</span>(user);
+  <span class="tok-key">return</span> &lt;UserList users={users} onSelect={handleSelect} /&gt;;
+}</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>Hooks 出現後，這個模式的邊界變得模糊——Custom Hook 可以把「容器型」的邏輯抽出來，讓單一組件同時有乾淨的 UI 和封裝好的邏輯。但模式本身仍是理解關注點分離的好框架。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Hooks 讓這個模式變得不必要了嗎？</summary><p>部分是。Custom Hook 讓邏輯和 UI 可以在同一個函式組件裡乾淨共存。但模式背後的「關注點分離」原則仍有價值，只是實現方式從「拆成兩個組件」變成「Hook 抽邏輯 + 組件純 UI」。</p></details>
+      <details><summary>Redux 的 connect() 和這個模式有什麼關係？</summary><p>Redux 的 <code>connect()(Component)</code> 就是一個 HOC，自動把 Component 包成容器型組件（連接 store）。這是這個模式的典型實際應用。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「呈現型組件只管 UI，所有資料從 props 來，不關心資料從哪裡來；容器型組件負責獲取資料和業務邏輯，再透過 props 餵給呈現型組件。好處是<span class="hl">關注點清晰、呈現型組件極易測試和複用</span>。Hooks 時代改用 Custom Hook 抽邏輯，讓單一組件同時保持 UI 簡潔和邏輯封裝，是這個模式的現代演進。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋 React 中的組合模式（composition pattern）.html">組合模式</a>
+      <a href="React 中的高階組件（higher order components, HOCs）是什麼？.html">高階組件 HOC</a>
+      <a href="在 React 中使用 Hooks 有什麼優點？.html">Hooks 的優點</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>doctype 的作用</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">HTML</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">HTML / 瀏覽器渲染</div>
+    <h1>一行宣告，讓瀏覽器進入<em>標準模式</em>而非猜測模式</h1>
+    <p class="lede"><b>DOCTYPE</b> 告訴瀏覽器這份文件遵循哪個 HTML 版本規範，從而啟用<b>標準模式（no-quirks mode）</b>渲染。少了它，瀏覽器會用「怪異模式」亂猜，CSS 盒模型和渲染行為都會出錯。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>DOCTYPE 做了什麼</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          瀏覽器讀取文件第一行，找到 <code>&lt;!DOCTYPE html&gt;</code>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          識別為 HTML5 規範 → 啟動<strong>標準模式（Standards Mode）</strong>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          CSS 盒模型、JavaScript API、版面計算全部按規範執行
+        </div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">&lt;!-- HTML5 標準寫法：一定放在第一行 --&gt;</span>
+<span class="tok-key">&lt;!DOCTYPE html&gt;</span>
+<span class="tok-str">&lt;html lang="zh-Hant"&gt;</span>
+...</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>沒有 DOCTYPE 或格式錯誤時，瀏覽器進入<strong>怪異模式（Quirks Mode）</strong>：盒模型計算不同、CSS 渲染不一致、JavaScript 行為出現差異，跨瀏覽器版面問題倍增。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">歷史背景</span>
+    <h2>為什麼 HTML5 的 DOCTYPE 這麼短？</h2>
+    <p>舊版 HTML/XHTML 的 DOCTYPE 需要引用 DTD 完整 URL（超長字串）。HTML5 簡化為 <code>&lt;!DOCTYPE html&gt;</code>，純粹作為「啟用標準模式」的開關，不再需要指定外部 DTD。</p>
+    <div class="aside">
+      <strong>舊版對比：</strong><br>
+      HTML 4.01：<code>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;</code>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>怪異模式（Quirks Mode）具體有哪些不同？</summary>
+        <p>最著名的是盒模型差異：怪異模式下 IE 將 border 和 padding 包含在 width 內（類似 border-box），而標準模式使用 content-box。此外還有行高計算、table 樣式等差異，各瀏覽器的怪異模式行為也不盡相同。</p>
+      </details>
+      <details>
+        <summary>DOCTYPE 不區分大小寫嗎？</summary>
+        <p>HTML5 的 DOCTYPE 宣告不區分大小寫，<code>&lt;!doctype html&gt;</code>、<code>&lt;!DOCTYPE HTML&gt;</code> 都有效。但慣例上使用 <code>&lt;!DOCTYPE html&gt;</code>（首字母大寫）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「DOCTYPE 是 HTML 文件的第一行宣告，告知瀏覽器文件遵循的 HTML 版本。HTML5 的寫法是 <code>&lt;!DOCTYPE html&gt;</code>，它的作用是<span class="hl">觸發瀏覽器進入標準模式（Standards Mode）</span>，確保 CSS 盒模型計算、版面渲染都按規範執行。沒有正確的 DOCTYPE，瀏覽器會進入<span class="hl">怪異模式（Quirks Mode）</span>，各瀏覽器行為不一致，CSS 盒模型甚至計算方式都不同，會造成難以追蹤的跨瀏覽器 bug。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="將 HTML5 視為開放網路平台，HTML5 的基本建構組成有哪些？.html">HTML5 基本建構組成</a>
+      <a href="`* { box-sizing border-box; }` 的作用是什麼？.html">box-sizing: border-box</a>
+      <a href="功能偵測、功能推斷和使用 UA 字串有什麼差別？.html">功能偵測 vs UA 字串</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柯里化原理與應用</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式式程式設計・Currying</div>
+    <h1>一次只吃一個參數，<em>柯里化讓函式可無限組合</em></h1>
+    <p class="lede"><b>柯里化（Currying）</b>把 <code>f(a, b, c)</code> 轉成 <code>f(a)(b)(c)</code>，每次只接受一個參數並回傳下一個函式。這讓你能輕鬆從通用函式「特化」出專用函式，是函式組合的核心技術。</p>
+  </header>
+
+  <section>
+    <span class="num">原理</span>
+    <h2>巢狀函式 + 閉包</h2>
+    <pre><code>// 傳統寫法
+function curriedAdd(a) {
+  return function(b) {
+    return function(c) {
+      return a + b + c;
+    };
+  };
+}
+
+// 箭頭函式簡化
+const curriedAdd = (a) =&gt; (b) =&gt; (c) =&gt; a + b + c;
+
+curriedAdd(1)(2)(3); // 6
+
+// 部分套用：先填一部分，之後再補
+const add1 = curriedAdd(1);       // 固定 a=1
+const add1and2 = add1(2);         // 固定 b=2
+add1and2(10); // 13</code></pre>
+  </section>
+
+  <section>
+    <span class="num">實務應用</span>
+    <h2>從通用函式衍生專用函式</h2>
+    <pre><code>// 通用：含稅計算
+const withTax = (rate) =&gt; (price) =&gt; price * (1 + rate);
+
+// 特化：各地稅率
+const tw = withTax(0.05);   // 台灣 5%
+const us = withTax(0.08);   // 美國某州 8%
+
+tw(100);  // 105
+us(100);  // 108</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>柯里化是函式組合（<code>compose</code>/<code>pipe</code>）的基礎——每個步驟只接受一個參數，才能直接串接。Ramda、Lodash/fp 等函式庫的 API 設計都以柯里化為前提。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>如何實作一個通用的 curry 輔助函式？</summary><p>遞迴版本：比較已收到的參數數量與原函式的 <code>fn.length</code>，未滿就繼續收；達到就執行。<code>const curry = fn =&gt; (...args) =&gt; args.length &gt;= fn.length ? fn(...args) : curry(fn.bind(null, ...args));</code></p></details>
+      <details><summary>柯里化和部分套用最大的差異？</summary><p>柯里化嚴格「每次一個參數」，函式鏈長度等於 arity；部分套用則可以一次固定多個參數，較靈活但不那麼純粹。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「柯里化把多參數函式轉換成<span class="hl">每次只接受一個參數的函式鏈</span>，背後是閉包記住前面的參數。實務好處是可以<span class="hl">從通用函式衍生出語意明確的專用函式</span>，例如 <code>withTax(0.05)</code> 產生台灣含稅計算器。柯里化也是函式組合的基礎，Ramda 等 FP 函式庫大量使用。與部分套用的差別：柯里化嚴格每次一個參數，部分套用可以一次固定多個。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Currying與部分套用範例.html">Currying 與部分套用範例</a>
+      <a href="柯里化與部分應用的差異.html">柯里化與部分應用的差異</a>
+      <a href="柯里化與部分套用的優點.html">柯里化與部分套用的優點</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

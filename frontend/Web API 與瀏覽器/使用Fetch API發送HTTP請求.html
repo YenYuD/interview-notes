@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fetch API 發送 HTTP 請求</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>Fetch API：<em>Promise-based</em> 的現代 HTTP 請求標準</h1>
+    <p class="lede">fetch() 是現代瀏覽器內建的 HTTP 請求 API，<b>回傳 Promise</b>，支援 async/await，語法簡潔。但要記住一個大陷阱：<b>HTTP 錯誤不會自動 reject</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">基本用法</span>
+    <h2>GET 與 POST 請求模式</h2>
+    <pre><code><span class="tok-com">// GET 請求（async/await 風格）</span>
+<span class="tok-key">async function</span> <span class="tok-fn">fetchUser</span>(id) {
+  <span class="tok-key">const</span> res = <span class="tok-key">await</span> fetch(<span class="tok-str">`/api/users/${id}`</span>);
+  <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> Error(<span class="tok-str">`HTTP ${res.status}`</span>);
+  <span class="tok-key">return</span> res.json();
+}
+
+<span class="tok-com">// POST 請求（傳送 JSON）</span>
+<span class="tok-key">await</span> fetch(<span class="tok-str">'/api/users'</span>, {
+  method: <span class="tok-str">'POST'</span>,
+  headers: { <span class="tok-str">'Content-Type'</span>: <span class="tok-str">'application/json'</span> },
+  body: JSON.stringify({ name: <span class="tok-str">'Alice'</span>, age: 25 }),
+});</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>fetch() 只有網路失敗才 reject，<b>HTTP 404/500 仍然 resolve</b>，必須手動檢查 <code>response.ok</code> 或 <code>response.status</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">Response 處理</span>
+    <h2>回應格式的解析方法</h2>
+    <table>
+      <thead><tr><th>方法</th><th>用途</th><th>回傳</th></tr></thead>
+      <tbody>
+        <tr><td><code>response.json()</code></td><td>解析 JSON</td><td>Promise&lt;Object&gt;</td></tr>
+        <tr><td><code>response.text()</code></td><td>純文字</td><td>Promise&lt;string&gt;</td></tr>
+        <tr><td><code>response.blob()</code></td><td>二進位（圖片、檔案）</td><td>Promise&lt;Blob&gt;</td></tr>
+        <tr><td><code>response.ok</code></td><td>狀態碼是否在 200-299</td><td>boolean</td></tr>
+        <tr><td><code>response.status</code></td><td>HTTP 狀態碼</td><td>number</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>如何取消一個進行中的 fetch 請求？</summary>
+        <p>用 <code>AbortController</code>：建立 controller，把 <code>controller.signal</code> 傳入 fetch options，呼叫 <code>controller.abort()</code> 即可取消，fetch 的 Promise 會以 AbortError reject。</p>
+      </details>
+      <details>
+        <summary>fetch 如何帶 Cookie？</summary>
+        <p>預設 fetch 不帶 Cookie。加上 <code>credentials: 'include'</code> 才會帶上跨域 Cookie；同源時用 <code>credentials: 'same-origin'</code>（預設行為）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「fetch() 是現代瀏覽器內建的 HTTP 請求 API，基於 Promise，搭配 async/await 語法很簡潔。最重要的注意事項是：<span class="hl">HTTP 錯誤狀態（404、500）不會觸發 reject</span>，要手動檢查 response.ok。POST 請求需要設定 method、Content-Type header，並用 JSON.stringify 序列化 body。要取消請求用 AbortController。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="XMLHttpRequest與fetch在JavaScript與瀏覽器中的差異.html">XHR vs fetch() 比較</a>
+      <a href="如何使用AbortController中止JavaScript的網路請求.html">AbortController 取消請求</a>
+      <a href="詳細解釋AJAX.html">AJAX 完整說明</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

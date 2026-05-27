@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML5 的基本建構組成</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">HTML</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">HTML5 / 平台概覽</div>
+    <h1>HTML5 不只是標籤：<em>開放網路平台</em>的八個支柱</h1>
+    <p class="lede">把 HTML5 理解為完整的<b>開放網路平台</b>，而不只是新標籤的集合。它涵蓋了從語意、多媒體、連線性到效能的八個核心能力維度。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>八個建構組成</h2>
+    <table>
+      <thead>
+        <tr><th>維度</th><th>說明</th><th>代表技術</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>語意（Semantics）</strong></td><td>用標籤描述內容意義</td><td>header、article、nav、section</td></tr>
+        <tr><td><strong>樣式（Styling）</strong></td><td>自訂外觀，動畫效果</td><td>CSS3、Transitions、Animations</td></tr>
+        <tr><td><strong>連線性（Connectivity）</strong></td><td>新型伺服器通訊方式</td><td>WebSocket、Server-Sent Events</td></tr>
+        <tr><td><strong>離線與儲存</strong></td><td>客戶端本地資料儲存</td><td>localStorage、IndexedDB、Service Worker</td></tr>
+        <tr><td><strong>多媒體（Multimedia）</strong></td><td>原生影音支援</td><td>video、audio、WebRTC</td></tr>
+        <tr><td><strong>2D/3D 繪圖</strong></td><td>豐富視覺效果</td><td>Canvas、SVG、WebGL</td></tr>
+        <tr><td><strong>效能與整合</strong></td><td>速度優化、硬體利用</td><td>Web Workers、requestAnimationFrame</td></tr>
+        <tr><td><strong>裝置存取</strong></td><td>輸入輸出裝置整合</td><td>Geolocation、Camera API、Touch Events</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>面試時用這八個維度來組織回答，能展現對 HTML5 的系統性理解，而不是只列舉幾個新標籤。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>語意化標籤（semantic HTML）有什麼實際好處？</summary>
+        <p>三大好處：1. <strong>SEO</strong>——搜尋引擎更理解內容結構；2. <strong>無障礙性</strong>——螢幕閱讀器能正確識別導覽、主內容、標題層級；3. <strong>可維護性</strong>——其他開發者讀 HTML 結構就能理解頁面組成，不需要全靠 div+class 猜。</p>
+      </details>
+      <details>
+        <summary>Service Worker 和 localStorage 有什麼差別？</summary>
+        <p>localStorage 同步、容量約 5MB、只能儲存字串，適合小型設定資料。Service Worker 是獨立執行緒，能攔截網路請求、快取資源，實現完整的離線功能（PWA 核心），功能遠比 localStorage 強大，但 API 較複雜。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「把 HTML5 理解為開放網路平台，它涵蓋八個維度：<span class="hl">語意標籤</span>讓機器理解內容結構、CSS3 提供豐富樣式、<span class="hl">WebSocket 等新連線方式</span>實現即時通訊、Service Worker 和 IndexedDB 支援離線功能、原生 video/audio 取代 Flash、Canvas/WebGL 提供繪圖能力、Web Workers 讓效能任務在背景執行、Geolocation 等 API 存取裝置功能。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="doctype 有什麼作用？.html">DOCTYPE 的作用</a>
+      <a href="`data-` 屬性有什麼用途？.html">data- 屬性用途</a>
+      <a href="什麼是漸進式渲染（progressive rendering）？.html">漸進式渲染</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

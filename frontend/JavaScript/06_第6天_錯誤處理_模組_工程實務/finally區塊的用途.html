@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>finally 區塊的用途</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 錯誤處理</div>
+    <h1><em>無論如何</em>都要執行的那段程式碼</h1>
+    <p class="lede"><b>finally</b> 區塊在 try 與 catch 執行完後必定執行，就算中途 return 也不例外。它是資源清理的最後保障，也是 API 呼叫中「隱藏 loading 狀態」的慣用寫法。</p>
+  </header>
+
+  <section>
+    <span class="num">三種情境</span>
+    <h2>finally 為何「必定」執行</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>正常完成：try 執行完</h4>
+          <p>try 無錯誤 → 跳過 catch → 執行 finally。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>發生錯誤：catch 執行完</h4>
+          <p>try 拋出錯誤 → 執行 catch → 執行 finally。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot good">!</div>
+        <div class="flow-body">
+          <h4>中途 return：finally 仍然執行</h4>
+          <p>即使 try 或 catch 裡寫了 <code>return</code>，函式實際返回前仍會先跑完 finally。</p>
+        </div>
+      </div>
+    </div>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">example</span>() {
+  <span class="tok-key">try</span> {
+    <span class="tok-key">return</span> <span class="tok-str">'try 的回傳值'</span>;
+  } <span class="tok-key">finally</span> {
+    console.<span class="tok-fn">log</span>(<span class="tok-str">'finally 先執行'</span>); <span class="tok-com">// 這行先印</span>
+  }
+}
+console.<span class="tok-fn">log</span>(<span class="tok-fn">example</span>());
+<span class="tok-com">// finally 先執行</span>
+<span class="tok-com">// try 的回傳值</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">實務用途</span>
+    <h2>loading 狀態與資源釋放</h2>
+    <pre><code><span class="tok-key">async function</span> <span class="tok-fn">fetchData</span>() {
+  setLoading(<span class="tok-key">true</span>);               <span class="tok-com">// 顯示 spinner</span>
+  <span class="tok-key">try</span> {
+    <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-fn">fetch</span>(<span class="tok-str">'/api/data'</span>);
+    <span class="tok-key">return await</span> res.<span class="tok-fn">json</span>();
+  } <span class="tok-key">catch</span> (e) {
+    setError(e.message);
+  } <span class="tok-key">finally</span> {
+    setLoading(<span class="tok-key">false</span>);            <span class="tok-com">// 無論成功或失敗都隱藏 spinner</span>
+  }
+}</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>Promise 的 .finally()：</b>Promise chain 也有對應方法 <code>.finally(() =&gt; ...)</code>，語義相同——無論 resolve 或 reject 都執行，且<strong>不接收引數、不改變 Promise 的值</strong>。</p>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>陷阱：</b>若 finally 裡也有 <code>return</code>，它會<strong>覆蓋</strong> try/catch 的回傳值。這幾乎總是 bug，應避免在 finally 裡寫 return。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>finally 裡可以 throw 嗎？</summary>
+        <p>可以，但會蓋掉原來的錯誤。如果 try 拋出錯誤 A，finally 又拋出錯誤 B，catch 只會接到 B，原始錯誤 A 被靜默丟棄。這是需要特別小心的行為。</p>
+      </details>
+      <details>
+        <summary>什麼時候不需要 finally，用 .finally() 更好？</summary>
+        <p>當你使用 Promise chain 風格（<code>.then().catch()</code>）時，搭配 <code>.finally()</code> 比混用 async/await 和 try/catch 更一致。兩者功能相同，看整體程式碼風格選擇。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">finally</span> 區塊的作用是確保某段程式碼無論成功或失敗都一定執行，常用於資源清理與 UI 狀態重設，例如 API 呼叫後關掉 loading 指示器。它有一個重要特性：即使 try 或 catch 裡寫了 return，<span class="hl">finally 仍然在函式真正回傳之前執行</span>。Promise 的 <code>.finally()</code> 語義相同，不改變 Promise 的最終值，只保證清理邏輯執行。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何使用trycatch區塊處理錯誤.html">如何使用 try…catch</a>
+      <a href="非同步操作錯誤處理.html">非同步操作錯誤處理</a>
+      <a href="JavaScript錯誤傳播概念解析.html">錯誤傳播概念</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>型別推斷 vs 情境型別</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TypeScript</div>
+    <h1>兩種「不用手寫型別」的<em>反向魔法</em></h1>
+    <p class="lede">型別推斷：<b>值 → 型別</b>（看你給的值）。情境型別：<b>情境 → 型別</b>（看你把函式放在哪）。後者正是為什麼 callback 參數不用手動標型別。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 型別從哪來</span>
+    <h2>切換看 TS 怎麼推</h2>
+
+    <div class="lab">
+      <div class="lab-label">兩種推斷方向</div>
+      <div class="toggle-row" id="row">
+        <button class="on" data-k="infer">型別推斷（值 → 型別）</button>
+        <button data-k="contextual">情境型別（情境 → 型別）</button>
+      </div>
+      <pre id="code"><code></code></pre>
+      <div class="log" id="out" style="max-height:none"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">對比</span>
+    <h2>方向相反</h2>
+    <table>
+      <tr><th></th><th>型別推斷</th><th>情境型別</th></tr>
+      <tr><td>方向</td><td>值 → 型別</td><td>位置／情境 → 型別</td></tr>
+      <tr><td>時機</td><td>宣告／初始化</td><td>函式參數、callback、事件處理器</td></tr>
+      <tr><td>例</td><td><code>let x = "hi"</code> → string</td><td><code>arr.forEach(n =&gt; …)</code> → n 是元素型別</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>兩者都讓你<b>少寫標注又不失型別安全</b>。理解情境型別，就懂為什麼 React 的 <code>onClick={e =&gt; …}</code> 裡 <code>e</code> 自動是 <code>MouseEvent</code>——TS 從 onClick 的定義反推出來了。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼時候還是該手動標型別？</summary><p>函式參數（非 callback）、公開 API 邊界、想固定回傳型別當契約時。推斷適合區域變數，邊界處明確標注較安全好讀。</p></details>
+      <details><summary>推斷會推出 any 嗎？</summary><p>會。沒初始值又沒標型別、或關閉 <code>noImplicitAny</code> 時可能落到 any。開啟 <code>strict</code> 能逼你補上。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「兩個都是少寫型別的機制。<span class="hl">型別推斷是『值 → 型別』</span>，從初始值推出變數型別；<span class="hl">情境型別是反向的『情境 → 型別』</span>，從函式被放置的位置推出參數型別——這就是 callback 和事件處理器參數不用手寫型別的原因。區域變數靠推斷，API 邊界我仍會明確標注。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="019 型別斷言 Type Assertions.html">型別斷言</a>
+      <a href="013 noImplicitAny 是什麼.html">noImplicitAny</a>
+      <a href="011 泛型 Generics 是什麼.html">泛型</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), code=document.querySelector('#code code'), out=document.getElementById('out');
+  const data={
+    infer:{c:`let name = "john";   // 推斷 string\nlet nums = [1, 2, 3]; // 推斷 number[]\nfunction add(x: number, y: number) {\n  return x + y;        // 推斷回傳 number\n}`, note:'TS 從你給的「值」推出型別'},
+    contextual:{c:`window.onmousedown = function (e) {\n  e.button;  // ✅ TS 知道 e 是 MouseEvent\n  e.person;  // ❌ MouseEvent 沒有 person\n};\n[1,2,3].forEach(n => n.toFixed()); // n 是 number`, note:'TS 從「使用情境」反推參數型別（onmousedown 的簽章）'}
+  };
+  function render(k){ const d=data[k]; code.textContent=d.c; out.innerHTML=`<div class="ln c-dim">// ${d.note}</div>`; }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(b.dataset.k); });
+  render('infer');
+</script>
+</body>
+</html>

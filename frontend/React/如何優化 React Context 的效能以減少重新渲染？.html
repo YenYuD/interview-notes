@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>優化 Context 效能</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 效能</div>
+    <h1>Context 效能優化：三招讓<em>只有真正需要更新的組件重渲</em></h1>
+    <p class="lede">Context value 改變，所有 consumer 都重渲——這個問題有解。三個層級的解法：<b>拆分 Context</b>（按職責分開）、<b>記憶 value 物件</b>（useMemo）、<b>選擇性訂閱</b>（use-context-selector）。</p>
+  </header>
+
+  <section>
+    <span class="num">解法一</span>
+    <h2>拆分 Context：把高頻和低頻的分開</h2>
+    <pre><code><span class="tok-com">// ❌ 合在一起：user 改變時 theme 的 consumer 也重渲</span>
+<span class="tok-key">const</span> AppContext = { user, theme, count };
+
+<span class="tok-com">// ✅ 分開：各自 consumer 只訂閱自己關心的</span>
+<span class="tok-key">const</span> UserContext   = <span class="tok-fn">createContext</span>();  <span class="tok-com">// 登入資訊（低頻）</span>
+<span class="tok-key">const</span> ThemeContext  = <span class="tok-fn">createContext</span>();  <span class="tok-com">// 主題（極低頻）</span>
+<span class="tok-key">const</span> CountContext  = <span class="tok-fn">createContext</span>();  <span class="tok-com">// 計數（高頻，隔離）</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">解法二</span>
+    <h2>useMemo 記憶 value 物件</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">AppProvider</span>({ children }) {
+  <span class="tok-key">const</span> [state, dispatch] = <span class="tok-fn">useReducer</span>(reducer, init);
+
+  <span class="tok-com">// 沒有 useMemo：每次 Provider 重渲都建立新物件</span>
+  <span class="tok-com">// 有 useMemo：state 不變就用同一個引用</span>
+  <span class="tok-key">const</span> value = <span class="tok-fn">useMemo</span>(
+    () =&gt; ({ state, dispatch }),
+    [state]   <span class="tok-com">// dispatch 穩定，不需加</span>
+  );
+
+  <span class="tok-key">return</span> &lt;AppContext.Provider value={value}&gt;{children}&lt;/AppContext.Provider&gt;;
+}</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>狀態（state）和 dispatch（setter）分離成兩個 Context 也是常見進階模式：只需要 dispatch 的組件不因 state 改變而重渲。</p></div>
+  </section>
+
+  <section>
+    <span class="num">解法三</span>
+    <h2>use-context-selector：細粒度訂閱</h2>
+    <pre><code><span class="tok-key">import</span> { useContextSelector } <span class="tok-key">from</span> <span class="tok-str">'use-context-selector'</span>;
+
+<span class="tok-com">// 只訂閱 user.name，其他欄位變不觸發重渲</span>
+<span class="tok-key">const</span> name = <span class="tok-fn">useContextSelector</span>(UserContext, ctx =&gt; ctx.user.name);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React.memo 能擋住 Context 觸發的重渲嗎？</summary><p>不能。<code>React.memo</code> 只比對 props，而 Context 是透過 useContext 訂閱，繞過 props 觸發重渲。<code>React.memo</code> 對 Context consumer 無效。</p></details>
+      <details><summary>把 state 和 dispatch 分成兩個 Context 有什麼好處？</summary><p>只 dispatch action 的組件（如按鈕）不需要訂閱 state，分開後這些組件不會因 state 變更重渲，在大型表單或頻繁更新的場景效能明顯更好。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「優化 Context 效能有三個層級：一是<span class="hl">拆分 Context</span>，按更新頻率把高頻和低頻資料分開，讓 consumer 只訂閱自己需要的；二是用 <span class="hl">useMemo 記憶 value 物件</span>，避免每次 Provider 重渲都建立新引用；三是用 <code>use-context-selector</code> 做<span class="hl">細粒度訂閱</span>，只訂閱 Context 裡特定的欄位。React.memo 對 Context 觸發的重渲無效。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="在 React 中使用 Context 有哪些陷阱？.html">Context 的陷阱</a>
+      <a href="React 中的 `useMemo` hook 是什麼？什麼時候應該使用它？.html">useMemo</a>
+      <a href="你如何決定何時使用 React State、Context 或外部狀態管理工具？.html">State / Context 選擇</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

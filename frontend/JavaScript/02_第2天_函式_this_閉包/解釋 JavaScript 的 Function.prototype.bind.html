@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Function.prototype.bind</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式・this 綁定</div>
+    <h1><em>bind</em> 回傳一個新函式，<em>this 永久鎖定</em></h1>
+    <p class="lede"><code>bind(thisArg, ...args)</code> 不立即執行，而是回傳一個<b>新函式</b>，其 this 永遠固定為 thisArg，且可選擇預先填入部分參數（部分套用）。</p>
+  </header>
+
+  <section>
+    <span class="num">核心行為</span>
+    <h2>bind vs call / apply</h2>
+    <table>
+      <tr><th></th><th><code>bind</code></th><th><code>call</code> / <code>apply</code></th></tr>
+      <tr><td>執行時機</td><td>回傳新函式，<b>不立即執行</b></td><td>立即執行</td></tr>
+      <tr><td>回傳值</td><td>新函式</td><td>原函式的回傳值</td></tr>
+      <tr><td>適合場景</td><td>事件處理器、回呼</td><td>立即呼叫並設定 this</td></tr>
+    </table>
+    <pre><code>const john = { age: 42, getAge() { return this.age; } };
+
+// 直接呼叫正確
+john.getAge(); // 42
+
+// 脫離物件，this 丟失
+const fn = john.getAge;
+fn(); // undefined
+
+// bind 鎖定 this
+const bound = john.getAge.bind(john);
+bound(); // 42
+
+// 也可以綁到其他物件
+const mary = { age: 21 };
+john.getAge.bind(mary)(); // 21</code></pre>
+  </section>
+
+  <section>
+    <span class="num">部分套用</span>
+    <h2>bind 也能預先填參數</h2>
+    <pre><code>function multiply(a, b) { return a * b; }
+
+// 綁定 this 為 null，同時固定第一個參數為 5
+const multiplyBy5 = multiply.bind(null, 5);
+multiplyBy5(3); // 15
+multiplyBy5(4); // 20</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>React class component 的慣用寫法：<code>this.handleClick = this.handleClick.bind(this)</code>，讓 handleClick 傳入 JSX 後仍能正確存取 this。現代寫法改用 class field 箭頭函式。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>可以對箭頭函式使用 bind 嗎？</summary><p>可以呼叫，但<b>無效</b>。箭頭函式的 this 在定義時已詞法綁定，bind 傳入再多的 thisArg 都不會改變它。</p></details>
+      <details><summary>bind 和閉包有什麼關係？</summary><p>bind 內部本質上是用閉包記住了 thisArg 和預填參數，回傳的新函式在呼叫時再從閉包取出使用。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>bind</code> 回傳一個<span class="hl">新函式，this 永久鎖定</span>，不立即執行——這是它和 call/apply 最大的差異。主要用在需要「稍後再呼叫」卻又要保住 this 的場景，例如<span class="hl">事件處理器或非同步回呼</span>。bind 也支援部分套用，可以預先固定部分參數。注意箭頭函式對 bind 免疫，this 無法被覆蓋。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript 中 call 與 apply 的差異.html">call 與 apply 的差異</a>
+      <a href="this關鍵字常見陷阱.html">this 常見陷阱</a>
+      <a href="部分應用概念說明.html">部分應用概念說明</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

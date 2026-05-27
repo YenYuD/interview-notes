@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>this 綁定方式</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式 · this</div>
+    <h1><code>this</code> 是誰，<em>看「怎麼呼叫」</em>而不是怎麼定義</h1>
+    <p class="lede">同一個函式，<b>呼叫方式不同，this 就不同</b>。記住四種綁定的優先序，再加上箭頭函式的特例，幾乎所有 this 謎題都能解開。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 同一個 greet，五種呼叫</span>
+    <h2>this 會指向誰？</h2>
+    <p>函式 <code>function greet(){ return this }</code>。點不同呼叫方式，看 this 綁到哪：</p>
+
+    <div class="lab">
+      <div class="lab-label">選一種呼叫方式</div>
+      <div class="toggle-row" id="row" style="flex-wrap:wrap">
+        <button class="on" data-k="default">greet()</button>
+        <button data-k="implicit">obj.greet()</button>
+        <button data-k="explicit">greet.call(obj)</button>
+        <button data-k="new">new Greet()</button>
+        <button data-k="arrow">() =&gt; ...</button>
+      </div>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">四種綁定 + 一個特例</span>
+    <h2>優先序由高到低</h2>
+    <table>
+      <tr><th>綁定</th><th>觸發方式</th><th>this 指向</th></tr>
+      <tr><td>new 綁定</td><td><code>new Fn()</code></td><td>新建立的物件</td></tr>
+      <tr><td>顯式綁定</td><td><code>call/apply/bind</code></td><td>你指定的物件</td></tr>
+      <tr><td>隱式綁定</td><td><code>obj.fn()</code></td><td>呼叫前的那個物件 <code>obj</code></td></tr>
+      <tr><td>預設綁定</td><td><code>fn()</code></td><td>嚴格模式 <code>undefined</code>；否則全域物件</td></tr>
+    </table>
+    <div class="callout info"><span class="ico">💡</span><p><b>箭頭函式沒有自己的 this</b>，它直接繼承外層的 this，且 call/apply/bind 改不動。所以物件方法不要寫成箭頭函式，否則 this 會抓到外層而非物件本身。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>把 obj.method 取出來再呼叫，this 跑掉了？</summary><p>對。<code>const f = obj.method; f()</code> 變成預設綁定（this 不是 obj）。解法：<code>obj.method.bind(obj)</code> 或用箭頭函式包起來。</p></details>
+      <details><summary>callback 裡的 this 為什麼不對？</summary><p>傳給 setTimeout / 事件處理器的函式是被「裸呼叫」的，走預設綁定。用箭頭函式或 bind 鎖定 this。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「this 的值看<span class="hl">呼叫方式</span>，優先序是 <span class="hl">new ＞ 顯式(call/apply/bind) ＞ 隱式(obj.fn) ＞ 預設(fn)</span>。箭頭函式是特例——它沒有自己的 this，<span class="hl">繼承外層</span>且綁不動，所以很適合用在 callback 鎖定 this，但不適合當物件方法。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋JavaScript中this的運作原理.html">this 運作原理</a>
+      <a href="解釋 JavaScript 的 Function.prototype.bind.html">bind</a>
+      <a href="JavaScript 中 call 與 apply 的差異.html">call vs apply</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), log=document.getElementById('log');
+  const info={
+    default:['greet()','預設綁定','嚴格模式 → <b>undefined</b>；非嚴格 → 全域物件 (window)','c-bad'],
+    implicit:['obj.greet()','隱式綁定','<b>obj</b>（呼叫前那個物件）','c-ok'],
+    explicit:['greet.call(obj)','顯式綁定','<b>obj</b>（你明確指定的）','c-ok'],
+    new:['new Greet()','new 綁定','<b>新建立的實例物件</b>','c-ok'],
+    arrow:['const f = () =&gt; this','箭頭函式','<b>繼承外層</b>的 this（自己沒有，綁不動）','c-req'],
+  };
+  function render(k){
+    const [call,name,points,cls]=info[k];
+    log.innerHTML=`<div class="ln c-dim">呼叫：${call}</div><div class="ln">綁定類型：${name}</div><div class="ln ${cls}">→ this 指向 ${points}</div>`;
+  }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(b.dataset.k); });
+  render('default');
+</script>
+</body>
+</html>

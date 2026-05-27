@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>this 的運作原理</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT・this</div>
+    <h1><em>this</em> 不看定義位置，只看<em>怎麼被呼叫</em></h1>
+    <p class="lede"><code>this</code> 是對「<b>當前執行上下文</b>」的動態參考，值由呼叫方式決定。掌握六條規則，就能在任何情境下預測 this 的值。</p>
+  </header>
+
+  <section>
+    <span class="num">六條規則（優先順序由高到低）</span>
+    <h2>this 的決定規則</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>1. 箭頭函式</strong> — 詞法繼承定義時外層的 this，不受其他規則影響</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>2. new 建構子</strong> — this 是新建立的物件實例 <code>new Foo()</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>3. 明確綁定</strong> — <code>call(obj)</code> / <code>apply(obj)</code> / <code>bind(obj)</code> 傳入的物件</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>4. 隱式綁定（方法呼叫）</strong> — <code>obj.fn()</code>，this 是 obj</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>5. 自由呼叫</strong> — 非嚴格模式是全域物件（<code>window</code>）；嚴格模式是 <code>undefined</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>6. 全域腳本頂層</strong> — 瀏覽器是 <code>window</code>，Node.js 是 <code>module.exports</code> / <code>global</code></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">對照程式碼</span>
+    <h2>同一個函式，四種呼叫方式，四種 this</h2>
+    <pre><code>function show() { console.log(this?.name ?? this); }
+
+const obj = { name: 'obj', show };
+
+show();           // window / undefined（自由呼叫）
+obj.show();       // { name: 'obj', ... }（隱式）
+show.call({name:'explicit'}); // { name: 'explicit' }（明確）
+new show();       // show {}（new 建構）
+
+// 箭頭函式：完全忽略以上規則
+const arrow = () =&gt; console.log(this);
+arrow.call({ name: 'ignored' }); // 依然是外層 this</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>class 內部的 this 是哪種規則？</summary><p>class 方法呼叫屬於「隱式綁定」，但 class 內部預設為嚴格模式，因此方法獨立呼叫時 this 是 <code>undefined</code>，而非全域物件。</p></details>
+      <details><summary>事件處理器中 this 是什麼？</summary><p>使用普通函式作為事件處理器，this 指向觸發事件的 DOM 元素（<code>event.currentTarget</code>）；使用箭頭函式則繼承外層 this，不是 DOM 元素。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>this</code> 是<span class="hl">動態決定的執行上下文</span>，值由呼叫方式而非定義位置決定。優先順序由高到低：箭頭函式詞法繼承外層、new 建構子、call/apply/bind 明確指定、方法呼叫隱式綁定、最後才是自由呼叫（全域或 undefined）。<span class="hl">箭頭函式的 this 完全不受其他規則影響</span>，這是它最重要的特性。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="this關鍵字常見陷阱.html">this 常見陷阱</a>
+      <a href="事件處理器中this綁定概念解析.html">事件處理器中 this 綁定</a>
+      <a href="JavaScript 中 call 與 apply 的差異.html">call 與 apply 的差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

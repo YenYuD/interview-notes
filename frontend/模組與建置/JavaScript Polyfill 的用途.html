@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Polyfill 的用途</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">模組與建置</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">MODULE &amp; BUILD</div>
+    <h1>舊瀏覽器也能跑新 API？<em>Polyfill</em> 就是那塊墊片</h1>
+    <p class="lede">Polyfill 是一段「<b>功能偵測 + 替代實作</b>」的 JavaScript，讓你用現代語法卻不放棄舊瀏覽器支援，是相容性策略的核心工具。</p>
+  </header>
+
+  <section>
+    <span class="num">核心原理</span>
+    <h2>先偵測、再填補</h2>
+    <p>Polyfill 的邏輯很直接：先檢查瀏覽器是否原生支援，若不支援則注入替代實作，若已支援則什麼都不做（避免覆蓋原生實作）。</p>
+
+    <pre><code><span class="tok-com">// Array.prototype.includes 的 polyfill 範例</span>
+<span class="tok-key">if</span> (!Array.prototype.includes) {
+  Array.prototype.includes = <span class="tok-key">function</span>(searchElement) {
+    <span class="tok-key">for</span> (<span class="tok-key">var</span> i = 0; i < <span class="tok-key">this</span>.length; i++) {
+      <span class="tok-key">if</span> (<span class="tok-key">this</span>[i] === searchElement) <span class="tok-key">return true</span>;
+    }
+    <span class="tok-key">return false</span>;
+  };
+}</code></pre>
+
+    <div class="aside">
+      <b>Polyfill vs Transpile：</b>Polyfill 是補 <em>執行時缺少的 API</em>（如 <code>Promise</code>、<code>fetch</code>）；Transpile（Babel）是把新<em>語法</em>（如箭頭函式、可選鏈）轉成舊語法。實務上通常兩者並用。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">常見工具</span>
+    <h2>不用自己手刻——用成熟工具</h2>
+
+    <div class="chips">
+      <div class="chip good">core-js<small>精細按需引入</small></div>
+      <div class="chip info">Polyfill.io<small>按瀏覽器動態下發</small></div>
+      <div class="chip info">Babel + preset-env<small>自動分析+注入</small></div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>工具</th><th>運作方式</th><th>適合場景</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>core-js</td>
+          <td>npm 套件，按需 import 特定 polyfill</td>
+          <td>精確控制 bundle 大小</td>
+        </tr>
+        <tr>
+          <td>Polyfill.io</td>
+          <td>CDN 服務，依 User-Agent 回傳最小所需 polyfill</td>
+          <td>快速上線、不需本地管理</td>
+        </tr>
+        <tr>
+          <td>@babel/preset-env</td>
+          <td>根據 <code>.browserslistrc</code> 自動決定需要的 polyfill</td>
+          <td>Babel 建置流程整合</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <pre><code><span class="tok-com">// core-js 按需引入</span>
+<span class="tok-key">import</span> <span class="tok-str">'core-js/actual/array/flat-map'</span>;
+[1, 2].<span class="tok-fn">flatMap</span>(it => [it, it]); <span class="tok-com">// => [1, 1, 2, 2]</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">注意事項</span>
+    <h2>別讓 polyfill 拖垮效能</h2>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>選擇性載入：</b>不要把所有 polyfill 都全量打包。現代瀏覽器根本不需要 polyfill，卻要下載一大包是浪費。用 Polyfill.io 或 <code>@babel/preset-env</code> + <code>useBuiltIns: 'usage'</code> 讓工具自動按需注入。</p>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>module/nomodule 技巧：</b>用 <code>&lt;script type="module"&gt;</code> 給現代瀏覽器，<code>&lt;script nomodule&gt;</code> 給舊瀏覽器加載 polyfill 版本——兩者互斥，達到差異化下載。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Polyfill 和 Shim 有什麼差別？</summary>
+        <p>兩者常混用，但嚴格來說：<strong>Polyfill</strong> 是利用當前環境已有的 API，模擬「本應存在但缺失」的原生行為；<strong>Shim</strong> 泛指任何插入在 API 層與呼叫者之間的適配層，不一定是補缺失功能。實務上 polyfill 是 shim 的子集。</p>
+      </details>
+      <details>
+        <summary>為什麼不能所有東西都 polyfill？</summary>
+        <p>部分平台能力根本無法用 JavaScript 模擬，如 CSS Grid 在舊 IE 的完整支援、Service Worker、WebAssembly 等。這類功能只能用漸進增強（progressive enhancement）策略——有支援就用，沒有就降級到功能性替代方案。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Polyfill 是一段先做<span class="hl">功能偵測</span>、若環境不支援就注入替代實作的 JavaScript，讓開發者能使用現代 API 又兼顧舊瀏覽器。例如 IE 11 沒有 <code>Array.prototype.includes</code>，就可以手動或透過 <span class="hl">core-js</span> 補上。實務上我通常用 <code>@babel/preset-env</code> 搭配 browserslist，讓工具自動分析並按需注入，避免全量引入拖垮 bundle 大小。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="使用編譯成JavaScript語言的優缺點.html">編譯成 JS 語言的優缺點</a>
+      <a href="模組打包工具的優點.html">模組打包工具的優點</a>
+      <a href="CommonJS與ESM比較.html">CommonJS vs ESM</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

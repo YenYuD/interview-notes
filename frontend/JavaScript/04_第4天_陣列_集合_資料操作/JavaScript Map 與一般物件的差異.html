@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map vs 一般物件</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · Map</div>
+    <h1>都是鍵值對，<em>Map 多了普通物件做不到的事</em></h1>
+    <p class="lede">普通物件（POJO）輕量但只能用字串／Symbol 當鍵。<b>Map</b> 的鍵可以是任意類型、保留插入順序、有 <code>size</code> 屬性——換來的代價是無法直接 JSON 序列化。</p>
+  </header>
+
+  <section>
+    <span class="num">差異對比</span>
+    <h2>六個關鍵維度</h2>
+    <table>
+      <thead><tr><th>特性</th><th>Map</th><th>普通物件</th></tr></thead>
+      <tbody>
+        <tr><td>鍵的類型</td><td>任意（物件、數字…）</td><td>字串 / Symbol</td></tr>
+        <tr><td>鍵的順序</td><td>保留插入順序 ✅</td><td>不保證（整數鍵會重排）</td></tr>
+        <tr><td>元素數量</td><td><code>map.size</code></td><td>需 <code>Object.keys(o).length</code></td></tr>
+        <tr><td>迭代</td><td>直接 for...of</td><td>需 Object.keys() / entries()</td></tr>
+        <tr><td>JSON 序列化</td><td>❌（需手動轉換）</td><td>✅ 直接 JSON.stringify</td></tr>
+        <tr><td>大量增刪效能</td><td>較佳（O(1) 查找）</td><td>小資料集較快</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">選擇指南</span>
+    <h2>什麼時候用 Map？什麼時候用物件？</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>選 Map</small>
+        非字串鍵 / 需要順序 / 大量增刪
+      </div>
+      <div class="chip info">
+        <small>選物件</small>
+        JSON 傳輸 / 靜態設定 / 簡單字串鍵
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// Map 用物件當鍵</span>
+<span class="tok-key">const</span> cache = <span class="tok-key">new</span> <span class="tok-fn">Map</span>();
+<span class="tok-key">const</span> node = document.<span class="tok-fn">getElementById</span>(<span class="tok-str">'btn'</span>);
+cache.<span class="tok-fn">set</span>(node, { clickCount: 0 });  <span class="tok-com">// DOM 節點當鍵</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Map 不能直接用 <code>JSON.stringify()</code>，結果是空物件 <code>{}</code>。需要序列化時，先用 <code>Object.fromEntries(map)</code> 轉換，或改用第三方函式庫。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Map 和 Object 的查找效能有多大差異？</summary><p>對於<b>大量頻繁增刪</b>的情境，Map 的 V8 引擎內部實作通常比 Object 更優化。小型靜態物件兩者差異不大，一般應用無需為效能特別切換。</p></details>
+      <details><summary>Map 可以被 for...in 遍歷嗎？</summary><p>不行。Map 沒有可列舉屬性，<code>for...in</code> 什麼都拿不到。應該用 <code>for...of</code>、<code>map.forEach()</code> 或 <code>map.entries()</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Map 和普通物件都是鍵值對，但 Map 的<span class="hl">鍵可以是任意類型、保留插入順序、有 size 屬性</span>，迭代也更直接。普通物件的優勢是可以直接 JSON 序列化、語法更輕量。需要傳輸或存儲時用物件；需要非字串鍵或大量動態增刪時用 Map。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Set與Map是什麼及其用法.html">Set 與 Map 用法</a>
+      <a href="JavaScript 中 Map Set 與 WeakMap WeakSet 的差異.html">Weak 版本差異</a>
+      <a href="Set與Map如何判斷物件相等性.html">Set/Map 相等性判斷</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

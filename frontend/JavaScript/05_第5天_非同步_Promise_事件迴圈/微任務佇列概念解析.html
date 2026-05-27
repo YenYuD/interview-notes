@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>微任務佇列</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · 事件迴圈</div>
+    <h1>Promise 為什麼比 setTimeout<em>先跑</em>？微任務的優先權</h1>
+    <p class="lede">JS 有兩條非同步佇列：<b>微任務（microtask）</b>優先、<b>巨任務（macrotask）</b>在後。每次同步碼跑完，都要先清空微任務，才做下一個巨任務。</p>
+  </header>
+
+  <section>
+    <span class="num">執行順序規則</span>
+    <h2>事件迴圈的三步節奏</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>① 同步碼</b>全部跑完，呼叫堆疊清空。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>② 清空微任務佇列</b>：逐一取出所有微任務執行（若微任務又產生微任務，也一起清）。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>③ 取出一個巨任務</b>執行，完成後回到步驟 ②。</div>
+      </div>
+    </div>
+    <pre><code>console.<span class="tok-fn">log</span>(<span class="tok-str">'① 同步'</span>);
+
+<span class="tok-fn">setTimeout</span>(() => console.<span class="tok-fn">log</span>(<span class="tok-str">'④ 巨任務'</span>), 0);
+
+Promise.<span class="tok-fn">resolve</span>()
+  .<span class="tok-fn">then</span>(() => console.<span class="tok-fn">log</span>(<span class="tok-str">'② 微任務 1'</span>))
+  .<span class="tok-fn">then</span>(() => console.<span class="tok-fn">log</span>(<span class="tok-str">'③ 微任務 2'</span>));
+
+console.<span class="tok-fn">log</span>(<span class="tok-str">'① 同步（繼續）'</span>);
+<span class="tok-com">// 輸出順序：① ① ② ③ ④</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">誰進哪條佇列</span>
+    <h2>快速分類</h2>
+    <table>
+      <tr><th>微任務（先）</th><th>巨任務（後）</th></tr>
+      <tr><td><code>Promise.then / catch / finally</code></td><td><code>setTimeout / setInterval</code></td></tr>
+      <tr><td><code>async/await</code>（await 之後的程式碼）</td><td>I/O 事件、UI 事件</td></tr>
+      <tr><td><code>queueMicrotask()</code></td><td><code>MessageChannel</code>、<code>setImmediate</code>（Node）</td></tr>
+      <tr><td><code>MutationObserver</code> 回呼</td><td>網路請求完成回呼</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">注意</span>
+    <h2>微任務的潛在風險</h2>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>若微任務執行時又持續加入新微任務（例如在 <code>.then</code> 中無限 resolve），微任務佇列永遠清不完，巨任務（包括畫面更新）會被<b>餓死</b>，導致瀏覽器卡住。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>queueMicrotask() 和 Promise.resolve().then() 效果一樣嗎？</summary>
+        <p>幾乎一樣——兩者都將回呼排入微任務佇列。<code>queueMicrotask</code> 更語意化且不需建立 Promise 物件，適合直接排程微任務（效能略優）。</p>
+      </details>
+      <details>
+        <summary>Node.js 的 process.nextTick 是微任務嗎？</summary>
+        <p>它比微任務還早——<code>process.nextTick</code> 有自己的佇列（nextTick queue），在微任務佇列之前被清空。優先順序：nextTick → 微任務 → 巨任務。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「微任務佇列是事件迴圈中優先級最高的非同步佇列。規則是：每當<span class="hl">同步碼執行完畢或一個巨任務完成</span>，就先把微任務佇列全部清空，才取下一個巨任務。所以 <span class="hl">Promise.then</span> 永遠比 <span class="hl">setTimeout</span> 先執行。常見的微任務來源是 Promise 的回呼和 queueMicrotask()。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript事件迴圈介紹.html">事件迴圈介紹</a>
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="setTimeout_setImmediate_process.nextTick_差異.html">setTimeout vs nextTick</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

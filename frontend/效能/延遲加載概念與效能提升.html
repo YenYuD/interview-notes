@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>延遲加載概念</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>用到才載，<em>初始下載只給最必要的</em></h1>
+    <p class="lede"><b>延遲加載（Lazy Loading）</b>把資源的載入推遲到真正需要時。圖片進入視窗才下載、程式碼路由才載入——<b>初始束縮小、互動更快</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">三種常見應用</span>
+    <h2>哪些資源可以延遲？</h2>
+    <div class="chips">
+      <div class="chip good">圖片 / 影片<small>loading="lazy" 或 IntersectionObserver</small></div>
+      <div class="chip good">JS 模組<small>動態 import() 拆分 code bundle</small></div>
+      <div class="chip good">React 元件<small>React.lazy + Suspense</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">圖片延遲加載</span>
+    <h2>HTML 原生 vs JavaScript</h2>
+    <pre><code><span class="tok-com">&lt;!-- 方法 1：HTML 原生，瀏覽器自動處理 --&gt;</span>
+&lt;img src=<span class="tok-str">"photo.webp"</span> loading=<span class="tok-str">"lazy"</span> alt=<span class="tok-str">"..."</span> /&gt;
+
+<span class="tok-com">// 方法 2：IntersectionObserver，更靈活</span>
+<span class="tok-key">const</span> observer = <span class="tok-key">new</span> IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    <span class="tok-key">if</span> (entry.isIntersecting) {
+      <span class="tok-key">const</span> img = entry.target;
+      img.src = img.dataset.src; <span class="tok-com">// 用 data-src 存真實 URL</span>
+      observer.unobserve(img);
+    }
+  });
+});
+document.querySelectorAll(<span class="tok-str">'img.lazy'</span>).forEach(img => observer.observe(img));</code></pre>
+    <div class="aside">原生 <code>loading="lazy"</code> 最省事，IE 不支援但可接受。IntersectionObserver 控制更細（自定義觸發時機），也可用於無限捲動。</div>
+  </section>
+
+  <section>
+    <span class="num">程式碼分割</span>
+    <h2>React.lazy 路由切割</h2>
+    <pre><code><span class="tok-key">import</span> React, { lazy, Suspense } from <span class="tok-str">'react'</span>;
+
+<span class="tok-key">const</span> Dashboard = lazy(() => <span class="tok-key">import</span>(<span class="tok-str">'./Dashboard'</span>)); <span class="tok-com">// 路由進入才下載</span>
+
+<span class="tok-key">function</span> <span class="tok-fn">App</span>() {
+  <span class="tok-key">return</span> (
+    &lt;Suspense fallback={&lt;div&gt;載入中...&lt;/div&gt;}&gt;
+      &lt;Dashboard /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>程式碼分割搭配路由，每個頁面只下載自己需要的 JS。結合 <code>prefetch</code> 可在背景預載即將要訪問的路由，讓切換更流暢。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>lazy loading 圖片會影響 CLS（累積版面偏移）嗎？</summary><p>會。圖片延遲載入、尺寸未預定，載入後會撐開頁面造成 CLS。解法：一定要在 img 上設 width/height 屬性，或用 CSS aspect-ratio 預留空間。</p></details>
+      <details><summary>動態 import() 和靜態 import 的差別？</summary><p>靜態 import 在模組解析時就載入，打包工具會將其打進同一個 bundle；動態 <code>import()</code> 回傳 Promise，打包工具自動將其切割為獨立 chunk，僅在執行到該行時才下載。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「延遲加載的核心是<span class="hl">只在需要時才下載資源</span>，縮短初始載入時間。圖片用 <span class="hl"><code>loading="lazy"</code></span> 最簡單，或用 IntersectionObserver 自定義觸發；JS 模組用動態 <span class="hl"><code>import()</code> 做 code splitting</span>，搭配 React.lazy 按路由分割。要注意圖片 lazy loading 要設好寬高，避免載入後跳動影響 CLS 分數。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="優化網路請求提升效能.html">優化網路請求</a>
+      <a href="script async defer 的差異說明.html">async / defer</a>
+      <a href="單頁應用與SEO優化.html">SPA 與 SEO</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

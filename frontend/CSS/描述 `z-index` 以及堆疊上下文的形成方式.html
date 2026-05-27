@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>z-index 與堆疊上下文</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS 版面</div>
+    <h1><code>z-index:9999</code> 還是<em>蓋不過去</em>？</h1>
+    <p class="lede">不是數字不夠大——是元素被困在父層的「堆疊上下文」裡。<b>子元素的 z-index 再高，也跳不出父層的層級。</b></p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 9999 為什麼輸給 2</span>
+    <h2>子元素能爬到別人上面嗎？</h2>
+    <p>紅卡 A（含子元素 C，<code>z-index:9999</code>）和藍卡 B（<code>z-index:2</code>）。切換 A 有沒有自己的堆疊上下文：</p>
+
+    <div class="lab">
+      <div class="lab-label">A 是否形成堆疊上下文</div>
+      <div class="toggle-row" id="row">
+        <button class="on" data-ctx="on">A 有 opacity:.99（形成上下文）</button>
+        <button data-ctx="off">A 無（不形成）</button>
+      </div>
+
+      <div style="position:relative;height:170px;background:var(--paper);border-radius:10px;border:1px dashed var(--line)">
+        <div id="cardA" style="position:absolute;left:20px;top:24px;width:130px;height:90px;background:var(--bad-soft);border:2px solid var(--bad);border-radius:8px;z-index:1;opacity:.99;font-family:var(--mono);font-size:.72rem;color:var(--bad);padding:6px">
+          A (z:1)
+          <div style="position:absolute;left:40px;top:40px;width:130px;height:80px;background:oklch(70% 0.18 25);border-radius:8px;color:#fff;display:grid;place-items:center;z-index:9999">C z:9999</div>
+        </div>
+        <div style="position:absolute;left:120px;top:70px;width:130px;height:80px;background:var(--info-soft);border:2px solid var(--info);border-radius:8px;z-index:2;display:grid;place-items:center;font-family:var(--mono);font-size:.78rem;color:var(--info)">B z:2</div>
+      </div>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">兩個前提</span>
+    <h2>z-index 生效的條件</h2>
+    <ul>
+      <li>元素必須是<b>已定位</b>的（<code>position</code> 不為 <code>static</code>），或是 flex/grid 子項。</li>
+      <li>z-index 只在<b>同一個堆疊上下文內</b>互相比較。跨上下文時，先比父層的層級。</li>
+    </ul>
+    <div class="callout warn"><span class="ico">✕</span><p>常見雷：給某層加了 <code>opacity</code>、<code>transform</code> 或 <code>filter</code>，它就<b>悄悄形成新的堆疊上下文</b>，導致裡面的 <code>z-index:9999</code> 怎麼調都蓋不出去。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>哪些屬性會建立新的堆疊上下文？</summary><p>根元素、<code>position</code> 為 absolute/relative 且有 z-index、<code>position:fixed/sticky</code>、<code>opacity &lt; 1</code>、<code>transform</code>/<code>filter</code>/<code>will-change</code> 不為 none、flex/grid 子項有 z-index 等。</p></details>
+      <details><summary>沒設 z-index 時誰在上面？</summary><p>按 DOM 順序，後出現的蓋在前面的上面；已定位元素一律蓋過 static 元素。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「z-index 只對<span class="hl">已定位元素</span>有效，而且只在<span class="hl">同一個堆疊上下文內</span>比較。一旦父層因為 opacity、transform 等形成了獨立的堆疊上下文，子元素的 z-index 再大也跳不出去——這就是『9999 還蓋不過去』的原因。debug 時我會先找是哪一層意外建立了堆疊上下文。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="`relative`、`fixed`、`absolute`、`sticky` 和 `static` 定位的元素有什麼差別？.html">position 定位</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row = document.getElementById('row');
+  const cardA = document.getElementById('cardA');
+  const log = document.getElementById('log');
+  function render(ctx){
+    cardA.style.opacity = ctx ? '.99' : '1';
+    if(ctx){
+      log.innerHTML =
+        '<div class="ln c-dim">A 形成獨立堆疊上下文（opacity&lt;1）</div>'+
+        '<div class="ln">C 的 z:9999 被「鎖」在 A 內部</div>'+
+        '<div class="ln c-bad">→ 整個 A（含 C）只用 z:1 跟 B 比 → B 蓋過 A</div>';
+    } else {
+      log.innerHTML =
+        '<div class="ln c-dim">A 不形成堆疊上下文</div>'+
+        '<div class="ln">C 直接參與最外層比較</div>'+
+        '<div class="ln c-ok">→ C 的 z:9999 生效 → C 蓋過 B</div>';
+    }
+  }
+  row.addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    [...row.children].forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    render(b.dataset.ctx === 'on');
+  });
+  render(true);
+</script>
+</body>
+</html>

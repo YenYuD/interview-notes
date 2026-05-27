@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Error Boundaries</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 錯誤處理</div>
+    <h1>Error Boundary：讓一個組件的爆炸，<em>不拖垮整個應用程式</em></h1>
+    <p class="lede">沒有錯誤邊界時，任何子組件的 JavaScript 錯誤都會讓整個 React 樹崩潰、畫面變白。<b>Error Boundary</b> 攔截子樹的渲染錯誤，改顯示<b>備用 UI</b>，其他部分繼續正常運作。</p>
+  </header>
+
+  <section>
+    <span class="num">實作</span>
+    <h2>需要類別組件：實作兩個生命週期方法</h2>
+    <pre><code><span class="tok-key">class</span> ErrorBoundary <span class="tok-key">extends</span> React.Component {
+  state = { hasError: <span class="tok-key">false</span> };
+
+  <span class="tok-com">// 捕獲錯誤，更新 state 顯示備用 UI</span>
+  <span class="tok-key">static</span> <span class="tok-fn">getDerivedStateFromError</span>() {
+    <span class="tok-key">return</span> { hasError: <span class="tok-key">true</span> };
+  }
+
+  <span class="tok-com">// 記錄錯誤（送到監控服務）</span>
+  <span class="tok-fn">componentDidCatch</span>(error, info) {
+    errorTrackingService.<span class="tok-fn">log</span>(error, info.componentStack);
+  }
+
+  <span class="tok-fn">render</span>() {
+    <span class="tok-key">if</span> (this.state.hasError) {
+      <span class="tok-key">return</span> &lt;h2&gt;此功能暫時無法使用，請稍後再試。&lt;/h2&gt;;
+    }
+    <span class="tok-key">return</span> this.props.children;
+  }
+}</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>目前 Error Boundary 只能用<b>類別組件</b>實作（官方尚未提供 Hook 版），但你可以用 <code>react-error-boundary</code> 套件的函式組件寫法。</p></div>
+  </section>
+
+  <section>
+    <span class="num">捕獲範圍</span>
+    <h2>什麼錯誤能捕獲？什麼不行？</h2>
+    <div class="chips">
+      <div class="chip good"><small>能捕獲</small>render、生命週期方法、constructor 裡的錯誤</div>
+      <div class="chip bad"><small>不能捕獲</small>事件處理器（用 try/catch 自行處理）</div>
+      <div class="chip bad"><small>不能捕獲</small>非同步程式碼（setTimeout、Promise）</div>
+      <div class="chip bad"><small>不能捕獲</small>SSR 期間的錯誤</div>
+      <div class="chip bad"><small>不能捕獲</small>Error Boundary 自身拋出的錯誤</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Error Boundary 應該放在哪個層級？</summary><p>視需求而定。可以在整個 App 放一個兜底邊界，也可以在每個功能模組放獨立邊界，讓局部錯誤不影響其他模組。顆粒度越細，使用者體驗越好。</p></details>
+      <details><summary>如何在 Error Boundary 裡提供「重試」功能？</summary><p>在 Error Boundary 的 state 加 retry 機制，或使用 <code>react-error-boundary</code> 套件的 <code>resetErrorBoundary</code> 回呼，讓使用者可以手動觸發重渲。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Error Boundary 是特殊的類別組件，透過 <code>getDerivedStateFromError</code> 和 <code>componentDidCatch</code> 攔截<span class="hl">子組件樹的渲染錯誤</span>，改顯示備用 UI，防止整個應用程式崩潰。它無法捕獲事件處理器或非同步錯誤——那些要用 try/catch 自行處理。實務上建議在重要功能模組各放一個邊界，搭配錯誤監控服務（如 Sentry）記錄錯誤。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React Suspense 是什麼？它實現了什麼功能？.html">React Suspense</a>
+      <a href="React Fiber 是什麼？它如何改進先前的做法？.html">React Fiber</a>
+      <a href="在 React 中進行資料獲取時有哪些常見的陷阱？.html">資料獲取陷阱</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

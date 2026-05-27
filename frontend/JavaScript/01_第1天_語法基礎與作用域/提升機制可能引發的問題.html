@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提升機制可能引發的問題</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 提升陷阱</div>
+    <h1>提升讓 var 宣告前使用不報錯，<em>但悄悄埋下 undefined 地雷</em></h1>
+    <p class="lede">提升本身是中性機制，問題出在 <b>var 的靜默 undefined</b> 與<b>函式表達式的 TypeError</b>。了解三種常見陷阱，才能寫出可預測的程式。</p>
+  </header>
+
+  <section>
+    <span class="num">三種常見陷阱</span>
+    <h2>提升可能造成的問題</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>陷阱 1：var 宣告前存取得 undefined</strong><br>不報錯，但邏輯悄悄錯誤。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>陷阱 2：函式表達式在宣告前呼叫 → TypeError</strong><br>var 版本提升為 undefined，呼叫 undefined 就是 TypeError。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>陷阱 3：var 在區塊內重複宣告同名變數</strong><br>var 沒有區塊作用域，會覆蓋外部同名變數，難以追蹤。</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 陷阱 1</span>
+console.log(a); <span class="tok-com">// undefined（靜默！）</span>
+<span class="tok-key">var</span> a = <span class="tok-num">5</span>;
+
+<span class="tok-com">// 陷阱 2</span>
+bar(); <span class="tok-com">// TypeError: bar is not a function</span>
+<span class="tok-key">var</span> bar = <span class="tok-key">function</span>() {};
+
+<span class="tok-com">// 陷阱 3</span>
+<span class="tok-key">var</span> x = <span class="tok-num">1</span>;
+<span class="tok-key">if</span> (<span class="tok-key">true</span>) { <span class="tok-key">var</span> x = <span class="tok-num">2</span>; } <span class="tok-com">// 覆蓋了外部 x！</span>
+console.log(x); <span class="tok-com">// 2</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">let/const 的改善</span>
+    <h2>TDZ 讓問題立刻浮現</h2>
+    <pre><code>console.log(b); <span class="tok-com">// ReferenceError（立刻知道問題！）</span>
+<span class="tok-key">let</span> b = <span class="tok-num">10</span>;</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>ReferenceError 比靜默 undefined 好，因為「快速失敗」讓你立即知道哪裡有問題，不讓 bug 潛伏到後面才爆發。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>有什麼真實世界的例子會踩到提升陷阱？</summary><p>最常見的是 for 迴圈中的非同步回呼：用 var 時所有回呼共享同一個 i，迴圈結束後 i 已到最大值，全部印出同樣的數字。改用 let 則每次迭代有自己的 i，行為符合直覺。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「提升的問題主要出在 var 上，有三個常見陷阱：一是宣告前存取得 undefined 而非報錯，<span class="hl">靜默失敗讓 bug 難追蹤</span>；二是函式表達式宣告前呼叫會 TypeError；三是 var 沒有區塊作用域，在 if/for 裡重複宣告同名變數會意外覆蓋。<span class="hl">用 let/const 取代 var</span>，讓 TDZ 把問題變成立即可見的 ReferenceError，是根本的解決方式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript提升機制說明.html">提升機制說明</a>
+      <a href="避免提升問題的方法.html">避免提升問題</a>
+      <a href="var、let 與 const 的提升差異說明.html">var/let/const 提升差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

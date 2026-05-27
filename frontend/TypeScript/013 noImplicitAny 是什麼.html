@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>noImplicitAny 是什麼</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1><em>noImplicitAny</em> 把「偷偷變成 any」的情況全部揪出來</h1>
+    <p class="lede">TypeScript 遇到無法推斷的型別，預設會悄悄標為 <code>any</code>。<b>開啟 <code>noImplicitAny</code> 讓這些「隱式 any」在編譯時就報錯</b>，強制你明確標注型別，是邁向嚴格型別安全的第一步。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>開啟前後的行為差異</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>關閉（預設）</small>
+        TypeScript 遇到無法推斷的型別 → 自動變 any，不報錯
+      </div>
+      <div class="chip good">
+        <small>開啟（建議）</small>
+        遇到無法推斷的型別 → 編譯錯誤，強制你明確標注
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// noImplicitAny: false（預設）</span>
+<span class="tok-key">function</span> <span class="tok-fn">print</span>(x) {
+  console.log(x); <span class="tok-com">// x 隱式變 any，不報錯</span>
+}
+
+<span class="tok-com">// noImplicitAny: true</span>
+<span class="tok-key">function</span> <span class="tok-fn">print</span>(x) {
+  <span class="tok-com">// ❌ Parameter 'x' implicitly has an 'any' type</span>
+}
+
+<span class="tok-key">function</span> <span class="tok-fn">print</span>(x: <span class="tok-fn">string</span>): <span class="tok-fn">void</span> {
+  console.log(x); <span class="tok-com">// ✅ 明確標注後 OK</span>
+}</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>無論設定如何，<b>你都可以手動明確標注 <code>any</code></b>（<code>x: any</code>），這個設定只影響「隱式」的 any——你沒寫型別、TS 也推不出來的情況。</p></div>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>tsconfig.json 設定與 strict 模式</h2>
+    <pre><code>{
+  <span class="tok-str">"compilerOptions"</span>: {
+    <span class="tok-str">"noImplicitAny"</span>: <span class="tok-key">true</span>,
+    <span class="tok-com">// 或者直接開啟 strict（包含 noImplicitAny）</span>
+    <span class="tok-str">"strict"</span>: <span class="tok-key">true</span>
+  }
+}</code></pre>
+    <table>
+      <thead><tr><th>情境</th><th>建議</th></tr></thead>
+      <tbody>
+        <tr><td>新 TypeScript 專案</td><td>✅ 開啟（配合 <code>strict: true</code>）</td></tr>
+        <tr><td>JS 漸進式遷移到 TS</td><td>暫時關閉，逐步修正後再開</td></tr>
+        <tr><td>大型既有 TS 專案</td><td>看團隊規範</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>strict: true 包含哪些選項？</summary><p><code>strict: true</code> 是一個組合選項，包含 <code>noImplicitAny</code>、<code>strictNullChecks</code>、<code>strictFunctionTypes</code>、<code>strictBindCallApply</code>、<code>strictPropertyInitialization</code>、<code>noImplicitThis</code> 等。現代 TypeScript 最佳實踐是開啟 <code>strict: true</code>。</p></details>
+      <details><summary>strictNullChecks 和 noImplicitAny 有什麼關係？</summary><p>兩者獨立但互補。<code>noImplicitAny</code> 防止型別被隱式標為 any；<code>strictNullChecks</code> 讓 null 和 undefined 成為獨立型別，不能隨便賦值給其他型別。兩個都開啟才能發揮最大的型別安全效益。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl"><code>noImplicitAny</code> 是 tsconfig 的編譯器選項</span>，控制 TypeScript 遇到無法推斷的型別時是否報錯。關閉時，TS 會悄悄把推不出型別的地方標為 any；<span class="hl">開啟後，這些「隱式 any」在編譯時就會報錯，強制你明確標注</span>。它是 <code>strict: true</code> 的一部分，現代 TS 專案通常直接開啟 strict 模式，涵蓋 noImplicitAny 和其他嚴格設定。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="012 何時使用 unknown 型別.html">unknown 型別</a>
+      <a href="001 TypeScript 型別系統面試筆記.html">型別系統總覽</a>
+      <a href="019 型別斷言 Type Assertions.html">型別斷言</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

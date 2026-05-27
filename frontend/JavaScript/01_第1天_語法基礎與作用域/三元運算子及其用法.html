@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三元運算子用法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 語法</div>
+    <h1>if-else 的單行版本，<em>但巢狀過深就該收手</em></h1>
+    <p class="lede">三元運算子（ternary operator）是 JavaScript 唯一接受<b>三個運算元</b>的運算子：<code>condition ? expr1 : expr2</code>。簡潔但不能濫用，巢狀超過兩層就是可讀性殺手。</p>
+  </header>
+
+  <section>
+    <span class="num">基本語法</span>
+    <h2>三元運算子結構</h2>
+    <pre><code><span class="tok-com">// 語法：condition ? 為真的值 : 為假的值</span>
+<span class="tok-key">let</span> age = <span class="tok-num">18</span>;
+<span class="tok-key">let</span> canVote = age >= <span class="tok-num">18</span> ? <span class="tok-str">'Yes'</span> : <span class="tok-str">'No'</span>;
+console.log(canVote); <span class="tok-com">// 'Yes'</span>
+
+<span class="tok-com">// 等同於：</span>
+<span class="tok-key">let</span> canVoteIf;
+<span class="tok-key">if</span> (age >= <span class="tok-num">18</span>) { canVoteIf = <span class="tok-str">'Yes'</span>; }
+<span class="tok-key">else</span> { canVoteIf = <span class="tok-str">'No'</span>; }</code></pre>
+  </section>
+
+  <section>
+    <span class="num">適用 vs 不適用</span>
+    <h2>何時用，何時別用</h2>
+    <div class="chips">
+      <div class="chip good"><small>適合</small>簡單的值指派或 JSX 條件渲染</div>
+      <div class="chip good"><small>適合</small>兩個明確對立的結果</div>
+      <div class="chip bad"><small>避免</small>巢狀超過兩層，改用 if-else 或物件映射</div>
+      <div class="chip bad"><small>避免</small>運算結果有副作用（如 console.log）</div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>巢狀三元在視覺上難以追蹤 true/false 分支，應拆成 if-else 或用物件 lookup 取代。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>三元運算子和 && / || 的短路求值有何不同？</summary><p><code>&&</code> 和 <code>||</code> 是基於 truthiness 短路求值，不一定回傳 boolean；三元運算子明確有兩個分支，更適合需要明確 true/false 分支的情境。React JSX 常用 <code>&& </code> 做條件渲染（如 <code>isLoggedIn && &lt;Dashboard /&gt;</code>），但要注意 <code>0 && ...</code> 會渲染數字 0。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三元運算子是 <code>condition ? true值 : false值</code>，是 if-else 的簡潔寫法。<span class="hl">適合單行、簡單的條件賦值</span>，在 React JSX 中也很常見。但如果條件複雜或需要巢狀超過一層，<span class="hl">可讀性會急速下降</span>，這時應該改用 if-else 或用物件映射取代，維護性更好。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="switch語句的用途.html">switch 語句</a>
+      <a href="break與continue語句的用途.html">break 與 continue</a>
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let/var/const 差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

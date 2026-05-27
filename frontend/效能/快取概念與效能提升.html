@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>快取概念與效能提升</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>不重複請求，<em>是最快的網路優化</em></h1>
+    <p class="lede"><b>快取</b>把資源副本存在更近的地方，下次直接取用。對前端而言，掌握<b>瀏覽器快取</b>和 <b>HTTP 標頭</b>的運作，是讓重複訪客秒開的關鍵。</p>
+  </header>
+
+  <section>
+    <span class="num">三層快取</span>
+    <h2>從近到遠的快取層級</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Memory Cache</b>：同一分頁內已下載的資源（最快，關分頁即消失）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Disk Cache（瀏覽器快取）</b>：跨分頁、跨會話持久快取，受 HTTP 標頭控制</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Service Worker Cache</b>：攔截 fetch、可離線提供，開發者完全可控</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">HTTP 快取標頭</span>
+    <h2>幾個最常用的設定</h2>
+    <table>
+      <tr><th>標頭</th><th>用途</th><th>範例值</th></tr>
+      <tr><td><code>Cache-Control</code></td><td>主要控制指令</td><td><code>max-age=3600, public</code></td></tr>
+      <tr><td><code>ETag</code></td><td>資源指紋，驗證是否變更</td><td><code>"abc123"</code></td></tr>
+      <tr><td><code>Last-Modified</code></td><td>最後修改時間</td><td><code>Mon, 26 May 2025 10:00:00 GMT</code></td></tr>
+      <tr><td><code>no-cache</code></td><td>每次都驗證（非不快取）</td><td><code>Cache-Control: no-cache</code></td></tr>
+      <tr><td><code>no-store</code></td><td>完全不快取（敏感資料）</td><td><code>Cache-Control: no-store</code></td></tr>
+    </table>
+    <div class="aside"><code>no-cache</code> 不等於「不快取」，它的意思是「每次使用前先向伺服器驗證 ETag」。真的不要快取要用 <code>no-store</code>。</div>
+  </section>
+
+  <section>
+    <span class="num">Service Worker 快取</span>
+    <h2>可離線運作的快取策略</h2>
+    <pre><code><span class="tok-com">// install：預先快取靜態資源</span>
+self.addEventListener(<span class="tok-str">'install'</span>, e => {
+  e.waitUntil(caches.open(<span class="tok-str">'v1'</span>).then(c =>
+    c.addAll([<span class="tok-str">'/index.html'</span>, <span class="tok-str">'/app.js'</span>, <span class="tok-str">'/style.css'</span>])
+  ));
+});
+
+<span class="tok-com">// fetch：cache-first 策略</span>
+self.addEventListener(<span class="tok-str">'fetch'</span>, e => {
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request))
+  );
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>部署新版本時怎麼讓快取失效？</summary><p>最常見做法是在靜態檔名加 hash（如 <code>app.a1b2c3.js</code>）——每次內容變動檔名就變，舊快取自然失效。這稱為 Cache Busting。</p></details>
+      <details><summary>Cache-Control: public 和 private 差在哪？</summary><p><code>public</code> 允許 CDN 和代理伺服器快取；<code>private</code> 只允許瀏覽器快取，不讓中間層快取（適合含個人資料的回應）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「快取的核心是<span class="hl">減少重複的網路請求</span>。瀏覽器快取靠 HTTP 標頭控制：<code>Cache-Control: max-age</code> 設新鮮期、<span class="hl">ETag 負責驗證是否變更</span>。靜態資源加 content hash 做 cache busting 讓更新立即生效。需要離線能力就用 Service Worker 攔截請求、自定義快取策略。<code>no-cache</code> 和 <code>no-store</code> 是兩回事，前者每次驗證，後者才是真的不存。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="優化網路請求提升效能.html">優化網路請求</a>
+      <a href="延遲加載概念與效能提升.html">延遲加載</a>
+      <a href="Web Workers與效能提升.html">Web Workers</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

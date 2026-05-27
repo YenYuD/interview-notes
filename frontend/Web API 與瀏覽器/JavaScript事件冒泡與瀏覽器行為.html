@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事件冒泡</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>事件冒泡：事件<em>從子元素向上傳播</em>到根節點的機制</h1>
+    <p class="lede">點擊子元素時，事件會<b>沿 DOM 樹向上冒泡</b>，觸發所有祖先元素的監聽器。這是<b>事件代理</b>技術的基礎，也是最容易產生意外行為的源頭。</p>
+  </header>
+
+  <section>
+    <span class="num">冒泡行為</span>
+    <h2>點擊子元素，父元素的處理器也會被觸發</h2>
+    <pre><code><span class="tok-key">const</span> parent = document.getElementById(<span class="tok-str">'parent'</span>);
+<span class="tok-key">const</span> child  = document.getElementById(<span class="tok-str">'child'</span>);
+
+parent.addEventListener(<span class="tok-str">'click'</span>, () => console.log(<span class="tok-str">'Parent 被點到了'</span>));
+child.addEventListener( <span class="tok-str">'click'</span>, () => console.log(<span class="tok-str">'Child 被點到了'</span>));
+
+<span class="tok-com">// 點擊 child → 印出：</span>
+<span class="tok-com">// "Child 被點到了"</span>
+<span class="tok-com">// "Parent 被點到了"  ← 冒泡</span></code></pre>
+    <p>用 <code>event.stopPropagation()</code> 可在任意層停止冒泡，阻止事件繼續往上傳。</p>
+  </section>
+
+  <section>
+    <span class="num">實際應用</span>
+    <h2>事件代理：用一個監聽器管理所有子元素</h2>
+    <pre><code><span class="tok-com">// 傳統：每個項目各自綁定 → 效能差</span>
+items.forEach(item => item.addEventListener(<span class="tok-str">'click'</span>, handleClick));
+
+<span class="tok-com">// 事件代理：只在父層綁定一個 → 效能好，動態新增的子元素也適用</span>
+document.getElementById(<span class="tok-str">'list'</span>).addEventListener(<span class="tok-str">'click'</span>, (e) => {
+  <span class="tok-key">if</span> (e.target.matches(<span class="tok-str">'li'</span>)) {
+    handleClick(e.target);
+  }
+});</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><code>event.target</code> 是<b>實際被點擊的元素</b>；<code>event.currentTarget</code> 是<b>綁定監聽器的元素</b>。事件代理時需區分兩者。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>stopPropagation 和 preventDefault 有什麼不同？</summary>
+        <p><code>stopPropagation()</code> 阻止事件繼續冒泡（或捕獲）；<code>preventDefault()</code> 阻止瀏覽器的預設行為（如表單送出、連結跳轉）。兩者互相獨立，可同時呼叫。</p>
+      </details>
+      <details>
+        <summary>哪些事件不會冒泡？</summary>
+        <p><code>focus</code>、<code>blur</code>、<code>mouseenter</code>、<code>mouseleave</code> 不會冒泡。對應的冒泡版本是 <code>focusin</code>/<code>focusout</code> 和 <code>mouseover</code>/<code>mouseout</code>。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「事件冒泡是指事件從觸發的目標元素開始，<span class="hl">沿 DOM 樹向上依序觸發每個祖先元素的事件處理器</span>。這個機制讓事件代理成為可能——只在父層綁定一個監聽器，利用 <code>event.target</code> 判斷是哪個子元素觸發的，既省記憶體也方便管理動態生成的元素。需要阻止時用 <span class="hl">stopPropagation()</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript事件代理說明.html">事件代理說明</a>
+      <a href="瀏覽器事件階段說明.html">瀏覽器事件三階段</a>
+      <a href="event.preventDefault與event.stopPropagation差異.html">preventDefault vs stopPropagation</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

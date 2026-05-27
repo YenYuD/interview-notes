@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事件傳播三階段</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">DOM 事件</div>
+    <h1>一次點擊，事件<em>先往下、再往上</em></h1>
+    <p class="lede">事件傳播分三段：<b>捕獲</b>（root → 目標）→ <b>目標</b> → <b>冒泡</b>（目標 → root）。預設監聽器跑在冒泡階段；加 <code>true</code> 才在捕獲階段。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 點最內層，看觸發順序</span>
+    <h2>三層巢狀，誰先誰後？</h2>
+    <p>三個巢狀的 div 都掛了監聽器。先選監聽階段，再點最內層的「target」：</p>
+
+    <div class="lab">
+      <div class="lab-label">監聽階段</div>
+      <div class="toggle-row" id="row">
+        <button class="on" data-k="bubble">冒泡（預設，false）</button>
+        <button data-k="capture">捕獲（true）</button>
+      </div>
+      <div id="nest" style="text-align:center">
+        <div class="lvl" data-n="grandparent">grandparent
+          <div class="lvl" data-n="parent">parent
+            <div class="lvl" data-n="target" style="background:var(--accent-soft);border-color:var(--accent)">target（點我）</div>
+          </div>
+        </div>
+      </div>
+      <div class="log" id="out" style="max-height:none"><div class="ln empty">// 點上面的 target…</div></div>
+    </div>
+    <div class="aside">捕獲：grandparent → parent → target。冒泡：target → parent → grandparent。事件代理靠的就是冒泡這一段。</div>
+  </section>
+
+  <section>
+    <span class="num">三階段</span>
+    <h2>傳播路線</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>捕獲 Capturing</h4><p>從 root 往下傳到目標。<code>addEventListener(type, fn, true)</code> 註冊。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>目標 Target</h4><p>抵達被點的元素本身。</p></div></div>
+      <div class="flow-step"><div class="flow-dot good">3</div><div class="flow-body"><h4>冒泡 Bubbling</h4><p>從目標往上傳回 root。預設（<code>false</code>）就在這跑。</p></div></div>
+    </div>
+    <div class="callout info"><span class="ico">💡</span><p>用 <code>stopPropagation()</code> 可中止後續傳播；<code>stopImmediatePropagation()</code> 連同元素上其他監聽器也一起擋掉。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>preventDefault 和 stopPropagation 差在哪？</summary><p><code>preventDefault</code> 取消瀏覽器<b>預設行為</b>（如連結跳轉）；<code>stopPropagation</code> 阻止事件<b>繼續傳播</b>。兩者互不相干。</p></details>
+      <details><summary>為什麼預設在冒泡階段？</summary><p>歷史相容（IE 只有冒泡），且冒泡對事件代理最直覺。需要在外層先攔截時才用捕獲。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「事件傳播有三階段：<span class="hl">捕獲（root→目標）、目標、冒泡（目標→root）</span>。<code>addEventListener</code> 預設在<span class="hl">冒泡</span>階段觸發，第三參數傳 <code>true</code> 則改在捕獲階段。事件代理就是利用冒泡。要中止傳播用 <code>stopPropagation</code>，取消預設行為用 <code>preventDefault</code>，兩者不同。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript事件代理說明.html">事件代理</a>
+      <a href="JavaScript事件捕獲機制說明.html">事件捕獲</a>
+      <a href="event.preventDefault與event.stopPropagation差異.html">preventDefault vs stopPropagation</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), out=document.getElementById('out');
+  let phase='bubble';
+  const names={grandparent:'grandparent',parent:'parent',target:'target'};
+  const lvls=[...document.querySelectorAll('.lvl')];
+  function flash(name){ const el=lvls.find(l=>l.dataset.n===name); el.style.outline='3px solid var(--accent)'; setTimeout(()=>el.style.outline='',300); }
+  document.querySelector('[data-n="target"]').addEventListener('click', e=>{
+    e.stopPropagation();
+    const order = phase==='capture'
+      ? ['grandparent','parent','target']
+      : ['target','parent','grandparent'];
+    out.innerHTML='';
+    order.forEach((nm,i)=>setTimeout(()=>{
+      out.insertAdjacentHTML('beforeend',`<div class="ln c-ok">${i+1}. ${names[nm]} 的監聽器觸發</div>`);
+      flash(nm); out.scrollTop=out.scrollHeight;
+    }, i*450));
+  });
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); phase=b.dataset.k; out.innerHTML='<div class="ln empty">// 點上面的 target…</div>'; });
+</script>
+<style>.lvl{border:2px solid var(--line);border-radius:10px;padding:1rem;margin:.5rem auto;font-family:var(--mono);font-size:.78rem;color:var(--ink-soft);cursor:default;background:var(--paper)}.lvl[data-n="target"]{cursor:pointer}</style>
+</body>
+</html>

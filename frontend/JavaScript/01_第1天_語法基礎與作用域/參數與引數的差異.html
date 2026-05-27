@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>參數與引數的差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 函式基礎</div>
+    <h1>定義時叫參數，<em>呼叫時才叫引數</em></h1>
+    <p class="lede"><b>Parameter（參數）</b>是函式定義中的佔位符；<b>Argument（引數）</b>是呼叫函式時實際傳入的值。兩者是同一概念的不同時機，卻常被混淆。</p>
+  </header>
+
+  <section>
+    <span class="num">定義釐清</span>
+    <h2>概念對照</h2>
+    <div class="chips">
+      <div class="chip info"><small>Parameter 參數</small>函式<b>定義</b>時的變數名稱</div>
+      <div class="chip good"><small>Argument 引數</small>函式<b>呼叫</b>時傳入的實際值</div>
+    </div>
+    <pre><code><span class="tok-com">// a, b 是 parameter（參數）</span>
+<span class="tok-key">function</span> add(a, b) {
+  <span class="tok-key">return</span> a + b;
+}
+
+<span class="tok-com">// 2, 3 是 argument（引數）</span>
+<span class="tok-key">const</span> result = add(<span class="tok-num">2</span>, <span class="tok-num">3</span>);
+console.log(result); <span class="tok-com">// 5</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">傳值 vs 傳參考</span>
+    <h2>引數的傳遞方式</h2>
+    <p>原始值（number、string 等）以<b>複製傳遞</b>；物件以<b>參考傳遞</b>，函式內修改物件屬性會影響外部。</p>
+    <pre><code><span class="tok-key">function</span> modifyNum(n) { n = <span class="tok-num">99</span>; } <span class="tok-com">// 原始值：複製，外部不受影響</span>
+<span class="tok-key">let</span> x = <span class="tok-num">1</span>;
+modifyNum(x);
+console.log(x); <span class="tok-com">// 1 — 不變</span>
+
+<span class="tok-key">function</span> modifyObj(obj) { obj.name = <span class="tok-str">'Bob'</span>; } <span class="tok-com">// 物件：參考傳遞</span>
+<span class="tok-key">let</span> user = { name: <span class="tok-str">'Alice'</span> };
+modifyObj(user);
+console.log(user.name); <span class="tok-com">// 'Bob' — 被修改了</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>傳入的引數比參數多或少會怎樣？</summary><p>多餘引數被忽略（可用 arguments 物件或 rest 參數 <code>...args</code> 取得）；少傳引數時對應參數值為 <code>undefined</code>，這正是預設參數存在的原因。</p></details>
+      <details><summary>arguments 物件和 rest 參數的差異？</summary><p>arguments 是類陣列物件，存在所有傳統函式中；rest 參數（<code>...args</code>）是真正的陣列，且箭頭函式沒有 arguments 物件。現代 JS 建議用 rest 參數取代 arguments。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">Parameter 是定義時的佔位符，Argument 是呼叫時傳入的值</span>，兩者是同一個概念在不同時機的稱呼。傳遞方式上，原始值是複製傳遞（pass by value），物件是傳遞參考（pass by reference），所以函式內修改物件屬性會影響外部，但重新賦值整個物件不會影響外部。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="預設參數及其用法.html">預設參數</a>
+      <a href="JavaScript中的各種資料類型.html">各種資料類型</a>
+      <a href="JavaScript作用域概念說明.html">作用域概念</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

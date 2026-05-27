@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>裝飾者模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>不修改原始碼，<em>動態疊加行為</em></h1>
+    <p class="lede">裝飾者模式透過「包裝」物件來擴展功能，讓你在不動原始類別的情況下<b>組合新行為</b>。React 的 HOC 和 JavaScript 的 Class Decorator 都是它的直接體現。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>層層包裝，介面一致</h2>
+    <p>裝飾者與被裝飾物件實作同一個介面，呼叫端無需知道被包裝了幾層。</p>
+    <pre><code><span class="tok-com">// 原始物件</span>
+<span class="tok-key">const</span> logger = {
+  <span class="tok-fn">log</span>: (msg) => console.log(msg)
+};
+
+<span class="tok-com">// 裝飾者：加上時間戳</span>
+<span class="tok-key">function</span> <span class="tok-fn">withTimestamp</span>(logger) {
+  <span class="tok-key">return</span> {
+    <span class="tok-fn">log</span>: (msg) => logger.<span class="tok-fn">log</span>(`[${<span class="tok-key">new</span> Date().toISOString()}] ${msg}`)
+  };
+}
+
+<span class="tok-com">// 裝飾者：加上日誌等級前綴</span>
+<span class="tok-key">function</span> <span class="tok-fn">withLevel</span>(logger, level) {
+  <span class="tok-key">return</span> {
+    <span class="tok-fn">log</span>: (msg) => logger.<span class="tok-fn">log</span>(`[${level}] ${msg}`)
+  };
+}
+
+<span class="tok-key">const</span> fancy = <span class="tok-fn">withLevel</span>(<span class="tok-fn">withTimestamp</span>(logger), <span class="tok-str">'INFO'</span>);
+fancy.<span class="tok-fn">log</span>(<span class="tok-str">'hello'</span>); <span class="tok-com">// [INFO] [2026-05-27T…] hello</span></code></pre>
+
+    <div class="aside">
+      <b>組合 vs 繼承：</b>裝飾者模式使用組合（composition）而非繼承，避免深層繼承樹帶來的脆弱性。每個裝飾者只關注一件事，符合單一職責原則。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">前端應用</span>
+    <h2>HOC 就是裝飾者模式</h2>
+    <table>
+      <thead><tr><th>前端場景</th><th>裝飾了什麼</th></tr></thead>
+      <tbody>
+        <tr><td>React HOC（如 <code>withAuth</code>）</td><td>包裝元件，注入認證邏輯</td></tr>
+        <tr><td>TypeScript <code>@decorator</code></td><td>包裝 class / method，加 logging / validation</td></tr>
+        <tr><td>fetch 包裝器</td><td>在原始 fetch 外包加上 retry、timeout、auth header</td></tr>
+        <tr><td>Express middleware</td><td>每個 middleware 就是一層裝飾</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p><b>React Hooks 時代：</b>HOC 已逐漸被 custom hook 取代，但裝飾者的思維依然存在——<code>useMemo</code>、<code>useCallback</code> 本質上也是包裝原始值以加上記憶化行為。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>裝飾者模式 vs 繼承，各自的優缺點？</summary>
+        <p>繼承在編譯時期決定，無法動態改變；裝飾者在執行時組合，彈性更高。繼承的優點是程式碼直觀易讀；裝飾者的優點是遵守 OCP，可任意組合，但多層裝飾可能讓除錯困難。</p>
+      </details>
+      <details>
+        <summary>JavaScript Proxy 與裝飾者模式有何關係？</summary>
+        <p><code>Proxy</code> 是語言層級的裝飾者，攔截對任何物件的操作（get、set、apply 等），不需要實作相同介面。常見用途：響應式資料（Vue 3 的 reactive）、驗證、日誌。裝飾者模式是設計層面的概念，Proxy 是實作裝飾的原生工具之一。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「裝飾者模式透過<span class="hl">包裝物件來動態疊加行為</span>，不修改原始類別。裝飾者與被裝飾物件實作同一介面，呼叫端不知道包了幾層。前端最直接的例子是 React HOC：<code>withAuth(Component)</code> 就是裝飾，注入認證邏輯而不改變元件本身。它的核心價值是<span class="hl">組合優於繼承</span>——每個裝飾者只負責一件事，任意組合比深層繼承更靈活、更好維護。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="模組模式與封裝.html">模組模式與封裝</a>
+      <a href="策略模式概念說明.html">策略模式</a>
+      <a href="設計模式及其重要性.html">設計模式總覽</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>優化 DOM 操作</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>DOM 碰越少越好，<em>碰一次解決所有事</em></h1>
+    <p class="lede">每次直接操作 DOM，瀏覽器就可能重新計算樣式和版面。<b>減少次數、批次寫入、分開讀寫</b>——是讓 DOM 操作高效的三個核心原則。</p>
+  </header>
+
+  <section>
+    <span class="num">四招核心技巧</span>
+    <h2>讓 DOM 操作盡量少觸發重排</h2>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>快取 DOM 參考</b>：把 <code>getElementById</code> 結果存進變數，避免重複查詢，每次查詢都有代價。</p>
+    </div>
+
+    <pre><code><span class="tok-com">// ✅ 只查一次，後續直接用變數</span>
+<span class="tok-key">const</span> el = document.getElementById(<span class="tok-str">'box'</span>);
+el.style.color = <span class="tok-str">'red'</span>;
+el.style.fontSize = <span class="tok-str">'16px'</span>;</code></pre>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>DocumentFragment 批次插入</b>：先在記憶體裡建好所有節點，最後一次插入 DOM，只觸發一次重排。</p>
+    </div>
+
+    <pre><code><span class="tok-com">// ✅ 100 個元素只觸發一次 reflow</span>
+<span class="tok-key">const</span> frag = document.createDocumentFragment();
+<span class="tok-key">for</span> (<span class="tok-key">let</span> i = 0; i &lt; 100; i++) {
+  <span class="tok-key">const</span> div = document.createElement(<span class="tok-str">'div'</span>);
+  div.textContent = i;
+  frag.appendChild(div);
+}
+document.body.appendChild(frag); <span class="tok-com">// 只碰一次真實 DOM</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">最關鍵技巧</span>
+    <h2>分開讀取與寫入，避免 Layout Thrashing</h2>
+    <div class="chips">
+      <div class="chip bad">錯誤<small>迴圈裡讀寫交錯</small></div>
+      <div class="chip good">正確<small>先批次讀，再批次寫</small></div>
+    </div>
+    <pre><code><span class="tok-com">// ❌ 每次寫後立刻讀，強迫同步重排</span>
+items.forEach(el => {
+  el.style.height = el.offsetHeight + 10 + <span class="tok-str">'px'</span>; <span class="tok-com">// 讀+寫</span>
+});
+
+<span class="tok-com">// ✅ 先讀完，再寫完</span>
+<span class="tok-key">const</span> heights = items.map(el => el.offsetHeight); <span class="tok-com">// 批次讀</span>
+items.forEach((el, i) => el.style.height = heights[i] + 10 + <span class="tok-str">'px'</span>);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">動畫場景</span>
+    <h2>requestAnimationFrame 對齊重繪週期</h2>
+    <p>動畫邏輯放進 <code>requestAnimationFrame</code>，確保每一幀的更新都在瀏覽器「準備重繪」時進行，不掉格、不浪費。</p>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">animate</span>() {
+  <span class="tok-com">// 動畫邏輯</span>
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);</code></pre>
+    <div class="aside">比 <code>setTimeout(fn, 16)</code> 精準：隱藏分頁時自動暫停、不累積誤差。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>cssText 和逐條設 style 的差別？</summary><p>逐條設 <code>el.style.color</code>、<code>el.style.fontSize</code> 可能觸發多次樣式計算；<code>el.style.cssText = 'color:red;font-size:16px'</code> 一次設完，減少中間步驟。另一個常見做法是改 className，讓瀏覽器一次套用整組 CSS。</p></details>
+      <details><summary>React / Vue 怎麼解這個問題？</summary><p>框架用虛擬 DOM 在記憶體中比對差異（diffing），批次計算出最小化的真實 DOM 操作集合後一次寫入，開發者不需手動管理讀寫順序。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「優化 DOM 操作的核心是<span class="hl">減少觸發重排的次數</span>。我會：快取 DOM 參考避免重複查詢；用 <span class="hl">DocumentFragment 批次插入</span>節點；<span class="hl">把讀取（offsetHeight）集中在寫入之前</span>，避免 layout thrashing；動畫用 <code>requestAnimationFrame</code> 對齊重繪週期。能用框架的虛擬 DOM 就交給框架管，自己寫原生時這幾點最重要。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="減少重排與重繪的技巧.html">減少重排與重繪</a>
+      <a href="JavaScript應用程式常見效能瓶頸.html">效能瓶頸</a>
+      <a href="解釋防抖與節流概念.html">防抖與節流</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

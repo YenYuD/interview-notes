@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Workers 用途</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>Workers：讓 JavaScript <em>脫離單執行緒限制</em>的背景執行機制</h1>
+    <p class="lede">JavaScript 預設單執行緒，耗時運算會凍結 UI。<b>Workers</b> 讓你把重度任務移到背景執行緒，<b>主執行緒保持回應</b>，面試必考三種 Worker 的差異。</p>
+  </header>
+
+  <section>
+    <span class="num">三種 Workers</span>
+    <h2>Web Worker、Service Worker、Shared Worker 怎麼選</h2>
+    <table>
+      <thead><tr><th>類型</th><th>用途</th><th>存活週期</th><th>DOM 存取</th></tr></thead>
+      <tbody>
+        <tr><td><b>Web Worker</b></td><td>CPU 密集運算（圖像處理、資料壓縮）</td><td>主腳本卸載即終止</td><td>❌</td></tr>
+        <tr><td><b>Service Worker</b></td><td>網路代理、離線快取、推播通知</td><td>瀏覽器管理，頁面關閉仍在</td><td>❌</td></tr>
+        <tr><td><b>Shared Worker</b></td><td>多分頁共享狀態</td><td>所有連線關閉才終止</td><td>❌</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info">
+      <span class="ico">ℹ</span>
+      <p>所有 Workers 都<b>無法直接操作 DOM</b>，需透過 <code>postMessage()</code> 與主執行緒溝通。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">Web Worker 範例</span>
+    <h2>主執行緒與 Worker 互傳訊息</h2>
+    <pre><code><span class="tok-com">// main.js</span>
+<span class="tok-key">const</span> worker = <span class="tok-key">new</span> Worker(<span class="tok-str">'worker.js'</span>);
+worker.postMessage(<span class="tok-str">'開始計算'</span>);
+worker.onmessage = (e) => console.log(<span class="tok-str">'結果：'</span>, e.data);
+
+<span class="tok-com">// worker.js</span>
+onmessage = (e) => {
+  <span class="tok-key">const</span> result = heavyComputation(e.data);
+  postMessage(result);
+};</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Service Worker 是 <b>PWA 離線功能的基礎</b>，它可以攔截 fetch 請求並回傳快取資源，讓網頁在無網路時也能運作。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Web Worker 和 Service Worker 最大的差別是什麼？</summary>
+        <p>Web Worker 是給頁面用的背景執行緒，頁面關閉就消失；Service Worker 是網路代理，由瀏覽器管理生命週期，即使頁面關閉也能接收推播、處理快取。</p>
+      </details>
+      <details>
+        <summary>Worker 能使用哪些 Web API？</summary>
+        <p>可以用 <code>fetch()</code>、IndexedDB、Web Storage、<code>setTimeout</code>，但不能用 <code>document</code>、<code>window</code>、DOM 相關 API。</p>
+      </details>
+      <details>
+        <summary>什麼情境真的值得用 Web Worker？</summary>
+        <p>當主執行緒因運算卡頓時（如解析大型 JSON、影像濾鏡、加密演算法），才值得加入 Worker 的複雜度。一般 AJAX 請求本身就是非同步的，不需要 Worker。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Workers 是讓 JavaScript <span class="hl">在主執行緒之外平行執行</span>的機制。三種主要類型：Web Worker 用於 CPU 密集運算（如影像處理）、Service Worker 作為網路代理實現<span class="hl">離線快取與推播通知</span>、Shared Worker 讓多個分頁共享狀態。它們都無法直接操作 DOM，透過 <code>postMessage</code> 與主執行緒通訊。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="漸進式網頁應用程式PWA介紹.html">PWA 漸進式網頁應用程式</a>
+      <a href="伺服器推送事件 SSE.html">Server-Sent Events (SSE)</a>
+      <a href="解釋 WebSocket API 概念.html">WebSocket API 概念</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

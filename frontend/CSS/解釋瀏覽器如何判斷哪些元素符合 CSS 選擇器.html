@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>瀏覽器 CSS 選擇器匹配機制</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 選擇器</div>
+    <h1>瀏覽器從<em>右到左</em>讀選擇器——這讓短選擇器更快</h1>
+    <p class="lede">CSS 選擇器的匹配是<b>從右到左</b>進行的。瀏覽器先找所有符合<b>關鍵選擇器</b>（最右邊）的元素，再向上確認父元素是否也符合。選擇器鏈越短，匹配越快。</p>
+  </header>
+
+  <section>
+    <span class="num">核心機制</span>
+    <h2>從右到左：以 p span 為例</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">瀏覽器讀到選擇器 <code>p span</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">從<strong>關鍵選擇器</strong>（最右端 <code>span</code>）出發，在 DOM 中找到所有 <code>&lt;span&gt;</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">對每個 <code>&lt;span&gt;</code>，向上遍歷父元素，尋找是否有 <code>&lt;p&gt;</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">找到 <code>&lt;p&gt;</code> 祖先就確認匹配，停止向上遍歷</div>
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>如果關鍵選擇器是 <code>*</code> 或標籤（如 <code>div</code>），瀏覽器需要先篩選大量元素，再逐一向上確認，效能差。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">效能建議</span>
+    <h2>讓選擇器更高效</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>低效（廣泛的關鍵選擇器）</small>
+        <code>div p span</code>、<code>.sidebar ul li a</code>——鏈太長，每個 span/a 都需向上多層確認
+      </div>
+      <div class="chip good">
+        <small>高效（單一 class）</small>
+        <code>.nav-link</code>、<code>.article-title</code>——直接命中，無需向上走訪，這是 BEM 的副作用
+      </div>
+    </div>
+    <div class="aside">
+      <strong>實際影響：</strong>現代瀏覽器的 CSS 引擎已非常快，選擇器效能在大多數頁面中不是瓶頸。但在大型 DOM（數千個節點）或有大量動態更新的場景中仍值得注意。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>為什麼從右到左而不是從左到右？</summary>
+        <p>從左到右讀 <code>div span</code> 需要先找所有 div，再在每個 div 的後代中找 span，如果頁面有 1000 個 div，就需要遍歷大量子樹。從右到左只需要找所有 span（通常比 div 少），再向上確認是否有 div 父元素，平均需要遍歷的路徑更短。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「瀏覽器從<span class="hl">最右邊的關鍵選擇器開始</span>，在 DOM 中找到所有符合的元素，再<span class="hl">向上遍歷</span>確認父元素是否也符合選擇器。以 <code>p span</code> 為例：先找所有 span，對每個 span 向上找是否有 p 祖先。這就是為什麼關鍵選擇器是通用 <code>*</code> 或標籤名時效能差——匹配到太多元素。最高效的寫法是<span class="hl">用單一 class 直接命中</span>，這也是 BEM 方法論帶來的副作用。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="撰寫高效 CSS 時有哪些常見的陷阱？.html">高效 CSS 的陷阱</a>
+      <a href="什麼是 CSS 選擇器的特異性（specificity），它如何運作？.html">CSS 選擇器特異性</a>
+      <a href="描述偽元素並討論其用途.html">CSS 偽元素</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 效能瓶頸</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>這五件事，<em>偷走最多效能</em></h1>
+    <p class="lede">DOM 操作太頻繁、主執行緒被佔滿、記憶體不釋放——都是 JS 應用常見的效能殺手。<b>找到真正的瓶頸</b>，才能對症優化。</p>
+  </header>
+
+  <section>
+    <span class="num">五大瓶頸</span>
+    <h2>對照一次看清楚</h2>
+    <table>
+      <tr><th>瓶頸</th><th>症狀</th><th>解法</th></tr>
+      <tr><td>頻繁 DOM 更新</td><td>捲動、互動明顯卡頓</td><td>DocumentFragment 批次插入；Virtual DOM</td></tr>
+      <tr><td>Layout thrashing</td><td>迴圈裡讀寫交錯，瀏覽器瘋狂重排</td><td>讀取集中在寫入之前；FastDOM</td></tr>
+      <tr><td>重度運算阻塞主執行緒</td><td>頁面「卡住」、輸入無回應</td><td>Web Worker 卸載到背景執行緒</td></tr>
+      <tr><td>記憶體洩漏</td><td>長時間使用後越來越慢</td><td>移除 event listener；清除循環參考</td></tr>
+      <tr><td>過量全域變數 / 閉包</td><td>GC 壓力大、記憶體持續成長</td><td>用 let/const 限縮作用域</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">最常踩的坑</span>
+    <h2>Layout Thrashing</h2>
+    <p>在迴圈裡交錯讀寫 DOM 屬性，瀏覽器每次讀取前都必須先完成排版，效能直接崩潰。</p>
+    <div class="chips">
+      <div class="chip bad">錯誤方式<small>讀寫交錯</small></div>
+      <div class="chip good">正確方式<small>批次讀再批次寫</small></div>
+    </div>
+    <pre><code><span class="tok-com">// ❌ 每次迴圈都強迫同步重排</span>
+boxes.forEach(box => {
+  <span class="tok-key">const</span> h = box.offsetHeight;   <span class="tok-com">// 讀</span>
+  box.style.height = h + <span class="tok-str">'px'</span>;  <span class="tok-com">// 寫 → 強制重排</span>
+});
+
+<span class="tok-com">// ✅ 先批次讀，再批次寫</span>
+<span class="tok-key">const</span> heights = boxes.map(b => b.offsetHeight); <span class="tok-com">// 全部讀</span>
+boxes.forEach((b, i) => b.style.height = heights[i] + <span class="tok-str">'px'</span>); <span class="tok-com">// 全部寫</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">記憶體洩漏</span>
+    <h2>最常忘的兩種情形</h2>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>未移除的 event listener</b>：元件卸載後 listener 仍活著，持有元件閉包，GC 無法回收。React 在 <code>useEffect</code> 裡必須 return 清理函式。</p>
+    </div>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p><b>循環參考</b>：現代 JS 引擎的 mark-and-sweep GC 可處理大部分循環參考，但若牽涉 DOM + JS 跨環境參考仍可能洩漏。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Web Worker 有什麼限制？</summary><p>無法存取 DOM，與主執行緒透過 <code>postMessage</code> 傳遞資料（值複製或 Transferable）。適合純運算；不適合需要即時操作 UI 的任務。</p></details>
+      <details><summary>怎麼偵測記憶體洩漏？</summary><p>Chrome DevTools → Memory 面板 → 多次拍快照（Heap Snapshot）比較差異；或用 Allocation timeline 觀察持續增長的物件。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 應用常見瓶頸有幾類：<span class="hl">頻繁 DOM 操作或 layout thrashing</span> 造成卡頓，要批次讀寫；<span class="hl">重度運算阻塞主執行緒</span>，用 Web Worker 分擔；<span class="hl">記憶體洩漏</span>源自未清除的 listener 或閉包持有。診斷時先用 DevTools Performance 火焰圖確認熱點，再對症處理，避免憑感覺亂優化。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="減少重排與重繪的技巧.html">減少重排與重繪</a>
+      <a href="Web Workers與效能提升.html">Web Workers</a>
+      <a href="JavaScript效能測量與分析工具.html">效能測量工具</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

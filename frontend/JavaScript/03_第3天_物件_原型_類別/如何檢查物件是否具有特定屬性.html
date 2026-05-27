@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>檢查物件是否有特定屬性</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1><em>in vs hasOwnProperty</em>：繼承屬性算不算？</h1>
+    <p class="lede">兩種方式都能檢查屬性是否存在，但 <b>in</b> 往上找整條原型鏈，<b>hasOwnProperty</b> 只看物件自身——選哪個取決於你要不要算繼承來的屬性。</p>
+  </header>
+
+  <section>
+    <span class="num">兩種方式對比</span>
+    <h2>自身屬性 vs 含繼承屬性</h2>
+    <pre><code><span class="tok-key">const</span> parent = { inherited: <span class="tok-str">'yes'</span> };
+<span class="tok-key">const</span> child = Object.<span class="tok-fn">create</span>(parent);
+child.own = <span class="tok-str">'mine'</span>;
+
+<span class="tok-com">// in 運算子：查整條鏈</span>
+console.log(<span class="tok-str">'inherited'</span> <span class="tok-key">in</span> child);              <span class="tok-com">// true</span>
+console.log(<span class="tok-str">'own'</span> <span class="tok-key">in</span> child);                    <span class="tok-com">// true</span>
+
+<span class="tok-com">// hasOwnProperty：只查自身</span>
+console.log(child.<span class="tok-fn">hasOwnProperty</span>(<span class="tok-str">'inherited'</span>)); <span class="tok-com">// false</span>
+console.log(child.<span class="tok-fn">hasOwnProperty</span>(<span class="tok-str">'own'</span>));       <span class="tok-com">// true</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">推薦做法</span>
+    <h2>用 Object.hasOwn()（ES2022）</h2>
+    <pre><code><span class="tok-com">// 比 hasOwnProperty 更安全：即使物件沒有 prototype 也能用</span>
+console.log(Object.<span class="tok-fn">hasOwn</span>(child, <span class="tok-str">'own'</span>));       <span class="tok-com">// true</span>
+console.log(Object.<span class="tok-fn">hasOwn</span>(child, <span class="tok-str">'inherited'</span>)); <span class="tok-com">// false</span>
+
+<span class="tok-com">// 為何比 hasOwnProperty 好？</span>
+<span class="tok-key">const</span> dict = Object.<span class="tok-fn">create</span>(<span class="tok-key">null</span>); <span class="tok-com">// 無 prototype 的物件</span>
+dict.foo = 1;
+<span class="tok-com">// dict.hasOwnProperty('foo') → TypeError（沒有這個方法）</span>
+<span class="tok-com">// Object.hasOwn(dict, 'foo') → true ✓</span></code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>新專案建議使用 <code>Object.hasOwn()</code>，舊瀏覽器可 polyfill。避免直接呼叫 <code>obj.hasOwnProperty()</code>，因為 <code>Object.create(null)</code> 建立的物件沒有這個方法。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>用 obj.key !== undefined 可以判斷屬性存在嗎？</summary><p>不可靠。若屬性明確設為 <code>undefined</code>（<code>obj.key = undefined</code>），這個判斷會誤判為不存在。應用 <code>'key' in obj</code> 或 <code>Object.hasOwn()</code>。</p></details>
+      <details><summary>for...in 遍歷屬性時要注意什麼？</summary><p>for...in 會列出所有可列舉屬性，包含繼承來的。通常應在迴圈內加 <code>Object.hasOwn(obj, key)</code> 或 <code>obj.hasOwnProperty(key)</code> 過濾，只處理自身屬性。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>in</code> 運算子查整條原型鏈，繼承屬性也算；<code>hasOwnProperty</code> 只查物件自身。現代建議用 <span class="hl">Object.hasOwn(obj, key)</span>（ES2022），它功能等同 <code>hasOwnProperty</code>，但不會因為物件以 <code>Object.create(null)</code> 建立而報錯。用 <code>obj.key !== undefined</code> 判斷屬性存在是個陷阱，屬性值若本來就是 undefined 就會誤判。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何可靠判斷物件是否為空.html">判斷物件是否為空</a>
+      <a href="物件屬性存取：點記法與中括號記法差異.html">點記法 vs 中括號記法</a>
+      <a href="JavaScript物件屬性標誌與描述符.html">屬性標誌與描述符</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

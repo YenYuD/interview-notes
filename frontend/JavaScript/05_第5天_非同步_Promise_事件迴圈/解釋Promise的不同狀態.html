@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promise 的三種狀態</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · Promise</div>
+    <h1>Promise 的一生：<em>只能定案一次</em></h1>
+    <p class="lede">從 <b>pending</b> 開始，成功就 <b>fulfilled</b>、失敗就 <b>rejected</b>。關鍵：一旦定案（settled）就<b>不可逆、不能再改</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 跑一次非同步流程</span>
+    <h2>按按鈕，看狀態怎麼轉</h2>
+
+    <div class="lab">
+      <div class="lab-label">模擬一個非同步請求</div>
+      <div class="flow" id="flow">
+        <div class="flow-step"><div class="flow-dot" id="d0">1</div><div class="flow-body"><h4 id="s0">pending（待定）</h4><p>new Promise 後立刻進入，操作尚未完成。</p></div></div>
+        <div class="flow-step"><div class="flow-dot" id="d1">2</div><div class="flow-body"><h4 id="s1">settled（定案）</h4><p>resolve → fulfilled，或 reject → rejected。</p></div></div>
+        <div class="flow-step"><div class="flow-dot" id="d2">3</div><div class="flow-body"><h4 id="s2">回呼觸發</h4><p>fulfilled 走 .then，rejected 走 .catch。</p></div></div>
+      </div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn-primary" id="ok">resolve（成功）</button>
+        <button class="btn-primary" id="ng" style="background:var(--bad);box-shadow:0 6px 16px -8px var(--bad)">reject（失敗）</button>
+        <button class="btn-ghost" id="reset">重置</button>
+      </div>
+      <div class="log" id="log" style="max-height:none"><div class="ln empty">// 狀態變化會顯示在這…</div></div>
+    </div>
+    <div class="aside">注意第二次點擊沒有反應——因為 Promise <b>已經定案，狀態鎖死</b>，這就是「只能定案一次」。</div>
+  </section>
+
+  <section>
+    <span class="num">三種狀態</span>
+    <h2>速查</h2>
+    <table>
+      <tr><th>狀態</th><th>意義</th><th>觸發 / 結果</th></tr>
+      <tr><td><code>pending</code></td><td>進行中</td><td>初始狀態</td></tr>
+      <tr><td><code>fulfilled</code></td><td>成功</td><td><code>resolve(值)</code> → <code>.then</code></td></tr>
+      <tr><td><code>rejected</code></td><td>失敗</td><td><code>reject(原因)</code> → <code>.catch</code></td></tr>
+    </table>
+    <div class="callout info"><span class="ico">💡</span><p>fulfilled 或 rejected 統稱 <b>settled（已定案）</b>。<code>.finally</code> 無論成功失敗都會跑，適合收尾（關 loading 等）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>resolve 之後再 reject 會怎樣？</summary><p>沒用。狀態一旦從 pending 定案就鎖死，後續的 resolve/reject 全部被忽略。</p></details>
+      <details><summary>.then 的回呼什麼時候執行？</summary><p>排進<b>微任務佇列</b>，等當前同步碼跑完、堆疊清空後才執行——所以永遠晚於同步碼、早於 setTimeout。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Promise 有三種狀態：<span class="hl">pending、fulfilled、rejected</span>。建立時是 pending，<span class="hl">resolve 轉 fulfilled、reject 轉 rejected</span>，定案後<span class="hl">不可逆</span>，再呼叫 resolve/reject 都無效。成功走 .then、失敗走 .catch、.finally 收尾。它的回呼是微任務，會在同步碼之後、setTimeout 之前執行。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="JavaScript事件迴圈介紹.html">事件迴圈</a>
+      <a href="微任務佇列概念解析.html">微任務佇列</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const log=document.getElementById('log');
+  let settled=false;
+  const dots=[0,1,2].map(i=>document.getElementById('d'+i));
+  const labels=[document.getElementById('s0'),document.getElementById('s1'),document.getElementById('s2')];
+  function add(html,cls){ const em=log.querySelector('.empty'); if(em)em.remove(); log.insertAdjacentHTML('beforeend',`<div class="ln ${cls||''}">${html}</div>`); log.scrollTop=log.scrollHeight; }
+  function settle(ok){
+    if(settled){ add('// 已經定案了，這次呼叫被忽略 ✗','c-bad'); return; }
+    settled=true;
+    add('new Promise → <b>pending</b>','c-dim');
+    dots[1].classList.add(ok?'good':''); if(!ok) dots[1].style.background='var(--bad)';
+    if(ok){ labels[1].textContent='fulfilled（已實現）'; add('resolve(value) → <b>fulfilled</b>','c-ok'); labels[2].textContent='.then(value) 被呼叫'; add('→ .then 收到值','c-ok'); }
+    else { labels[1].textContent='rejected（已拒絕）'; add('reject(reason) → <b>rejected</b>','c-bad'); labels[2].textContent='.catch(reason) 被呼叫'; add('→ .catch 收到原因','c-bad'); }
+  }
+  document.getElementById('ok').addEventListener('click',()=>settle(true));
+  document.getElementById('ng').addEventListener('click',()=>settle(false));
+  document.getElementById('reset').addEventListener('click',()=>{
+    settled=false; log.innerHTML='<div class="ln empty">// 狀態變化會顯示在這…</div>';
+    dots[1].classList.remove('good'); dots[1].style.background='';
+    labels[1].textContent='settled（定案）'; labels[2].textContent='回呼觸發';
+  });
+</script>
+</body>
+</html>

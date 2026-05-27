@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CommonJS 與 ES 模組深度解析</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">模組與建置</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">MODULE &amp; BUILD</div>
+    <h1>同樣是模組，<em>CJS 與 ESM</em> 骨子裡差在哪？</h1>
+    <p class="lede">不只是語法不同——兩者在<b>載入時機、綁定方式、與打包器的關係</b>上有根本差異，這些細節決定了你選擇模組系統的理由。</p>
+  </header>
+
+  <section>
+    <span class="num">本質差異</span>
+    <h2>值的拷貝 vs 活的綁定</h2>
+    <p>這是最常被忽略的差異：CommonJS 匯出的是值的<strong>快照（拷貝）</strong>，匯出後若原模組修改，引用端不會更新。ESM 匯出的是<strong>活綁定（live binding）</strong>，原模組的值改變，所有引用者都會看到最新值。</p>
+
+    <pre><code><span class="tok-com">// CJS — 匯出值的拷貝</span>
+<span class="tok-key">let</span> count = 0;
+module.exports = { count, increment: () => count++ };
+<span class="tok-com">// 引用端 counter.count 永遠是 0（拷貝時的值）</span>
+
+<span class="tok-com">// ESM — 活綁定</span>
+<span class="tok-key">export let</span> count = 0;
+<span class="tok-key">export const</span> <span class="tok-fn">increment</span> = () => count++;
+<span class="tok-com">// import { count } 會隨 increment() 更新</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">載入機制</span>
+    <h2>同步執行 vs 三階段解析</h2>
+
+    <p>CJS 執行到 <code>require()</code> 才去載入並執行目標模組，是<strong>完全同步阻塞</strong>的，適合伺服器端（本地 I/O 快）。</p>
+    <p>ESM 採三階段處理：</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>Construction（建構）</h4>
+          <p>靜態解析所有 import，建立模組依賴圖，此時還沒執行任何程式碼。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>Instantiation（實例化）</h4>
+          <p>為每個匯出分配記憶體位置，但尚未賦值（所有值為 <code>undefined</code>）。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot good">3</div>
+        <div class="flow-body">
+          <h4>Evaluation（求值）</h4>
+          <p>實際執行程式碼並填入值。深度優先，依賴模組先執行。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>為什麼 ESM 更適合瀏覽器：</b>靜態分析讓瀏覽器可以並行抓取依賴模組（不用等上一個模組執行完才知道下一個），大幅提升網路利用率。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">完整比較表</span>
+    <h2>各維度一次對照</h2>
+    <table>
+      <thead>
+        <tr><th>維度</th><th>CommonJS</th><th>ES Modules</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>匯入語法</td><td><code>require()</code></td><td><code>import</code></td></tr>
+        <tr><td>匯出語法</td><td><code>module.exports</code></td><td><code>export</code></td></tr>
+        <tr><td>匯出內容</td><td>值的拷貝</td><td>活綁定（live binding）</td></tr>
+        <tr><td>載入方式</td><td>同步</td><td>非同步</td></tr>
+        <tr><td>分析時機</td><td>執行時（動態）</td><td>編譯時（靜態）</td></tr>
+        <tr><td>檔案副檔名</td><td>.js（預設）/ .cjs</td><td>.mjs 或 package.json type:module</td></tr>
+        <tr><td>Tree Shaking</td><td>❌</td><td>✅</td></tr>
+        <tr><td>循環依賴處理</td><td>回傳不完整的模組物件</td><td>活綁定延遲求值，更安全</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>ESM 的頂層 await 是什麼？</summary>
+        <p>ES2022 起，ESM 模組頂層可直接使用 <code>await</code>，不需包在 async 函式裡。CJS 因同步載入機制無法支援此特性。這讓 ESM 非常適合做資料初始化或條件載入。</p>
+      </details>
+      <details>
+        <summary>兩套系統的循環依賴（circular dependency）處理有什麼差異？</summary>
+        <p>CJS 遇到循環依賴時，回傳目前已執行完畢的部分模組物件（不完整），容易導致 undefined 值。ESM 用活綁定，循環依賴在 Instantiation 階段就建立好記憶體位址，Evaluation 完成後自動填值，更能安全處理循環。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CJS 和 ESM 最根本的差別有兩點：一是 <span class="hl">載入時機</span>——CJS 是同步執行時載入，ESM 是編譯時靜態分析；二是 <span class="hl">匯出的本質</span>——CJS 匯出值的拷貝，ESM 匯出活綁定，原模組改值引用端會同步更新。靜態分析帶來的好處是讓打包器能做 Tree Shaking，而且瀏覽器可以並行下載依賴，不必等序列執行。新專案我會選 ESM，舊 Node.js 系統則視遷移成本決定。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="CommonJS與ESM比較.html">CommonJS vs ESM 比較</a>
+      <a href="模組打包中的Tree Shaking概念.html">Tree Shaking</a>
+      <a href="模組是什麼及其重要性.html">模組是什麼</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

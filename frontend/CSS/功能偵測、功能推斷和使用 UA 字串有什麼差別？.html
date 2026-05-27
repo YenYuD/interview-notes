@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>功能偵測 vs 功能推斷 vs UA 字串</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS / JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript / 瀏覽器相容</div>
+    <h1>偵測「能不能用」而非「是哪個瀏覽器」——<em>功能偵測</em>才可靠</h1>
+    <p class="lede">處理瀏覽器相容有三種方式：直接<b>偵測 API 是否存在</b>（最可靠）、根據某功能的存在<b>推斷</b>其他功能（不可靠）、或解析 <b>UA 字串</b>（最不可靠）。現代開發永遠優先功能偵測。</p>
+  </header>
+
+  <section>
+    <span class="num">三種方式比較</span>
+    <h2>可靠度由高到低</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>功能偵測（Feature Detection）— 最推薦</strong>
+          直接檢查 API 是否存在，根據結果執行不同程式碼：
+          <pre><code><span class="tok-key">if</span> (<span class="tok-str">'geolocation'</span> <span class="tok-key">in</span> navigator) {
+  navigator.geolocation.getCurrentPosition(cb);
+} <span class="tok-key">else</span> {
+  showLocationFallback();
+}
+
+<span class="tok-com">/* CSS @supports */</span>
+<span class="tok-key">@supports</span> (display: grid) {
+  .layout { display: grid; }
+}</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>功能推斷（Feature Inference）— 不推薦</strong>
+          假設「有 A 功能就一定有 B 功能」，這種假設不可靠：
+          <pre><code><span class="tok-com">// ❌ 有 getElementsByTagName 就用 getElementById？</span>
+<span class="tok-key">if</span> (document.getElementsByTagName) {
+  el = document.getElementById(id); <span class="tok-com">// 邏輯不嚴謹</span>
+}</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>UA 字串（User-Agent String）— 避免</strong>
+          難以解析、可被偽造，Chrome 回報自己同時是 Chrome 和 Safari，可靠性極低。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">工具推薦</span>
+    <h2>Modernizr — 功能偵測函式庫</h2>
+    <p>Modernizr 針對數十種 HTML5/CSS3 功能做偵測，並在 <code>&lt;html&gt;</code> 標籤上加 class（如 <code>.flexbox</code>、<code>.no-webgl</code>），讓 CSS 可以根據功能支援情況套用不同樣式。</p>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>現代開發中，CSS 的 <code>@supports</code> 可以在不依賴 JS 的情況下做 CSS 功能偵測；JS API 偵測則直接 <code>if ('api' in obj)</code> 即可，Modernizr 的必要性已降低很多。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>UA 字串的哪些問題讓它不可靠？</summary>
+        <p>1. Chrome 回報自己是 Chrome AND Safari（歷史相容原因），要排除 Safari 需要同時檢查兩個字串。2. UA 字串可以被使用者或工具偽造。3. 各瀏覽器的 UA 字串格式不一致，解析複雜且容易出錯。4. 未來瀏覽器可能改變 UA 字串格式，讓現有的解析邏輯失效。</p>
+      </details>
+      <details>
+        <summary>Modernizr 在現代專案還有用嗎？</summary>
+        <p>需求已大幅減少。CSS <code>@supports</code> 覆蓋了 CSS 功能偵測；JS API 直接 <code>in</code> 運算子或 optional chaining 即可偵測。Modernizr 對需要支援大量舊版瀏覽器且有複雜降級需求的企業專案仍有價值，但現代新專案通常不需要。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三種方式可靠度差很多。<span class="hl">功能偵測</span>直接問「這個 API 存在嗎？」，是最可靠的方式，CSS 用 <code>@supports</code>，JS 用 <code>'api' in obj</code>。功能推斷假設有 A 功能就有 B，邏輯不嚴謹，不推薦。<span class="hl">UA 字串最不可靠</span>——可被偽造、格式不一致，Chrome 甚至同時回報自己是 Chrome 和 Safari，解析極易出錯，應避免。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="How do you serve your pages for feature-constrained browsers?.html">為功能受限瀏覽器提供頁面</a>
+      <a href="你會如何解決瀏覽器特定的樣式問題？.html">解決瀏覽器特定樣式問題</a>
+      <a href="你能舉一個除了 `screen` 以外的 `@media` 屬性範例嗎？.html">@media 媒體類型</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

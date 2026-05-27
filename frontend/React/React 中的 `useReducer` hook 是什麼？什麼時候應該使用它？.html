@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useReducer hook</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT HOOKS</div>
+    <h1><code>useReducer</code>：當 state 邏輯複雜時，把<em>更新規則集中</em>在一處</h1>
+    <p class="lede"><code>useState</code> 適合簡單值，<code>useReducer</code> 適合多個子值相互影響、或更新邏輯複雜的場景。它引入 <b>action → reducer → newState</b> 的模式，讓狀態變更<b>可預測、易測試</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">API</span>
+    <h2>dispatch action → reducer 決定新 state</h2>
+    <pre><code><span class="tok-key">const</span> initialState = { count: 0 };
+
+<span class="tok-key">function</span> <span class="tok-fn">reducer</span>(state, action) {
+  <span class="tok-key">switch</span> (action.type) {
+    <span class="tok-key">case</span> <span class="tok-str">'increment'</span>: <span class="tok-key">return</span> { count: state.count + 1 };
+    <span class="tok-key">case</span> <span class="tok-str">'decrement'</span>: <span class="tok-key">return</span> { count: state.count - 1 };
+    <span class="tok-key">case</span> <span class="tok-str">'reset'</span>:     <span class="tok-key">return</span> initialState;
+    <span class="tok-key">default</span>: <span class="tok-key">throw</span> <span class="tok-key">new</span> Error(<span class="tok-str">'未知 action'</span>);
+  }
+}
+
+<span class="tok-key">function</span> <span class="tok-fn">Counter</span>() {
+  <span class="tok-key">const</span> [state, dispatch] = <span class="tok-fn">useReducer</span>(reducer, initialState);
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;p&gt;{state.count}&lt;/p&gt;
+      &lt;button onClick={() =&gt; <span class="tok-fn">dispatch</span>({ type: <span class="tok-str">'increment'</span> })}&gt;+&lt;/button&gt;
+      &lt;button onClick={() =&gt; <span class="tok-fn">dispatch</span>({ type: <span class="tok-str">'reset'</span> })}&gt;重置&lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">何時選用</span>
+    <h2>useState vs useReducer</h2>
+    <table>
+      <thead><tr><th>情境</th><th>推薦</th></tr></thead>
+      <tbody>
+        <tr><td>單一、簡單的值（布林、數字、字串）</td><td><code>useState</code></td></tr>
+        <tr><td>多個相關聯的狀態欄位</td><td><code>useReducer</code></td></tr>
+        <tr><td>下一個 state 依賴多個條件</td><td><code>useReducer</code></td></tr>
+        <tr><td>想把更新邏輯移出組件、方便測試</td><td><code>useReducer</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>Reducer 是純函式（pure function），可以完全脫離組件單獨測試，這是它比 useState 更容易維護的主要原因。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>useReducer + Context 可以取代 Redux 嗎？</summary><p>可以處理中小型應用。但 Redux 提供 DevTools（時間旅行除錯）、中間件（logger、thunk）、更嚴格的更新流程，大型應用仍有其價值。</p></details>
+      <details><summary>useReducer 的 dispatch 函式是穩定的嗎？</summary><p>是的，<code>dispatch</code> 函式在渲染之間保持穩定（引用不變），因此可以安全地放進 <code>useEffect</code> 的依賴陣列，或傳給子組件而不觸發不必要的重渲。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>useReducer</code> 是 <code>useState</code> 的替代方案，適合<span class="hl">狀態邏輯複雜或多個相關欄位</span>的場景。它採用 <code>dispatch(action) → reducer → newState</code> 模式，把所有更新規則集中在 reducer 函式裡，讓邏輯可預測且易於單獨測試。搭配 Context 可以實現輕量級的全域狀態管理。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋在 React 中調用 `useState` 的 setter 函式時會發生什麼事.html">useState setter 行為</a>
+      <a href="你如何決定何時使用 React State、Context 或外部狀態管理工具？.html">State / Context / 外部工具選擇</a>
+      <a href="Flux 模式（Flux pattern）是什麼？它有哪些優點？.html">Flux 模式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

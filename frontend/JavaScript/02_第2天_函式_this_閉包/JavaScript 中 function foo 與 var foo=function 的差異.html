@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>function foo vs var foo = function</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式宣告 vs 函式表達式</div>
+    <h1>宣告可以「先呼叫後定義」，<em>表達式不行</em></h1>
+    <p class="lede"><code>function foo(){}</code> 是<b>函式宣告</b>，整個函式體會被 <b>Hoisting（提升）</b>到頂端，可在任何地方呼叫；<code>var foo = function(){}</code> 是<b>函式表達式</b>，只有變數名稱被提升，本體不提升，提前呼叫直接報錯。</p>
+  </header>
+
+  <section>
+    <span class="num">關鍵差異</span>
+    <h2>Hoisting 行為完全不同</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>函式宣告 — 安全</small>
+        <pre><code>foo(); // ✅ 'FOOOOO'
+function foo() {
+  console.log('FOOOOO');
+}</code></pre>
+      </div>
+      <div class="chip bad">
+        <small>函式表達式 — 提前呼叫報錯</small>
+        <pre><code>foo(); // ❌ TypeError: foo is not a function
+var foo = function() {
+  console.log('FOOOOO');
+};</code></pre>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>函式表達式用 <code>var</code> 宣告時，提升的只有 <code>var foo</code>（值為 <code>undefined</code>），並非函式本體，因此呼叫會得到 <code>TypeError: foo is not a function</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">具名函式表達式</span>
+    <h2>函式名稱只在函式內部可見</h2>
+    <pre><code>const myFunc = function namedFunc() {
+  console.log(namedFunc); // ✅ 函式本身
+};
+
+myFunc();
+console.log(namedFunc); // ❌ ReferenceError: namedFunc is not defined</code></pre>
+    <p>具名函式表達式的名稱 <code>namedFunc</code> 僅在<b>函式自己的作用域內</b>存在，常用於遞迴自我呼叫，不污染外部命名空間。</p>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>用 let / const 定義的函式表達式提升行為？</summary><p><code>let</code>/<code>const</code> 雖然也會提升，但進入 <b>TDZ（Temporal Dead Zone）</b>，在宣告前存取會拋出 <code>ReferenceError</code>，不同於 <code>var</code> 的 <code>undefined</code>。</p></details>
+      <details><summary>實務上何時選函式宣告，何時選表達式？</summary><p>需要<b>在整個作用域中隨處呼叫</b>，選函式宣告；函式只用一次、作為回呼、或要限制可見範圍，選表達式（搭配 <code>const</code>）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">函式宣告整個函式體會被 Hoisting</span>，可以在宣告之前呼叫；函式表達式只有變數名稱被提升，本體不提升，提前呼叫得到 TypeError。實務上我預設用 <code>const</code> 加函式表達式，因為它<span class="hl">明確表示函式不會被重新賦值</span>，行為更可預測；只有需要在模組頂端到處呼叫的輔助函式才考慮函式宣告。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="為何 function foo 無法作為 IIFE.html">為何 function foo 無法作為 IIFE</a>
+      <a href="JavaScript匿名函式的典型應用.html">匿名函式的典型應用</a>
+      <a href="JavaScript箭頭函式在建構子中作為方法的優勢.html">箭頭函式的優勢</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

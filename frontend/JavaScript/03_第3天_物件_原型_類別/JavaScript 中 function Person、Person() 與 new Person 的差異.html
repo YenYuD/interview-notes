@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>function Person vs new Person</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 建構子</div>
+    <h1>差一個 new，結果<em>天差地遠</em></h1>
+    <p class="lede"><code>function Person(){}</code>、<code>Person()</code>、<code>new Person()</code> 三個寫法看似相近，卻代表「定義」、「一般呼叫」、「建立實例」三件截然不同的事。少了 <b>new</b>，你只會拿到 <code>undefined</code>。</p>
+  </header>
+
+  <section>
+    <span class="num">三者對照</span>
+    <h2>一眼看清差異</h2>
+    <table>
+      <thead><tr><th>寫法</th><th>意思</th><th>回傳值</th><th>常見錯誤</th></tr></thead>
+      <tbody>
+        <tr><td><code>function Person(){}</code></td><td>定義函式，不執行</td><td>無</td><td>無</td></tr>
+        <tr><td><code>Person()</code></td><td>一般函式呼叫</td><td><code>undefined</code>（沒有 return）</td><td>誤以為能建立實例</td></tr>
+        <tr><td><code>new Person()</code></td><td>建構子呼叫</td><td>新建的物件</td><td>無（正確用法）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">new 做了什麼</span>
+    <h2>new 運算子的四步驟</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>建立空物件</strong>：<code>{}</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>設定原型</strong>：新物件的 <code>[[Prototype]]</code> 指向 <code>Person.prototype</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>綁定 this</strong>：執行建構子，函式內 <code>this</code> 指向新物件</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>回傳物件</strong>：若建構子沒有明確 return 物件，則回傳 <code>this</code>（新物件）</div>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>若建構子明確 <code>return</code> 一個<strong>物件</strong>，new 會回傳那個物件而非 this；若 return 的是原始值則忽略，仍回傳 this。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>忘記 new 呼叫建構子，this 跑到哪去？</summary><p>在非嚴格模式下，<code>this</code> 會指向全域物件（<code>window</code>），你的屬性會汙染全域；在嚴格模式下會拋 TypeError，因為 <code>this</code> 是 <code>undefined</code>。</p></details>
+      <details><summary>如何防止建構子被不帶 new 呼叫？</summary><p>在函式內加上防護：<code>if (!(this instanceof Person)) return new Person(name);</code> 或改用 ES2015 class（強制需要 new，否則拋錯）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>function Person(){}</code> 只是定義一個函式，<code>Person()</code> 是一般呼叫，沒有 return 就是 undefined。<span class="hl">只有 <code>new Person()</code> 才會建立實例</span>——<code>new</code> 會建立空物件、把 [[Prototype]] 指向 <code>Person.prototype</code>、把 <code>this</code> 綁到新物件，最後回傳它。漏了 <code>new</code>，非嚴格模式下 <code>this</code> 會污染全域，嚴格模式直接報錯。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="new關鍵字的用途.html">new 關鍵字詳解</a>
+      <a href="如何建立建構子函式.html">如何建立建構子函式</a>
+      <a href="JavaScript中建立物件的多種方法.html">建立物件的多種方法</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

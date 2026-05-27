@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>匿名函式的典型應用</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式・匿名函式</div>
+    <h1>沒有名字，但無處不在：<em>匿名函式的三大舞台</em></h1>
+    <p class="lede"><b>匿名函式</b>（anonymous function）是沒有名稱的函式，通常當作參數傳入或立即執行。它是回呼、IIFE、陣列方法的主角，也是現代箭頭函式語法的基礎。</p>
+  </header>
+
+  <section>
+    <span class="num">三種典型用法</span>
+    <h2>什麼場合最適合匿名函式？</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>回呼函式（Callback）</strong> — 傳入其他函式作為行為參數
+          <pre><code>setTimeout(() =&gt; console.log('Hello!'), 1000);</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>IIFE（立即執行函式表達式）</strong> — 封裝作用域，避免污染全域
+          <pre><code>(function() {
+  var x = 10; // 外部看不到 x
+})();</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>陣列方法 / 高階函式</strong> — 一次性轉換邏輯
+          <pre><code>[1,2,3].map(n =&gt; n * 2); // [2,4,6]</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">注意事項</span>
+    <h2>匿名函式的限制</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p>匿名函式在 <b>Stack Trace</b> 中顯示為 <code>anonymous</code>，除錯時難以定位問題。若函式邏輯複雜或會被多次引用，建議<b>改用具名函式表達式</b>，例如 <code>const fn = function myFn() {...}</code>。</p></div>
+    <table>
+      <tr><th></th><th>匿名函式</th><th>具名函式</th></tr>
+      <tr><td>程式碼簡潔</td><td>✅</td><td>稍長</td></tr>
+      <tr><td>Stack Trace</td><td>顯示 <code>anonymous</code></td><td>✅ 顯示函式名</td></tr>
+      <tr><td>遞迴自我呼叫</td><td>❌ 無法</td><td>✅ 可用函式名</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>匿名函式和箭頭函式是同一件事嗎？</summary><p>不完全是。箭頭函式通常沒有名稱（匿名），但「匿名」指無名稱，「箭頭」指語法形式。箭頭函式還多了「無自己的 this」的特性，這是普通匿名函式沒有的。</p></details>
+      <details><summary>IIFE 在 ES6 模組流行後還有必要嗎？</summary><p>ES6 模組（<code>import/export</code>）每個檔案自成作用域，舊有「防污染全域」的需求幾乎消失。IIFE 現在主要用於需要立即初始化但不想建立命名函式的一次性邏輯。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「匿名函式是<span class="hl">沒有識別符的函式</span>，最常見於三個場景：作為回呼（如 <code>setTimeout</code>）、IIFE（封裝一次性作用域）、以及陣列高階方法（<code>map</code>/<code>filter</code>/<code>reduce</code>）。箭頭函式是匿名函式的現代語法，但多了<span class="hl">詞法 this 繼承</span>的特性。需要注意的是，匿名函式在 Stack Trace 中難以追蹤，複雜邏輯建議改用具名函式表達式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中高階函式的定義.html">高階函式定義</a>
+      <a href="回呼函式及其應用.html">回呼函式及其應用</a>
+      <a href="為何 function foo 無法作為 IIFE.html">為何 function foo 無法作為 IIFE</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

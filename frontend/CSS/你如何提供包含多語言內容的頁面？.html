@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多語言頁面的提供方式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">HTML / i18n</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">HTML / 國際化</div>
+    <h1>多語言頁面的技術基礎：<em>Accept-Language、lang 屬性、hreflang</em></h1>
+    <p class="lede">提供多語言頁面是<b>國際化（i18n）</b>的核心。瀏覽器透過 <b>Accept-Language</b> 標頭傳遞語言偏好；HTML 需宣告 <b>lang</b> 屬性；搜尋引擎則靠 <b>hreflang</b> 連結找到各語言版本。</p>
+  </header>
+
+  <section>
+    <span class="num">技術實作</span>
+    <h2>三個必要元素</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>Accept-Language 標頭</strong>
+          瀏覽器發送 HTTP 請求時自動帶上使用者語言偏好，伺服器依此回傳對應語言版本
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>&lt;html lang="zh-Hant"&gt;</strong>
+          在 HTML 標籤宣告語言，螢幕閱讀器和搜尋引擎需要此資訊
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>hreflang 連結</strong>
+          告訴搜尋引擎各語言版本的 URL：
+          <pre><code><span class="tok-str">&lt;link rel="alternate" hreflang="en" href="https://example.com/en" /&gt;
+&lt;link rel="alternate" hreflang="zh-TW" href="https://example.com/zh-tw" /&gt;
+&lt;link rel="alternate" hreflang="x-default" href="https://example.com/" /&gt;</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">渲染方式</span>
+    <h2>伺服器端 vs 客戶端渲染</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>伺服器端渲染（SSR）</small>
+        HTML 中放字串佔位符，伺服器根據語言替換後輸出完整 HTML；SEO 效果好
+      </div>
+      <div class="chip info">
+        <small>客戶端渲染（CSR）</small>
+        JavaScript 初始化時載入對應語系的翻譯 JSON，動態替換 UI 字串；React-i18next、Vue-i18n 等框架支援
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Accept-Language 標頭可靠嗎？</summary>
+        <p>不完全可靠。使用 VPN 或瀏覽器語言設定不準確時，推測語言可能有誤。因此伺服器可自動偵測後預選語言，但必須提供手動切換語言的選項，不能強制使用者使用偵測到的語言。</p>
+      </details>
+      <details>
+        <summary>URL 中應該包含語言資訊嗎？</summary>
+        <p>推薦包含，常見方式：<code>/en/page</code>（路徑前綴）或 <code>en.example.com</code>（子網域）。這讓使用者可以分享特定語言版本的 URL，搜尋引擎也更容易索引不同語言版本。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「提供多語言頁面，技術上有幾個要點：瀏覽器的 <span class="hl">Accept-Language 標頭</span>傳達使用者語言偏好，伺服器依此回傳對應版本；HTML 需在 <code>&lt;html&gt;</code> 宣告 <span class="hl">lang 屬性</span>（如 <code>lang="zh-Hant"</code>），供螢幕閱讀器和 SEO 使用；搜尋引擎需要 <span class="hl">hreflang</span> 連結才知道各語言版本的 URL 對應關係。渲染方式上，SSR 由伺服器替換語言字串後輸出 HTML；CSR 則在客戶端用 i18n 函式庫（如 react-i18next）動態替換。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="設計或開發多語言網站時，有哪些事情需要特別注意？.html">多語言網站設計注意事項</a>
+      <a href="doctype 有什麼作用？.html">DOCTYPE 的作用</a>
+      <a href="將 HTML5 視為開放網路平台，HTML5 的基本建構組成有哪些？.html">HTML5 基本建構</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

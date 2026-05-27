@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阻止事件的預設行為</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>用 <em>event.preventDefault()</em> 接管瀏覽器的預設行為</h1>
+    <p class="lede">瀏覽器對某些事件有預設行為：表單送出、連結跳轉、右鍵選單。<b>preventDefault()</b> 讓你<b>取消這些預設動作</b>，完全由 JavaScript 自訂處理邏輯。</p>
+  </header>
+
+  <section>
+    <span class="num">三個常見場景</span>
+    <h2>什麼時候需要阻止預設行為</h2>
+    <pre><code><span class="tok-com">// 1. 阻止表單送出（SPA 用 AJAX 送出時）</span>
+form.addEventListener(<span class="tok-str">'submit'</span>, (e) => {
+  e.preventDefault();
+  sendFormWithFetch(new FormData(form));
+});
+
+<span class="tok-com">// 2. 阻止連結跳轉（SPA 路由攔截）</span>
+link.addEventListener(<span class="tok-str">'click'</span>, (e) => {
+  e.preventDefault();
+  router.navigate(link.href);
+});
+
+<span class="tok-com">// 3. 阻止右鍵選單（自訂 context menu）</span>
+document.addEventListener(<span class="tok-str">'contextmenu'</span>, (e) => {
+  e.preventDefault();
+  showCustomMenu(e.clientX, e.clientY);
+});</code></pre>
+    <div class="callout info">
+      <span class="ico">ℹ</span>
+      <p>可以用 <code>event.cancelable</code> 屬性檢查該事件是否支援取消。自訂事件預設不可取消，scroll 事件預設也不行。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">注意事項</span>
+    <h2>preventDefault vs stopPropagation</h2>
+    <table>
+      <thead><tr><th>方法</th><th>作用</th><th>影響範圍</th></tr></thead>
+      <tbody>
+        <tr><td><code>preventDefault()</code></td><td>阻止瀏覽器預設行為</td><td>不影響事件傳播</td></tr>
+        <tr><td><code>stopPropagation()</code></td><td>阻止事件繼續冒泡</td><td>不影響預設行為</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>哪些事件的預設行為無法取消？</summary>
+        <p>像是 <code>scroll</code>（加了 passive 監聽器的）、某些瀏覽器安全事件（如 Ctrl+T 開新分頁）。可以用 event.cancelable 檢查是否可取消。</p>
+      </details>
+      <details>
+        <summary>passive 監聽器和 preventDefault 有什麼衝突？</summary>
+        <p>加了 <code>{ passive: true }</code> 的監聽器內呼叫 preventDefault() 會被忽略（並在 console 產生警告）。passive 意思就是「保證不會取消預設行為」，所以才能讓瀏覽器提前執行捲動。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">event.preventDefault()</span> 取消瀏覽器對事件的預設處理，例如阻止表單送出後用 fetch 自行處理、阻止連結跳轉讓前端路由接管。它只影響預設行為，不影響事件傳播；<code>stopPropagation()</code> 才是阻止冒泡的方法。要注意 passive 監聽器內呼叫 preventDefault 無效，因為兩者互斥。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="event.preventDefault與event.stopPropagation差異.html">preventDefault vs stopPropagation</a>
+      <a href="事件監聽器及其使用方法.html">事件監聽器使用方法</a>
+      <a href="使用Constraint Validation API驗證表單元素.html">表單驗證 API</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>展開語法 vs 剩餘語法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 語法</div>
+    <h1>同樣是 <code>...</code>，<em>展開和剩餘是兩個反向操作</em></h1>
+    <p class="lede"><b>展開（Spread）</b>把一個陣列／物件拆散成獨立元素；<b>剩餘（Rest）</b>把多個獨立元素收集成一個陣列。同樣三個點，看位置就知道是哪一種。</p>
+  </header>
+
+  <section>
+    <span class="num">核心區別</span>
+    <h2>展開：一變多；剩餘：多變一</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>展開 Spread</small>
+        出現在「值」的位置，把集合拆開
+      </div>
+      <div class="chip info">
+        <small>剩餘 Rest</small>
+        出現在「參數／解構」的位置，把剩下的收集起來
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 展開：把陣列拆開傳入函式</span>
+<span class="tok-key">const</span> nums = [1, 2, 3];
+console.<span class="tok-fn">log</span>(Math.<span class="tok-fn">max</span>(...nums)); <span class="tok-com">// 3</span>
+
+<span class="tok-com">// 剩餘：把「其餘引數」收進陣列</span>
+<span class="tok-key">function</span> <span class="tok-fn">sum</span>(...numbers) {
+  <span class="tok-key">return</span> numbers.<span class="tok-fn">reduce</span>((acc, n) => acc + n, 0);
+}
+console.<span class="tok-fn">log</span>(<span class="tok-fn">sum</span>(1, 2, 3, 4)); <span class="tok-com">// 10</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">解構中的剩餘</span>
+    <h2>收集「剩下的部分」</h2>
+    <pre><code><span class="tok-com">// 陣列解構的剩餘</span>
+<span class="tok-key">const</span> [first, second, ...rest] = [1, 2, 3, 4, 5];
+<span class="tok-com">// first=1, second=2, rest=[3,4,5]</span>
+
+<span class="tok-com">// 物件解構的剩餘</span>
+<span class="tok-key">const</span> { a, b, ...others } = { a: 1, b: 2, c: 3, d: 4 };
+<span class="tok-com">// a=1, b=2, others={ c:3, d:4 }</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>剩餘參數<b>必須放在最後</b>：<code>function fn(a, ...rest, b)</code> 是語法錯誤。函式只能有一個剩餘參數。</p>
+    </div>
+    <div class="aside">剩餘語法比 <code>arguments</code> 物件好用：<code>arguments</code> 是類陣列、不能在箭頭函式裡用；剩餘語法直接是真正的陣列，支援所有陣列方法。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>剩餘語法和 arguments 的差別？</summary><p><code>arguments</code> 是類陣列物件（沒有 map/filter 等方法）、包含所有引數、在箭頭函式裡不可用；剩餘語法是真正的 Array、只收集「其餘」引數（前面已命名的不包含）、可在任何函式使用。</p></details>
+      <details><summary>同樣是 ...，怎麼判斷是展開還是剩餘？</summary><p>看出現的語境：在<b>函式宣告的參數列表</b>或<b>解構賦值的左側</b>是剩餘；在<b>函式呼叫的引數</b>或<b>陣列 / 物件字面量裡</b>是展開。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「展開和剩餘語法符號相同，但方向相反。<span class="hl">展開出現在值的位置，把集合拆開；剩餘出現在參數或解構的左側，把多個元素收集成陣列</span>。剩餘語法比 <code>arguments</code> 更好用，因為它是真正的陣列，也支援箭頭函式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="展開運算子及其用法.html">展開運算子用法</a>
+      <a href="解釋物件與陣列的解構賦值.html">解構賦值</a>
+      <a href="使用展開運算子於陣列與物件的優勢.html">展開運算子優勢</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

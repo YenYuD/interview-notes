@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promise 取代 Callback</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · Promise vs Callback</div>
+    <h1>從巢狀地獄到<em>線性鏈結</em>：Promise 值得嗎？</h1>
+    <p class="lede">Promise 讓非同步程式碼從「向右」變成「向下」，<b>統一了錯誤處理</b>，也帶來了平行執行的語法糖。代價是一點點學習曲線。</p>
+  </header>
+
+  <section>
+    <span class="num">最大優勢</span>
+    <h2>Callback Hell → 扁平鏈結</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>Callback — 向右巢狀</small>
+        <pre style="margin:0;font-size:.7rem">getUser(id, (u) => {
+  getPosts(u, (p) => {
+    getComments(p, (c) => {
+      // 越來越右...
+    });
+  });
+});</pre>
+      </div>
+      <div class="chip good">
+        <small>Promise — 向下鏈結</small>
+        <pre style="margin:0;font-size:.7rem">getUser(id)
+  .then(getPosts)
+  .then(getComments)
+  .catch(handleError);</pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">四大優點</span>
+    <h2>Promise 帶來了什麼</h2>
+    <table>
+      <tr><th>優點</th><th>說明</th></tr>
+      <tr><td>避免 Callback Hell</td><td>用 <code>.then()</code> 鏈結，程式碼線性可讀</td></tr>
+      <tr><td>統一錯誤處理</td><td>整條鏈只要一個 <code>.catch()</code>，不必每層手動檢查 error 參數</td></tr>
+      <tr><td>平行請求</td><td><code>Promise.all()</code> 同時發出多請求，等全部完成</td></tr>
+      <tr><td>保證清理</td><td><code>.finally()</code> 無論成敗都執行，適合關閉 loading spinner</td></tr>
+    </table>
+    <pre><code><span class="tok-com">// 統一錯誤處理：任何一步 reject 都到 .catch</span>
+<span class="tok-fn">step1</span>()
+  .<span class="tok-fn">then</span>(step2)
+  .<span class="tok-fn">then</span>(step3)
+  .<span class="tok-fn">catch</span>((err) => console.<span class="tok-fn">error</span>(<span class="tok-str">'任一步失敗：'</span>, err))
+  .<span class="tok-fn">finally</span>(() => setLoading(<span class="tok-key">false</span>));</code></pre>
+  </section>
+
+  <section>
+    <span class="num">缺點與取捨</span>
+    <h2>Promise 的限制</h2>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Promise 仍需理解微任務佇列、鏈結中的 return 語意、以及 <code>Promise.all</code> 的失敗快速機制。對於<b>初學者</b>，理解成本比簡單 callback 高；對於<b>進階開發者</b>，async/await 通常比純 Promise 鏈更易讀。</p>
+    </div>
+    <div class="chips">
+      <div class="chip good">
+        <small>適合 Promise 的情境</small>
+        多個平行請求（Promise.all）、需要 .finally 清理、與舊有 Promise-based API 整合。
+      </div>
+      <div class="chip info">
+        <small>可考慮 async/await</small>
+        複雜的順序邏輯、需要在迴圈中 await、需要條件式非同步流程。
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Promise.all 和 Promise.allSettled 有什麼差？</summary>
+        <p><code>Promise.all</code> 任一失敗就立即 reject，其餘結果丟棄。<code>Promise.allSettled</code> 等全部完成，回傳每個 Promise 的狀態與值/原因，適合「不想因單一失敗而放棄全部結果」的情境。</p>
+      </details>
+      <details>
+        <summary>在 .then() 裡忘記 return 會怎樣？</summary>
+        <p>下一個 <code>.then()</code> 收到的值會是 <code>undefined</code>，而不是你以為的非同步結果。這是 Promise 鏈結中最常見的 bug 之一。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「相比 Callback，Promise 最大的優點是<span class="hl">把巢狀變成鏈結</span>，讓程式碼線性可讀；同時<span class="hl">統一了錯誤處理</span>，整條鏈只需一個 .catch()，不必在每個 callback 裡手動檢查錯誤。用 <code>Promise.all</code> 也能輕鬆處理平行請求。唯一的代價是需要理解 Promise 鏈的 return 語意和微任務機制。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="非同步操作中的回呼函式概念.html">Callback 回呼函式</a>
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="Promise.all的用途.html">Promise.all 用途</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

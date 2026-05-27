@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 雪碧圖</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 效能優化</div>
+    <h1>雪碧圖：用<em>一張大圖</em>減少 HTTP 請求的老式技巧</h1>
+    <p class="lede"><b>CSS 雪碧圖（CSS Sprites）</b>將多張小圖合併成一張，用 <b>background-position</b> 「剪裁」出需要的部分。曾是圖示的主流解法，HTTP/2 普及後重要性下降，但面試仍會被問到。</p>
+  </header>
+
+  <section>
+    <span class="num">核心原理</span>
+    <h2>如何實作</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">用雪碧圖產生器（如 CSS Sprites Generator）將多張圖片打包成一張大圖</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">工具自動輸出各圖示的 CSS 座標與尺寸</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">套用 <code>background-image</code> + <code>background-position</code> 顯示對應區塊</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">/* 共用基底 */</span>
+<span class="tok-key">.icon</span> {
+  background-image: <span class="tok-fn">url</span>(<span class="tok-str">'spritesheet.png'</span>);
+  width: 24px;
+  height: 24px;
+}
+<span class="tok-com">/* 各圖示用 background-position 定位 */</span>
+<span class="tok-key">.icon-cart</span>   { background-position: <span class="tok-str">0 0</span>; }
+<span class="tok-key">.icon-arrow</span>  { background-position: <span class="tok-str">-24px 0</span>; }
+<span class="tok-key">.icon-search</span> { background-position: <span class="tok-str">-48px 0</span>; }</code></pre>
+  </section>
+
+  <section>
+    <span class="num">評估時機</span>
+    <h2>現在還需要雪碧圖嗎？</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>雪碧圖的優點</small>
+        減少 HTTP 請求（HTTP/1.1 下顯著）；預載 hover 狀態圖片，避免閃爍
+      </div>
+      <div class="chip bad">
+        <small>現代替代方案</small>
+        HTTP/2 多工解決了請求數問題；圖示改用 SVG 字體或 SVG symbol；圖示元件庫（如 Heroicons）
+      </div>
+    </div>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>現代專案圖示首選 <strong>SVG 圖示系統</strong>（svg <code>&lt;use&gt;</code>、SVG sprite）或圖示字體（Icon Font）。點陣圖雪碧圖主要在 HTTP/1.1 環境或需要支援超舊瀏覽器時才考慮。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>HTTP/2 為什麼讓雪碧圖變得較不必要？</summary>
+        <p>HTTP/1.1 每個連線一次只能處理一個請求（有並行數限制），多張圖片請求會排隊等待。HTTP/2 支援<strong>多工（Multiplexing）</strong>，在同一個連線上並行傳送多個請求，大幅減少了合併請求的需求。</p>
+      </details>
+      <details>
+        <summary>SVG sprite 和點陣圖雪碧圖的差異？</summary>
+        <p>SVG sprite 使用 <code>&lt;symbol&gt;</code> 定義圖形，用 <code>&lt;use href="#icon-id"&gt;</code> 引用，可縮放不失真、可用 CSS 改色。點陣圖雪碧圖是固定像素，縮放會模糊，且無法動態改色。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CSS 雪碧圖把多張小圖合成一張，用 <span class="hl">background-position</span> 剪裁出需要的部分，主要優點是減少 HTTP 請求。在 HTTP/1.1 時代這很重要，<span class="hl">但 HTTP/2 的多工特性已讓這個需求大幅降低</span>。現代專案我會優先用 SVG 圖示系統——可縮放、可改色、無需座標計算；點陣雪碧圖現在主要是面試考古題的範疇了。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你曾處理過 Retina 顯示器的圖形嗎？.html">Retina 顯示器圖形處理</a>
+      <a href="你為什麼會在圖片標籤中使用 `srcset` 屬性？請說明瀏覽器評估此屬性內容的過程。.html">srcset 屬性</a>
+      <a href="撰寫高效 CSS 時有哪些常見的陷阱？.html">高效 CSS 的陷阱</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

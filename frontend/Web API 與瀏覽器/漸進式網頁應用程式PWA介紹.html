@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PWA 漸進式網頁應用程式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>PWA：讓網頁<em>像原生 App 一樣</em>安裝、離線、推播通知</h1>
+    <p class="lede">Progressive Web App 用標準網頁技術（HTML/CSS/JS）實現原生 App 的體驗。核心是 <b>Service Worker</b>（離線快取）+ <b>Web App Manifest</b>（安裝到主畫面）+ <b>HTTPS</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">三大核心技術</span>
+    <h2>缺一不可的 PWA 基礎</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>Service Worker</small>
+        <p>背景腳本，攔截網路請求、管理快取，實現<b>離線功能</b>與推播通知</p>
+      </div>
+      <div class="chip info">
+        <small>Web App Manifest</small>
+        <p>JSON 設定檔，定義名稱、圖示、啟動 URL，讓使用者<b>安裝到主畫面</b></p>
+      </div>
+      <div class="chip info">
+        <small>HTTPS</small>
+        <p>Service Worker 必要條件，確保安全性（localhost 例外用於開發）</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">Service Worker 快取</span>
+    <h2>攔截請求 → 快取 → 離線可用</h2>
+    <pre><code><span class="tok-com">// 1. 在主腳本中註冊</span>
+<span class="tok-key">if</span> (<span class="tok-str">'serviceWorker'</span> <span class="tok-key">in</span> navigator) {
+  navigator.serviceWorker.register(<span class="tok-str">'/sw.js'</span>);
+}
+
+<span class="tok-com">// 2. sw.js：攔截 fetch 請求，先查快取再上網</span>
+self.addEventListener(<span class="tok-str">'fetch'</span>, (event) => {
+  event.respondWith(
+    caches.match(event.request).then(
+      (cached) => cached || fetch(event.request)
+    )
+  );
+});</code></pre>
+    <table>
+      <thead><tr><th>特性</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>離線使用</td><td>Service Worker 快取靜態資源</td></tr>
+        <tr><td>安裝到主畫面</td><td>manifest.json 提供 App 元資料</td></tr>
+        <tr><td>推播通知</td><td>Service Worker + Push API</td></tr>
+        <tr><td>背景同步</td><td>離線時的操作，上線後自動同步</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>PWA 和原生 App 還有什麼差距？</summary>
+        <p>PWA 無法存取某些原生 API（藍牙、NFC 有限制）；iOS 支援較差（Safari 對 Service Worker 的支援落後 Chrome）；沒有 App Store 曝光優勢；硬體整合（相機、GPS）功能受限。</p>
+      </details>
+      <details>
+        <summary>Service Worker 的生命週期是什麼？</summary>
+        <p>三個階段：<b>安裝（install）</b>→ 快取靜態資源；<b>啟動（activate）</b>→ 清理舊快取；<b>抓取（fetch）</b>→ 攔截請求。新版 SW 在所有分頁關閉前不會取代舊版。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「PWA 讓網頁具備類原生 App 的體驗，三個核心：<span class="hl">Service Worker</span> 作為網路代理實現離線快取和推播通知；<span class="hl">Web App Manifest</span> 讓使用者安裝到主畫面；<span class="hl">HTTPS</span> 是必要的安全基礎。主要優勢是跨平台、不需上架 App Store；劣勢是 iOS 支援較差、部分原生功能受限。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中的Workers用途.html">Service Worker 詳解</a>
+      <a href="伺服器推送事件 SSE.html">SSE 即時推送</a>
+      <a href="瀏覽器中 Cookie、sessionStorage 與 localStorage 的差異.html">瀏覽器儲存機制</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

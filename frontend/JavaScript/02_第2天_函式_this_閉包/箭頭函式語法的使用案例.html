@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>箭頭函式語法的使用案例</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">箭頭函式・ES6</div>
+    <h1>不只是語法糖：箭頭函式的<em>最佳使用場景</em></h1>
+    <p class="lede">箭頭函式（<code>=&gt;</code>）比普通函式更簡潔，但它最關鍵的特性是<b>詞法 this</b>——繼承外層作用域的 this，不建立自己的。這讓它在回呼和事件處理中特別好用，但也有不適合的場合。</p>
+  </header>
+
+  <section>
+    <span class="num">語法</span>
+    <h2>三種常見寫法</h2>
+    <pre><code>// 單一表達式：隱式回傳，無須 return 或大括號
+const add = (a, b) =&gt; a + b;
+
+// 多行：需要大括號和 return
+const greet = (name) =&gt; {
+  const msg = `Hello, ${name}!`;
+  return msg;
+};
+
+// 無參數：空括號
+const getTime = () =&gt; Date.now();</code></pre>
+  </section>
+
+  <section>
+    <span class="num">最佳場景</span>
+    <h2>什麼時候箭頭函式最合適？</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>陣列方法回呼</strong> — 短小、一次性，箭頭函式讓程式碼更宣告式
+          <pre><code>[1,2,3].map(n =&gt; n * 2).filter(n =&gt; n &gt; 3);</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>需要詞法 this 的回呼</strong> — 在 class 或物件方法內，不想 this 跑掉
+          <pre><code>class Timer {
+  constructor() {
+    this.s = 0;
+    setInterval(() =&gt; this.s++, 1000); // this 是 Timer 實例
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>這三種情況<b>不要用箭頭函式</b>：物件字面量方法（this 不是物件）、需要用 <code>arguments</code> 的函式（箭頭函式無 arguments）、作為建構子（箭頭函式無法用 new）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">對比</span>
+    <h2>箭頭函式 vs 普通函式</h2>
+    <table>
+      <tr><th></th><th>箭頭函式</th><th>普通函式</th></tr>
+      <tr><td>this</td><td>詞法繼承外層</td><td>呼叫時決定</td></tr>
+      <tr><td>arguments</td><td>❌ 無</td><td>✅ 有</td></tr>
+      <tr><td>new</td><td>❌ 不能作建構子</td><td>✅</td></tr>
+      <tr><td>prototype</td><td>❌ 無</td><td>✅ 有</td></tr>
+      <tr><td>語法</td><td>簡潔（適合回呼）</td><td>較詳細</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>箭頭函式有 prototype 嗎？</summary><p>沒有。箭頭函式沒有 <code>prototype</code> 屬性，因此無法用 <code>new</code> 呼叫，也不能作為原型鏈的起點。</p></details>
+      <details><summary>回傳物件字面量時要注意什麼？</summary><p>隱式回傳物件需加括號，否則大括號會被解析為函式體：<code>const fn = () =&gt; ({ key: 'val' });</code>。忘了括號是常見 bug。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「箭頭函式最大的特性不是語法簡潔，而是<span class="hl">詞法 this——繼承外層作用域，不建立自己的 this</span>。最適合用在陣列方法回呼和需要保住外層 this 的非同步回呼。反過來，物件字面量的方法<span class="hl">不能用箭頭函式</span>，否則 this 不是物件本身；箭頭函式也沒有 arguments 物件，且不能作建構子。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript箭頭函式在建構子中作為方法的優勢.html">箭頭函式在建構子中的優勢</a>
+      <a href="this關鍵字常見陷阱.html">this 常見陷阱</a>
+      <a href="JavaScript匿名函式的典型應用.html">匿名函式的典型應用</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

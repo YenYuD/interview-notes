@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>var、let、const 的差異</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>預設用 <em>const</em>，需要重新賦值才改 <em>let</em>，幾乎不用 <em>var</em></h1>
+    <p class="lede"><code>var</code> 的函式作用域與 hoisting 是歷史遺毒。<b><code>let</code> 和 <code>const</code> 帶來區塊作用域</b>，讓變數範圍更可預期；而暫時死區（TDZ）讓錯誤在編譯期就爆出來。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>三者核心差異一覽</h2>
+    <table>
+      <thead><tr><th></th><th><code>var</code></th><th><code>let</code></th><th><code>const</code></th></tr></thead>
+      <tbody>
+        <tr><td>作用域</td><td>函式作用域</td><td>區塊作用域</td><td>區塊作用域</td></tr>
+        <tr><td>宣告前使用</td><td><code>undefined</code>（hoisting）</td><td>❌ TDZ 報錯</td><td>❌ TDZ 報錯</td></tr>
+        <tr><td>重新賦值</td><td>✅</td><td>✅</td><td>❌</td></tr>
+        <tr><td>宣告時初始化</td><td>非必要</td><td>非必要</td><td>✅ 必須</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>var 的問題：作用域洩漏 + 靜默的 undefined</h2>
+    <pre><code><span class="tok-com">// var hoisting：宣告前用回傳 undefined，不報錯（危險）</span>
+console.log(x); <span class="tok-com">// undefined（不是錯誤！）</span>
+<span class="tok-key">var</span> x = 5;
+
+<span class="tok-com">// var 不受 {} 限制</span>
+<span class="tok-key">if</span> (<span class="tok-key">true</span>) {
+  <span class="tok-key">var</span> leaked = <span class="tok-str">"I escape the block"</span>;
+}
+console.log(leaked); <span class="tok-com">// ✅ 竟然可以存取</span></code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p><code>let</code> 和 <code>const</code> 也有 hoisting，但進入的是「<b>暫時死區（TDZ）</b>」，宣告前存取會直接報錯，而不是默默回傳 <code>undefined</code>——錯誤更早被發現。</p></div>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>const 只保護「綁定」，不保護物件內容</h2>
+    <pre><code><span class="tok-key">const</span> user = { name: <span class="tok-str">"Bob"</span> };
+user.name = <span class="tok-str">"Alice"</span>; <span class="tok-com">// ✅ 修改屬性沒問題</span>
+user = {};           <span class="tok-com">// ❌ 重新賦值才報錯</span></code></pre>
+    <div class="aside">想要深層不可變，需要 <code>Object.freeze()</code> 或 TypeScript 的 <code>Readonly&lt;T&gt;</code>。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼是暫時死區（TDZ）？</summary><p>從進入區塊到 <code>let</code>/<code>const</code> 宣告那行之間的範圍，變數存在但不可存取。這段就是 TDZ。目的是消除 <code>var</code> hoisting 帶來的「宣告前存取回傳 undefined」的混亂行為。</p></details>
+      <details><summary>var 的 hoisting 具體怎麼運作？</summary><p>JavaScript 引擎在執行前先掃描所有 <code>var</code> 宣告，把「宣告」提升到作用域頂端（但初始化值不提升）。所以宣告前存取得到 <code>undefined</code> 而非報錯。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三者的核心差異是作用域和 hoisting 行為。<span class="hl"><code>var</code> 是函式作用域</span>，宣告前存取會靜默回傳 <code>undefined</code>——這容易造成隱藏的 bug。<span class="hl"><code>let</code> 和 <code>const</code> 是區塊作用域</span>，宣告前存取會進入暫時死區（TDZ）直接報錯，讓問題更早被發現。最佳實踐是：預設用 <code>const</code>，需要重新賦值才用 <code>let</code>，幾乎不用 <code>var</code>。</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="007 箭頭函式 Arrow Functions.html">箭頭函式</a>
+      <a href="013 noImplicitAny 是什麼.html">noImplicitAny</a>
+      <a href="009 never 與 void 回傳型別的差異.html">never vs void</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

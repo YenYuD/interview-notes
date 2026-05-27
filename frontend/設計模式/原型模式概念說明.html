@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>複製既有物件，<em>不從零建立</em></h1>
+    <p class="lede">原型模式以現有物件為藍圖複製出新物件，跳過昂貴的初始化流程。JavaScript 的<b>原型鏈（Prototype Chain）</b>本身就是這個模式的語言層實作。</p>
+  </header>
+
+  <section>
+    <span class="num">兩種實作方式</span>
+    <h2>Object.create vs 建構函式 prototype</h2>
+    <pre><code><span class="tok-com">// 方式一：Object.create（最直接）</span>
+<span class="tok-key">const</span> animalProto = {
+  <span class="tok-fn">speak</span>() { <span class="tok-key">return</span> `${<span class="tok-key">this</span>.name} says ${<span class="tok-key">this</span>.sound}`; }
+};
+<span class="tok-key">const</span> dog = Object.<span class="tok-fn">create</span>(animalProto);
+dog.name  = <span class="tok-str">'Rex'</span>;
+dog.sound = <span class="tok-str">'woof'</span>;
+dog.<span class="tok-fn">speak</span>(); <span class="tok-com">// "Rex says woof"</span>
+
+<span class="tok-com">// 方式二：建構函式 + prototype（共享方法節省記憶體）</span>
+<span class="tok-key">function</span> <span class="tok-fn">Animal</span>(name, sound) {
+  <span class="tok-key">this</span>.name = name; <span class="tok-key">this</span>.sound = sound;
+}
+Animal.prototype.speak = <span class="tok-key">function</span>() {
+  <span class="tok-key">return</span> `${<span class="tok-key">this</span>.name} says ${<span class="tok-key">this</span>.sound}`;
+};</code></pre>
+
+    <div class="callout info">
+      <span class="ico">💡</span>
+      <p><b>ES6 Class 的本質：</b><code>class</code> 語法糖底層仍是 prototype；<code>extends</code> 建立的繼承鏈就是原型鏈的延伸。理解原型模式有助於解釋為何 <code>instanceof</code> 和原型鏈查找是 JavaScript 的核心機制。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">原型鏈查找</span>
+    <h2>屬性存取沿著鏈往上找</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>先查自身屬性</h4>
+          <p>存取 <code>obj.prop</code> 時先找 <code>obj</code> 本身是否有 <code>prop</code>。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>再查 [[Prototype]]</h4>
+          <p>找不到則往 <code>Object.getPrototypeOf(obj)</code> 查，一路到 <code>null</code>。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot good">3</div>
+        <div class="flow-body">
+          <h4>回傳 undefined 或找到</h4>
+          <p>到達鏈尾仍未找到則回傳 <code>undefined</code>；找到即停止。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>淺複製 vs 深複製，原型模式怎麼選？</summary>
+        <p>原型模式的「複製」可以是淺複製（只複製一層屬性參考）或深複製（遞迴複製所有嵌套物件）。<code>Object.assign</code> 和展開運算子 <code>{...obj}</code> 是淺複製；需要深複製時用 <code>structuredClone()</code>（現代瀏覽器支援）或 <code>JSON.parse(JSON.stringify())</code>（不支援函式、undefined、循環參考）。</p>
+      </details>
+      <details>
+        <summary>Object.create(null) 和 Object.create(Object.prototype) 的差異？</summary>
+        <p><code>Object.create(null)</code> 建立一個沒有任何原型的「純淨」物件，不繼承 <code>toString</code>、<code>hasOwnProperty</code> 等，常用做 dictionary（純 key-value map）；<code>Object.create(Object.prototype)</code> 等同 <code>{}</code>，繼承所有 Object 方法。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「原型模式透過複製現有物件來建立新物件，適合物件初始化成本高的場景。JavaScript 天生就是原型語言，<span class="hl">每個物件都有 [[Prototype]] 鏈</span>，屬性存取沿鏈查找。<code>Object.create(proto)</code> 是最直接的原型模式實作；ES6 的 <code>class</code> 底層也是 prototype，<code>extends</code> 就是建立原型鏈繼承。使用時要注意<span class="hl">淺複製與深複製</span>的差異，避免多個實例共享同一個嵌套物件參考。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="設計模式及其重要性.html">設計模式總覽</a>
+      <a href="單例模式概念說明.html">單例模式</a>
+      <a href="工廠模式及其應用.html">工廠模式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

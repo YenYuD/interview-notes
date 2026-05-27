@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>檢測 JavaScript 是否禁用</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>用 <em>&lt;noscript&gt;</em> 為禁用 JavaScript 的使用者提供備援</h1>
+    <p class="lede">當 JavaScript 被禁用時，<b>&lt;noscript&gt; 標籤內的內容</b>才會顯示。這是偵測 JS 狀態的唯一原生 HTML 方式，也是優雅降級（graceful degradation）的實踐。</p>
+  </header>
+
+  <section>
+    <span class="num">noscript 用法</span>
+    <h2>JS 啟用時完全隱藏，禁用時才顯示</h2>
+    <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="zh-Hant"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;歡迎使用我們的網站&lt;/h1&gt;
+
+  &lt;!-- 只在 JavaScript 被禁用時才顯示 --&gt;
+  &lt;noscript&gt;
+    &lt;style&gt;.noscript-warning { color: red; font-weight: bold; }&lt;/style&gt;
+    &lt;p class="noscript-warning"&gt;
+      您的瀏覽器已停用 JavaScript，部分功能可能無法正常運作。
+    &lt;/p&gt;
+  &lt;/noscript&gt;
+
+  &lt;div id="app"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    <div class="callout info">
+      <span class="ico">ℹ</span>
+      <p><code>&lt;noscript&gt;</code> 也可以放在 <code>&lt;head&gt;</code> 中，用來在 JS 禁用時載入備用 CSS 或重新導向。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實際應用</span>
+    <h2>三種常見的 noscript 用法</h2>
+    <table>
+      <thead><tr><th>用途</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>提示訊息</td><td>告知使用者需要啟用 JS 才能使用完整功能</td></tr>
+        <tr><td>備用樣式</td><td>在 head 中放 noscript，載入非 JS 版本的樣式</td></tr>
+        <tr><td>分析追蹤</td><td>Google Tag Manager 等工具的備用 &lt;img&gt; noscript 版本</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>現代 SPA 通常在 <code>&lt;noscript&gt;</code> 裡放「請啟用 JavaScript 來使用本網站」的提示，因為整個 App 都依賴 JS 渲染。Next.js 等 SSR 框架則讓頁面在 JS 禁用時也能顯示基本內容。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>有辦法在 JavaScript 程式碼內偵測 JS 是否啟用嗎？</summary>
+        <p>不可能——因為 JS 被禁用時根本不會執行任何 JS 程式碼。noscript 是唯一原生的偵測方式，它是純 HTML 機制，不需要 JS 就能運作。</p>
+      </details>
+      <details>
+        <summary>漸進式增強（Progressive Enhancement）和優雅降級（Graceful Degradation）有什麼差別？</summary>
+        <p>漸進式增強：從最基本功能出發，再為能力更強的瀏覽器加功能；優雅降級：先做完整版，再為舊環境提供備案。前者更推薦，因為確保基礎功能對所有人可用。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「偵測 JavaScript 是否被禁用的方式是使用 <span class="hl">&lt;noscript&gt;</span> 標籤——它裡面的內容只在 JS 被禁用時才顯示，啟用時完全隱藏。因為 JS 禁用時不會執行任何 JS，所以這是唯一的純 HTML 偵測機制。實際應用包括顯示友善提示或提供備用內容，這也是優雅降級的一種實踐。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="輸入網址後到頁面顯示發生了什麼事.html">頁面載入流程</a>
+      <a href="document load 事件與 DOMContentLoaded 事件的差異.html">DOMContentLoaded vs load</a>
+      <a href="漸進式網頁應用程式PWA介紹.html">PWA 介紹</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

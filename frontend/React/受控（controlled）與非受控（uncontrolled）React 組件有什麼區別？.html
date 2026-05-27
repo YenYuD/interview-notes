@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>受控 vs 非受控組件</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 表單</div>
+    <h1>受控 vs 非受控：真相之源（source of truth）<em>在 React 還是在 DOM</em>？</h1>
+    <p class="lede"><b>受控組件</b>把表單值存在 React state，每次輸入都觸發 re-render 同步；<b>非受控組件</b>把值留在 DOM，用 <code>ref</code> 在需要時讀取。前者控制力強，後者實作簡單。</p>
+  </header>
+
+  <section>
+    <span class="num">對比</span>
+    <h2>兩種表單控制模式</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>受控組件（Controlled）</small>
+        <code>value={state}</code> + <code>onChange={handler}</code><br>
+        每次輸入都更新 state，React 是唯一資料來源
+      </div>
+      <div class="chip info">
+        <small>非受控組件（Uncontrolled）</small>
+        <code>ref={inputRef}</code><br>
+        DOM 自己管值，送出時 <code>inputRef.current.value</code> 讀取
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 受控</span>
+<span class="tok-key">const</span> [value, setValue] = <span class="tok-fn">useState</span>(<span class="tok-str">''</span>);
+&lt;input value={value} onChange={e =&gt; <span class="tok-fn">setValue</span>(e.target.value)} /&gt;
+
+<span class="tok-com">// 非受控</span>
+<span class="tok-key">const</span> ref = <span class="tok-fn">useRef</span>();
+&lt;input ref={ref} defaultValue=<span class="tok-str">"初始值"</span> /&gt;
+<span class="tok-com">// 讀取：ref.current.value</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">選用指南</span>
+    <h2>何時選哪種</h2>
+    <table>
+      <thead><tr><th>情境</th><th>推薦</th></tr></thead>
+      <tbody>
+        <tr><td>需要即時驗證、條件禁用按鈕</td><td>受控</td></tr>
+        <tr><td>需要動態控制 input 值（如清空）</td><td>受控</td></tr>
+        <tr><td>整合 React Hook Form 等表單庫</td><td>非受控（register API）</td></tr>
+        <tr><td>簡單表單、只在 submit 時讀值</td><td>非受控</td></tr>
+        <tr><td>需要與非 React 程式碼整合</td><td>非受控</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>React Hook Form 預設用非受控模式（register），效能更好（不因每次輸入重渲）；需要監看特定欄位時才用 <code>watch</code>（切換為受控模式）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>受控組件每次按鍵都 re-render，會有效能問題嗎？</summary><p>對簡單表單影響極小。若表單很複雜（數十個欄位），可以用 React Hook Form（非受控）或把各個欄位的 state 隔離，避免整個表單因一個欄位輸入而重渲。</p></details>
+      <details><summary>defaultValue 和 value 有什麼差別？</summary><p><code>defaultValue</code> 是初始值，之後 DOM 自己管（非受控）；<code>value</code> 綁定 React state，必須搭配 <code>onChange</code>（受控）。混用或忘記 <code>onChange</code> 會導致 React 警告 "uncontrolled to controlled" 切換。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「受控組件用 <code>value={state}</code> 把表單值存在 React state，<span class="hl">React 是唯一資料來源</span>，每次輸入都同步更新，適合需要即時驗證或動態控制值的場景；非受控組件把值留在 DOM，用 <code>ref</code> 在需要時讀取，<span class="hl">實作簡單、效能更好</span>，React Hook Form 等表單庫預設採用此模式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 `useRef` hook 是什麼？什麼時候應該使用它？.html">useRef hook</a>
+      <a href="React 中的 `forwardRef()` 是做什麼用的？.html">forwardRef</a>
+      <a href="解釋在 React 中調用 `useState` 的 setter 函式時會發生什麼事.html">useState setter 行為</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

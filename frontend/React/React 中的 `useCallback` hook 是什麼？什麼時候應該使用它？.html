@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useCallback hook</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT HOOKS</div>
+    <h1><code>useCallback</code>：記憶函式引用，<em>阻止子組件不必要的重渲</em></h1>
+    <p class="lede">每次渲染都會建立新的函式實例，如果把這些函式當 prop 傳給 <code>React.memo</code> 包裹的子組件，子組件每次都會觸發重渲。<b>useCallback</b> 快取函式引用，只有在依賴項改變時才建立新函式。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>為什麼函式引用每次都不同？</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">Parent</span>() {
+  <span class="tok-key">const</span> [count, setCount] = <span class="tok-fn">useState</span>(0);
+
+  <span class="tok-com">// 沒有 useCallback：每次渲染都建立新函式 → 子組件每次重渲</span>
+  <span class="tok-key">const</span> handleClick = () =&gt; <span class="tok-fn">setCount</span>(c =&gt; c + 1);
+
+  <span class="tok-com">// 有 useCallback：依賴不變就用同一個引用</span>
+  <span class="tok-key">const</span> handleClick = <span class="tok-fn">useCallback</span>(() =&gt; {
+    <span class="tok-fn">setCount</span>(c =&gt; c + 1);
+  }, []);  <span class="tok-com">// 空依賴 = 永不重建</span>
+
+  <span class="tok-key">return</span> &lt;Child onClick={handleClick} /&gt;;
+}
+
+<span class="tok-key">const</span> Child = React.<span class="tok-fn">memo</span>(({ onClick }) =&gt; {
+  console.<span class="tok-fn">log</span>(<span class="tok-str">'子組件渲染'</span>);
+  <span class="tok-key">return</span> &lt;button onClick={onClick}&gt;點&lt;/button&gt;;
+});</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p><code>useCallback</code> 要和 <code>React.memo</code> 搭配才有意義——若子組件沒有用 memo 包裹，就算函式引用不變，子組件仍會隨父組件重渲。</p></div>
+  </section>
+
+  <section>
+    <span class="num">何時使用</span>
+    <h2>不要過度使用</h2>
+    <div class="chips">
+      <div class="chip good"><small>適合用</small>傳給有 React.memo 的子組件的 callback</div>
+      <div class="chip good"><small>適合用</small>作為 useEffect 的依賴項的函式</div>
+      <div class="chip bad"><small>不必用</small>組件內純粹使用、不傳出去的函式</div>
+      <div class="chip bad"><small>不必用</small>子組件沒有 memo 優化時</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>useCallback 和 useMemo 有什麼差別？</summary><p><code>useCallback(fn, deps)</code> 等價於 <code>useMemo(() =&gt; fn, deps)</code>，前者快取函式本身，後者快取函式的回傳值。用途不同：useCallback 給「函式引用穩定」，useMemo 給「計算結果快取」。</p></details>
+      <details><summary>空依賴陣列 [] 的 useCallback 會不會有 stale closure 問題？</summary><p>會。如果函式內部用到了會變的 state 或 props，空依賴會讓函式永遠讀到初始值。解法：把需要的值加進依賴陣列，或改用 setter 的函式格式（<code>setCount(c =&gt; c + 1)</code>）繞過捕獲。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>useCallback</code> 快取函式引用，只有在依賴項改變時才重建。它要搭配 <code>React.memo</code> 才有效果——<span class="hl">單獨使用沒有意義</span>。典型場景是把 callback 傳給 memo 包裹的子組件，避免父組件重渲時子組件跟著無謂重渲。要注意<span class="hl">過度使用反而增加複雜度</span>，只在有明確效能瓶頸時再加。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 `useMemo` hook 是什麼？什麼時候應該使用它？.html">useMemo hook</a>
+      <a href="在 React 中，「重新渲染」（re-rendering）是什麼意思？.html">重新渲染</a>
+      <a href="React Hooks 的規則是什麼？.html">Hooks 規則</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

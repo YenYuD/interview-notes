@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set/Map 相等性判斷</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · Set / Map</div>
+    <h1>內容一樣不等於同一個，<em>Set/Map 看的是參考</em></h1>
+    <p class="lede">把兩個「內容相同」的物件加入 Set，你會得到<b>兩筆資料</b>。Set 和 Map 使用<b>參考相等（SameValueZero）</b>判斷，只有指向同一記憶體位置才算相同。</p>
+  </header>
+
+  <section>
+    <span class="num">踩雷示範</span>
+    <h2>為什麼 Set 還是有兩個「一樣」的物件？</h2>
+    <pre><code><span class="tok-key">const</span> set = <span class="tok-key">new</span> <span class="tok-fn">Set</span>();
+<span class="tok-key">const</span> obj1 = { a: 1 };
+<span class="tok-key">const</span> obj2 = { a: 1 };  <span class="tok-com">// 內容相同，但是不同物件</span>
+
+set.<span class="tok-fn">add</span>(obj1);
+set.<span class="tok-fn">add</span>(obj2);
+console.<span class="tok-fn">log</span>(set.size); <span class="tok-com">// 2 ← 兩個都進去了！</span>
+
+<span class="tok-com">// 同一個參考才會被去重</span>
+set.<span class="tok-fn">add</span>(obj1);
+console.<span class="tok-fn">log</span>(set.size); <span class="tok-com">// 仍是 2</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Set 的「去重」對<b>原始值</b>（數字、字串）有效，但對<b>物件</b>只去掉「同一個參考」的重複，不做深度比較。這是最容易誤用的地方。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">NaN 特例</span>
+    <h2>SameValueZero vs ===</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>NaN === NaN</small>
+        <code>false</code>（JavaScript 的奇特設計）
+      </div>
+      <div class="chip good">
+        <small>Set 裡的 NaN</small>
+        <code>new Set([NaN, NaN]).size === 1</code>
+      </div>
+    </div>
+    <div class="aside">Set/Map 使用的 SameValueZero 把兩個 NaN 視為相等，所以 Set 只會保留一個 NaN，這是和 <code>===</code> 唯一的差異。</div>
+  </section>
+
+  <section>
+    <span class="num">實務解法</span>
+    <h2>需要深度比較怎麼辦？</h2>
+    <p>Set/Map 本身沒有深度比較的選項。常見做法：</p>
+    <ol>
+      <li>改用字串化的鍵：<code>set.add(JSON.stringify(obj))</code>（有限制，如物件含函式時失效）。</li>
+      <li>自行維護陣列 + <code>some(isEqual)</code> 做成員檢查。</li>
+      <li>使用 <code>lodash.isEqual</code> 等函式庫實作深度比較邏輯。</li>
+    </ol>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Map 用物件當鍵時，取值要注意什麼？</summary><p>必須用同一個參考才能取到值。若你把 <code>{ id: 1 }</code> 設為鍵，再用另一個 <code>{ id: 1 }</code> 去 get，結果是 <code>undefined</code>。通常需要先把物件存在變數裡再使用。</p></details>
+      <details><summary>如何利用 Set 搭配 JSON 快速去重物件陣列？</summary><p><code>[...new Set(arr.map(o => JSON.stringify(o)))].map(s => JSON.parse(s))</code>。缺點是序列化有損失（函式、undefined、循環參考都無法處理）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Set 和 Map 判斷相等用的是<span class="hl"> SameValueZero，本質是參考相等</span>。兩個內容完全相同但不同的物件字面量，在 Set 裡會被視為兩個不同元素。唯一和 <code>===</code> 的差別是 NaN：Set 把兩個 NaN 視為相同，只保留一個。需要深度比較時，Set/Map 本身做不到，需要另外實作。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Set與Map是什麼及其用法.html">Set 與 Map 用法</a>
+      <a href="JavaScript Map 與一般物件的差異.html">Map vs 一般物件</a>
+      <a href="如何將Set轉換為陣列.html">Set 轉陣列</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

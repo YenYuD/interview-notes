@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enum 枚舉型別</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>Enum 是具名常數集合，但現代 TS 常用 <em>as const</em> 取代</h1>
+    <p class="lede">Enum 讓你用有意義的名稱代替裸數字或字串。<b>字串型 Enum 比數字型更易讀</b>，但它會編譯出額外的 JS 程式碼——這是為何現代專案偏好用 <code>as const</code> 物件替代的原因。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>數字型 vs 字串型 Enum</h2>
+    <div class="chips">
+      <div class="chip bad"><small>數字型（預設）</small>debug 時只看到數字</div>
+      <div class="chip good"><small>字串型（推薦）</small>debug 時看到有意義的字串</div>
+    </div>
+    <pre><code><span class="tok-com">// 字串型（推薦）</span>
+<span class="tok-key">enum</span> Status {
+  Active   = <span class="tok-str">"ACTIVE"</span>,
+  Inactive = <span class="tok-str">"INACTIVE"</span>,
+  Pending  = <span class="tok-str">"PENDING"</span>,
+}
+
+<span class="tok-key">const</span> s: Status = Status.Active;
+console.log(s); <span class="tok-com">// "ACTIVE"（不是 0）</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>Enum vs as const：bundle size 的考量</h2>
+    <table>
+      <thead><tr><th></th><th><code>enum</code></th><th><code>as const</code> 物件</th></tr></thead>
+      <tbody>
+        <tr><td>Tree-shaking</td><td>❌ 會生成 IIFE，較難搖掉</td><td>✅ 純物件，易 tree-shake</td></tr>
+        <tr><td>型別安全</td><td>✅</td><td>✅（搭配 <code>typeof</code>）</td></tr>
+        <tr><td>執行期存取</td><td>✅</td><td>✅</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">// as const 替代方案</span>
+<span class="tok-key">const</span> Status = {
+  Active: <span class="tok-str">"ACTIVE"</span>,
+  Inactive: <span class="tok-str">"INACTIVE"</span>,
+} <span class="tok-key">as const</span>;
+
+<span class="tok-key">type</span> StatusValue = <span class="tok-key">typeof</span> Status[<span class="tok-key">keyof typeof</span> Status];
+<span class="tok-com">// "ACTIVE" | "INACTIVE"</span></code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>TypeScript 把 enum 編譯成 IIFE 物件，這是它比 <code>as const</code> 多生成程式碼的原因。回答時主動提到這個 bundle size 考量，展示實務意識。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>const enum 和普通 enum 有什麼差別？</summary><p><code>const enum</code> 在編譯時會被內聯（inline）成字面值，不產生 IIFE，bundle size 更小。但它與 <code>isolatedModules</code>（如 Babel 轉換 TS）不相容，使用前要確認工具鏈支援。</p></details>
+      <details><summary>數字型 enum 為什麼有反向對映？</summary><p>數字型 enum 編譯後，TypeScript 同時建立 name→value 和 value→name 的對映（<code>Status[0] === "Active"</code>）。字串型沒有這個特性，這也是字串型較推薦的原因之一（行為更單純）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Enum 是一組具名常數的集合，用來避免魔法數字或字串散落在程式碼中。<span class="hl">字串型 Enum 比數字型更推薦</span>，因為 debug 時可以直接看到有意義的字串。不過，現代 TypeScript 有時偏好用 <span class="hl"><code>as const</code> 物件替代 enum</span>，因為 enum 會編譯成 IIFE，bundle size 較大且 tree-shaking 較差。兩種做法型別安全性相同，選擇依團隊規範。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="008 var、let、const 的差異.html">var、let、const</a>
+      <a href="015 Union 聯合型別 vs Intersection 交叉型別.html">Union vs Intersection</a>
+      <a href="004 Interface 介面是什麼.html">Interface 介面</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

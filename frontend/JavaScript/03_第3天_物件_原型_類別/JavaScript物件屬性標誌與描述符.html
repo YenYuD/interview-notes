@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>屬性標誌與描述符</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1>屬性不只有值：<em>三個標誌控制它能做什麼</em></h1>
+    <p class="lede">每個物件屬性除了有值，還帶著三個<b>布林標誌</b>，決定它能否被寫入、列舉、重新配置。理解這些標誌，才能真正掌控物件的封裝與不可變性。</p>
+  </header>
+
+  <section>
+    <span class="num">三個核心標誌</span>
+    <h2>writable / enumerable / configurable</h2>
+    <table>
+      <thead><tr><th>標誌</th><th>預設</th><th>false 時的效果</th></tr></thead>
+      <tbody>
+        <tr><td><code>writable</code></td><td>true</td><td>屬性值不可修改；嚴格模式下賦值拋 TypeError</td></tr>
+        <tr><td><code>enumerable</code></td><td>true</td><td>不出現在 <code>for...in</code>、<code>Object.keys()</code> 中</td></tr>
+        <tr><td><code>configurable</code></td><td>true</td><td>不可刪除、不可再修改描述符；這個設定本身不可逆</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">操作方式</span>
+    <h2>讀取與設定描述符</h2>
+    <pre><code><span class="tok-com">// 讀取描述符</span>
+<span class="tok-key">const</span> user = { name: <span class="tok-str">'John'</span> };
+console.log(Object.<span class="tok-fn">getOwnPropertyDescriptor</span>(user, <span class="tok-str">'name'</span>));
+<span class="tok-com">// { value: 'John', writable: true, enumerable: true, configurable: true }</span>
+
+<span class="tok-com">// 設定描述符</span>
+Object.<span class="tok-fn">defineProperty</span>(user, <span class="tok-str">'id'</span>, {
+  value: 42,
+  writable: <span class="tok-key">false</span>,       <span class="tok-com">// 唯讀</span>
+  enumerable: <span class="tok-key">false</span>,    <span class="tok-com">// 隱藏於列舉</span>
+  configurable: <span class="tok-key">false</span>  <span class="tok-com">// 鎖死描述符</span>
+});
+
+user.id = 99;  <span class="tok-com">// 靜默失敗；strict mode 下拋 TypeError</span>
+console.log(user.id); <span class="tok-com">// 42（未變）</span></code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p><code>configurable: false</code> 設定後無法再改回 true，也無法刪除屬性——這是單向門，使用前三思。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Object.freeze() 和手動設 writable: false 有何差異？</summary><p><code>Object.freeze()</code> 會對所有屬性批次設 <code>writable: false</code> 且 <code>configurable: false</code>，同時讓物件不可擴展（不能加新屬性）。手動 <code>defineProperty</code> 只影響你指定的那個屬性。</p></details>
+      <details><summary>enumerable: false 的實際應用？</summary><p>將工具方法或私有狀態標記為不可列舉，讓它們在 <code>for...in</code>、<code>JSON.stringify</code>、<code>Object.keys()</code> 中消失，保持物件結構乾淨。JS 內建的 prototype 方法（如 <code>toString</code>）就是這樣設計的。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「每個 JS 物件屬性除了值之外，還有三個標誌：<span class="hl">writable</span>（能否改值）、<span class="hl">enumerable</span>（能否在 for-in 或 Object.keys 裡出現）、<span class="hl">configurable</span>（能否刪除或再改描述符）。預設全部 true。用 <code>Object.defineProperty()</code> 可以精確控制，<code>Object.freeze()</code> 則是批次把全部屬性鎖死的快捷方式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript物件的getter與setter用途.html">getter 與 setter</a>
+      <a href="Object.freeze用途.html">Object.freeze 用途</a>
+      <a href="JavaScript中可變與不可變物件差異.html">可變 vs 不可變物件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

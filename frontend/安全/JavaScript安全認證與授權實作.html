@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 認證與授權安全實作</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全 · 認證授權</div>
+    <h1>Token 存哪、怎麼驗——<em>認證設計</em>決定了攻擊面大小</h1>
+    <p class="lede">認證（你是誰）與授權（你能做什麼）是 Web 安全的核心。<b>JWT 存放位置、token 過期策略、RBAC 粒度</b>這三個決策直接決定你的應用程式有多容易被打穿。</p>
+  </header>
+
+  <section>
+    <span class="num">Token 存放策略</span>
+    <h2>localStorage、sessionStorage、Cookie 怎麼選</h2>
+    <table>
+      <tr><th>存放位置</th><th>XSS 風險</th><th>CSRF 風險</th><th>建議</th></tr>
+      <tr><td><code>localStorage</code></td><td class="c-bad">高（JS 可讀）</td><td>無</td><td>避免存敏感 token</td></tr>
+      <tr><td><code>sessionStorage</code></td><td class="c-bad">高（JS 可讀）</td><td>無</td><td>同上，tab 關閉即清</td></tr>
+      <tr><td>HttpOnly Cookie</td><td>低（JS 無法讀取）</td><td class="c-bad">有（需搭配 SameSite）</td><td>推薦，搭配 SameSite=Lax</td></tr>
+    </table>
+
+    <pre><code><span class="tok-com">// ✅ 推薦：server 設 HttpOnly + Secure cookie</span>
+res.<span class="tok-fn">cookie</span>(<span class="tok-str">'token'</span>, token, {
+  httpOnly: <span class="tok-key">true</span>,   <span class="tok-com">// JS 無法讀取，防 XSS 偷 token</span>
+  secure: <span class="tok-key">true</span>,    <span class="tok-com">// 只走 HTTPS</span>
+  sameSite: <span class="tok-str">'Lax'</span>,  <span class="tok-com">// 防 CSRF，允許用戶點連結時帶 cookie</span>
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">JWT 生命週期</span>
+    <h2>短效 Access + 可撤銷 Refresh</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>發行短效 access token（15 分鐘）</h4><p>簽名時鎖定演算法：<code>{ algorithm: 'HS256' }</code>，絕不接受 <code>alg: none</code>。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>Refresh token 存 DB（30 天）</h4><p>存在 DB 才能撤銷。被偷或強登出時直接刪掉那筆記錄。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>Refresh token rotation</h4><p>每次換新 access token 時，舊的 refresh token 作廢，防止重放攻擊。</p></div></div>
+    </div>
+
+    <div class="callout warn"><span class="ico">⚠</span><p>經典漏洞：JWT header 的 <code>alg</code> 欄位設為 <code>"none"</code>，server 若不強制驗算法就會照單全收偽造 token。<b>一定要在 server 端鎖定允許的演算法</b>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">授權控制</span>
+    <h2>RBAC：角色決定能做什麼</h2>
+    <pre><code><span class="tok-com">// 簡單 RBAC 中介軟體</span>
+<span class="tok-key">function</span> <span class="tok-fn">requireRole</span>(role) {
+  <span class="tok-key">return</span> (req, res, next) => {
+    <span class="tok-key">if</span> (req.user?.role === role) <span class="tok-key">return</span> <span class="tok-fn">next</span>();
+    res.<span class="tok-fn">status</span>(403).<span class="tok-fn">json</span>({ error: <span class="tok-str">'Forbidden'</span> });
+  };
+}
+
+app.<span class="tok-fn">delete</span>(<span class="tok-str">'/admin/users/:id'</span>, <span class="tok-fn">requireRole</span>(<span class="tok-str">'admin'</span>), handler);</code></pre>
+
+    <div class="aside">授權應在 server 端強制執行，不能只靠前端隱藏按鈕。用戶可以直接打 API，所以每支 API 都要驗角色或 ownership。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>OAuth 和自己實作 JWT 有什麼取捨？</summary><p>OAuth（Google / GitHub 登入）把認證外包給信任的 IdP，省去密碼儲存、社工攻擊等風險，適合 C 端產品。自建 JWT 適合服務間 API 認證或需要完整控制 session 的場景。</p></details>
+      <details><summary>如何實作「強登出所有裝置」？</summary><p>把所有 refresh token 記錄在 DB，登出時刪除或標記失效。若用 JWT access token，可在 DB 維護一個「token 黑名單」（或版本號 <code>tokenVersion</code>），access token 過期前都要比對這個欄位。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「認證上我用 JWT：access token 15 分鐘、refresh token 存 DB 可撤銷，並做 <span class="hl">refresh rotation</span> 防重放。token 存 <span class="hl">HttpOnly + SameSite cookie</span>，JS 無法讀，防 XSS 偷取。server 端鎖定 JWT 演算法防 <code>alg: none</code> 攻擊。授權用 <span class="hl">RBAC 中介軟體</span>，每支 API 都驗，不能只靠前端隱藏按鈕。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="跨站請求偽造CSRF及防範技術.html">CSRF 防範</a>
+      <a href="JavaScript敏感資料處理最佳實踐.html">敏感資料處理</a>
+      <a href="輸入驗證與安全性重要性.html">輸入驗證</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

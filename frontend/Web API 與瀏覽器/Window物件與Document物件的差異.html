@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Window vs Document 物件</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1><em>window</em> 是瀏覽器視窗，<em>document</em> 是視窗裡的頁面內容</h1>
+    <p class="lede"><code>window</code> 是 JavaScript 在瀏覽器中的<b>全域物件</b>，所有全域變數都掛在它上面；<code>document</code> 是 <code>window.document</code> 的簡寫，代表當前<b>頁面的 DOM 結構</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>一張表看清兩者的職責</h2>
+    <table>
+      <thead><tr><th>面向</th><th>window</th><th>document</th></tr></thead>
+      <tbody>
+        <tr><td>代表什麼</td><td>瀏覽器視窗（全域環境）</td><td>視窗內的 HTML 文件</td></tr>
+        <tr><td>包含關係</td><td>包含 document</td><td>是 window 的屬性</td></tr>
+        <tr><td>全域變數</td><td>全域 var 會變成 window 的屬性</td><td>不適用</td></tr>
+        <tr><td>常用功能</td><td>計時器、導向、歷史、彈窗</td><td>選取元素、操作 DOM</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">常用 API</span>
+    <h2>各自負責哪些操作</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>window 常用</small>
+        <p><code>window.location</code> 導向<br><code>window.history</code> 歷史<br><code>setTimeout</code> / <code>setInterval</code><br><code>window.alert()</code> 彈窗<br><code>window.open()</code> 開新視窗</p>
+      </div>
+      <div class="chip info">
+        <small>document 常用</small>
+        <p><code>document.querySelector()</code><br><code>document.getElementById()</code><br><code>document.createElement()</code><br><code>document.title</code><br><code>document.URL</code></p>
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>寫 <code>setTimeout()</code> 不加 <code>window.</code> 也能用，因為 <code>window</code> 是全域物件，可省略前綴。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>在 Node.js 中有 window 嗎？</summary>
+        <p>沒有。Node.js 的全域物件是 <code>global</code>，不是 <code>window</code>。<code>document</code> 也不存在，因為 Node.js 沒有 DOM。</p>
+      </details>
+      <details>
+        <summary>為什麼 var 宣告的全域變數會掛在 window 上，let/const 不會？</summary>
+        <p><code>var</code> 是函式作用域，在全域作用域宣告時會成為 window 屬性；<code>let</code>/<code>const</code> 是區塊作用域，存在「腳本作用域」中，不會附加到 window 上。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">window</span> 是瀏覽器的全域物件，代表整個視窗環境，所有全域變數、計時器、導向方法都掛在它上面；<span class="hl">document</span> 是 window.document 的屬性，代表頁面的 HTML 文件結構，提供操作 DOM 的方法。簡單說：window 管『瀏覽器』，document 管『頁面內容』。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="什麼是DOM及其結構.html">什麼是 DOM 及其結構</a>
+      <a href="JavaScript如何導向新頁面.html">JavaScript 頁面導向</a>
+      <a href="如何使用window.history API.html">window.history API</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

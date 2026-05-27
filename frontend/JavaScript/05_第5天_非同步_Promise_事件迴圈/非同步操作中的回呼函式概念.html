@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>非同步回呼函式</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · 回呼</div>
+    <h1>把「等完成再做什麼」這件事，<em>包成函式傳進去</em></h1>
+    <p class="lede">Callback 是非同步最原始的解法：把後續邏輯當參數塞給呼叫者，<b>等操作完成再叫你</b>。理解它，才能真正懂 Promise 和 async/await 為何出現。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>什麼是 Callback？</h2>
+    <p>Callback 就是「被當作參數傳入，並在特定時機被呼叫」的函式。兩種模式：</p>
+    <div class="chips">
+      <div class="chip info">
+        <small>同步 Callback</small>
+        立即在函式內執行，會阻塞，例如 <code>Array.forEach</code>。
+      </div>
+      <div class="chip info">
+        <small>非同步 Callback</small>
+        等計時器、I/O、網路請求完成後才執行，不阻塞主執行緒。
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 非同步 Callback 範例：等 1 秒後才叫 callback</span>
+<span class="tok-key">function</span> <span class="tok-fn">fetchData</span>(callback) {
+  <span class="tok-fn">setTimeout</span>(() => {
+    <span class="tok-key">const</span> data = { name: <span class="tok-str">'Alice'</span>, age: 30 };
+    <span class="tok-fn">callback</span>(data);
+  }, 1000);
+}
+
+<span class="tok-fn">fetchData</span>((data) => {
+  console.<span class="tok-fn">log</span>(data); <span class="tok-com">// { name: 'Alice', age: 30 }</span>
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">致命缺陷</span>
+    <h2>Callback Hell — 巢狀地獄</h2>
+    <p>需要串接多步驟非同步時，巢狀越來越深，形成「毀滅金字塔」，難以閱讀與維護：</p>
+    <pre><code>getUser(id, (user) => {
+  getPosts(user, (posts) => {
+    getComments(posts[0], (comments) => {
+      <span class="tok-com">// 繼續往右... 😱</span>
+    });
+  });
+});</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Callback Hell 不只是排版問題——更大的麻煩是<b>錯誤處理散落各處</b>，每層都要手動檢查 error 參數。Promise 和 async/await 正是為了解決這兩個痛點而生。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">錯誤處理慣例</span>
+    <h2>Node.js 風格：error-first callback</h2>
+    <p>回呼函式的第一個參數留給錯誤物件，沒錯就傳 <code>null</code>，這是 Node.js 生態的標準約定：</p>
+    <pre><code><span class="tok-fn">fetchData</span>((error, data) => {
+  <span class="tok-key">if</span> (error) {
+    console.<span class="tok-fn">error</span>(<span class="tok-str">'出錯了：'</span>, error);
+    <span class="tok-key">return</span>;
+  }
+  console.<span class="tok-fn">log</span>(data);
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Callback 與 Promise 最大的差別是什麼？</summary>
+        <p>Promise 將「成功/失敗」的狀態封裝成物件，可鏈結 <code>.then().catch()</code>，避免巢狀；且能用 <code>Promise.all</code> 輕鬆處理平行請求。Callback 則沒有標準化的錯誤傳遞，容易產生巢狀與難以組合的問題。</p>
+      </details>
+      <details>
+        <summary>同步 Callback 有什麼例子？</summary>
+        <p><code>Array.forEach</code>、<code>Array.map</code>、<code>Array.filter</code> 傳入的函式都是同步 Callback——它們在呼叫堆疊中立即執行，執行完才繼續下一行。</p>
+      </details>
+      <details>
+        <summary>為什麼 Callback 難以做錯誤處理？</summary>
+        <p>因為沒有統一的約定：有人用 <code>(err, data)</code>，有人只傳 data。拋出的例外也無法被外層的 try/catch 捕捉，必須在每個 callback 內部自行處理。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Callback 是把後續邏輯包成函式、當作參數傳入，讓非同步操作完成後再呼叫它，避免阻塞主執行緒。缺點是多步驟串接時容易形成<span class="hl">Callback Hell</span>，錯誤處理也很分散。這是 <span class="hl">Promise</span> 和 <span class="hl">async/await</span> 出現的主要原因。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="使用Promise取代Callback的優缺點.html">Promise 取代 Callback</a>
+      <a href="async await 是什麼及其如何簡化非同步程式碼.html">async / await</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

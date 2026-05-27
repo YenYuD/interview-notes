@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>條件型別 Conditional Types</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>條件型別是<em>型別層級的三元運算子</em>，驅動所有 Utility Types</h1>
+    <p class="lede">語法長得像 <code>A extends B ? X : Y</code>，讓你根據「型別是否符合條件」決定最終型別。<b>Exclude、Extract、ReturnType 等內建工具的底層全都靠它</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>基本語法與分配性</h2>
+    <pre><code><span class="tok-com">// 基本形式</span>
+<span class="tok-key">type</span> IsString&lt;T&gt; = T <span class="tok-key">extends</span> <span class="tok-fn">string</span> ? <span class="tok-str">"yes"</span> : <span class="tok-str">"no"</span>;
+
+<span class="tok-key">type</span> A = IsString&lt;<span class="tok-fn">string</span>&gt;;  <span class="tok-com">// "yes"</span>
+<span class="tok-key">type</span> B = IsString&lt;<span class="tok-fn">number</span>&gt;;  <span class="tok-com">// "no"</span>
+<span class="tok-key">type</span> C = IsString&lt;<span class="tok-str">"hello"</span>&gt;; <span class="tok-com">// "yes"（字串字面量是 string 子型別）</span></code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p><b>分配性（Distributive）</b>：當泛型 T 是 Union Type，條件型別會對每個成員分別運算。<code>ToArray&lt;string | number&gt;</code> 展開成 <code>ToArray&lt;string&gt; | ToArray&lt;number&gt;</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>內建 Utility Types 的底層實作</h2>
+    <pre><code><span class="tok-com">// Exclude — 從 T 中去掉可賦值給 U 的型別</span>
+<span class="tok-key">type</span> Exclude&lt;T, U&gt; = T <span class="tok-key">extends</span> U ? <span class="tok-fn">never</span> : T;
+<span class="tok-key">type</span> A = Exclude&lt;<span class="tok-str">"a"</span> | <span class="tok-str">"b"</span> | <span class="tok-str">"c"</span>, <span class="tok-str">"a"</span>&gt;; <span class="tok-com">// "b" | "c"</span>
+
+<span class="tok-com">// Extract — 從 T 中保留可賦值給 U 的型別</span>
+<span class="tok-key">type</span> Extract&lt;T, U&gt; = T <span class="tok-key">extends</span> U ? T : <span class="tok-fn">never</span>;
+
+<span class="tok-com">// ReturnType — 取得函式的回傳型別（搭配 infer）</span>
+<span class="tok-key">type</span> ReturnType&lt;T <span class="tok-key">extends</span> (...args: <span class="tok-fn">any</span>) =&gt; <span class="tok-fn">any</span>&gt; =
+  T <span class="tok-key">extends</span> (...args: <span class="tok-fn">any</span>) =&gt; <span class="tok-key">infer</span> R ? R : <span class="tok-fn">any</span>;
+
+<span class="tok-key">function</span> <span class="tok-fn">getUser</span>() { <span class="tok-key">return</span> { name: <span class="tok-str">"Bob"</span>, age: 20 }; }
+<span class="tok-key">type</span> User = ReturnType&lt;<span class="tok-key">typeof</span> getUser&gt;; <span class="tok-com">// { name: string; age: number }</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>infer 關鍵字：在條件判斷中「捕捉」型別</h2>
+    <pre><code><span class="tok-key">type</span> FirstArg&lt;T&gt; = T <span class="tok-key">extends</span> (first: <span class="tok-key">infer</span> F, ...rest: <span class="tok-fn">any</span>[]) =&gt; <span class="tok-fn">any</span> ? F : <span class="tok-fn">never</span>;
+
+<span class="tok-key">function</span> <span class="tok-fn">greet</span>(name: <span class="tok-fn">string</span>, age: <span class="tok-fn">number</span>) {}
+<span class="tok-key">type</span> Arg = FirstArg&lt;<span class="tok-key">typeof</span> greet&gt;; <span class="tok-com">// string</span></code></pre>
+    <div class="aside"><code>infer</code> 讓你在條件型別的「true 分支」中聲明一個待推斷的型別變數，TypeScript 會自動填入。這是 ReturnType、Parameters 等工具的核心。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼是條件型別的分配性？如何關閉？</summary><p>泛型 T 是 union 時，條件型別對每個成員分別運算，結果再合成 union。要關閉分配性，把 T 包在 tuple 中：<code>[T] extends [U] ? X : Y</code>，這樣 T 就被當作整體處理。</p></details>
+      <details><summary>NonNullable 的底層是什麼？</summary><p><code>type NonNullable&lt;T&gt; = T extends null | undefined ? never : T</code>。它利用分配性逐一去掉 null 和 undefined，剩下的型別組回 union。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「條件型別語法是 <span class="hl"><code>A extends B ? X : Y</code></span>，意思是「若 A 是 B 的子型別，結果是 X，否則是 Y」。它是 TypeScript 型別系統的三元運算子，<span class="hl">Exclude、Extract、ReturnType、NonNullable 等內建工具的底層都靠它</span>。進階用法是搭配 <code>infer</code>——在條件判斷中捕捉並命名一個待推斷的型別，ReturnType 就是這樣實作的。日常開發不一定天天寫條件型別，但看懂 utility types 底層是必要的。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="011 泛型 Generics 是什麼.html">泛型 Generics</a>
+      <a href="015 Union 聯合型別 vs Intersection 交叉型別.html">Union vs Intersection</a>
+      <a href="005 從現有 Interface 建立子集型別（Omit、Pick）.html">Omit、Pick</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

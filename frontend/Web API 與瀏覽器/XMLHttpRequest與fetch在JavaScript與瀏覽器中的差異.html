@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XHR vs fetch()</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1><em>XMLHttpRequest</em> 的事件回調 vs <em>fetch()</em> 的 Promise 鏈</h1>
+    <p class="lede">兩者都能發 HTTP 請求，但 <code>fetch()</code> 語法更簡潔、基於 <b>Promise</b>、支援 async/await。<code>XHR</code> 在<b>上傳進度追蹤</b>上仍有優勢。現代開發預設選 fetch()。</p>
+  </header>
+
+  <section>
+    <span class="num">關鍵差異</span>
+    <h2>六個面向一次比完</h2>
+    <table>
+      <thead><tr><th>面向</th><th>XMLHttpRequest</th><th>fetch()</th></tr></thead>
+      <tbody>
+        <tr><td>語法風格</td><td>事件回調（onload/onerror）</td><td>Promise / async-await</td></tr>
+        <tr><td>錯誤處理</td><td><code>onerror</code> 事件</td><td><code>.catch()</code>，更乾淨</td></tr>
+        <tr><td>取消請求</td><td><code>xhr.abort()</code>，內建</td><td>需 <code>AbortController</code></td></tr>
+        <tr><td>上傳進度</td><td><code>xhr.upload.onprogress</code> 支援</td><td>不直接支援</td></tr>
+        <tr><td>快取控制</td><td>麻煩（需 URL 加隨機值）</td><td><code>options.cache</code> 支援</td></tr>
+        <tr><td>執行環境</td><td>僅瀏覽器</td><td>瀏覽器 + Node.js</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">語法對比</span>
+    <h2>相同的 GET 請求，兩種寫法</h2>
+    <pre><code><span class="tok-com">// XMLHttpRequest — 事件驅動，較繁瑣</span>
+<span class="tok-key">const</span> xhr = <span class="tok-key">new</span> XMLHttpRequest();
+xhr.open(<span class="tok-str">'GET'</span>, <span class="tok-str">'/api/data'</span>);
+xhr.responseType = <span class="tok-str">'json'</span>;
+xhr.onload = () => console.log(xhr.response);
+xhr.onerror = () => console.error(<span class="tok-str">'Error'</span>);
+xhr.send();
+
+<span class="tok-com">// fetch() — Promise 鏈，更現代</span>
+<span class="tok-key">const</span> data = <span class="tok-key">await</span> fetch(<span class="tok-str">'/api/data'</span>)
+  .then(res => {
+    <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> Error(<span class="tok-str">'HTTP error'</span>);
+    <span class="tok-key">return</span> res.json();
+  });</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>fetch() 的 <b>HTTP 4xx/5xx 不會觸發 reject</b>，需自行檢查 <code>response.ok</code>。這是最常見的踩雷點。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>fetch() 什麼時候才會 reject（進 catch）？</summary>
+        <p>只有網路完全失敗（DNS 錯誤、離線）或被 AbortController 中止時才 reject。HTTP 404、500 等狀態碼仍然 resolve，要用 <code>response.ok</code> 或 <code>response.status</code> 判斷。</p>
+      </details>
+      <details>
+        <summary>什麼場景還是需要用 XHR？</summary>
+        <p>需要追蹤大型檔案上傳進度時，XHR 的 <code>upload.onprogress</code> 比 fetch() 更方便。其他場景通常 fetch() 更好用。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「fetch() 是更現代的 HTTP 請求 API，基於 Promise，支援 async/await，語法比 XHR 簡潔很多。主要差異：XHR 用事件回調、有內建上傳進度追蹤；fetch() 用 Promise、需要 AbortController 才能取消。要注意 <span class="hl">fetch() 在 HTTP 錯誤狀態時不會自動 reject</span>，要手動檢查 response.ok。現代開發幾乎都用 fetch()。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="使用Fetch API發送HTTP請求.html">Fetch API 完整用法</a>
+      <a href="如何使用AbortController中止JavaScript的網路請求.html">AbortController 取消請求</a>
+      <a href="詳細解釋AJAX.html">AJAX 完整說明</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

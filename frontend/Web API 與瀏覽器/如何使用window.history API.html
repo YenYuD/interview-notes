@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>window.history API</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>window.history API：<em>不重新載入頁面</em>就能操控瀏覽器歷史紀錄</h1>
+    <p class="lede">History API 是 SPA 路由的核心。<b>pushState</b> 新增歷史、<b>replaceState</b> 取代當前——這兩個方法讓前端框架能在<b>不發送 HTTP 請求</b>的情況下改變 URL。</p>
+  </header>
+
+  <section>
+    <span class="num">核心方法</span>
+    <h2>五個方法涵蓋完整歷史操作</h2>
+    <table>
+      <thead><tr><th>方法</th><th>效果</th><th>歷史堆疊</th></tr></thead>
+      <tbody>
+        <tr><td><code>pushState(state, title, url)</code></td><td>更新 URL，不重新載入</td><td>新增一筆</td></tr>
+        <tr><td><code>replaceState(state, title, url)</code></td><td>更新 URL，不重新載入</td><td>取代當前</td></tr>
+        <tr><td><code>back()</code></td><td>等同點「上一頁」按鈕</td><td>往後移一步</td></tr>
+        <tr><td><code>forward()</code></td><td>等同點「下一頁」按鈕</td><td>往前移一步</td></tr>
+        <tr><td><code>go(n)</code></td><td>移動 n 步（可為負數）</td><td>移動 n 步</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">SPA 路由核心</span>
+    <h2>pushState 怎麼讓 URL 改變但頁面不刷新</h2>
+    <pre><code><span class="tok-com">// 點擊連結時攔截，不跳頁</span>
+document.getElementById(<span class="tok-str">'nav-about'</span>).addEventListener(<span class="tok-str">'click'</span>, (e) => {
+  e.preventDefault();                                        <span class="tok-com">// 不走預設跳頁</span>
+  history.pushState({ page: <span class="tok-str">'about'</span> }, <span class="tok-str">''</span>, <span class="tok-str">'/about'</span>);  <span class="tok-com">// 改 URL</span>
+  renderAboutPage();                                         <span class="tok-com">// 自己渲染內容</span>
+});
+
+<span class="tok-com">// 使用者點「上一頁」時接收通知</span>
+window.addEventListener(<span class="tok-str">'popstate'</span>, (e) => {
+  console.log(<span class="tok-str">'State:'</span>, e.state); <span class="tok-com">// pushState 傳入的 state 物件</span>
+  renderPageFor(e.state);
+});</code></pre>
+    <div class="callout info">
+      <span class="ico">ℹ</span>
+      <p><code>pushState</code> 和 <code>replaceState</code> <b>不會觸發 popstate</b>；只有使用者點擊上一頁/下一頁按鈕，或程式呼叫 <code>back()/forward()/go()</code> 才會觸發 popstate。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>pushState 和 hash 路由（#）有什麼差別？</summary>
+        <p>Hash 路由（<code>/#/about</code>）利用 URL hash 不觸發頁面重載的特性，不需要伺服器配合；pushState 路由（<code>/about</code>）URL 更乾淨，但需要伺服器設定將所有路由導向 index.html（SPA fallback）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「History API 的核心是 <span class="hl">pushState</span> 和 <span class="hl">replaceState</span>，能在不重新載入頁面的情況下修改 URL 和歷史堆疊。前端路由框架（React Router、Vue Router）底層就是用這個機制實現 SPA 路由。pushState 新增歷史，replaceState 取代當前；使用者點返回時會觸發 <code>popstate</code> 事件，SPA 監聽這個事件來渲染對應頁面。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript如何導向新頁面.html">JavaScript 頁面導向</a>
+      <a href="如何在JavaScript中取得當前頁面的查詢字串值.html">取得查詢字串值</a>
+      <a href="Window物件與Document物件的差異.html">Window vs Document 物件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

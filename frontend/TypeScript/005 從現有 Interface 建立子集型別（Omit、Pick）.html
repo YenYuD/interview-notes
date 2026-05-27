@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Omit、Pick 子集型別</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>用 <em>Omit</em> 和 <em>Pick</em> 從現有型別裁出子集，不重複定義</h1>
+    <p class="lede">同一個 <code>User</code> 介面，列表頁只需要部分欄位、表單頁需要去掉某幾個欄位。<b>Omit 和 Pick 讓你複用既有型別、零重複定義</b>，改一處就全部同步更新。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>Omit vs Pick：思考方式不同，結果互補</h2>
+    <table>
+      <thead><tr><th></th><th><code>Pick&lt;T, K&gt;</code></th><th><code>Omit&lt;T, K&gt;</code></th></tr></thead>
+      <tbody>
+        <tr><td>做什麼</td><td>只保留指定欄位</td><td>去掉指定欄位，其餘保留</td></tr>
+        <tr><td>適合場景</td><td>只需要少數欄位</td><td>只有少數欄位要排除</td></tr>
+        <tr><td>思考方式</td><td>「只要 X」</td><td>「除了 X 都要」</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-key">interface</span> User {
+  id: <span class="tok-fn">number</span>; name: <span class="tok-fn">string</span>; email: <span class="tok-fn">string</span>; age: <span class="tok-fn">number</span>;
+}
+
+<span class="tok-com">// Pick — 只拿 id 和 name</span>
+<span class="tok-key">type</span> UserCard = Pick&lt;User, <span class="tok-str">"id"</span> | <span class="tok-str">"name"</span>&gt;;
+<span class="tok-com">// { id: number; name: string }</span>
+
+<span class="tok-com">// Omit — 去掉 email</span>
+<span class="tok-key">type</span> PublicUser = Omit&lt;User, <span class="tok-str">"email"</span>&gt;;
+<span class="tok-com">// { id: number; name: string; age: number }</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>底層實作：Omit 其實是 Pick + Exclude</h2>
+    <pre><code><span class="tok-com">// Omit 的底層</span>
+<span class="tok-key">type</span> MyOmit&lt;T, K <span class="tok-key">extends</span> <span class="tok-key">keyof</span> T&gt; = Pick&lt;T, Exclude&lt;<span class="tok-key">keyof</span> T, K&gt;&gt;;
+
+<span class="tok-com">// Exclude 把 K 從 union 中去掉，剩下的再 Pick 出來</span></code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>面試時能說出 <code>Omit</code> 底層是 <code>Pick&lt;T, Exclude&lt;keyof T, K&gt;&gt;</code>，展示你理解 Utility Types 不是魔法，而是 Mapped Types + Conditional Types 組合出來的。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Partial、Required 和 Pick 的差別是什麼？</summary><p><code>Pick</code> 改變的是「哪些欄位存在」；<code>Partial</code> 把所有欄位變 optional（適合「更新」場景）；<code>Required</code> 是 Partial 的反向。三者正交，可以組合使用，如 <code>Partial&lt;Pick&lt;User, "name" | "email"&gt;&gt;</code>。</p></details>
+      <details><summary>為什麼不直接重新寫一個新的型別就好？</summary><p>重複定義會造成維護問題——改 <code>User</code> 欄位名稱時，所有手刻的子集型別都要同步更新。用 <code>Pick/Omit</code> 則自動跟著 <code>User</code> 更新，且 IDE 能追蹤來源。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">Pick 讓你從型別中挑選少數欄位，Omit 讓你去掉少數欄位、保留其餘</span>——選哪個取決於「需要的欄位少」還是「要排除的欄位少」。它們的核心價值是<span class="hl">複用型別定義、避免重複</span>：改動原型別時，所有衍生型別自動同步。底層實作上，Omit 就是 Pick 搭配 Exclude 的組合。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="004 Interface 介面是什麼.html">Interface 介面</a>
+      <a href="014 條件型別 Conditional Types.html">條件型別</a>
+      <a href="011 泛型 Generics 是什麼.html">泛型 Generics</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>設計模式及其重要性</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>不是死背範本，而是<em>共同語言</em></h1>
+    <p class="lede">設計模式是前人整理的<b>可重複使用解法</b>，讓你與隊友討論架構時一句話點到核心，而不是重新發明輪子。</p>
+  </header>
+
+  <section>
+    <span class="num">三大分類</span>
+    <h2>GoF 的 23 個模式怎麼分？</h2>
+    <p>「四人幫」（GoF）在 1994 年的經典著作中將模式分成三類，面試談設計模式時先說清楚分類，立刻顯得有條理。</p>
+    <table>
+      <thead><tr><th>類型</th><th>關注點</th><th>常見模式</th></tr></thead>
+      <tbody>
+        <tr><td><b>創建型</b> Creational</td><td>物件如何被建立</td><td>Singleton、Factory、Builder</td></tr>
+        <tr><td><b>結構型</b> Structural</td><td>物件與類別的組合方式</td><td>Decorator、Adapter、Proxy</td></tr>
+        <tr><td><b>行為型</b> Behavioral</td><td>物件間的互動與責任分配</td><td>Observer、Strategy、Command</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">為什麼重要</span>
+    <h2>設計模式解決的是「溝通」問題</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>共同語彙</h4>
+          <p>說「這裡用 Observer」比解釋整個訂閱通知機制快 10 倍，讓 Code Review 效率倍增。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>避免常見陷阱</h4>
+          <p>模式是踩過坑的精華；不用 Factory 就可能寫出 <code>if/else if</code> 一長串的建立邏輯。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot good">3</div>
+        <div class="flow-body">
+          <h4>提高可擴充性</h4>
+          <p>Strategy 模式讓你新增演算法時不動既有程式碼，符合開放封閉原則（OCP）。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p><b>前端最常被問的模式：</b>Observer（React/Redux 根基）、Singleton（Logger/Config）、Decorator（HOC、Class Decorator）、Factory（元件工廠）、Strategy（表單驗證策略）。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>設計模式與 SOLID 原則有什麼關係？</summary>
+        <p>很多模式其實是 SOLID 原則的具體實踐。例如 Strategy 模式實踐了 OCP（開放封閉原則）；Decorator 模式實踐了 SRP（單一職責原則）；Factory 模式解耦依賴，符合 DIP（依賴反轉原則）。</p>
+      </details>
+      <details>
+        <summary>什麼時候不該用設計模式？</summary>
+        <p>設計模式會增加抽象層，若問題本身很簡單，強行套用反而讓程式碼難讀（過度設計）。YAGNI 原則提醒我們：先解決當下的問題，有真實的擴充需求再重構引入模式。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「設計模式是針對軟體常見問題的<span class="hl">可重複使用解法範本</span>，分三類：創建型管理物件建立、結構型處理組合、行為型處理互動。對前端開發者來說，React 的狀態管理本質上是 Observer，HOC 是 Decorator，動態元件工廠是 Factory。設計模式最大的價值不只是程式碼本身，而是讓團隊有<span class="hl">共同語言</span>，溝通更有效率。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="觀察者模式與應用場景.html">觀察者模式</a>
+      <a href="單例模式概念說明.html">單例模式</a>
+      <a href="策略模式概念說明.html">策略模式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

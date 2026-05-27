@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>extends vs implements</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1><em>extends</em> 是繼承實作，<em>implements</em> 是簽約履行形狀</h1>
+    <p class="lede"><code>extends</code> 讓子類別「繼承」父類別的所有屬性和方法；<code>implements</code> 讓 class「承諾」自己符合某個型別的形狀，但<b>不繼承任何實作，所有成員要自己寫</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>核心差異對比</h2>
+    <table>
+      <thead><tr><th></th><th><code>extends</code></th><th><code>implements</code></th></tr></thead>
+      <tbody>
+        <tr><td>繼承父類別實作</td><td>✅ 是</td><td>❌ 否</td></tr>
+        <tr><td>強制自己實作</td><td>❌（可直接用繼承的）</td><td>✅ 全部都要自己寫</td></tr>
+        <tr><td>可對應 interface</td><td>❌（class 用 implements）</td><td>✅</td></tr>
+        <tr><td>可對應 class</td><td>✅</td><td>✅（少見）</td></tr>
+        <tr><td>多個</td><td>只能繼承一個</td><td>可 implements 多個</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>extends：繼承，子類別獲得父類別的實作</h2>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">Animal</span> {
+  constructor(<span class="tok-key">public</span> name: <span class="tok-fn">string</span>) {}
+  speak(): <span class="tok-fn">void</span> { console.log(<span class="tok-str">`${this.name} makes a sound.`</span>); }
+}
+
+<span class="tok-key">class</span> <span class="tok-fn">Dog</span> <span class="tok-key">extends</span> <span class="tok-fn">Animal</span> {
+  speak(): <span class="tok-fn">void</span> { console.log(<span class="tok-str">`${this.name} barks.`</span>); } <span class="tok-com">// 覆寫</span>
+  fetch(): <span class="tok-fn">void</span> { console.log(<span class="tok-str">"Fetching!"</span>); } <span class="tok-com">// 新增</span>
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>implements：簽約，所有成員要自己提供</h2>
+    <pre><code><span class="tok-key">interface</span> Serializable {
+  serialize(): <span class="tok-fn">string</span>;
+}
+
+<span class="tok-key">class</span> <span class="tok-fn">User</span> <span class="tok-key">implements</span> Serializable {
+  name = <span class="tok-str">"Bob"</span>;
+  serialize() { <span class="tok-key">return</span> JSON.stringify({ name: <span class="tok-key">this</span>.name }); } <span class="tok-com">// 必須自己實作</span>
+}
+
+<span class="tok-com">// 同時 extends + implements</span>
+<span class="tok-key">class</span> <span class="tok-fn">Admin</span> <span class="tok-key">extends</span> <span class="tok-fn">User</span> <span class="tok-key">implements</span> Serializable, Loggable {
+  <span class="tok-com">// 繼承 User 的屬性，同時實作兩個 interface</span>
+}</code></pre>
+    <div class="callout tip"><span class="ico">💡</span><p><code>implements</code> 像「簽約」——class 向 TypeScript 承諾自己符合某個形狀，但不拿到任何實作。這是<b>依賴注入（DI）</b>和多型設計的基礎。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>interface 自己的 extends 和 class 的 extends 一樣嗎？</summary><p>interface 用 <code>extends</code> 來擴充另一個 interface，可以多繼承（<code>interface Dog extends Animal, Pet</code>）；class 的 <code>extends</code> 只能繼承一個 class。語法相同但語義稍有差異。</p></details>
+      <details><summary>為什麼有時候 class implements class（而不是 interface）？</summary><p>當你想用一個 class 當作「型別契約」（只借用其形狀），同時讓另一個 class 承諾符合它，可以這樣做。但這僅檢查形狀，不繼承實作，實務上較少見，通常更清晰的做法是定義一個 interface。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl"><code>extends</code> 是繼承</span>，子類別取得父類別的屬性和方法，可以覆寫或新增；<span class="hl"><code>implements</code> 是實作契約</span>，class 承諾自己符合某個 interface 或型別的形狀，但不繼承任何實作，所有成員要自己提供。兩者可以同時使用：<code>class Admin extends User implements Serializable</code>。<code>implements</code> 是多型和依賴注入設計的核心工具。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="004 Interface 介面是什麼.html">Interface 介面</a>
+      <a href="018 Abstract Class 抽象類別.html">Abstract Class</a>
+      <a href="010 存取修飾詞 Access Modifiers.html">存取修飾詞</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

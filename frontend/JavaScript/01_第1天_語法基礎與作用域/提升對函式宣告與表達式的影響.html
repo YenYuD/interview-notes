@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提升對函式宣告與表達式的影響</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 提升</div>
+    <h1>宣告可以先用後寫，<em>表達式的賦值不一起提升</em></h1>
+    <p class="lede">函式宣告（function declaration）與函式表達式（function expression）的提升行為截然不同。<b>宣告連定義一起提升</b>；<b>表達式只有變數名提升</b>，先呼叫必報錯。</p>
+  </header>
+
+  <section>
+    <span class="num">行為對照</span>
+    <h2>三種寫法的提升結果</h2>
+    <table>
+      <tr><th>寫法</th><th>提升內容</th><th>宣告前呼叫</th></tr>
+      <tr><td><code>function foo(){}</code></td><td>宣告＋定義</td><td><b style="color:var(--good)">正常執行</b></td></tr>
+      <tr><td><code>var bar = function(){}</code></td><td>只有 <code>var bar</code>（值為 undefined）</td><td><b style="color:var(--bad)">TypeError</b></td></tr>
+      <tr><td><code>let/const baz = function(){}</code></td><td>提升但在 TDZ</td><td><b style="color:var(--bad)">ReferenceError</b></td></tr>
+    </table>
+    <pre><code><span class="tok-com">// 函式宣告 — 可先呼叫</span>
+console.log(foo()); <span class="tok-com">// 'Hello' ✓</span>
+<span class="tok-key">function</span> foo() { <span class="tok-key">return</span> <span class="tok-str">'Hello'</span>; }
+
+<span class="tok-com">// 函式表達式（var）— TypeError</span>
+console.log(bar()); <span class="tok-com">// TypeError: bar is not a function</span>
+<span class="tok-key">var</span> bar = <span class="tok-key">function</span>() { <span class="tok-key">return</span> <span class="tok-str">'Hello'</span>; };
+
+<span class="tok-com">// 函式表達式（let）— ReferenceError</span>
+console.log(baz()); <span class="tok-com">// ReferenceError: Cannot access 'baz' before initialization</span>
+<span class="tok-key">let</span> baz = <span class="tok-key">function</span>() { <span class="tok-key">return</span> <span class="tok-str">'Hello'</span>; };</code></pre>
+  </section>
+
+  <section>
+    <span class="num">底層原因</span>
+    <h2>為什麼有此差異</h2>
+    <p>引擎在執行前先掃描並處理函式宣告，整個函式（名稱＋本體）都被加入作用域。函式表達式本質上是把函式賦值給變數，只有左側的變數名稱被提升，賦值（右側）要等到程式執行到那一行才發生。</p>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>var 表達式先呼叫得 TypeError（bar 是 undefined，不是 function）；let/const 表達式先呼叫得 ReferenceError（TDZ），這是另一個 var vs let/const 行為差異的體現。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>實務上應該優先用函式宣告還是表達式？</summary><p>各有用途：函式宣告可提升，適合定義工具函式；const + 箭頭函式表達式強制先定義再使用，讀起來更線性。箭頭函式還沒有自己的 this，在回呼中特別方便。現代 React 組件幾乎都用箭頭函式表達式。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「提升對兩者的影響不同。<span class="hl">函式宣告連本體一起提升</span>，所以可以先呼叫再宣告；<span class="hl">函式表達式只有左邊的變數名提升</span>，右邊的函式賦值不提升，在賦值前呼叫會報錯——var 版本是 TypeError（變數是 undefined），let/const 版本是 ReferenceError（TDZ）。實務上建議先定義後使用，避免靠提升來安排程式碼順序。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript提升機制說明.html">提升機制說明</a>
+      <a href="函式提升概念說明.html">函式提升概念</a>
+      <a href="提升機制可能引發的問題.html">提升引發的問題</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

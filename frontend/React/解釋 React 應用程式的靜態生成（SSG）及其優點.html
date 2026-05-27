@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>靜態生成 SSG</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 渲染策略</div>
+    <h1>SSG：在建置時就把 HTML 生成好，<em>部署後直接從 CDN 秒速供應</em></h1>
+    <p class="lede">靜態生成（Static Site Generation）在<b>建置期</b>預先把每個頁面的 HTML 算好，存成靜態檔案。請求來時直接從 CDN 回傳，<b>零伺服器運算</b>，速度最快、成本最低。</p>
+  </header>
+
+  <section>
+    <span class="num">三種渲染策略比較</span>
+    <h2>SSG vs SSR vs CSR</h2>
+    <table>
+      <thead><tr><th>策略</th><th>HTML 生成時機</th><th>適合場景</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>SSG</b></td>
+          <td>建置時（build time）</td>
+          <td>部落格、文件、行銷頁、不常更新的內容</td>
+        </tr>
+        <tr>
+          <td><b>SSR</b></td>
+          <td>每次請求（request time）</td>
+          <td>個人化內容、即時資料、需要 SEO 的動態頁</td>
+        </tr>
+        <tr>
+          <td><b>CSR</b></td>
+          <td>瀏覽器（client time）</td>
+          <td>管理後台、需要大量互動、不需 SEO 的 App</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">Next.js 實作</span>
+    <h2>getStaticProps：在建置期獲取資料</h2>
+    <pre><code><span class="tok-com">// pages/blog/[slug].js（Next.js Pages Router）</span>
+<span class="tok-key">export</span> <span class="tok-key">async function</span> <span class="tok-fn">getStaticPaths</span>() {
+  <span class="tok-key">const</span> posts = <span class="tok-key">await</span> <span class="tok-fn">getAllPosts</span>();
+  <span class="tok-key">return</span> { paths: posts.<span class="tok-fn">map</span>(p =&gt; `/blog/${p.slug}`), fallback: <span class="tok-key">false</span> };
+}
+
+<span class="tok-key">export</span> <span class="tok-key">async function</span> <span class="tok-fn">getStaticProps</span>({ params }) {
+  <span class="tok-key">const</span> post = <span class="tok-key">await</span> <span class="tok-fn">getPost</span>(params.slug);
+  <span class="tok-key">return</span> { props: { post }, revalidate: 60 };  <span class="tok-com">// ISR：60 秒後重新生成</span>
+}</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p><b>增量靜態再生（ISR）</b>：在 <code>getStaticProps</code> 加 <code>revalidate</code>，讓靜態頁面在後台定期重新建置，兼顧速度與內容新鮮度。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>SSG 的內容過期怎麼辦？</summary><p>有三個策略：1. 重新 deploy（適合更新頻率極低的內容）；2. ISR（<code>revalidate</code>，定時在背景重建）；3. On-demand ISR（內容更新時手動呼叫 API 觸發重建）。</p></details>
+      <details><summary>Next.js App Router 的靜態生成有什麼不同？</summary><p>App Router 預設就是靜態的（Server Components），不需要 <code>getStaticProps</code>。若需要動態，加 <code>export const dynamic = 'force-dynamic'</code> 或使用 <code>fetch</code> 時不加 <code>cache</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「SSG 在<span class="hl">建置期</span>預先生成所有頁面的靜態 HTML，部署後從 CDN 直接供應，速度最快、伺服器成本最低，SEO 也最友善。適合部落格、文件等不常更動的內容。搭配 Next.js 的 ISR（增量靜態再生），可以讓靜態頁面在背景定期更新，兼顧<span class="hl">速度與資料新鮮度</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋 React 應用程式的伺服器端渲染（SSR）及其優點.html">SSR</a>
+      <a href="解釋什麼是 React 水合（hydration）.html">水合（Hydration）</a>
+      <a href="React 應用程式中的程式碼分割（code splitting）是什麼？.html">程式碼分割</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

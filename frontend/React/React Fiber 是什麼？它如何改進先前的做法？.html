@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Fiber</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 架構</div>
+    <h1>Fiber：讓 React 從「一次跑完」變成<em>可中斷、可優先排程</em>的引擎</h1>
+    <p class="lede">React 16 之前的協調算法是同步遞迴，一旦開始就無法中斷，複雜 UI 時容易卡住主線程。<b>Fiber</b> 把渲染工作拆成小單元，讓 React 能暫停、恢復，並根據<b>優先級</b>決定先處理哪些更新。</p>
+  </header>
+
+  <section>
+    <span class="num">舊 vs 新</span>
+    <h2>Stack 演算法 vs Fiber 演算法</h2>
+    <table>
+      <thead><tr><th>面向</th><th>舊 Stack 演算法</th><th>Fiber（React 16+）</th></tr></thead>
+      <tbody>
+        <tr><td>執行方式</td><td>同步、一次跑完</td><td>可中斷、分幀執行</td></tr>
+        <tr><td>主線程阻塞</td><td>長任務會凍結 UI</td><td>讓出控制權給瀏覽器</td></tr>
+        <tr><td>優先級</td><td>無</td><td>用戶互動 &gt; 動畫 &gt; 後台更新</td></tr>
+        <tr><td>啟用功能</td><td>—</td><td>Concurrent Mode、Suspense、時間分片</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">關鍵概念</span>
+    <h2>Fiber 做了三件事</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>漸進式渲染（Incremental rendering）</b>：把渲染工作拆成「fiber 節點」，每個節點是可暫停的最小工作單元。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>時間分片（Time slicing）</b>：高優先度任務（如鍵盤輸入、點擊）可以插隊，確保 UI 響應流暢。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>錯誤邊界（Error boundaries）</b>：Fiber 架構讓捕獲子樹錯誤成為可能，舊 Stack 演算法做不到。</div>
+      </div>
+    </div>
+    <div class="callout tip"><span class="ico">✅</span><p>Fiber 是內部實作細節，對大多數開發者而言感知是：<b>Concurrent Mode</b>（React 18 的並行功能）和 <b>Suspense</b> 資料載入都建立在 Fiber 之上。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Fiber 的「Render 階段」和「Commit 階段」有什麼不同？</summary><p>Render 階段（協調）可以中斷，計算出 effect 清單；Commit 階段不可中斷，一次性把 DOM 變更全部套用，確保畫面一致性。</p></details>
+      <details><summary>Concurrent Mode 是什麼？跟 Fiber 有什麼關係？</summary><p>Concurrent Mode 是建立在 Fiber 之上的模式，允許 React 同時準備多個版本的 UI、根據優先級中斷低優先度渲染。React 18 的 <code>createRoot</code> 即啟用此模式。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React Fiber 是 React 16 對協調算法的完全重寫。舊版算法是同步遞迴，一旦開始就無法中斷，複雜 UI 會阻塞主線程。Fiber 把渲染工作拆成可中斷的小單元，引入<span class="hl">優先級排程</span>——用戶互動可以插隊低優先度更新，讓 UI 保持流暢。同時它也是 Concurrent Mode、Suspense 等新功能的基礎架構。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的「協調」（reconciliation）是什麼？.html">協調（Reconciliation）</a>
+      <a href="React 中的虛擬 DOM（virtual DOM）是什麼？.html">虛擬 DOM</a>
+      <a href="React Suspense 是什麼？它實現了什麼功能？.html">React Suspense</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

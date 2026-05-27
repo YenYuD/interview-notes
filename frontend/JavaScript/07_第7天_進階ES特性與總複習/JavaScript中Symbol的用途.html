@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symbol 的用途</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JAVASCRIPT</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT / ES6+</div>
+    <h1>永不重複的 key，<br>物件裡的<em>隱形屬性</em></h1>
+    <p class="lede"><b>Symbol</b> 是 ES6 新增的原始型別，每次呼叫 <code>Symbol()</code> 都產生<b>全球唯一</b>的值。最常見的用法是當物件屬性鍵，讓第三方程式碼「看不到」你加的屬性，也不怕與其他屬性名稱衝突。</p>
+  </header>
+
+  <section>
+    <span class="num">三大核心特性</span>
+    <h2>Symbol 的本質</h2>
+    <div class="chips">
+      <div class="chip good">唯一性<small>Symbol() === Symbol() 永遠是 false</small></div>
+      <div class="chip good">不可列舉<small>不出現在 for...in / Object.keys()</small></div>
+      <div class="chip info">非建構子<small>不能 new Symbol()，只能 Symbol()</small></div>
+    </div>
+    <pre><code><span class="tok-key">const</span> s1 = <span class="tok-fn">Symbol</span>(<span class="tok-str">'id'</span>);
+<span class="tok-key">const</span> s2 = <span class="tok-fn">Symbol</span>(<span class="tok-str">'id'</span>);
+s1 === s2; <span class="tok-com">// false — 描述相同但值不同</span>
+
+<span class="tok-key">const</span> obj = { name: <span class="tok-str">'Alice'</span>, [s1]: 42 };
+<span class="tok-fn">Object.keys</span>(obj);      <span class="tok-com">// ['name']  ← Symbol 不出現</span>
+obj[s1];               <span class="tok-com">// 42  ← 但還是能直接存取</span>
+<span class="tok-fn">Object.getOwnPropertySymbols</span>(obj); <span class="tok-com">// [Symbol(id)]</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">全域登錄表 vs 局部 Symbol</span>
+    <h2>Symbol.for()：跨模組共享</h2>
+    <p>局部 <code>Symbol()</code> 每次都產生新值；<code>Symbol.for(key)</code> 會先查全域登錄表，相同 key 回傳同一個 Symbol。</p>
+    <pre><code><span class="tok-key">const</span> a = <span class="tok-fn">Symbol.for</span>(<span class="tok-str">'app.token'</span>);
+<span class="tok-key">const</span> b = <span class="tok-fn">Symbol.for</span>(<span class="tok-str">'app.token'</span>);
+a === b; <span class="tok-com">// true</span>
+
+<span class="tok-fn">Symbol.keyFor</span>(a); <span class="tok-com">// 'app.token'</span></code></pre>
+    <div class="aside">適合在多個模組或 iframe 之間共享同一個「約定好的」Symbol，例如框架內部的 plugin key。</div>
+  </section>
+
+  <section>
+    <span class="num">知名 Symbol</span>
+    <h2>用來自訂語言行為的內建 Symbol</h2>
+    <table>
+      <thead><tr><th>Symbol</th><th>覆蓋後效果</th></tr></thead>
+      <tbody>
+        <tr><td><code>Symbol.iterator</code></td><td>讓物件支援 <code>for...of</code> 與展開運算子</td></tr>
+        <tr><td><code>Symbol.toPrimitive</code></td><td>控制物件轉換成數字或字串的行為</td></tr>
+        <tr><td><code>Symbol.toStringTag</code></td><td><code>Object.prototype.toString.call(obj)</code> 回傳的標籤</td></tr>
+        <tr><td><code>Symbol.hasInstance</code></td><td>自訂 <code>instanceof</code> 的判斷邏輯</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">// 讓自訂類別支援 for...of</span>
+<span class="tok-key">class</span> <span class="tok-fn">Range</span> {
+  <span class="tok-fn">constructor</span>(from, to) { <span class="tok-key">this</span>.from = from; <span class="tok-key">this</span>.to = to; }
+  *[<span class="tok-fn">Symbol.iterator</span>]() {
+    <span class="tok-key">for</span> (<span class="tok-key">let</span> i = <span class="tok-key">this</span>.from; i <= <span class="tok-key">this</span>.to; i++) <span class="tok-key">yield</span> i;
+  }
+}
+[...<span class="tok-key">new</span> <span class="tok-fn">Range</span>(1, 3)]; <span class="tok-com">// [1, 2, 3]</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Symbol 屬性不可列舉，那能被 JSON.stringify 序列化嗎？</summary>
+        <p>不能。<code>JSON.stringify</code> 會完全忽略 Symbol 鍵的屬性。這反而是一個優點：可以在物件上掛「私有」元資料，序列化時自動消失，不會污染 API 回應。</p>
+      </details>
+      <details>
+        <summary>Symbol 和私有類別欄位 <code>#field</code> 有什麼不同？</summary>
+        <p>私有類別欄位（<code>#field</code>，ES2022）是真正的語法層面封裝，在類別外完全無法存取。Symbol 屬性雖然不可列舉，但只要拿得到那個 Symbol reference，外部程式碼仍能讀寫，只是「不易發現」而非真正私有。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Symbol 是 ES6 新增的原始型別，每次呼叫都產生<span class="hl">全球唯一</span>的值。主要用途有兩個：一是當物件屬性鍵，利用它不可列舉的特性掛「半私有」的元資料，不會出現在 <code>Object.keys()</code> 和 <code>JSON.stringify</code> 中；二是用<span class="hl">知名 Symbol</span>（如 <code>Symbol.iterator</code>）來自訂物件的語言行為，例如讓自訂類別支援 <code>for...of</code>。需要跨模組共享同一個 Symbol 時，用 <code>Symbol.for(key)</code> 查全域登錄表。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中的迭代器與生成器及其應用.html">迭代器與生成器</a>
+      <a href="JavaScript代理的用途.html">Proxy 代理</a>
+      <a href="Intl命名空間物件的用途.html">Intl 國際化</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

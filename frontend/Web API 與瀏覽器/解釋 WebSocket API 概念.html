@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebSocket API</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>WebSocket：建立<em>持久雙向連線</em>，伺服器也能主動推送</h1>
+    <p class="lede">HTTP 是單次請求-回應，每次都要重新建立連線。WebSocket 在一次握手後保持<b>持久連線</b>，客戶端與伺服器<b>可以任意時刻互相發送訊息</b>，延遲極低。</p>
+  </header>
+
+  <section>
+    <span class="num">WebSocket vs HTTP</span>
+    <h2>為什麼聊天室不用普通的 HTTP 請求？</h2>
+    <table>
+      <thead><tr><th>面向</th><th>HTTP</th><th>WebSocket</th></tr></thead>
+      <tbody>
+        <tr><td>連線模式</td><td>請求-回應，每次新連線</td><td>持久連線，一次握手</td></tr>
+        <tr><td>誰能主動發送</td><td>只有客戶端</td><td>客戶端與伺服器都可以</td></tr>
+        <tr><td>延遲</td><td>較高（每次建立連線的 overhead）</td><td>極低</td></tr>
+        <tr><td>協定</td><td>http:// / https://</td><td>ws:// / wss://</td></tr>
+        <tr><td>適合場景</td><td>一般頁面請求</td><td>即時聊天、遊戲、協作工具</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">基本用法</span>
+    <h2>四個事件涵蓋完整生命週期</h2>
+    <pre><code><span class="tok-key">const</span> socket = <span class="tok-key">new</span> WebSocket(<span class="tok-str">'wss://example.com/ws'</span>);
+
+socket.addEventListener(<span class="tok-str">'open'</span>, () => {
+  socket.send(<span class="tok-str">'Hello Server!'</span>);  <span class="tok-com">// 連線建立後送訊息</span>
+});
+
+socket.addEventListener(<span class="tok-str">'message'</span>, (e) => {
+  console.log(<span class="tok-str">'收到：'</span>, e.data);     <span class="tok-com">// 接收伺服器推送</span>
+});
+
+socket.addEventListener(<span class="tok-str">'close'</span>, () => {
+  console.log(<span class="tok-str">'連線關閉'</span>);
+});
+
+socket.addEventListener(<span class="tok-str">'error'</span>, (e) => {
+  console.error(<span class="tok-str">'錯誤：'</span>, e);
+});</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>生產環境用 <b>wss://</b>（WebSocket Secure），就像 HTTPS 加密 HTTP 請求一樣，加密 WebSocket 通訊。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>WebSocket 和 SSE 怎麼選？</summary>
+        <p>需要<b>雙向通訊</b>（如聊天、遊戲）用 WebSocket；只需要<b>伺服器單向推送</b>（如通知、即時數據更新）用 SSE，SSE 基於 HTTP，更簡單且支援自動重連。</p>
+      </details>
+      <details>
+        <summary>WebSocket 連線斷掉怎麼辦？</summary>
+        <p>需要自己實作重連機制（監聽 close 事件後 setTimeout 重連），或使用 Socket.io 等函式庫，它內建重連、心跳偵測（heartbeat）和降級機制。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「WebSocket 提供客戶端和伺服器之間的<span class="hl">持久全雙工連線</span>，雙方都可以任意時刻主動發送訊息，延遲比 HTTP 輪詢低很多。建立方式是 <code>new WebSocket(url)</code>，透過 <code>open/message/close/error</code> 四個事件管理生命週期。適合<span class="hl">即時聊天、線上遊戲、協作編輯</span>等需要低延遲雙向通訊的場景。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="伺服器推送事件 SSE.html">Server-Sent Events (SSE)</a>
+      <a href="JavaScript中的Workers用途.html">Web Workers</a>
+      <a href="使用Fetch API發送HTTP請求.html">Fetch API</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

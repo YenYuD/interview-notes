@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 基礎面試精要</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">其他前端</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">其他前端</div>
+    <h1>async/await 是<em>語法糖</em>，但底下是整個 Promise 機制</h1>
+    <p class="lede">JavaScript 基礎面試最常考 <b>async/await 與錯誤處理</b>。理解它是 Promise 的包裝，才能回答「為什麼不能在頂層直接 await」和「如何同時發多個請求」。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>async/await 是什麼</h2>
+    <table>
+      <tr><th>問題</th><th>答案</th></tr>
+      <tr><td>本質</td><td>Promise 的語法糖，讓非同步程式碼讀起來像同步</td></tr>
+      <tr><td>限制</td><td><code>await</code> 只能在 <code>async</code> 函式（或 Top-level await ESM）內使用</td></tr>
+      <tr><td>錯誤捕捉</td><td>用 <code>try…catch</code> 包住，等同 <code>.catch()</code></td></tr>
+      <tr><td>並行寫法</td><td><code>Promise.all([a(), b()])</code> 同時發起，不要連續 await</td></tr>
+    </table>
+    <pre><code><span class="tok-com">// ❌ 連續 await（a 完成才發 b，慢）</span>
+<span class="tok-key">const</span> a = <span class="tok-key">await</span> fetchA();
+<span class="tok-key">const</span> b = <span class="tok-key">await</span> fetchB();
+
+<span class="tok-com">// ✅ 並行（同時發）</span>
+<span class="tok-key">const</span> [a, b] = <span class="tok-key">await</span> <span class="tok-fn">Promise.all</span>([<span class="tok-fn">fetchA</span>(), <span class="tok-fn">fetchB</span>()]);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">易錯點</span>
+    <h2>三個常見誤區</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>誤區 1</small>
+        連續 await 當作並行——實際上是串行，浪費等待時間
+      </div>
+      <div class="chip bad">
+        <small>誤區 2</small>
+        忘記 try/catch——未捕捉的 rejected Promise 會變成 UnhandledRejection
+      </div>
+      <div class="chip bad">
+        <small>誤區 3</small>
+        在非 async 函式裡用 await——SyntaxError，直接編譯失敗
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p><code>Promise.all</code> 有一個 reject 就整批失敗。若需要「有幾個成功就算幾個」，改用 <b><code>Promise.allSettled</code></b>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>async 函式回傳什麼？</summary><p>永遠回傳一個 Promise。就算你 <code>return 42</code>，呼叫方收到的是 <code>Promise.resolve(42)</code>。</p></details>
+      <details><summary>Promise.all vs Promise.allSettled vs Promise.race 差在哪？</summary><p><code>all</code>：全部成功才 resolve，任一失敗立刻 reject。<code>allSettled</code>：等全部結束，不管成敗，回傳每筆狀態。<code>race</code>：第一個結束（不管成敗）就決定結果。</p></details>
+      <details><summary>什麼是 microtask queue？和 async/await 有何關係？</summary><p>Promise 的 <code>.then</code> callback（包含 await 後面的程式碼）進 microtask queue，比 setTimeout（macrotask）早執行。所以 await 之後的程式碼，在當前同步執行完後立即執行，早於 <code>setTimeout(fn, 0)</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">async/await 是 Promise 的語法糖</span>，讓非同步程式碼讀起來像同步。<code>await</code> 必須在 async 函式內，用 <span class="hl">try/catch</span> 捕捉錯誤。需要同時發多個請求時，我會用 <span class="hl">Promise.all</span> 而不是連續 await，避免不必要的串行等待。底層來說，await 之後的程式碼進入 microtask queue，比 setTimeout 更早執行。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="004 React 核心.html">004 React 核心</a>
+      <a href="005 效能優化與架構.html">005 效能優化與架構</a>
+      <a href="002 前端工程師面試題庫.html">002 題庫索引</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

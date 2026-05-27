@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>innerHTML vs textContent</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1><em>innerHTML</em> 解析 HTML 標記，<em>textContent</em> 只處理純文字</h1>
+    <p class="lede"><code>innerHTML</code> 功能強大但<b>有 XSS 風險</b>；<code>textContent</code> 更安全、更快，適合插入使用者輸入的內容。選對方法是防範 XSS 的第一步。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>同一段內容，兩種結果</h2>
+    <pre><code><span class="tok-key">const</span> el = document.getElementById(<span class="tok-str">'demo'</span>);
+<span class="tok-key">const</span> userInput = <span class="tok-str">'&lt;strong&gt;Bold Text&lt;/strong&gt;'</span>;
+
+el.innerHTML    = userInput; <span class="tok-com">// 渲染成粗體文字（解析 HTML）</span>
+el.textContent  = userInput; <span class="tok-com">// 顯示原始字串 &lt;strong&gt;Bold Text&lt;/strong&gt;</span></code></pre>
+    <table>
+      <thead><tr><th>面向</th><th>innerHTML</th><th>textContent</th></tr></thead>
+      <tbody>
+        <tr><td>解析 HTML</td><td>是，會渲染標籤</td><td>否，當純文字顯示</td></tr>
+        <tr><td>XSS 風險</td><td>有（插入不信任內容時）</td><td>無（自動轉義）</td></tr>
+        <tr><td>效能</td><td>較慢（需解析 HTML）</td><td>較快</td></tr>
+        <tr><td>適用情境</td><td>動態插入 HTML 結構</td><td>插入使用者文字內容</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">安全警告</span>
+    <h2>innerHTML 的 XSS 陷阱</h2>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>使用者輸入的字串如果直接放入 innerHTML，攻擊者可以注入 <code>&lt;script&gt;</code> 或 <code>onerror</code> 屬性執行惡意程式碼。</p>
+    </div>
+    <pre><code><span class="tok-com">// 危險：XSS</span>
+el.innerHTML = userComment; <span class="tok-com">// 若 userComment 含 &lt;script&gt;...</span>
+
+<span class="tok-com">// 安全：插入使用者文字用 textContent</span>
+el.textContent = userComment;
+
+<span class="tok-com">// 必須插入 HTML 時，先消毒（sanitize）</span>
+el.innerHTML = DOMPurify.sanitize(userComment);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>innerText 和 textContent 有什麼不同？</summary>
+        <p><code>textContent</code> 回傳所有文字（包含隱藏元素的文字），速度更快；<code>innerText</code> 只回傳「可見」的文字，並考慮 CSS 樣式，速度較慢但結果更符合視覺呈現。</p>
+      </details>
+      <details>
+        <summary>除了 DOMPurify，還有什麼方式安全插入 HTML？</summary>
+        <p>使用 DOM API（<code>createElement</code>、<code>appendChild</code>、<code>setAttribute</code>）逐一建構元素，不需要解析 HTML 字串，天然避免 XSS。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">innerHTML</span> 會解析並渲染 HTML 標記，適合動態插入結構，但用在使用者輸入時有 XSS 風險；<span class="hl">textContent</span> 把內容當純文字處理，自動轉義 HTML 字符，更安全也更快。原則是：插入使用者輸入的內容一律用 textContent，必須插入 HTML 時用 DOMPurify 等函式庫先做消毒。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="DOM中屬性與屬性值的差異.html">DOM Attribute vs Property</a>
+      <a href="使用JavaScript新增移除修改HTML元素.html">JS 操作 DOM 元素</a>
+      <a href="什麼是DOM及其結構.html">什麼是 DOM</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

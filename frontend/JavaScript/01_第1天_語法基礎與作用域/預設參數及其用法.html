@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>預設參數用法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 函式</div>
+    <h1>引數沒傳就用預設值，<em>省掉一堆防禦性檢查</em></h1>
+    <p class="lede">ES6 的預設參數（default parameter）讓你直接在函式簽章宣告回退值，<b>不再需要 <code>if (x === undefined) x = 預設值</code></b> 的樣板程式碼，也讓函式意圖更清晰。</p>
+  </header>
+
+  <section>
+    <span class="num">基本用法</span>
+    <h2>語法與觸發條件</h2>
+    <pre><code><span class="tok-com">// ES6 預設參數</span>
+<span class="tok-key">function</span> greet(name = <span class="tok-str">'Guest'</span>) {
+  console.log(<span class="tok-str">`Hello, ${name}!`</span>);
+}
+
+greet();          <span class="tok-com">// Hello, Guest! （未傳，用預設值）</span>
+greet(<span class="tok-str">'Alice'</span>);  <span class="tok-com">// Hello, Alice!</span>
+greet(<span class="tok-key">undefined</span>); <span class="tok-com">// Hello, Guest! （傳 undefined 也觸發預設值）</span>
+greet(<span class="tok-key">null</span>);      <span class="tok-com">// Hello, null!  （null ≠ undefined，不觸發）</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>只有 <code>undefined</code> 才會觸發預設值，傳入 <code>null</code>、<code>0</code>、<code>''</code>（空字串）等 falsy 值<b>不會</b>觸發。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">進階用法</span>
+    <h2>預設值可以是運算式</h2>
+    <pre><code><span class="tok-com">// 後面的預設值可引用前面的參數</span>
+<span class="tok-key">function</span> add(a = <span class="tok-num">0</span>, b = a + <span class="tok-num">1</span>) {
+  <span class="tok-key">return</span> a + b;
+}
+add();     <span class="tok-com">// 0 + 1 = 1</span>
+add(<span class="tok-num">5</span>);    <span class="tok-com">// 5 + 6 = 11</span>
+add(<span class="tok-num">5</span>, <span class="tok-num">10</span>); <span class="tok-com">// 5 + 10 = 15</span></code></pre>
+    <div class="aside">預設值在<b>呼叫時才被求值</b>，不是在定義時。這表示預設值是動態的，每次呼叫都會重新計算。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>ES6 之前怎麼做預設參數？</summary><p>用 <code>||</code> 運算子：<code>name = name || 'Guest'</code>，但這有個問題——0、空字串、false 這類 falsy 值也會被取代成預設值，行為不精確。ES6 預設參數只對 undefined 觸發，更安全。</p></details>
+      <details><summary>有預設值的參數要放在哪裡？</summary><p>應該放在最後面，否則前面有預設值的參數仍然佔位，呼叫者必須明確傳 undefined 才能跳過，使用起來非常不直觀。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「預設參數是 ES6 讓函式在引數未傳或為 <code>undefined</code> 時自動使用指定值的語法。比舊的 <code>x = x || 預設值</code> 更安全，因為<span class="hl">只有 undefined 才觸發，不會誤傷 0 或空字串</span>。預設值本身也可以是運算式，甚至引用前面的參數。有預設值的參數習慣上要放在參數列最後面。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="參數與引數的差異.html">參數與引數差異</a>
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let/var/const 差異</a>
+      <a href="JavaScript變數null、undefined與未宣告的差異.html">null/undefined/未宣告</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

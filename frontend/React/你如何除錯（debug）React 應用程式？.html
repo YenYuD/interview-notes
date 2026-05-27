@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>除錯 React 應用程式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 除錯</div>
+    <h1>四層除錯工具箱：從<em>React DevTools</em> 到<em>錯誤邊界</em></h1>
+    <p class="lede">有效除錯 React 應用需要工具分層配合：<b>React DevTools</b> 看組件樹和 state、<b>斷點</b>暫停執行查看流程、<b>console.log</b> 快速追蹤、<b>錯誤邊界</b>捕獲渲染錯誤並顯示備用 UI。</p>
+  </header>
+
+  <section>
+    <span class="num">工具一覽</span>
+    <h2>除錯工具與適用場景</h2>
+    <table>
+      <thead><tr><th>工具</th><th>適用場景</th></tr></thead>
+      <tbody>
+        <tr><td>React DevTools 擴充功能</td><td>檢查組件樹、查看 state/props、追蹤重渲染原因（Profiler）</td></tr>
+        <tr><td>瀏覽器 DevTools 斷點</td><td>暫停執行、逐步追蹤邏輯、查看呼叫堆疊</td></tr>
+        <tr><td>console.log / console.error</td><td>快速輸出資料、確認執行流程</td></tr>
+        <tr><td>錯誤邊界（Error Boundary）</td><td>捕獲子樹的渲染錯誤、顯示備用 UI、記錄錯誤</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>React DevTools 的 <b>Profiler</b> 標籤可以錄製一次互動，列出每個組件的渲染時間和觸發原因，是優化重渲染問題的利器。</p></div>
+  </section>
+
+  <section>
+    <span class="num">錯誤邊界</span>
+    <h2>捕獲渲染錯誤，顯示備用 UI</h2>
+    <pre><code><span class="tok-com">// 方法一：手寫 Class Component 錯誤邊界</span>
+<span class="tok-key">class</span> <span class="tok-fn">ErrorBoundary</span> <span class="tok-key">extends</span> React.Component {
+  state = { hasError: <span class="tok-key">false</span> };
+
+  <span class="tok-key">static</span> <span class="tok-fn">getDerivedStateFromError</span>() {
+    <span class="tok-key">return</span> { hasError: <span class="tok-key">true</span> };
+  }
+
+  <span class="tok-fn">componentDidCatch</span>(error, info) {
+    <span class="tok-com">// 上報錯誤到監控服務（如 Sentry）</span>
+    console.<span class="tok-fn">error</span>(error, info);
+  }
+
+  <span class="tok-fn">render</span>() {
+    <span class="tok-key">return</span> <span class="tok-key">this</span>.state.hasError
+      ? &lt;h1&gt;發生錯誤，請重新整理。&lt;/h1&gt;
+      : <span class="tok-key">this</span>.props.children;
+  }
+}
+
+<span class="tok-com">// 方法二：用 react-error-boundary 套件（更靈活）</span>
+<span class="tok-key">import</span> { ErrorBoundary } <span class="tok-key">from</span> <span class="tok-str">'react-error-boundary'</span>;
+
+&lt;ErrorBoundary
+  FallbackComponent={ErrorFallback}
+  onReset={() =&gt; { <span class="tok-com">/* 重置 app state */</span> }}
+  onError={(error, info) =&gt; <span class="tok-fn">logToSentry</span>(error, info)}
+&gt;
+  &lt;App /&gt;
+&lt;/ErrorBoundary&gt;</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>錯誤邊界<b>只能捕獲渲染過程中的錯誤</b>，無法捕獲事件處理器、非同步程式碼（setTimeout、fetch）中的錯誤。後者需用 try-catch 或 <code>useErrorBoundary</code> hook 手動拋出。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React DevTools 的 Profiler 能幫助解決什麼問題？</summary><p>Profiler 錄製一次互動後，會顯示每個組件的渲染持續時間、渲染次數，以及「為什麼這個組件重渲」（props 變了？context 變了？父組件重渲？）。這讓你精確定位效能瓶頸，而不用猜測。</p></details>
+      <details><summary>事件處理器裡的錯誤要怎麼讓錯誤邊界捕獲？</summary><p>用 <code>react-error-boundary</code> 的 <code>useErrorBoundary</code> hook 取得 <code>showBoundary</code>，在 catch 裡呼叫 <code>showBoundary(error)</code> 手動把錯誤傳給最近的錯誤邊界。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「除錯 React 我有四層工具：<span class="hl">React DevTools</span> 看組件樹、state/props，Profiler 找渲染瓶頸；<span class="hl">瀏覽器斷點</span>暫停執行逐步追蹤；<code>console.log</code> 快速確認資料流；<span class="hl">錯誤邊界</span>捕獲渲染錯誤並顯示備用 UI，搭配 Sentry 等服務上報。要注意錯誤邊界只捕獲渲染期的錯誤，事件處理器和非同步錯誤需要另外處理。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的錯誤邊界（error boundaries）是做什麼用的？.html">錯誤邊界</a>
+      <a href="你如何測試 React 應用程式？.html">測試 React 應用</a>
+      <a href="React 的嚴格模式（strict mode）是什麼？它有什麼優點？.html">React 嚴格模式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>箭頭函式在建構子中的優勢</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">箭頭函式・this 綁定</div>
+    <h1>箭頭函式的 <em>this</em> 從出生就固定，<em>普通函式不行</em></h1>
+    <p class="lede">在建構子裡，箭頭函式方法的 <b>this 詞法綁定</b>到當下的實例，<code>call</code>/<code>apply</code>/<code>bind</code> 都無法改變它；普通函式方法的 <b>this 由呼叫方式決定</b>，傳出去就可能丟失。</p>
+  </header>
+
+  <section>
+    <span class="num">對比實驗</span>
+    <h2>同一個物件，兩種方法</h2>
+    <pre><code>const Person = function(name) {
+  this.firstName = name;
+
+  this.sayName1 = function() {     // 普通函式
+    console.log(this.firstName);
+  };
+  this.sayName2 = () =&gt; {          // 箭頭函式
+    console.log(this.firstName);
+  };
+};
+
+const john = new Person('John');
+const dave = new Person('Dave');
+
+john.sayName1();              // 'John'
+john.sayName2();              // 'John'
+
+john.sayName1.call(dave);     // 'Dave'  ← this 被改掉了
+john.sayName2.call(dave);     // 'John'  ← 箭頭函式不受影響
+
+const fn1 = john.sayName1;
+fn1();                        // undefined ← 脫離物件，this 變成 global
+const fn2 = john.sayName2;
+fn2();                        // 'John'   ← 箭頭函式 this 仍是 john</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>把方法當回呼傳出去（如 <code>setTimeout(john.sayName1, 1000)</code>）時，<b>普通函式的 this 會丟失</b>，箭頭函式則永遠保住實例。</p></div>
+  </section>
+
+  <section>
+    <span class="num">限制</span>
+    <h2>箭頭函式不是萬能的</h2>
+    <table>
+      <tr><th></th><th>箭頭函式</th><th>普通函式</th></tr>
+      <tr><td>可作建構子 (<code>new</code>)</td><td>❌ TypeError</td><td>✅</td></tr>
+      <tr><td><code>arguments</code> 物件</td><td>❌ 無（用 <code>...args</code>）</td><td>✅</td></tr>
+      <tr><td>this 可被 call/bind 改變</td><td>❌</td><td>✅</td></tr>
+      <tr><td>物件字面量方法</td><td>⚠️ this 不指向物件</td><td>✅</td></tr>
+    </table>
+    <div class="callout warn"><span class="ico">⚠️</span><p>在<b>物件字面量</b>中定義方法時，不要用箭頭函式——<code>{ getValue: () =&gt; this.x }</code> 的 this 不是物件本身，而是外層作用域。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>ES6 class 中的方法和建構子裡的箭頭函式有什麼差？</summary><p>class 方法定義在原型上，所有實例共用；建構子裡的箭頭函式屬性定義在每個實例上，各自擁有一份函式。後者記憶體消耗較大，但 this 保證固定。</p></details>
+      <details><summary>React class component 為什麼要在 constructor 裡 bind(this)？</summary><p>class 方法是普通函式，傳給 JSX 事件屬性後 this 會丟失。解法一：<code>this.handleClick = this.handleClick.bind(this)</code>；解法二（現代）：直接用箭頭函式定義方法，利用 class fields 語法。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「在建構子中，箭頭函式方法的 this 在<span class="hl">建立時就詞法綁定到當前實例</span>，之後無論怎麼傳遞、call/apply/bind 都無法改變。普通函式方法的 this 則由呼叫方式決定，一旦脫離物件就可能丟失。這讓箭頭函式特別適合當<span class="hl">事件處理器或非同步回呼</span>——不用額外 bind 就能安全使用。代價是無法用 new、無 arguments 物件，且每個實例各持一份函式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="箭頭函式語法的使用案例.html">箭頭函式使用案例</a>
+      <a href="this關鍵字常見陷阱.html">this 常見陷阱</a>
+      <a href="解釋 JavaScript 的 Function.prototype.bind.html">Function.prototype.bind</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

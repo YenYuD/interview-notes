@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Loop，用按的就懂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Noto+Sans+TC:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: oklch(98% 0.012 85);
+    --paper-2: oklch(95.5% 0.018 85);
+    --ink: oklch(26% 0.03 60);
+    --ink-soft: oklch(45% 0.025 60);
+    --accent: oklch(58% 0.16 38);      /* 磚紅 */
+    --accent-soft: oklch(92% 0.05 45);
+    --good: oklch(52% 0.13 155);       /* 綠 */
+    --good-soft: oklch(93% 0.05 155);
+    --bad: oklch(54% 0.19 25);         /* 警示紅 */
+    --bad-soft: oklch(93% 0.06 25);
+    --blue: oklch(55% 0.13 250);       /* 藍 */
+    --blue-soft: oklch(93% 0.04 250);
+    --purple: oklch(54% 0.15 305);     /* 紫 */
+    --purple-soft: oklch(93% 0.05 305);
+    --line: oklch(85% 0.02 70);
+    --shadow: oklch(40% 0.04 60 / 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Noto Sans TC", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.75;
+    background-image:
+      radial-gradient(oklch(90% 0.02 70 / 0.4) 0.5px, transparent 0.5px);
+    background-size: 14px 14px;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: clamp(1.4rem, 5vw, 2.5rem) clamp(1.2rem, 5vw, 2rem) 6rem;
+  }
+
+  /* ---------- TOPBAR ---------- */
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "Space Mono", monospace; font-size: 0.8rem;
+    margin-bottom: clamp(1.6rem, 5vw, 3rem);
+  }
+  .topbar a { color: var(--ink-soft); text-decoration: none; }
+  .topbar a:hover { color: var(--accent); }
+  .topbar .tag { color: var(--accent); letter-spacing: 0.05em; }
+
+  /* ---------- HERO ---------- */
+  .hero { margin-bottom: clamp(3rem, 8vw, 5rem); }
+
+  .kicker {
+    font-family: "Space Mono", monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.2rem;
+  }
+
+  h1 {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 900;
+    font-size: clamp(2.4rem, 9vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.4rem;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+    white-space: nowrap;
+  }
+  h1 em::after {
+    content: "";
+    position: absolute;
+    left: -2%; right: -2%; bottom: 0.08em;
+    height: 0.28em;
+    background: var(--accent-soft);
+    z-index: -1;
+    transform: rotate(-1deg);
+  }
+
+  .lede {
+    font-size: clamp(1.05rem, 3vw, 1.3rem);
+    color: var(--ink-soft);
+    max-width: 38ch;
+  }
+  .lede b { color: var(--ink); font-weight: 700; }
+
+  /* ---------- SECTION ---------- */
+  section { margin-bottom: clamp(3.5rem, 9vw, 6rem); }
+
+  .num {
+    font-family: "Space Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  h2 {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 900;
+    font-size: clamp(1.6rem, 5vw, 2.3rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+  }
+
+  p { margin-bottom: 1rem; }
+  p .hl { background: var(--accent-soft); padding: 0 0.2em; border-radius: 2px; font-weight: 500; }
+  code {
+    font-family: "Space Mono", monospace;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    padding: 0.05em 0.4em;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+
+  .aside {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    border-left: 3px solid var(--accent);
+    padding: 0.2rem 0 0.2rem 1.2rem;
+    margin: 1.5rem 0;
+  }
+  .aside b { color: var(--ink); }
+
+  /* ---------- 互動卡片通用 ---------- */
+  .lab {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: clamp(1.4rem, 4vw, 2rem);
+    margin-top: 1.8rem;
+    box-shadow: 0 1px 0 oklch(100% 0 0 / 0.6) inset, 0 10px 30px -20px var(--shadow);
+  }
+  .lab-label {
+    font-family: "Space Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+  .lab-label::before {
+    content: "";
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+
+  button {
+    font-family: "Noto Sans TC", sans-serif;
+    cursor: pointer;
+    border: none;
+    font-weight: 700;
+    transition: transform 0.08s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+  button:active { transform: scale(0.96); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--paper);
+    padding: 0.85rem 1.6rem;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    box-shadow: 0 6px 16px -8px var(--accent);
+  }
+  .btn-primary:hover:not(:disabled) { box-shadow: 0 8px 22px -8px var(--accent); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1.5px solid var(--line);
+    padding: 0.6rem 1.1rem;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--ink-soft); color: var(--ink); }
+
+  .btn-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 1.2rem 0; }
+
+  /* ---------- DEMO 1: 餐廳服務生 ---------- */
+  .diner { display: grid; gap: 1rem; }
+  .tables { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+  .table-cell {
+    flex: 1; min-width: 64px;
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    padding: 0.8rem 0.4rem;
+    text-align: center;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+  .table-cell .t-emoji { font-size: 1.6rem; line-height: 1.2; }
+  .table-cell .t-state { font-size: 0.7rem; color: var(--ink-soft); margin-top: 0.2rem; min-height: 1.2em; }
+  .table-cell.serving {
+    border-color: var(--accent); background: var(--accent-soft);
+    box-shadow: 0 0 0 4px var(--accent-soft); transform: translateY(-4px);
+  }
+  .table-cell.cooking { border-color: var(--blue); background: var(--blue-soft); }
+  .table-cell.done { border-color: var(--good); background: var(--good-soft); }
+  .waiter-line {
+    font-weight: 700; min-height: 1.6em; color: var(--ink);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .waiter-line .w { font-size: 1.4rem; }
+
+  /* ---------- DEMO 2: Event Loop 模擬器 ---------- */
+  .sim-code {
+    background: var(--ink);
+    color: oklch(92% 0.02 85);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    font-family: "Space Mono", monospace;
+    font-size: 0.82rem;
+    line-height: 1.85;
+    overflow-x: auto;
+    margin-bottom: 1.4rem;
+  }
+  .sim-code .ln { display: block; transition: background 0.2s; padding: 0 0.4rem; border-radius: 4px; }
+  .sim-code .ln.active { background: oklch(58% 0.16 38 / 0.4); }
+  .sim-code .c-key { color: oklch(78% 0.12 305); }
+  .sim-code .c-fn  { color: oklch(80% 0.12 250); }
+  .sim-code .c-str { color: oklch(80% 0.13 145); }
+  .sim-code .c-cmt { color: oklch(60% 0.02 85); }
+
+  .lanes { display: grid; grid-template-columns: 1fr; gap: 0.7rem; }
+  @media (min-width: 600px) { .lanes { grid-template-columns: 1fr 1fr; } }
+  .lane {
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: 11px;
+    padding: 0.7rem 0.8rem;
+    min-height: 78px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .lane.hot { box-shadow: 0 0 0 3px var(--accent-soft); }
+  .lane-head {
+    font-family: "Space Mono", monospace;
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .lane-head .pri { margin-left: auto; font-size: 0.62rem; color: var(--ink-soft); font-weight: 400; }
+  .lane-head::before { content: ""; width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .lane[data-q="sync"]  .lane-head::before { background: var(--ink); }
+  .lane[data-q="tick"]  .lane-head::before { background: var(--accent); }
+  .lane[data-q="micro"] .lane-head::before { background: var(--purple); }
+  .lane[data-q="timer"] .lane-head::before { background: var(--blue); }
+  .lane[data-q="check"] .lane-head::before { background: var(--good); }
+  .lane-items { display: flex; flex-wrap: wrap; gap: 0.35rem; min-height: 30px; align-content: flex-start; }
+  .pill {
+    font-family: "Space Mono", monospace;
+    font-weight: 700; font-size: 0.82rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 7px;
+    border: 1.5px solid var(--line);
+    background: var(--paper-2);
+    animation: pop 0.25s ease;
+  }
+  .lane[data-q="tick"]  .pill { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .lane[data-q="micro"] .pill { border-color: var(--purple); color: var(--purple); background: var(--purple-soft); }
+  .lane[data-q="timer"] .pill { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
+  .lane[data-q="check"] .pill { border-color: var(--good); color: var(--good); background: var(--good-soft); }
+  @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .sim-out {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin: 1.2rem 0 0.4rem; min-height: 48px;
+  }
+  .out-cell {
+    width: 46px; height: 46px; border-radius: 10px;
+    display: grid; place-items: center;
+    font-family: "Space Mono", monospace; font-weight: 700; font-size: 1.2rem;
+    border: 2px solid var(--accent); background: var(--accent-soft); color: var(--accent);
+    animation: pop 0.3s ease;
+  }
+  .sim-step {
+    font-weight: 700; min-height: 3em; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 10px; padding: 0.7rem 0.9rem; margin-top: 0.6rem;
+    font-size: 0.92rem;
+  }
+  .sim-step .tagk {
+    font-family: "Space Mono", monospace; font-size: 0.72rem;
+    padding: 0.1rem 0.45rem; border-radius: 5px; margin-right: 0.5rem;
+    background: var(--ink); color: var(--paper);
+  }
+
+  /* ---------- DEMO 3: CPU 阻塞 ---------- */
+  .block-stage { display: flex; align-items: center; gap: 1.4rem; flex-wrap: wrap; }
+  .spinner {
+    width: 70px; height: 70px; flex-shrink: 0;
+    border-radius: 50%;
+    border: 7px solid var(--line);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .block-info { flex: 1; min-width: 180px; }
+  .block-info .clock { font-family: "Space Mono", monospace; font-size: 1.6rem; font-weight: 700; }
+  .block-info .sub { font-size: 0.85rem; color: var(--ink-soft); }
+  .block-info .verdict { font-weight: 700; min-height: 1.5em; margin-top: 0.3rem; }
+  .block-info .verdict.bad { color: var(--bad); }
+  .block-info .verdict.good { color: var(--good); }
+
+  /* ---------- 流程圖 ---------- */
+  .flow { display: flex; flex-direction: column; gap: 0; margin-top: 1.8rem; }
+  .flow-step {
+    display: flex; gap: 1rem; align-items: flex-start;
+    position: relative; padding-bottom: 1.6rem;
+  }
+  .flow-step:not(:last-child)::before {
+    content: ""; position: absolute; left: 17px; top: 38px; bottom: -4px;
+    width: 2px; background: var(--line);
+  }
+  .flow-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent); color: var(--paper);
+    display: grid; place-items: center;
+    font-family: "Space Mono", monospace; font-weight: 700;
+    flex-shrink: 0; z-index: 1;
+  }
+  .flow-step.poll .flow-dot { background: var(--blue); }
+  .flow-step.check .flow-dot { background: var(--good); }
+  .flow-body h4 { font-size: 1.05rem; margin-bottom: 0.2rem; }
+  .flow-body p { font-size: 0.92rem; color: var(--ink-soft); margin: 0; }
+
+  /* ---------- 優先順序速查 ---------- */
+  .prio { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.4rem; }
+  .prio-row {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 0.7rem 0.9rem;
+  }
+  .prio-row .rank {
+    font-family: "Space Mono", monospace; font-weight: 700;
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    display: grid; place-items: center; color: var(--paper); font-size: 0.85rem;
+  }
+  .prio-row .body { flex: 1; }
+  .prio-row .body b { font-family: "Space Mono", monospace; }
+  .prio-row .body small { display: block; color: var(--ink-soft); font-size: 0.8rem; }
+
+  /* ---------- 面試框 ---------- */
+  .interview {
+    background: var(--ink); color: var(--paper);
+    border-radius: 16px; padding: clamp(1.6rem, 5vw, 2.4rem);
+  }
+  .interview .num { color: oklch(80% 0.12 70); }
+  .interview h2 { color: var(--paper); }
+  .interview .quote {
+    font-family: "Noto Serif TC", serif;
+    font-size: 1.1rem; line-height: 1.9;
+    border-left: 3px solid var(--accent); padding-left: 1.2rem;
+    color: oklch(92% 0.02 85);
+  }
+  .interview .quote .hl { background: oklch(58% 0.16 38 / 0.35); padding: 0 0.2em; }
+
+  /* ---------- 踩雷 ---------- */
+  .pitfall {
+    display: flex; gap: 0.9rem;
+    background: var(--bad-soft); border-radius: 12px;
+    padding: 1.1rem 1.3rem; margin-top: 1rem; align-items: flex-start;
+  }
+  .pitfall .x { color: var(--bad); font-weight: 900; font-size: 1.3rem; line-height: 1.4; }
+  .pitfall p { margin: 0; font-size: 0.95rem; }
+  .pitfall b { color: var(--bad); }
+
+  footer {
+    text-align: center; color: var(--ink-soft); font-size: 0.85rem;
+    margin-top: 4rem; font-family: "Space Mono", monospace;
+  }
+  footer .links { margin-top: 0.5rem; }
+  footer .links a { color: var(--accent); text-decoration: none; margin: 0 0.4rem; }
+  footer .links a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="index.html">← 回索引</a>
+    <span class="tag">Node-01 · ⭐ 必考 · 互動圖解</span>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="kicker">Node.js 核心機制</div>
+    <h1>一個服務生<br>跑滿<em>整間餐廳</em></h1>
+    <p class="lede">Node 只有<b>一條 JS 執行緒</b>，靠 Event Loop 不斷輪詢「有沒有做完的非同步工作要收尾」。<br>看文字記不住六個階段？這頁讓你<b>親手按、親眼看</b> queue 怎麼流動、為什麼是那個輸出順序。</p>
+  </header>
+
+  <!-- 1. 餐廳直覺 -->
+  <section>
+    <span class="num">DEMO 01 — 直覺</span>
+    <h2>服務生不會站著等廚房</h2>
+    <p>想像餐廳只有<b>一位服務生（單執行緒）</b>。他不會站在一桌旁邊乾等客人的菜做好 —— 他點完餐就去服務下一桌，<span class="hl">廚房（I/O）</span>在背後忙，等菜好了他再回來上菜。</p>
+    <p>按「開門營業」，看這位服務生怎麼<b>邊收尾、邊接新桌</b>，從頭到尾沒停下來等：</p>
+
+    <div class="lab">
+      <div class="lab-label">親手試試</div>
+      <div class="diner">
+        <div class="tables" id="tables"></div>
+        <div class="waiter-line" id="waiterLine"><span class="w">🧑‍🍳</span><span>按下面開始營業…</span></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="dinerBtn">▶ 開門營業</button>
+        <button class="btn-ghost" id="dinerReset">重來</button>
+      </div>
+    </div>
+    <div class="aside">關鍵：服務生（JS 執行緒）<b>幾乎都在「等菜的空檔做別的事」</b>。耗時的 I/O 丟給背後的 libuv 去做，所以單執行緒也能同時招呼很多桌 —— 這就是 Node 高並發的本質。</div>
+  </section>
+
+  <!-- 2. 模擬器 -->
+  <section>
+    <span class="num">DEMO 02 — 核心（這頁的主角）</span>
+    <h2>5 條 queue，看 Event Loop 怎麼選下一個</h2>
+    <p>面試最愛問「猜這段輸出順序」。其實它不是隨機 —— 每種非同步工作被丟進<b>不同的 queue</b>，Event Loop 照<span class="hl">固定優先順序</span>把它們撈出來執行。</p>
+    <p>先按「載入程式」把任務分流到各 queue，再一直按「下一步」，看誰先被撈出來、為什麼：</p>
+
+    <div class="lab">
+      <div class="lab-label">逐步執行，看 queue 流動</div>
+
+      <div class="sim-code" id="simCode">
+<span class="ln" data-l="0"><span class="c-fn">console.log</span>(<span class="c-str">'A'</span>)<span class="c-cmt">              // 同步</span></span>
+<span class="ln" data-l="1"><span class="c-fn">setTimeout</span>(() => log(<span class="c-str">'B'</span>), 0)<span class="c-cmt">    // 計時器</span></span>
+<span class="ln" data-l="2"><span class="c-key">Promise</span>.resolve().then(() => log(<span class="c-str">'C'</span>))<span class="c-cmt"> // microtask</span></span>
+<span class="ln" data-l="3">process.<span class="c-fn">nextTick</span>(() => log(<span class="c-str">'D'</span>))<span class="c-cmt">  // nextTick</span></span>
+<span class="ln" data-l="4"><span class="c-fn">setImmediate</span>(() => log(<span class="c-str">'E'</span>))<span class="c-cmt">     // check</span></span>
+<span class="ln" data-l="5"><span class="c-fn">console.log</span>(<span class="c-str">'F'</span>)<span class="c-cmt">              // 同步</span></span>
+      </div>
+
+      <div class="lanes">
+        <div class="lane" data-q="sync"><div class="lane-head">Call Stack<span class="pri">同步、最先</span></div><div class="lane-items" id="q-sync"></div></div>
+        <div class="lane" data-q="tick"><div class="lane-head">nextTick queue<span class="pri">優先 1</span></div><div class="lane-items" id="q-tick"></div></div>
+        <div class="lane" data-q="micro"><div class="lane-head">microtask (Promise)<span class="pri">優先 2</span></div><div class="lane-items" id="q-micro"></div></div>
+        <div class="lane" data-q="timer"><div class="lane-head">Timers (宏任務)<span class="pri">階段</span></div><div class="lane-items" id="q-timer"></div></div>
+        <div class="lane" data-q="check"><div class="lane-head">Check (setImmediate)<span class="pri">階段</span></div><div class="lane-items" id="q-check"></div></div>
+      </div>
+
+      <div class="sim-out" id="simOut"></div>
+      <div class="sim-step" id="simStep">按「載入程式」開始。</div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="simNext">▶ 載入程式</button>
+        <button class="btn-ghost" id="simReset">重來</button>
+      </div>
+    </div>
+    <div class="aside">輸出順序：<code>A → F → D → C → B → E</code>。<br><b>A、F</b> 同步先跑完 →<b>D</b> 清空 nextTick →<b>C</b> 清空 microtask → 才進入階段輪巡，<b>B</b>（Timers）→<b>E</b>（Check）。<br>記住一句：<b>每做完一塊工作，先把 nextTick 和 microtask 清乾淨，才換下一個階段。</b></div>
+  </section>
+
+  <!-- 3. 六階段流程 -->
+  <section>
+    <span class="num">機制 — 巡邏路線</span>
+    <h2>Event Loop 的六個階段</h2>
+    <p>剛剛「進入階段輪巡」是什麼意思？Event Loop 每一圈會依序經過這六站，每站處理一種 callback：</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body"><h4>Timers</h4><p>執行到期的 <code>setTimeout</code> / <code>setInterval</code> callback。</p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body"><h4>Pending callbacks</h4><p>延後到下一圈的系統 callback（如某些 TCP 錯誤）。</p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body"><h4>Idle / Prepare</h4><p>Node 內部使用，跟我們無關。</p></div>
+      </div>
+      <div class="flow-step poll">
+        <div class="flow-dot">4</div>
+        <div class="flow-body"><h4>Poll（最主要的工作站）</h4><p>取得新的 I/O 事件、執行 I/O callback（讀檔、DB、網路回來的結果都在這收尾）。沒事做時會在這「等一下」。</p></div>
+      </div>
+      <div class="flow-step check">
+        <div class="flow-dot">5</div>
+        <div class="flow-body"><h4>Check</h4><p>執行 <code>setImmediate</code> 的 callback。</p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">6</div>
+        <div class="flow-body"><h4>Close callbacks</h4><p>收尾用，如 <code>socket.on('close', …)</code>。</p></div>
+      </div>
+    </div>
+    <div class="aside">重點不是背滿六站，而是記住<b>主角是 Poll（I/O）</b>，加上前面的 Timers、後面的 Check。而且 —— <b>每兩站之間都會插播一次「清空 nextTick + microtask」</b>。</div>
+  </section>
+
+  <!-- 4. 優先順序速查 -->
+  <section>
+    <span class="num">速查 — 誰先誰後</span>
+    <h2>背這四層優先順序</h2>
+    <p>面試被問「<code>nextTick</code> 跟 <code>Promise.then</code> 誰先？」直接答這張表：</p>
+
+    <div class="prio">
+      <div class="prio-row">
+        <div class="rank" style="background:var(--ink)">0</div>
+        <div class="body"><b>同步程式碼</b><small>整段 script 先一路跑到底，才輪到任何非同步</small></div>
+      </div>
+      <div class="prio-row">
+        <div class="rank" style="background:var(--accent)">1</div>
+        <div class="body"><b>process.nextTick</b><small>自己一條獨立 queue，優先於所有 microtask</small></div>
+      </div>
+      <div class="prio-row">
+        <div class="rank" style="background:var(--purple)">2</div>
+        <div class="body"><b>microtask</b><small>Promise.then / catch / finally、queueMicrotask</small></div>
+      </div>
+      <div class="prio-row">
+        <div class="rank" style="background:var(--blue)">3</div>
+        <div class="body"><b>macrotask（階段）</b><small>Timers 的 setTimeout、Check 的 setImmediate、I/O callback</small></div>
+      </div>
+    </div>
+    <div class="aside">陷阱題：<b>top-level 的 <code>setTimeout(fn,0)</code> 和 <code>setImmediate</code> 誰先？</b>不一定（看程序啟動耗時）。<b>但若兩者都寫在某個 I/O callback 裡，<code>setImmediate</code> 一定先</b> —— 因為 I/O 在 Poll 階段，下一站就是 Check。</div>
+  </section>
+
+  <!-- 5. CPU 阻塞 -->
+  <section>
+    <span class="num">DEMO 03 — 親眼看它卡死</span>
+    <h2>為什麼「不要在主執行緒做重運算」</h2>
+    <p>單執行緒的代價：<b>只要有一塊同步程式碼跑很久，整條 Event Loop 就停擺</b> —— 計時器延遲、新請求進不來、畫面凍住。下面這顆轉圈圈代表「Event Loop 還活著」。</p>
+    <p>按「同步重算」，看轉圈圈<span class="hl">直接卡住約 1.5 秒</span>；再按「切成非同步」，看它幾乎不卡：</p>
+
+    <div class="lab">
+      <div class="lab-label">按按看，盯著轉圈圈</div>
+      <div class="block-stage">
+        <div class="spinner" id="spinner"></div>
+        <div class="block-info">
+          <div class="clock" id="clock">00.000</div>
+          <div class="sub">計時器每 10ms 應該要跳一次</div>
+          <div class="verdict" id="verdict"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="blockBtn" style="background:var(--bad);box-shadow:0 6px 16px -8px var(--bad)">🔥 同步重算（卡主線）</button>
+        <button class="btn-ghost" id="asyncBtn">✅ 切成非同步</button>
+      </div>
+    </div>
+    <div class="aside">同步那顆：轉圈圈完全凍住、計時器跳針 —— 因為 busy loop 霸佔了唯一的執行緒。<br>解法：CPU 密集（影像、加解密、大量計算）丟給 <code>Worker Threads</code>，或把工作切片用 <code>setImmediate</code> 分批做，讓 Event Loop 有空檔喘息。</div>
+  </section>
+
+  <!-- 6. 踩雷 -->
+  <section>
+    <span class="num">別搞混</span>
+    <h2>三個最常見的雷</h2>
+
+    <div class="pitfall">
+      <div class="x">✕</div>
+      <p><b>把 CPU 密集運算放主執行緒。</b> 整個 server 卡住、所有請求一起變慢。重活丟 Worker Threads，或切片讓出執行緒。</p>
+    </div>
+    <div class="pitfall">
+      <div class="x">✕</div>
+      <p><b>無限遞迴呼叫 <code>process.nextTick</code>。</b> nextTick 優先級最高，遞迴它會讓 microtask 和所有階段「餓死」，後面的 I/O 永遠輪不到。要遞迴改用 <code>setImmediate</code>。</p>
+    </div>
+    <div class="pitfall">
+      <div class="x">✕</div>
+      <p><b>以為 <code>setTimeout(fn, 0)</code> 真的是 0ms。</b> 它只是「下一輪 Timers 階段、且至少 0ms 後」才執行，前面排隊的同步、nextTick、microtask 都得先清完。</p>
+    </div>
+  </section>
+
+  <!-- 7. 面試框 -->
+  <section class="interview">
+    <span class="num">FINAL — 面試直接背這段</span>
+    <h2>30 秒講完 Event Loop</h2>
+    <p class="quote">「Node 用<span class="hl">單一 JS 執行緒</span>跑程式，耗時 I/O 交給底層 <span class="hl">libuv</span> 在背景做。Event Loop 輪巡六個階段（timers → pending → poll → check → close），主角是 Poll 收 I/O。重點在優先順序：同步先跑完，接著 <span class="hl">process.nextTick</span>，再來 microtask（Promise），最後才換下一個階段的 macrotask。所以它擅長 <span class="hl">I/O 密集</span>、不擅長 CPU 密集 —— 重運算會卡死整條執行緒，要丟給 Worker Threads。」</p>
+  </section>
+
+  <footer>
+    <div>Event Loop 互動筆記 · 看不懂順序就用按的</div>
+    <div class="links">相關：
+      <a href="Node-04-Cluster與Worker-Threads.html">Node-04 Worker Threads</a>·
+      <a href="Node-09-API變慢的排查方法.html">Node-09 API 變慢</a>·
+      <a href="Node-01-Event-Loop事件迴圈.html">Node-01 文字版</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  /* ===== DEMO 1: 餐廳服務生 ===== */
+  (function(){
+    const tablesEl = document.getElementById('tables');
+    const line = document.getElementById('waiterLine');
+    const btn = document.getElementById('dinerBtn');
+    const reset = document.getElementById('dinerReset');
+    const N = 4;
+    let timers = [];
+
+    function build(){
+      tablesEl.innerHTML = '';
+      for(let i=0;i<N;i++){
+        const c = document.createElement('div');
+        c.className = 'table-cell';
+        c.innerHTML = `<div class="t-emoji">🪑</div><div class="t-state">桌 ${i+1}</div>`;
+        tablesEl.appendChild(c);
+      }
+    }
+    function setState(i, cls, emoji, txt){
+      const c = tablesEl.children[i];
+      c.className = 'table-cell ' + cls;
+      c.querySelector('.t-emoji').textContent = emoji;
+      c.querySelector('.t-state').textContent = txt;
+    }
+    function say(txt){ line.innerHTML = `<span class="w">🧑‍🍳</span><span>${txt}</span>`; }
+    function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+    function T(fn, ms){ timers.push(setTimeout(fn, ms)); }
+
+    function run(){
+      clearTimers(); build();
+      btn.disabled = true;
+      // 服務生依序接每一桌的點餐（同步、很快），廚房在背後做（不同耗時），做好了才回來上菜
+      const cookMs = [1600, 600, 1200, 900]; // 各桌廚房耗時不同
+      say('服務生開始繞桌點餐…');
+      for(let i=0;i<N;i++){
+        T(()=>{
+          setState(i,'serving','🧑‍🍳',`點餐中`);
+          say(`點桌 ${i+1} 的餐 → 立刻丟給廚房，不等！`);
+        }, 500*i + 300);
+        T(()=>{
+          setState(i,'cooking','🍳',`廚房做菜`);
+        }, 500*i + 700);
+        // 廚房做好（背景 I/O 完成）→ 服務生回來上菜
+        T(()=>{
+          setState(i,'done','✅',`上菜完成`);
+          say(`桌 ${i+1} 的菜好了，服務生回來上菜 🍽️`);
+        }, 500*N + cookMs[i]);
+      }
+      T(()=>{
+        say('整場只有一位服務生，卻同時招呼了 4 桌 — 這就是單執行緒高並發。');
+        btn.disabled = false;
+      }, 500*N + Math.max(...cookMs) + 400);
+    }
+    btn.addEventListener('click', run);
+    reset.addEventListener('click', ()=>{ clearTimers(); build(); say('按下面開始營業…'); btn.disabled=false; });
+    build();
+  })();
+
+  /* ===== DEMO 2: Event Loop 模擬器 ===== */
+  (function(){
+    const codeEl = document.getElementById('simCode');
+    const out = document.getElementById('simOut');
+    const stepEl = document.getElementById('simStep');
+    const nextBtn = document.getElementById('simNext');
+    const resetBtn = document.getElementById('simReset');
+    const lanes = {
+      sync: document.getElementById('q-sync'),
+      tick: document.getElementById('q-tick'),
+      micro: document.getElementById('q-micro'),
+      timer: document.getElementById('q-timer'),
+      check: document.getElementById('q-check'),
+    };
+    const laneBox = q => lanes[q].closest('.lane');
+
+    // 整個劇本：每一步描述「做什麼」
+    // phase: 'load' 載入；'run' 執行某 pill
+    const script = [
+      { type:'sync-run', v:'A', line:0, tag:'同步', q:'sync',
+        text:'執行 console.log(\'A\')。同步程式碼一路往下跑，最先輸出。' },
+      { type:'register', v:'B', line:1, q:'timer', tag:'註冊',
+        text:'遇到 setTimeout → 把 callback 丟進 Timers queue，現在不執行，繼續往下。' },
+      { type:'register', v:'C', line:2, q:'micro', tag:'註冊',
+        text:'遇到 Promise.then → 把 callback 丟進 microtask queue。' },
+      { type:'register', v:'D', line:3, q:'tick', tag:'註冊',
+        text:'遇到 process.nextTick → 丟進它專屬的 nextTick queue（最高優先）。' },
+      { type:'register', v:'E', line:4, q:'check', tag:'註冊',
+        text:'遇到 setImmediate → 丟進 Check queue。' },
+      { type:'sync-run', v:'F', line:5, tag:'同步', q:'sync',
+        text:'執行 console.log(\'F\')。同步碼到此跑完，主程式 (script) 結束。' },
+      { type:'run', v:'D', q:'tick', tag:'nextTick',
+        text:'同步跑完！先清 nextTick queue → 執行 D。它優先於所有 microtask。' },
+      { type:'run', v:'C', q:'micro', tag:'microtask',
+        text:'nextTick 清空後，清 microtask queue → 執行 C（Promise.then）。' },
+      { type:'phase', q:'timer', tag:'Timers 階段',
+        text:'microtask 也清空了，正式進入 Event Loop 階段輪巡。第一站 Timers…' },
+      { type:'run', v:'B', q:'timer', tag:'Timers',
+        text:'Timers 階段：setTimeout 到期 → 執行 B。' },
+      { type:'phase', q:'check', tag:'Check 階段',
+        text:'Timers 處理完，經過 Poll（沒有 I/O）→ 進到 Check 階段…' },
+      { type:'run', v:'E', q:'check', tag:'Check',
+        text:'Check 階段：執行 setImmediate → 輸出 E。佇列全空，程式結束。' },
+    ];
+
+    let idx = -1;        // -1 = 尚未載入
+    let loaded = false;
+
+    function clearLanes(){ Object.values(lanes).forEach(l => l.innerHTML=''); }
+    function clearHot(){ document.querySelectorAll('.lane.hot').forEach(l=>l.classList.remove('hot')); document.querySelectorAll('.sim-code .ln.active').forEach(l=>l.classList.remove('active')); }
+    function addPill(q, v){ const p=document.createElement('div'); p.className='pill'; p.textContent=v; p.dataset.v=v; lanes[q].appendChild(p); return p; }
+    function removePill(q, v){ const p=[...lanes[q].children].find(x=>x.dataset.v===v); if(p) p.remove(); }
+    function addOut(v){ const c=document.createElement('div'); c.className='out-cell'; c.textContent=v; out.appendChild(c); }
+    function setStep(tag, text){ stepEl.innerHTML = `<span class="tagk">${tag}</span>${text}`; }
+
+    function reset(){
+      idx = -1; loaded = false;
+      clearLanes(); clearHot();
+      out.innerHTML = '';
+      stepEl.textContent = '按「載入程式」開始。';
+      nextBtn.textContent = '▶ 載入程式';
+      nextBtn.disabled = false;
+    }
+
+    function step(){
+      clearHot();
+      // 第一次點 = 載入（把同步開始）
+      idx++;
+      if (idx >= script.length){
+        setStep('完成', '輸出順序：A → F → D → C → B → E。每做完一塊工作，先清 nextTick + microtask，才換下個階段。');
+        nextBtn.disabled = true;
+        return;
+      }
+      const s = script[idx];
+
+      if (idx === 0){ nextBtn.textContent = '▶ 下一步'; loaded = true; }
+
+      // 高亮對應 lane 與程式碼行
+      laneBox(s.q).classList.add('hot');
+      if (s.line !== undefined){ const ln = codeEl.querySelector(`.ln[data-l="${s.line}"]`); if(ln) ln.classList.add('active'); }
+
+      if (s.type === 'sync-run'){
+        const p = addPill('sync', s.v);
+        setStep(s.tag, s.text);
+        setTimeout(()=>{ p.remove(); addOut(s.v); }, 380);
+      } else if (s.type === 'register'){
+        addPill(s.q, s.v);
+        setStep(s.tag, s.text);
+      } else if (s.type === 'run'){
+        setStep(s.tag, s.text);
+        setTimeout(()=>{ removePill(s.q, s.v); addOut(s.v); }, 200);
+      } else if (s.type === 'phase'){
+        setStep(s.tag, s.text);
+      }
+    }
+
+    nextBtn.addEventListener('click', step);
+    resetBtn.addEventListener('click', reset);
+    reset();
+  })();
+
+  /* ===== DEMO 3: CPU 阻塞 ===== */
+  (function(){
+    const clockEl = document.getElementById('clock');
+    const verdict = document.getElementById('verdict');
+    const blockBtn = document.getElementById('blockBtn');
+    const asyncBtn = document.getElementById('asyncBtn');
+
+    let elapsed = 0;
+    // 用 setInterval 模擬「Event Loop 還在跑就會跳的計時器」
+    setInterval(()=>{
+      elapsed += 0.01;
+      clockEl.textContent = elapsed.toFixed(3).padStart(6,'0');
+    }, 10);
+
+    function fmtNow(){ return performance.now(); }
+
+    // 同步重算：busy loop 霸佔執行緒約 1.5 秒 → 計時器與 spinner 都凍住
+    blockBtn.addEventListener('click', ()=>{
+      verdict.className = 'verdict bad';
+      verdict.textContent = '⏳ 主線被霸佔中…轉圈圈和計時器都凍住！';
+      const t0 = fmtNow();
+      // 強制同步阻塞
+      while (fmtNow() - t0 < 1500){ /* busy */ }
+      verdict.textContent = '😵 卡了 1.5 秒！期間整個 server 都不能回應。';
+    });
+
+    // 非同步：把工作切成小片，用 setTimeout 讓出執行緒 → 幾乎不卡
+    asyncBtn.addEventListener('click', ()=>{
+      verdict.className = 'verdict good';
+      verdict.textContent = '⚙️ 切片處理中…轉圈圈照轉、計時器照跳。';
+      let chunk = 0;
+      function work(){
+        const t0 = fmtNow();
+        while (fmtNow() - t0 < 12){ /* 只忙 12ms 就讓出 */ }
+        chunk++;
+        if (chunk < 120){ setTimeout(work, 0); }   // 讓出執行緒，給 Event Loop 喘息
+        else verdict.textContent = '✅ 一樣的工作量，但全程順暢 — 因為一直讓出執行緒。';
+      }
+      work();
+    });
+  })();
+</script>
+</body>
+</html>

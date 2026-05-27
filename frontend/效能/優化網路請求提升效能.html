@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>優化網路請求</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>請求越少、傳得越小，<em>頁面越快</em></h1>
+    <p class="lede">網路是效能的最大瓶頸之一。<b>減少請求數、壓縮傳輸量、善用快取</b>——這三個方向下手，能讓絕大多數頁面快上一截。</p>
+  </header>
+
+  <section>
+    <span class="num">四個方向</span>
+    <h2>系統化的優化清單</h2>
+    <table>
+      <tr><th>方向</th><th>手段</th><th>效果</th></tr>
+      <tr><td>減少請求數</td><td>合併 CSS/JS、CSS Sprite、inline 小圖</td><td>降低 RTT 往返次數</td></tr>
+      <tr><td>壓縮傳輸量</td><td>Gzip/Brotli、JS/CSS 縮小化（minify）</td><td>減少 bytes 傳輸</td></tr>
+      <tr><td>善用快取</td><td>Cache-Control、ETag、Service Worker</td><td>重複訪客零請求</td></tr>
+      <tr><td>現代協定</td><td>HTTP/2 多工、CDN 就近分發</td><td>降低延遲</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">圖片專項</span>
+    <h2>圖片通常佔流量最大宗</h2>
+    <div class="chips">
+      <div class="chip good">WebP / AVIF<small>比 JPEG 小 25–80%</small></div>
+      <div class="chip good">srcset 響應式<small>依裝置給正確尺寸</small></div>
+      <div class="chip good">loading="lazy"<small>視窗外的圖不先載</small></div>
+      <div class="chip info">CDN<small>從用戶最近節點提供</small></div>
+    </div>
+    <pre><code><span class="tok-com">&lt;!-- 響應式圖片 + 延遲載入 --&gt;</span>
+&lt;img
+  src=<span class="tok-str">"photo-800.webp"</span>
+  srcset=<span class="tok-str">"photo-400.webp 400w, photo-800.webp 800w"</span>
+  sizes=<span class="tok-str">"(max-width: 600px) 400px, 800px"</span>
+  loading=<span class="tok-str">"lazy"</span>
+  alt=<span class="tok-str">"..."</span>
+/&gt;</code></pre>
+  </section>
+
+  <section>
+    <span class="num">API 優化</span>
+    <h2>資料層的精簡</h2>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>只取需要的欄位</b>：REST API 常回傳整個物件，前端只用幾個欄位。可改用 GraphQL 按需請求，或後端提供精簡的 BFF（Backend for Frontend）端點。</p>
+    </div>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p><b>HTTP/2 多工</b>：同一 TCP 連線可並行傳送多個請求，解決 HTTP/1.1 的 head-of-line blocking，讓小資源不互相等待。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Brotli 和 Gzip 怎麼選？</summary><p>Brotli 壓縮率通常比 Gzip 高 15–25%，但需要 HTTPS。現代瀏覽器都支援，伺服器配置後會根據 <code>Accept-Encoding</code> 標頭自動選擇。新專案優先用 Brotli，Gzip 作為 fallback。</p></details>
+      <details><summary>preload 和 prefetch 差在哪？</summary><p><code>rel="preload"</code> 提前下載當前頁面即將需要的關鍵資源（高優先度）；<code>rel="prefetch"</code> 低優先度預下載下一頁可能需要的資源，利用瀏覽器空閒時間。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「優化網路請求從三個方向下手：<span class="hl">減少請求次數</span>——合併資源、延遲載入非必要資源；<span class="hl">壓縮傳輸量</span>——Brotli/Gzip 壓縮、minify、圖片用 WebP/AVIF 加 srcset；<span class="hl">善用快取</span>——靜態資源加 content hash 配長期 max-age、動態資源用 ETag 驗證。上 CDN 降低延遲、HTTP/2 啟用多工，這幾點組合起來就能明顯改善載入效能。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="快取概念與效能提升.html">快取概念</a>
+      <a href="延遲加載概念與效能提升.html">延遲加載</a>
+      <a href="script async defer 的差異說明.html">async / defer</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

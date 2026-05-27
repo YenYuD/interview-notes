@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScript 核心型別觀念</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TypeScript</div>
+    <h1>從 <em>any / unknown / never</em> 到 Mapped Types：型別系統的四個核心地基</h1>
+    <p class="lede">TypeScript 不只是「加了型別的 JavaScript」。<b>any 是逃生口，unknown 是安全門，never 是永遠不存在的值</b>——搞懂這三個特殊型別，再搭配 Mapped Types，你就掌握了 TS 的精髓。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>any vs unknown：都能接受任何值，差在能否操作</h2>
+    <table>
+      <thead><tr><th></th><th><code>any</code></th><th><code>unknown</code></th></tr></thead>
+      <tbody>
+        <tr><td>賦值給它</td><td>✅ 任何值</td><td>✅ 任何值</td></tr>
+        <tr><td>直接操作（呼叫方法等）</td><td>✅ 隨便用，TS 不管</td><td>❌ 必須先 narrowing</td></tr>
+        <tr><td>型別安全</td><td>🚫 完全放棄</td><td>✅ 保留</td></tr>
+        <tr><td>一句話</td><td>逃生口</td><td>安全門</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">// unknown — 使用前必須 narrowing</span>
+<span class="tok-key">let</span> b: <span class="tok-fn">unknown</span> = <span class="tok-str">"hello"</span>;
+<span class="tok-com">// b.toUpperCase(); ❌ 編譯錯誤</span>
+<span class="tok-key">if</span> (<span class="tok-key">typeof</span> b === <span class="tok-str">"string"</span>) {
+  b.toUpperCase(); <span class="tok-com">// ✅ narrowing 後才能操作</span>
+}</code></pre>
+    <div class="callout tip"><span class="ico">💡</span><p><code>unknown</code> 是 top type（所有型別是它的子型別），<code>never</code> 是 bottom type（它是所有型別的子型別），<code>any</code> 則同時是 top 也是 bottom——這讓它「繞過」了整個型別系統。</p></div>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>never：永遠不存在的值，exhaustive check 的利器</h2>
+    <pre><code><span class="tok-com">// 場景 1：一定拋錯 / 無窮迴圈</span>
+<span class="tok-key">function</span> <span class="tok-fn">throwError</span>(msg: <span class="tok-fn">string</span>): <span class="tok-fn">never</span> {
+  <span class="tok-key">throw new</span> Error(msg);
+}
+
+<span class="tok-com">// 場景 2：Exhaustive Check — 新增 case 忘了處理就編譯報錯</span>
+<span class="tok-key">type</span> Shape = <span class="tok-str">"circle"</span> | <span class="tok-str">"square"</span>;
+<span class="tok-key">function</span> <span class="tok-fn">getArea</span>(shape: Shape) {
+  <span class="tok-key">switch</span> (shape) {
+    <span class="tok-key">case</span> <span class="tok-str">"circle"</span>: <span class="tok-key">return</span> Math.PI * 100;
+    <span class="tok-key">case</span> <span class="tok-str">"square"</span>: <span class="tok-key">return</span> 100;
+    <span class="tok-key">default</span>:
+      <span class="tok-key">const</span> _check: <span class="tok-fn">never</span> = shape; <span class="tok-com">// 若漏掉新 case 就報錯</span>
+      <span class="tok-key">return</span> _check;
+  }
+}</code></pre>
+    <div class="aside"><code>never</code> 在 union 中會自動消失：<code>string | never</code> → <code>string</code>。這是 <code>Exclude</code> utility type 的核心機制。</div>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>Type Narrowing 與 Discriminated Unions</h2>
+    <div class="chips">
+      <div class="chip info"><small>typeof</small>原始型別判斷</div>
+      <div class="chip info"><small>instanceof</small>class 實例</div>
+      <div class="chip info"><small>in</small>屬性存在性</div>
+      <div class="chip info"><small>discriminant</small>共同辨識欄位</div>
+    </div>
+    <pre><code><span class="tok-key">type</span> ApiResponse = { status: <span class="tok-str">"success"</span>; data: string }
+                  | { status: <span class="tok-str">"error"</span>; message: string };
+
+<span class="tok-key">function</span> <span class="tok-fn">handle</span>(res: ApiResponse) {
+  <span class="tok-key">switch</span> (res.status) {
+    <span class="tok-key">case</span> <span class="tok-str">"success"</span>: console.log(res.data);    <span class="tok-key">break</span>;
+    <span class="tok-key">case</span> <span class="tok-str">"error"</span>:   console.log(res.message); <span class="tok-key">break</span>;
+  }
+}</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>Discriminated Union 靠共同的「辨識欄位」（status）讓 TS 自動 narrow，不需要手動 <code>as</code> 斷言。</p></div>
+  </section>
+
+  <section>
+    <span class="num">04</span>
+    <h2>Mapped Types：遍歷並轉換型別的語法</h2>
+    <pre><code><span class="tok-com">// 自製 Readonly</span>
+<span class="tok-key">type</span> MyReadonly&lt;T&gt; = {
+  <span class="tok-key">readonly</span> [K <span class="tok-key">in keyof</span> T]: T[K];
+};
+
+<span class="tok-com">// 內建 Utility Types 都是 Mapped Type</span>
+<span class="tok-com">// Partial&lt;T&gt; → [K in keyof T]?: T[K]</span>
+<span class="tok-com">// Required&lt;T&gt; → [K in keyof T]-?: T[K]</span>
+<span class="tok-com">// Record&lt;K,V&gt; → [P in K]: V</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼情況下應該用 unknown 而不是 any？</summary><p>幾乎任何「真的不知道型別」的場景都應該用 <code>unknown</code>：接收外部 API 回傳、<code>JSON.parse</code>、catch block 的 error 物件。<code>any</code> 只在漸進式 JS→TS 遷移時暫時過渡。</p></details>
+      <details><summary>never 在 Exclude 底層怎麼運作？</summary><p><code>type Exclude&lt;T, U&gt; = T extends U ? never : T</code>。對 union 分配運算時，命中條件的成員被換成 <code>never</code>，而 <code>never</code> 在 union 中會自動消失，結果就是被排除了。</p></details>
+      <details><summary>Mapped Type 的 key remapping（as）怎麼用？</summary><p>TS 4.1+ 支援 <code>[K in keyof T as \`get${Capitalize&lt;string & K&gt;}\`]</code>，可在遍歷時重命名 key，用來建 getter/setter 型別非常方便。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「TypeScript 型別系統有幾個關鍵角色：<span class="hl">any 是逃生口，繞過一切型別檢查；unknown 是安全門，接受任何值但使用前必須 narrowing；never 代表永遠不存在的值</span>，常用於拋錯函式和 exhaustive check。此外，Mapped Types 讓你用 <code>[K in keyof T]</code> 遍歷並轉換型別，是 Partial、Readonly 這些 utility types 的底層。搞懂這幾個概念，基本上就掌握了 TS 型別系統的核心邏輯。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="012 何時使用 unknown 型別.html">unknown 型別</a>
+      <a href="009 never 與 void 回傳型別的差異.html">never vs void</a>
+      <a href="014 條件型別 Conditional Types.html">條件型別</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

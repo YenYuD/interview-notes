@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mouseenter vs mouseover</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1><em>mouseenter</em> 不冒泡，<em>mouseover</em> 會冒泡——差一個字，行為完全不同</h1>
+    <p class="lede">兩者都在滑鼠進入元素時觸發，但 <code>mouseover</code> 進入<b>子元素時也會再次觸發</b>，容易造成意外的多次回調。選錯了可能讓 hover 效果閃爍不停。</p>
+  </header>
+
+  <section>
+    <span class="num">關鍵差異</span>
+    <h2>冒泡行為決定觸發次數</h2>
+    <table>
+      <thead><tr><th>屬性</th><th>mouseenter</th><th>mouseover</th></tr></thead>
+      <tbody>
+        <tr><td>冒泡</td><td>❌ 不冒泡</td><td>✅ 會冒泡</td></tr>
+        <tr><td>觸發時機</td><td>僅在進入綁定元素本身時</td><td>進入自身及任何子元素時</td></tr>
+        <tr><td>對應的離開事件</td><td>mouseleave</td><td>mouseout</td></tr>
+        <tr><td>常見用途</td><td>簡單 hover 效果</td><td>事件代理（需判斷 target）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">行為示意</span>
+    <h2>滑鼠從父元素移入子元素時各自的反應</h2>
+    <div class="callout info">
+      <span class="ico">ℹ</span>
+      <p>情境：父元素 div 內有一個子元素 span，滑鼠移入父元素再移入子元素。</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">滑鼠進入父元素 → mouseenter 與 mouseover 都在父元素觸發一次</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">滑鼠移入子元素 → <b>mouseover 再次觸發</b>（子元素冒泡到父元素）；<b>mouseenter 不觸發</b></div>
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>有多個子元素時，<code>mouseover</code> 在每次進入子元素時都會觸發，可能造成效能問題或閃爍。偏好用 <code>mouseenter</code> 做 hover 效果。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>什麼情況下反而需要 mouseover？</summary>
+        <p>想用事件代理在父元素統一處理所有子元素的 hover 時，需要 mouseover（因為它會冒泡）。搭配 <code>event.target</code> 判斷是哪個子元素觸發。</p>
+      </details>
+      <details>
+        <summary>CSS :hover 和 JavaScript mouseenter 有差嗎？</summary>
+        <p>CSS :hover 更簡單高效，不需要 JS，瀏覽器直接處理。JavaScript 的 mouseenter/mouseover 適合需要做複雜邏輯（如計算、資料更新）的場景。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「主要差異在冒泡：<span class="hl">mouseenter 不冒泡</span>，只在滑鼠進入綁定元素本身時觸發一次，適合簡單 hover 效果；<span class="hl">mouseover 會冒泡</span>，每次進入任何子元素都會再次觸發，容易造成多次回調。有巢狀子元素的場景，通常用 mouseenter/mouseleave 更可預測，避免閃爍問題。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="事件監聽器及其使用方法.html">事件監聽器使用方法</a>
+      <a href="JavaScript事件冒泡與瀏覽器行為.html">事件冒泡說明</a>
+      <a href="JavaScript事件代理說明.html">事件代理說明</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

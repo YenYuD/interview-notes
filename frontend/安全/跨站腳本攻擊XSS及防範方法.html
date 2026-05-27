@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XSS 跨站腳本攻擊</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全</div>
+    <h1>使用者輸入被當成<em>程式碼執行</em></h1>
+    <p class="lede">XSS 是攻擊者把惡意腳本注入網頁，在<b>其他使用者的瀏覽器</b>裡執行——偷 cookie、劫持 session、記錄按鍵。根因只有一個：<b>把不可信資料當 HTML/JS 渲染</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 跳脫前後的差別</span>
+    <h2>同一段惡意輸入，渲染成什麼？</h2>
+    <p>假設留言內容是 <code>&lt;img src=x onerror=alert(1)&gt;</code>。切換有沒有跳脫，看它被當資料還是當程式碼：</p>
+
+    <div class="lab">
+      <div class="lab-label">輸出處理</div>
+      <div class="toggle-row" id="row">
+        <button class="on bad" data-k="raw">直接塞 innerHTML（危險）</button>
+        <button data-k="esc">先跳脫 / 用 textContent（安全）</button>
+      </div>
+      <div style="background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:1rem">
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-bottom:.4rem">頁面實際顯示：</div>
+        <div id="render" style="min-height:2rem;font-size:.9rem"></div>
+      </div>
+      <div class="log" id="out" style="max-height:none"></div>
+    </div>
+    <div class="aside">跳脫後，<code>&lt;</code> 變成 <code>&amp;lt;</code>，瀏覽器把它當<b>純文字顯示</b>，而不是建立一個會執行 onerror 的 img 標籤。</div>
+  </section>
+
+  <section>
+    <span class="num">三種類型</span>
+    <h2>注入點在哪</h2>
+    <table>
+      <tr><th>類型</th><th>惡意腳本來源</th></tr>
+      <tr><td>儲存型 Stored</td><td>存進資料庫（留言、貼文），每個讀者都中招</td></tr>
+      <tr><td>反射型 Reflected</td><td>從 URL／請求參數反射回頁面（釣魚連結）</td></tr>
+      <tr><td>DOM 型</td><td>純前端，JS 把不可信資料寫進 DOM</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>防禦三層：① <b>輸出跳脫</b>（最關鍵，框架如 React 預設會做）② <b>CSP</b> 限制可執行的腳本來源 ③ <b>HttpOnly cookie</b> 讓 JS 偷不到 session。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React 就完全免疫 XSS 嗎？</summary><p>預設安全（JSX 會跳脫）。但 <code>dangerouslySetInnerHTML</code>、把使用者資料塞進 <code>href="javascript:"</code> 或直接操作 DOM，仍會中招。</p></details>
+      <details><summary>CSP 怎麼擋 XSS？</summary><p>用 <code>Content-Security-Policy</code> 標頭限制只能載入白名單來源的腳本、禁止 inline script，就算注入成功也跑不起來。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「XSS 是攻擊者把腳本注入網頁、在<span class="hl">他人瀏覽器執行</span>，可偷 cookie、劫持 session。分儲存型、反射型、DOM 型。根因是<span class="hl">把不可信資料當 HTML/JS 渲染</span>。我的防禦是：<span class="hl">輸出一律跳脫</span>（React 預設會做，慎用 dangerouslySetInnerHTML）、設 <span class="hl">CSP</span>、cookie 設 <span class="hl">HttpOnly</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="跨站請求偽造CSRF及防範技術.html">CSRF</a>
+      <a href="內容安全政策CSP概念與安全強化.html">CSP</a>
+      <a href="常見安全標頭及其用途.html">安全標頭</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), render=document.getElementById('render'), out=document.getElementById('out');
+  const payload='<img src=x onerror=alert(1)>';
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function go(k){
+    if(k==='raw'){
+      // 安全地「示意」危險：不真的塞會執行的 HTML，改用視覺標示
+      render.innerHTML='<span style="color:var(--bad)">💥 瀏覽器把它當成真的 &lt;img&gt; 標籤 → onerror 觸發 → alert(1) 執行</span>';
+      out.innerHTML='<div class="ln c-bad">// el.innerHTML = userInput → 注入成功，腳本在使用者瀏覽器執行 ✗</div>';
+    } else {
+      render.textContent = payload; // textContent：當純文字
+      out.innerHTML='<div class="ln c-ok">// el.textContent = userInput（或先 escape）→ 只顯示文字，不執行 ✓</div>';
+    }
+  }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); go(b.dataset.k); });
+  go('raw');
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Object.preventExtensions 用途</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1>只關「進門」：<em>Object.preventExtensions()</em></h1>
+    <p class="lede"><code>Object.preventExtensions()</code> 是三種物件鎖定方法中限制最少的一種：<b>只阻止新增屬性</b>，現有屬性的修改與刪除仍然允許。</p>
+  </header>
+
+  <section>
+    <span class="num">行為說明</span>
+    <h2>防擴展 vs 可修改 vs 可刪除</h2>
+    <pre><code><span class="tok-key">const</span> obj = { name: <span class="tok-str">'John'</span> };
+Object.<span class="tok-fn">preventExtensions</span>(obj);
+
+obj.age = 30;       <span class="tok-com">// ✗ 無法新增新屬性</span>
+console.log(obj.age); <span class="tok-com">// undefined</span>
+
+obj.name = <span class="tok-str">'Jane'</span>;  <span class="tok-com">// ✓ 可修改現有屬性</span>
+<span class="tok-key">delete</span> obj.name;    <span class="tok-com">// ✓ 可刪除現有屬性</span>
+console.log(obj);   <span class="tok-com">// {}</span></code></pre>
+    <div class="aside"><code>Object.isExtensible(obj)</code> 回傳 <code>false</code> 表示已防擴展。</div>
+  </section>
+
+  <section>
+    <span class="num">三種鎖定對照</span>
+    <h2>preventExtensions / seal / freeze 比較</h2>
+    <table>
+      <thead><tr><th>方法</th><th>防新增</th><th>防刪除</th><th>防改值</th></tr></thead>
+      <tbody>
+        <tr><td><code>preventExtensions</code></td><td>✓</td><td>✗</td><td>✗</td></tr>
+        <tr><td><code>seal</code></td><td>✓</td><td>✓</td><td>✗</td></tr>
+        <tr><td><code>freeze</code></td><td>✓</td><td>✓</td><td>✓</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>preventExtensions 可以撤銷嗎？</summary><p>不行。一旦呼叫 <code>Object.preventExtensions()</code>，物件永遠不可擴展，無法逆轉。這和 <code>configurable: false</code> 一樣是單向門。</p></details>
+      <details><summary>實際上什麼時候會用 preventExtensions？</summary><p>比較罕見，通常用在需要「固定物件結構但允許改值」的情境，例如確保 API 回傳物件的 schema 不被呼叫端意外擴充，但允許更新現有欄位。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>Object.preventExtensions()</code> 是三種物件鎖定中限制最少的，<span class="hl">只防止新增屬性</span>，現有屬性仍可修改或刪除。比較常用的是 <code>seal</code>（防新增 / 刪除、可改值）和 <code>freeze</code>（完全唯讀）。三者都是單向操作，無法撤銷。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Object.freeze用途.html">Object.freeze 詳解</a>
+      <a href="Object.seal的用途.html">Object.seal 詳解</a>
+      <a href="JavaScript中可變與不可變物件差異.html">可變 vs 不可變物件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

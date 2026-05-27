@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重置 React 組件狀態</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT STATE</div>
+    <h1>重置狀態：把<em>初始值存起來</em>，需要時呼叫 setter 傳回去</h1>
+    <p class="lede">重置組件狀態的核心做法是把<b>初始值定義成常數</b>，並在重置時呼叫 <b><code>setState(initialState)</code></b>。如果初始值來自 props 或動態來源，改用函式包裝。</p>
+  </header>
+
+  <section>
+    <span class="num">最常見做法</span>
+    <h2>定義 initialState，重置時傳回去</h2>
+    <pre><code><span class="tok-key">import</span> { useState } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-com">// ✅ 把初始值定義在組件外（穩定引用）</span>
+<span class="tok-key">const</span> initialState = { count: <span class="tok-num">0</span>, text: <span class="tok-str">''</span> };
+
+<span class="tok-key">function</span> <span class="tok-fn">MyComponent</span>() {
+  <span class="tok-key">const</span> [state, setState] = <span class="tok-fn">useState</span>(initialState);
+
+  <span class="tok-key">const</span> resetState = () =&gt; <span class="tok-fn">setState</span>(initialState);
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;p&gt;計數：{state.count}&lt;/p&gt;
+      &lt;button onClick={resetState}&gt;重置&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>把 <code>initialState</code> 定義在組件<b>外部</b>（模組頂層），可確保引用穩定，避免每次渲染都建立新物件造成不必要的比較問題。</p></div>
+  </section>
+
+  <section>
+    <span class="num">動態初始值</span>
+    <h2>初始值來自 props？用函式包裝</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">MyComponent</span>({ initialCount }) {
+  <span class="tok-com">// 函式形式：useState 只在首次渲染呼叫它（lazy initializer）</span>
+  <span class="tok-key">const</span> getInitialState = () =&gt; ({ count: initialCount, text: <span class="tok-str">''</span> });
+  <span class="tok-key">const</span> [state, setState] = <span class="tok-fn">useState</span>(getInitialState);
+
+  <span class="tok-key">const</span> resetState = () =&gt; <span class="tok-fn">setState</span>(<span class="tok-fn">getInitialState</span>());
+
+  <span class="tok-key">return</span> (
+    &lt;div&gt;
+      &lt;p&gt;計數：{state.count}&lt;/p&gt;
+      &lt;button onClick={resetState}&gt;重置&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">進階技巧</span>
+    <h2>用 key prop 強制重置整個組件</h2>
+    <div class="aside">除了手動呼叫 setState，還有一個更乾淨的方式：在父組件改變子組件的 <code>key</code>，React 會卸載舊實例、掛載全新組件——所有 state 都回到初始值，不需要寫任何重置邏輯。適合「對話框關閉後清空所有欄位」這類場景。</div>
+    <pre><code><span class="tok-com">// 父組件：改變 key 即可完全重置 Form</span>
+<span class="tok-key">const</span> [formKey, setFormKey] = <span class="tok-fn">useState</span>(<span class="tok-num">0</span>);
+&lt;Form key={formKey} /&gt;
+&lt;button onClick={() =&gt; <span class="tok-fn">setFormKey</span>(k =&gt; k + <span class="tok-num">1</span>)}&gt;重置表單&lt;/button&gt;</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>改 key 和手動 setState(initialState) 有什麼差別？</summary><p>改 <code>key</code> 會讓 React 完全<b>卸載再掛載</b>組件，所有 state、ref、副作用都重設，適合「完全歸零」的情境。手動 <code>setState(initialState)</code> 只重設 state，組件實例和 DOM 保留，適合「保留組件生命週期但清空資料」的情境。</p></details>
+      <details><summary>為什麼 initialState 建議定義在組件外部？</summary><p>定義在組件內部時，每次渲染都會重新建立這個物件（新引用），雖然不影響正確性，但若把它放進 dependency array（如 useEffect、useMemo）會造成不必要的重新執行。放外部可確保引用穩定。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「重置 React 組件狀態有兩種主要方式：一是把初始值定義為常數，呼叫 <span class="hl">setState(initialState)</span> 傳回初始值；若初始值來自 props，改用函式 <code>getInitialState()</code> 包裝。另一種更乾淨的方式是在父組件<span class="hl">改變子組件的 key</span>，React 會完全重新掛載組件，適合需要徹底歸零的場景，不需要在組件內寫任何重置邏輯。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋在 React 中調用 `useState` 的 setter 函式時會發生什麼事.html">useState setter 行為</a>
+      <a href="為什麼 React 建議不要直接修改（mutate）State？.html">不要直接修改 State</a>
+      <a href="React 中 `key` prop 的用途是什麼？.html">key prop 的用途</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

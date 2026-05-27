@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Object.seal 用途</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1>結構鎖死，值還能改：<em>Object.seal()</em></h1>
+    <p class="lede"><code>Object.seal()</code> 封印物件的<b>結構</b>——不能新增也不能刪除屬性；但現有屬性的<b>值</b>仍可修改，這是它和 freeze 的關鍵差異。</p>
+  </header>
+
+  <section>
+    <span class="num">封印行為</span>
+    <h2>什麼能做、什麼不能</h2>
+    <pre><code><span class="tok-key">const</span> person = { name: <span class="tok-str">'Alice'</span>, age: 25 };
+Object.<span class="tok-fn">seal</span>(person);
+
+person.name = <span class="tok-str">'Bob'</span>;   <span class="tok-com">// ✓ 可修改現有值</span>
+person.age = 30;     <span class="tok-com">// ✓</span>
+
+person.city = <span class="tok-str">'Taipei'</span>; <span class="tok-com">// ✗ 不能新增</span>
+<span class="tok-key">delete</span> person.name;   <span class="tok-com">// ✗ 不能刪除</span>
+
+console.log(person);  <span class="tok-com">// { name: 'Bob', age: 30 }</span>
+console.log(Object.<span class="tok-fn">isSealed</span>(person)); <span class="tok-com">// true</span></code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>seal 在內部做了兩件事：呼叫 <code>Object.preventExtensions()</code>，並把所有現有屬性的 <code>configurable</code> 設為 <code>false</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">三種鎖定對照</span>
+    <h2>seal 在哪個位置？</h2>
+    <table>
+      <thead><tr><th>方法</th><th>防新增</th><th>防刪除</th><th>防改值</th></tr></thead>
+      <tbody>
+        <tr><td><code>preventExtensions</code></td><td>✓</td><td>✗</td><td>✗</td></tr>
+        <tr><td><strong>seal</strong></td><td>✓</td><td>✓</td><td>✗</td></tr>
+        <tr><td><code>freeze</code></td><td>✓</td><td>✓</td><td>✓</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>seal 後還能用 Object.defineProperty 改 writable 嗎？</summary><p>不行。seal 把所有屬性設為 <code>configurable: false</code>，因此無法再修改描述符，包括 <code>writable</code>。若要讓值不可改，改用 <code>freeze</code>。</p></details>
+      <details><summary>什麼情境適合用 seal 而非 freeze？</summary><p>當你希望物件結構穩定（不被意外新增 / 刪除屬性），但邏輯上值需要更新時。例如一個 config 物件，欄位集合是固定的，但每個欄位的值會根據環境動態設定。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>Object.seal()</code> 封印物件結構：<span class="hl">不能新增屬性、不能刪除屬性</span>，但現有屬性的值仍可修改。底層它做了 preventExtensions 再把所有屬性的 <code>configurable</code> 設為 false。和 <code>freeze</code> 的差別就是：seal 鎖結構，freeze 連值也鎖。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Object.freeze用途.html">Object.freeze 詳解</a>
+      <a href="Object.preventExtensions的用途.html">Object.preventExtensions</a>
+      <a href="JavaScript中可變與不可變物件差異.html">可變 vs 不可變物件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

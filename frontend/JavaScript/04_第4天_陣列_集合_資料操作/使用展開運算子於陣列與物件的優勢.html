@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>展開運算子優勢</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 展開運算子</div>
+    <h1>不可變操作的最佳拍檔，<em>展開讓程式碼意圖自己說話</em></h1>
+    <p class="lede">展開運算子的優勢不只是「少打幾個字」。它讓你<b>不修改原始資料</b>就能複製、合併、新增——這正是 React state 更新、Redux reducer 所需要的思維方式。</p>
+  </header>
+
+  <section>
+    <span class="num">陣列優勢</span>
+    <h2>複製、合併、插入，全部不改原陣列</h2>
+    <pre><code><span class="tok-key">const</span> base = [1, 2, 3];
+
+<span class="tok-com">// 複製</span>
+<span class="tok-key">const</span> copy = [...base];
+
+<span class="tok-com">// 合併（在任意位置插入）</span>
+<span class="tok-key">const</span> merged = [...base, ...[4, 5]];   <span class="tok-com">// [1,2,3,4,5]</span>
+<span class="tok-key">const</span> prepend = [0, ...base];           <span class="tok-com">// [0,1,2,3]</span>
+
+<span class="tok-com">// 不改 base，base 仍是 [1, 2, 3]</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">物件優勢</span>
+    <h2>更新單一欄位，而不破壞整個物件</h2>
+    <pre><code><span class="tok-key">const</span> user = { name: <span class="tok-str">'Alice'</span>, age: 25, role: <span class="tok-str">'user'</span> };
+
+<span class="tok-com">// 更新 role，其他欄位保持不變</span>
+<span class="tok-key">const</span> admin = { ...user, role: <span class="tok-str">'admin'</span> };
+
+<span class="tok-com">// 合併兩個設定物件（後者優先）</span>
+<span class="tok-key">const</span> config = { ...defaults, ...overrides };</code></pre>
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p>這種「展開原物件、覆蓋特定屬性」的模式在 React 的 state 更新中隨處可見：<code>setState(prev => ({ ...prev, loading: false }))</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>展開運算子是深拷貝還是淺拷貝？</summary><p>淺拷貝。第一層的原始值會被複製，但第一層的物件或陣列仍是共享參考。更新巢狀資料時需逐層展開，或改用 <code>structuredClone()</code>。</p></details>
+      <details><summary>為什麼說展開運算子利於函式式編程？</summary><p>函式式編程強調<b>不可變性（immutability）</b>，避免直接修改資料。展開運算子讓你建立「修改了某個部分的新資料」，而原始資料完全不動，符合純函式的精神。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「展開運算子的核心優勢是<span class="hl">不修改原始資料就能完成複製、合併、局部更新</span>。對陣列可以在任意位置插入；對物件可以覆蓋特定屬性同時保留其他欄位。這讓 React state 更新、Redux reducer 的 immutable 寫法變得非常直觀。要注意它是淺拷貝，巢狀資料需要逐層處理。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="展開運算子及其用法.html">展開運算子用法</a>
+      <a href="展開運算子概念與應用.html">展開運算子概念與應用</a>
+      <a href="淺拷貝與深拷貝差異說明.html">淺拷貝與深拷貝</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

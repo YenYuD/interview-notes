@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Splitting</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 效能</div>
+    <h1>程式碼分割：讓使用者<em>只下載當前用到的程式碼</em></h1>
+    <p class="lede">打包後的 bundle 越大，初始載入越慢。<b>Code Splitting</b> 把 bundle 拆成多個 chunk，用到時才按需載入（lazy load）。React 內建 <b>React.lazy + Suspense</b> 讓這件事變得極簡。</p>
+  </header>
+
+  <section>
+    <span class="num">實作</span>
+    <h2>React.lazy + Suspense：三行搞定懶載入</h2>
+    <pre><code><span class="tok-key">import</span> { lazy, Suspense } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-com">// 動態 import → Webpack/Vite 自動拆成獨立 chunk</span>
+<span class="tok-key">const</span> Analytics = <span class="tok-fn">lazy</span>(() =&gt; <span class="tok-key">import</span>(<span class="tok-str">'./Analytics'</span>));
+<span class="tok-key">const</span> Settings  = <span class="tok-fn">lazy</span>(() =&gt; <span class="tok-key">import</span>(<span class="tok-str">'./Settings'</span>));
+
+<span class="tok-key">function</span> <span class="tok-fn">App</span>() {
+  <span class="tok-key">return</span> (
+    &lt;Suspense fallback={&lt;Spinner /&gt;}&gt;
+      &lt;Routes&gt;
+        &lt;Route path=<span class="tok-str">"/analytics"</span> element={&lt;Analytics /&gt;} /&gt;
+        &lt;Route path=<span class="tok-str">"/settings"</span> element={&lt;Settings /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>最佳分割點是<b>路由層級</b>：每個頁面一個 chunk，使用者導航到哪裡才載入哪個頁面的程式碼。</p></div>
+  </section>
+
+  <section>
+    <span class="num">分割策略</span>
+    <h2>什麼時候分割、分割多細</h2>
+    <div class="chips">
+      <div class="chip good"><small>適合分割</small>路由頁面、只在特定場景出現的重型組件（圖表庫、富文字編輯器）</div>
+      <div class="chip bad"><small>不值得分割</small>極小的組件、首屏必須立即顯示的 UI</div>
+    </div>
+    <div class="aside">過度分割反而增加 HTTP 請求數，網路延遲的成本可能超過節省的 JS 解析時間。用 Chrome DevTools 的 Coverage 分析才能找出真正值得分割的位置。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React.lazy 和動態 import() 有什麼關係？</summary><p><code>React.lazy</code> 接受一個回傳 <code>import()</code> 的函式。動態 <code>import()</code> 是 ES 標準，讓打包工具（Webpack/Vite）自動拆分程式碼；<code>React.lazy</code> 則把非同步載入的模組包裝成可在 JSX 使用的組件。</p></details>
+      <details><summary>預取（Prefetch）和懶載入有什麼差別？</summary><p>懶載入是「用到時才載入」；預取是「目前不需要，但預判快要用到，提前在背景下載」。可以在 <code>import()</code> 加 webpack magic comment：<code>/* webpackPrefetch: true */</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「程式碼分割把大 bundle 拆成多個 chunk，使用者只下載當前需要的程式碼，縮短初始載入時間。React 內建 <code>React.lazy()</code> 搭配動態 <code>import()</code>，讓打包工具自動拆分，再用 <span class="hl">Suspense 提供 fallback UI</span>。最佳實踐是<span class="hl">按路由拆分</span>，每個頁面獨立 chunk；重型第三方函式庫（如圖表庫）也適合拆出去。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React Suspense 是什麼？它實現了什麼功能？.html">React Suspense</a>
+      <a href="解釋 React 應用程式的伺服器端渲染（SSR）及其優點.html">SSR</a>
+      <a href="你如何處理 React 應用程式中的非同步資料載入？.html">非同步資料載入</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字串轉數字四種方法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 型別轉換</div>
+    <h1>字串轉數字，<em>四種方法各有適用場景</em></h1>
+    <p class="lede">JavaScript 提供 <b>Number()</b>、<b>parseInt()</b>、<b>parseFloat()</b>、<b>一元加號 +</b> 四種轉換方式，差別在於能否處理小數、基底（radix）以及非數字字串的行為。</p>
+  </header>
+
+  <section>
+    <span class="num">四種方法對照</span>
+    <h2>各方法行為比較</h2>
+    <table>
+      <tr><th>方法</th><th>整數</th><th>浮點數</th><th><code>"123abc"</code></th><th>基底支援</th></tr>
+      <tr><td><code>Number()</code></td><td>123</td><td>123.45</td><td><b style="color:var(--bad)">NaN</b></td><td>—</td></tr>
+      <tr><td><code>parseInt()</code></td><td>123</td><td>123（截斷小數）</td><td><b style="color:var(--good)">123</b></td><td>✓（第二參數）</td></tr>
+      <tr><td><code>parseFloat()</code></td><td>123</td><td>123.45</td><td><b style="color:var(--good)">123</b></td><td>—</td></tr>
+      <tr><td><code>+str</code></td><td>123</td><td>123.45</td><td><b style="color:var(--bad)">NaN</b></td><td>—</td></tr>
+    </table>
+    <pre><code>parseInt(<span class="tok-str">'1010'</span>, <span class="tok-num">2</span>); <span class="tok-com">// 10 — 以二進位解析</span>
+Number(<span class="tok-str">'  42  '</span>);   <span class="tok-com">// 42 — 會去除前後空白</span>
++<span class="tok-str">'abc'</span>;           <span class="tok-com">// NaN</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">選用指引</span>
+    <h2>什麼情況用哪個</h2>
+    <div class="chips">
+      <div class="chip good"><small>Number()</small>嚴格轉換，結果必須是純數字字串</div>
+      <div class="chip good"><small>parseInt()</small>解析帶有非數字尾綴的字串（如 CSS px 值）</div>
+      <div class="chip info"><small>parseFloat()</small>需要保留小數的解析</div>
+      <div class="chip info"><small>+str</small>簡短寫法，但可讀性差，不建議在生產代碼用</div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>parseInt 不傳第二個 radix 參數時，遇到 <code>'08'</code> 等情況可能有意外行為。建議永遠傳入 <code>10</code>：<code>parseInt(str, 10)</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>如何偵測轉換失敗（NaN）？</summary><p>用 <code>Number.isNaN(value)</code>，不要用全域的 <code>isNaN()</code>，因為後者會先強制轉型再判斷，<code>isNaN('abc')</code> 回傳 true 但 <code>Number.isNaN('abc')</code> 回傳 false。</p></details>
+      <details><summary>空字串轉數字是什麼？</summary><p><code>Number('')</code> 和 <code>+''</code> 都是 <code>0</code>，這容易造成意外判斷，需留意。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「主要四種方法。<span class="hl">Number() 和一元加號最嚴格</span>，字串含非數字就回傳 NaN；parseInt/parseFloat 會從頭解析到遇到非數字為止，比較寬鬆。parseInt 還支援第二個 radix 參數指定進位制。實務上我習慣用 Number() 做嚴格轉換，用 parseInt(str, 10) 解析帶尾綴的數值字串，並一定要搭配 <span class="hl">Number.isNaN()</span> 檢查轉換結果。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中的各種資料類型.html">各種資料類型</a>
+      <a href="如何檢查變數的資料類型.html">如何檢查資料類型</a>
+      <a href="JavaScript變數null、undefined與未宣告的差異.html">null/undefined/未宣告</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

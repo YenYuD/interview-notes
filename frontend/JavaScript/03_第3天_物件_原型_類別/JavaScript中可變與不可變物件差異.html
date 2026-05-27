@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>可變 vs 不可變物件</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1><em>const 防不了</em>的事，Object.freeze 才能做</h1>
+    <p class="lede">JS 物件預設是可變的（mutable）。<b>const</b> 只鎖住變數的參考，屬性仍可改；真正的不可變需要 <b>Object.freeze()</b>——但它只凍表層，巢狀物件仍然可變。</p>
+  </header>
+
+  <section>
+    <span class="num">const vs freeze</span>
+    <h2>三層保護的能力差異</h2>
+    <table>
+      <thead><tr><th>操作</th><th>預設物件</th><th>const</th><th>Object.freeze()</th></tr></thead>
+      <tbody>
+        <tr><td>重新賦值給變數</td><td>✓</td><td>✗ TypeError</td><td>✗ TypeError（若同時用 const）</td></tr>
+        <tr><td>修改現有屬性值</td><td>✓</td><td>✓</td><td>✗ 靜默失敗 / strict 拋錯</td></tr>
+        <tr><td>新增屬性</td><td>✓</td><td>✓</td><td>✗ 靜默失敗</td></tr>
+        <tr><td>刪除屬性</td><td>✓</td><td>✓</td><td>✗ 靜默失敗</td></tr>
+        <tr><td>修改巢狀物件屬性</td><td>✓</td><td>✓</td><td>✓（淺層凍結的盲點！）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">深層凍結</span>
+    <h2>freeze 是淺的，巢狀要手動遞迴</h2>
+    <pre><code><span class="tok-key">const</span> obj = Object.<span class="tok-fn">freeze</span>({ user: { name: <span class="tok-str">'Alice'</span> } });
+obj.user.name = <span class="tok-str">'Bob'</span>;   <span class="tok-com">// 成功！巢狀物件沒被凍</span>
+console.log(obj.user.name); <span class="tok-com">// 'Bob'</span>
+
+<span class="tok-com">// 深凍實作</span>
+<span class="tok-key">function</span> <span class="tok-fn">deepFreeze</span>(obj) {
+  Object.keys(obj).<span class="tok-fn">forEach</span>(key => {
+    <span class="tok-key">if</span> (<span class="tok-key">typeof</span> obj[key] === <span class="tok-str">'object'</span> &amp;&amp; obj[key] !== <span class="tok-key">null</span>)
+      <span class="tok-fn">deepFreeze</span>(obj[key]);
+  });
+  <span class="tok-key">return</span> Object.<span class="tok-fn">freeze</span>(obj);
+}</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>實務上大量使用不可變物件時，建議改用 <strong>Immer</strong> 或 <strong>Immutable.js</strong>，它們用結構共享避免重複複製的效能問題。</p></div>
+  </section>
+
+  <section>
+    <span class="num">為何需要不可變性</span>
+    <h2>不可變帶來的三個好處</h2>
+    <div class="chips">
+      <div class="chip good">
+        <strong>易於比較</strong>
+        <small>React / Redux 靠參考相等（===）快速判斷物件是否變動，不可變讓這個假設成立</small>
+      </div>
+      <div class="chip good">
+        <strong>可預測</strong>
+        <small>函式接收不可變輸入，不必擔心被呼叫端偷偷改掉，易於推理與測試</small>
+      </div>
+      <div class="chip info">
+        <strong>防禦性複製</strong>
+        <small>不可變物件可安全共享參考，不必每次傳入都先深複製一份</small>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Object.freeze 和 Object.seal 有何差異？</summary><p>兩者都防止新增 / 刪除屬性；但 <code>freeze</code> 還會把現有屬性設為 <code>writable: false</code>，讓值也不能改。<code>seal</code> 封住結構，但值仍可改。</p></details>
+      <details><summary>原始值（string、number）是不可變的嗎？</summary><p>是的。<code>'hello'.toUpperCase()</code> 不修改原字串，而是回傳新字串。原始值本質上是不可變的。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 物件預設可變，<code>const</code> 只防止變數被重新指派，屬性仍可改。<span class="hl">Object.freeze()</span> 才能真正凍結屬性值，防止新增、修改、刪除——但只到第一層，巢狀物件不受影響。React / Redux 大量依賴不可變物件做高效變動偵測，真正需要深層不可變時建議搭配 Immer 等函式庫。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Object.freeze用途.html">Object.freeze 詳解</a>
+      <a href="Object.seal的用途.html">Object.seal 詳解</a>
+      <a href="JavaScript物件屬性標誌與描述符.html">屬性標誌與描述符</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

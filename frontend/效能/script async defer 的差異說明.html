@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>script async defer 差異</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>script 放哪、加什麼屬性，<em>決定頁面能多快渲染</em></h1>
+    <p class="lede">預設 <code>&lt;script&gt;</code> 會阻塞 HTML 解析，讓頁面「凍住」等腳本跑完。<b>async</b> 和 <b>defer</b> 讓下載和解析平行進行，差別在於<b>執行時機</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">三種行為對照</span>
+    <h2>一圖勝千言</h2>
+    <table>
+      <tr><th>屬性</th><th>下載時機</th><th>執行時機</th><th>執行順序</th></tr>
+      <tr><td><code>&lt;script&gt;</code></td><td>遇到立即下載（阻塞解析）</td><td>下載完立即執行（阻塞解析）</td><td>按出現順序</td></tr>
+      <tr><td><code>async</code></td><td>與 HTML 解析並行</td><td>下載完立即執行（可能中斷解析）</td><td>不保證順序</td></tr>
+      <tr><td><code>defer</code></td><td>與 HTML 解析並行</td><td>HTML 解析完成後（DOMContentLoaded 前）</td><td>按出現順序</td></tr>
+    </table>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>&lt;script&gt;</b>：HTML ▓▓▓ — 等下載 — 執行 — HTML 繼續。每次都凍住。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>async</b>：HTML ▓▓▓▓▓▓▓▓ 同時下載，下載完就插進來執行，順序不定。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>defer</b>：HTML ▓▓▓▓▓▓▓▓ 同時下載，HTML 全部解析完才按順序執行。</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">選哪個</span>
+    <h2>場景決定屬性</h2>
+    <div class="chips">
+      <div class="chip bad">預設 &lt;script&gt;<small>需要立即執行且無法移動位置時</small></div>
+      <div class="chip info">async<small>獨立腳本：Analytics、廣告</small></div>
+      <div class="chip good">defer<small>依賴 DOM 或需要順序的主程式</small></div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>現代做法：<b>大多數腳本用 defer</b>，放在 <code>&lt;head&gt;</code> 或 <code>&lt;body&gt;</code> 底部皆可。獨立的第三方腳本（GA、廣告）用 async。不依賴 DOM、需要最快執行的關鍵腳本用預設 script 但盡量精簡。</p>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>async 和 defer 只對有 src 的外部腳本有效</b>，行內腳本（inline script）會被忽略這兩個屬性。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>type="module" 的腳本預設行為是？</summary><p>模組腳本預設就是 defer 行為——非同步下載、HTML 解析完才依序執行，且模組腳本只執行一次。加 async 的話會變成下載完立即執行（類似 async 行為）。</p></details>
+      <details><summary>defer 腳本保證在 DOMContentLoaded 前執行，對嗎？</summary><p>對。defer 腳本全部執行完畢後，才觸發 DOMContentLoaded 事件，所以可以安全操作 DOM。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三種屬性決定腳本的下載和執行時機。<span class="hl">預設 script 阻塞 HTML 解析</span>，遇到就停下來等；<span class="hl">async 和 defer 都跟 HTML 並行下載</span>，差別在執行：async 下載完立即執行、順序不固定，適合獨立腳本；<span class="hl">defer 等 HTML 解析完再依序執行</span>，適合需要 DOM 的主程式。現代專案大部分腳本我都用 defer。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="延遲加載概念與效能提升.html">延遲加載</a>
+      <a href="優化網路請求提升效能.html">優化網路請求</a>
+      <a href="快取概念與效能提升.html">快取概念</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>迭代器與生成器</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JAVASCRIPT</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT / ES6+</div>
+    <h1>暫停、繼續、<em>按需產值</em>——<br>生成器改變非同步的寫法</h1>
+    <p class="lede"><b>迭代器</b>定義「逐一取值」的協定，<b>生成器</b>（<code>function*</code> + <code>yield</code>）讓你用同步風格寫出可暫停的函式。從惰性求值、無限序列到分批非同步資料流，都是它們的舞台。</p>
+  </header>
+
+  <section>
+    <span class="num">迭代器協定</span>
+    <h2>實作 <code>next()</code> 就能被 for...of 消費</h2>
+    <p>只要一個物件有 <code>[Symbol.iterator]()</code> 方法回傳含 <code>next()</code> 的物件，它就是可迭代（iterable）的。</p>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">Range</span> {
+  <span class="tok-fn">constructor</span>(from, to) { <span class="tok-key">this</span>.from = from; <span class="tok-key">this</span>.to = to; }
+  [<span class="tok-fn">Symbol.iterator</span>]() {
+    <span class="tok-key">let</span> cur = <span class="tok-key">this</span>.from, end = <span class="tok-key">this</span>.to;
+    <span class="tok-key">return</span> {
+      <span class="tok-fn">next</span>() {
+        <span class="tok-key">return</span> cur <= end
+          ? { value: cur++, done: <span class="tok-key">false</span> }
+          : { value: <span class="tok-key">undefined</span>, done: <span class="tok-key">true</span> };
+      }
+    };
+  }
+}
+[...<span class="tok-key">new</span> <span class="tok-fn">Range</span>(1, 3)]; <span class="tok-com">// [1, 2, 3]</span></code></pre>
+    <div class="callout info"><span class="ico">i</span><p>內建支援迭代器的有：Array、String、Map、Set、NodeList，以及函式的 <code>arguments</code>。它們都能直接 <code>for...of</code> 或展開（<code>...</code>）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">生成器</span>
+    <h2>用 <code>function*</code> 和 <code>yield</code> 實作可暫停函式</h2>
+    <p>上面的 Range 用生成器改寫，程式碼更簡潔：</p>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">Range</span> {
+  <span class="tok-fn">constructor</span>(from, to) { <span class="tok-key">this</span>.from = from; <span class="tok-key">this</span>.to = to; }
+  *[<span class="tok-fn">Symbol.iterator</span>]() {
+    <span class="tok-key">for</span> (<span class="tok-key">let</span> i = <span class="tok-key">this</span>.from; i <= <span class="tok-key">this</span>.to; i++) <span class="tok-key">yield</span> i;
+  }
+}
+<span class="tok-com">// 無限序列也沒問題，消費端控制停止</span>
+<span class="tok-key">function</span>* <span class="tok-fn">naturals</span>() { <span class="tok-key">let</span> n = 0; <span class="tok-key">while</span>(<span class="tok-key">true</span>) <span class="tok-key">yield</span> n++; }
+<span class="tok-key">const</span> gen = <span class="tok-fn">naturals</span>();
+gen.<span class="tok-fn">next</span>().value; <span class="tok-com">// 0</span>
+gen.<span class="tok-fn">next</span>().value; <span class="tok-com">// 1</span></code></pre>
+
+    <div class="chips">
+      <div class="chip good">惰性求值<small>只在 next() 時才計算，節省記憶體</small></div>
+      <div class="chip good">無限序列<small>while(true) + yield，不會佔滿記憶體</small></div>
+      <div class="chip good">可雙向傳值<small>next(val) 可把值傳回生成器內部</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">非同步生成器</span>
+    <h2>分批拉取 API 資料的優雅寫法</h2>
+    <pre><code><span class="tok-key">async function</span>* <span class="tok-fn">fetchPages</span>(url, pages = 3) {
+  <span class="tok-key">for</span> (<span class="tok-key">let</span> p = 1; p <= pages; p++) {
+    <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-fn">fetch</span>(`${url}?_page=${p}`);
+    <span class="tok-key">yield await</span> res.<span class="tok-fn">json</span>();  <span class="tok-com">// 每次 await 一頁</span>
+  }
+}
+
+<span class="tok-key">for await</span> (<span class="tok-key">const</span> batch <span class="tok-key">of</span> <span class="tok-fn">fetchPages</span>(<span class="tok-str">'/api/items'</span>)) {
+  <span class="tok-fn">processBatch</span>(batch);  <span class="tok-com">// 拿到一頁就處理，不用等全部</span>
+}</code></pre>
+    <div class="callout tip"><span class="ico">✓</span><p>Redux-Saga 的 <code>put</code>/<code>take</code>/<code>call</code> effect 底層正是生成器；它讓非同步副作用的測試變得極容易（只需 call <code>next()</code> 驗證每一步 effect）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>迭代器和可迭代物件（iterable）有什麼差別？</summary>
+        <p><strong>迭代器</strong>是有 <code>next()</code> 方法的物件；<strong>可迭代物件</strong>是有 <code>[Symbol.iterator]()</code> 方法並回傳迭代器的物件。生成器函式執行後回傳的物件兩者兼具：它既有 <code>next()</code>，也有 <code>[Symbol.iterator]</code> 回傳自身，所以可以直接丟進 <code>for...of</code>。</p>
+      </details>
+      <details>
+        <summary>生成器可以提前終止嗎？</summary>
+        <p>可以。呼叫 <code>gen.return(value)</code> 會終止生成器並觸發 <code>finally</code> 清理邏輯；呼叫 <code>gen.throw(error)</code> 會在生成器當前暫停的位置拋出例外。<code>for...of</code> 用 <code>break</code> 跳出時，引擎會自動呼叫 <code>.return()</code>。</p>
+      </details>
+      <details>
+        <summary>async/await 和生成器有什麼關係？</summary>
+        <p>歷史上，<code>async/await</code> 在語言層面是以生成器為概念基礎設計的（早期用 co 函式庫搭配生成器模擬）。現代引擎 <code>async/await</code> 是原生實作，效能更好；但生成器在需要「外部控制」執行步驟的場景（如 Redux-Saga）仍不可取代。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「迭代器是實作了 <span class="hl">next()</span> 方法、回傳 <code>{ value, done }</code> 的物件；任何帶有 <code>[Symbol.iterator]</code> 的物件都可以用 <code>for...of</code> 消費。生成器（<code>function*</code> + <code>yield</code>）是建立迭代器最簡潔的方式，特點是執行可以<span class="hl">暫停並在呼叫 next() 時繼續</span>，非常適合惰性求值、無限序列與分批非同步資料流。<code>async function*</code> 搭配 <code>for await...of</code> 是處理分頁 API 或串流資料的優雅方案。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中Symbol的用途.html">Symbol 的用途</a>
+      <a href="JavaScript代理的用途.html">Proxy 代理</a>
+      <a href="遞迴及其在JavaScript中的應用.html">遞迴</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

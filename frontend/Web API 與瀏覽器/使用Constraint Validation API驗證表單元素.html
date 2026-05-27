@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constraint Validation API</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>Constraint Validation API：<em>瀏覽器內建</em>的表單驗證機制</h1>
+    <p class="lede">不需要自己寫驗證邏輯，HTML5 內建的 Constraint Validation API 讓你用 <b>checkValidity()</b> 和 <b>setCustomValidity()</b> 輕鬆實現表單驗證，搭配原生 <code>required</code>、<code>pattern</code> 等屬性更強大。</p>
+  </header>
+
+  <section>
+    <span class="num">核心方法</span>
+    <h2>四個最常用的 API</h2>
+    <table>
+      <thead><tr><th>方法 / 屬性</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>checkValidity()</code></td><td>驗證元素，回傳 true/false，不顯示提示</td></tr>
+        <tr><td><code>reportValidity()</code></td><td>驗證並顯示瀏覽器內建錯誤提示</td></tr>
+        <tr><td><code>setCustomValidity(msg)</code></td><td>設定自訂錯誤訊息，空字串表示有效</td></tr>
+        <tr><td><code>validity</code></td><td>物件，含 valueMissing、typeMismatch 等布林屬性</td></tr>
+        <tr><td><code>validationMessage</code></td><td>回傳目前的驗證錯誤訊息</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">實作範例</span>
+    <h2>攔截送出 + 自訂驗證邏輯</h2>
+    <pre><code><span class="tok-key">const</span> form = document.getElementById(<span class="tok-str">'myForm'</span>);
+<span class="tok-key">const</span> username = document.getElementById(<span class="tok-str">'username'</span>);
+
+form.addEventListener(<span class="tok-str">'submit'</span>, (e) => {
+  <span class="tok-com">// 自訂驗證：帳號不能包含空白</span>
+  <span class="tok-key">if</span> (username.value.includes(<span class="tok-str">' '</span>)) {
+    username.setCustomValidity(<span class="tok-str">'帳號不能包含空白'</span>);
+  } <span class="tok-key">else</span> {
+    username.setCustomValidity(<span class="tok-str">''</span>); <span class="tok-com">// 清除自訂訊息</span>
+  }
+
+  <span class="tok-key">if</span> (!form.checkValidity()) {
+    e.preventDefault();
+    form.reportValidity(); <span class="tok-com">// 顯示瀏覽器內建提示</span>
+  }
+});</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>呼叫 <code>setCustomValidity('訊息')</code> 後，元素就會變成無效狀態。驗證通過時務必用 <code>setCustomValidity('')</code>（空字串）清除，否則表單永遠送不出去。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>validity 物件有哪些屬性？</summary>
+        <p>常用的有：<code>valueMissing</code>（required 但空值）、<code>typeMismatch</code>（格式錯誤如 email）、<code>patternMismatch</code>（不符合 pattern）、<code>tooShort/tooLong</code>（長度）、<code>valid</code>（整體是否有效）。</p>
+      </details>
+      <details>
+        <summary>原生驗證 vs 自訂 JS 驗證，怎麼選？</summary>
+        <p>簡單的格式驗證（required、email、min/max）優先用原生 HTML 屬性；需要非同步驗證（如後端確認帳號是否重複）或複雜業務邏輯，才用 JS 搭配 setCustomValidity。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Constraint Validation API 是 HTML5 內建的表單驗證機制。核心用法是：<span class="hl">checkValidity()</span> 靜默驗證回傳 true/false；<span class="hl">reportValidity()</span> 驗證並顯示原生錯誤提示；<span class="hl">setCustomValidity()</span> 設定自訂訊息，傳空字串表示有效。配合 validity 物件可以細分具體哪個驗證條件失敗。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何阻止事件的預設行為.html">阻止表單預設送出</a>
+      <a href="使用Fetch API發送HTTP請求.html">用 Fetch 送出表單資料</a>
+      <a href="DOM中屬性與屬性值的差異.html">DOM Attribute vs Property</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

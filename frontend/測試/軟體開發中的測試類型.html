@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>軟體測試類型</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>四種測試類型：從<em>函式到使用者</em>的完整防線</h1>
+    <p class="lede">Unit、Integration、System、Acceptance——四層測試各有不同的驗證對象。<b>懂得區分它們</b>，才能在有限資源下做出正確的測試策略。</p>
+  </header>
+
+  <section>
+    <span class="num">四層一覽</span>
+    <h2>從小到大，從快到慢</h2>
+    <table>
+      <tr><th>類型</th><th>驗證對象</th><th>執行者</th><th>自動化</th></tr>
+      <tr><td><b>Unit 單元</b></td><td>個別函式或元件</td><td>開發者</td><td>✅ 全自動</td></tr>
+      <tr><td><b>Integration 整合</b></td><td>模組/服務間的互動</td><td>開發者</td><td>✅ 全自動</td></tr>
+      <tr><td><b>System 系統</b></td><td>完整整合後的整個系統</td><td>QA 團隊</td><td>部分自動</td></tr>
+      <tr><td><b>Acceptance 驗收</b></td><td>是否符合業務需求（UAT）</td><td>使用者/PM</td><td>多為手動</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">各層說明</span>
+    <h2>每層在防什麼問題</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">U</div>
+        <div class="flow-body">
+          <h4>Unit 單元測試</h4>
+          <p>最小粒度，每個函式獨立測。外部依賴全 mock，速度最快。<b>防：函式邏輯錯誤、邊界值問題</b>。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">I</div>
+        <div class="flow-body">
+          <h4>Integration 整合測試</h4>
+          <p>驗兩個以上模組接在一起還能不能合作。例如 API route + Database layer。<b>防：介面不合、資料格式不一致</b>。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">S</div>
+        <div class="flow-body">
+          <h4>System 系統測試</h4>
+          <p>部署到測試環境後，對整個系統做黑盒測試（不看程式碼內部）。<b>防：環境設定問題、服務整合後的非預期行為</b>。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">A</div>
+        <div class="flow-body">
+          <h4>Acceptance 驗收測試（UAT）</h4>
+          <p>由業務方確認：「這是我要的嗎？」。通常是上線前最後一關。<b>防：開發偏離業務需求</b>。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>System 測試和 E2E 測試是同一件事嗎？</summary><p>不完全是。E2E 強調使用者操作流程（從前端到後端全通）；System 測試強調整個系統符合「需求規格」。E2E 可以視為 System 測試的一種實作方式。</p></details>
+      <details><summary>小團隊沒有 QA，測試策略怎麼調整？</summary><p>把 System 測試層合併進 E2E（Cypress/Playwright 跑關鍵流程），由開發者維護。把驗收測試簡化成 demo 給 PM 確認。重心還是放在 Unit + Integration，這兩層 ROI 最高。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「軟體測試我分四層：<span class="hl">Unit 測函式邏輯</span>、<span class="hl">Integration 測模組串接</span>、System 測部署後整體行為、Acceptance 確認符合業務需求。越靠上層越貼近真實使用者，但也越慢越難自動化。實務上我會把大部分精力放在 Unit 和 Integration，System 用 E2E 工具覆蓋關鍵流程，Acceptance 讓 PM 在 staging 環境確認。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="單元測試整合測試與端對端測試差異.html">測試金字塔</a>
+      <a href="JavaScript測試工具.html">JavaScript 測試工具</a>
+      <a href="程式碼覆蓋率與測試品質評估.html">程式碼覆蓋率</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>判斷物件是否為空</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1><em>空物件不是 falsy</em>：可靠判斷 {} 的正確方式</h1>
+    <p class="lede"><code>if (!obj)</code> 判斷不了空物件——空物件是 truthy！<b>Object.keys(obj).length === 0</b> 才是最通用、最直覺的標準做法。</p>
+  </header>
+
+  <section>
+    <span class="num">方法對照</span>
+    <h2>四種做法的差異</h2>
+    <table>
+      <thead><tr><th>方法</th><th>寫法</th><th>備註</th></tr></thead>
+      <tbody>
+        <tr><td><code>Object.keys()</code></td><td><code>Object.keys(obj).length === 0</code></td><td>最常用；只看自身可列舉屬性</td></tr>
+        <tr><td><code>Object.entries()</code></td><td><code>Object.entries(obj).length === 0</code></td><td>同上，語意更明確</td></tr>
+        <tr><td><code>Object.values()</code></td><td><code>Object.values(obj).length === 0</code></td><td>功能等同，選一個一致使用</td></tr>
+        <tr><td><code>for...in</code></td><td>迴圈沒執行則為空</td><td>搭配 hasOwnProperty 可排除繼承屬性</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-key">const</span> <span class="tok-fn">isEmpty</span> = (obj) => Object.keys(obj).length === 0;
+
+console.log(<span class="tok-fn">isEmpty</span>({}));            <span class="tok-com">// true</span>
+console.log(<span class="tok-fn">isEmpty</span>({ a: 1 }));      <span class="tok-com">// false</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">邊界情況</span>
+    <h2>這些情形要注意</h2>
+    <div class="callout warn"><span class="ico">⚠️</span><p><strong>不可列舉屬性</strong>：若物件有用 <code>Object.defineProperty</code> 定義的不可列舉屬性，<code>Object.keys()</code> 不會列出，可能誤判為空。</p></div>
+    <div class="callout info"><span class="ico">ℹ️</span><p><strong>繼承屬性</strong>：以上方法都只看自身屬性，不含從原型繼承的屬性。<code>for...in</code> 加 <code>hasOwnProperty</code> 確保一致行為。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>JSON.stringify(obj) === '{}' 能判斷空物件嗎？</summary><p>可以，但不建議：它不處理不可列舉屬性，且效能比 Object.keys 差；若物件有 toJSON 方法，結果也可能被覆蓋。</p></details>
+      <details><summary>如何判斷一個值既不是 null/undefined 又是空物件？</summary><p><code>obj !== null && typeof obj === 'object' && Object.keys(obj).length === 0</code>——先排除 null（typeof null === 'object' 是 JS 歷史 bug），再檢查 keys。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「空物件 <code>{}</code> 是 truthy，不能用 <code>if (!obj)</code> 判斷。最可靠的方式是 <span class="hl">Object.keys(obj).length === 0</span>，只看自身可列舉屬性。若需考慮不可列舉屬性，改用 <code>Object.getOwnPropertyNames(obj).length === 0</code>。使用前記得先排除 null，因為 <code>typeof null === 'object'</code> 是個陷阱。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何檢查物件是否具有特定屬性.html">檢查物件是否有特定屬性</a>
+      <a href="JavaScript物件屬性標誌與描述符.html">屬性標誌與描述符</a>
+      <a href="物件屬性存取：點記法與中括號記法差異.html">點記法 vs 中括號記法</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單例模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>整個程式<em>只能有一個</em>實例</h1>
+    <p class="lede">單例模式保證一個類別只被實例化一次，並提供全域存取點。<b>Logger、設定物件、DB 連線池</b>是最常見的應用場景。</p>
+  </header>
+
+  <section>
+    <span class="num">核心機制</span>
+    <h2>三個關鍵特性</h2>
+    <div class="chips">
+      <div class="chip good">單一實例<small>只建立一次，後續回傳相同參考</small></div>
+      <div class="chip info">全域存取<small>透過靜態方法 getInstance() 取得</small></div>
+      <div class="chip info">延遲初始化<small>第一次需要時才建立（Lazy init）</small></div>
+    </div>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">Singleton</span> {
+  <span class="tok-key">static</span> #instance = <span class="tok-key">null</span>; <span class="tok-com">// 私有靜態屬性</span>
+
+  <span class="tok-key">static</span> <span class="tok-fn">getInstance</span>() {
+    <span class="tok-key">if</span> (!Singleton.#instance) {
+      Singleton.#instance = <span class="tok-key">new</span> Singleton();
+    }
+    <span class="tok-key">return</span> Singleton.#instance;
+  }
+
+  <span class="tok-fn">constructor</span>() { <span class="tok-key">this</span>.createdAt = Date.now(); }
+}
+
+<span class="tok-key">const</span> a = Singleton.<span class="tok-fn">getInstance</span>();
+<span class="tok-key">const</span> b = Singleton.<span class="tok-fn">getInstance</span>();
+console.log(a === b); <span class="tok-com">// true</span></code></pre>
+
+    <div class="aside">
+      <b>ES Module 天生就是單例：</b>同一模組在同一執行環境只會被載入一次，<code>export</code> 的物件即全域唯一。實務上直接 <code>export const logger = new Logger()</code> 就能達到同等效果。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">互動實驗</span>
+    <h2>多次取得，永遠是同一個實例</h2>
+    <div class="lab">
+      <div class="lab-label">Live Demo</div>
+      <p style="font-size:0.88rem;color:var(--ink-soft);margin-bottom:1rem;">每次點擊「取得實例」都會呼叫 <code>getInstance()</code>，觀察回傳的 <code>createdAt</code> 時間戳是否相同。</p>
+      <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+        <button class="btn-primary" id="get-btn">取得實例</button>
+        <button class="btn-ghost" id="reset-btn">重置（重新載入 Class）</button>
+      </div>
+      <div class="log" id="singleton-log">
+        <span class="ln empty">點擊「取得實例」開始…</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">使用場景 vs 陷阱</span>
+    <h2>何時用、何時避免</h2>
+    <table>
+      <thead><tr><th>場景</th><th>建議</th></tr></thead>
+      <tbody>
+        <tr><td>Logger、錯誤追蹤（Sentry）</td><td>✅ 適合，全程唯一狀態</td></tr>
+        <tr><td>設定物件（Config）</td><td>✅ 適合，避免多份設定衝突</td></tr>
+        <tr><td>資料庫 / WebSocket 連線</td><td>✅ 適合，節省資源</td></tr>
+        <tr><td>業務邏輯物件</td><td>⚠️ 謹慎，易產生隱性共享狀態</td></tr>
+        <tr><td>單元測試中的依賴</td><td>❌ 難以 mock，測試間互相污染</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>全域狀態是雙面刃：</b>方便存取但難以追蹤誰修改了狀態；在 React 等元件化框架中，優先用 Context 或狀態管理庫取代裸的 Singleton，保持資料流可追蹤。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>JavaScript 的 ES Module 如何天然實現單例？</summary>
+        <p>ES Module 在同一 JS 執行環境（同一 <code>realm</code>）只會被求值一次，之後的 <code>import</code> 都得到快取的模組。因此 <code>export const db = new Database()</code> 天生就是單例，不需要手動實作 <code>getInstance</code>。</p>
+      </details>
+      <details>
+        <summary>單例模式對單元測試有何影響？</summary>
+        <p>Singleton 持有全域狀態，測試 A 的副作用可能污染測試 B。解法是在測試前後重置狀態（或注入測試用假物件），或改用依賴注入（DI）讓外部傳入實例，而非讓類別自己管理唯一性。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「單例模式確保一個類別只存在一個實例，透過靜態的 <span class="hl">getInstance()</span> 方法回傳，後續呼叫都拿到同一個物件參考。常見應用是 Logger、設定物件、DB 連線池。在現代 JavaScript 中，<span class="hl">ES Module 本身就是單例</span>——同一模組只會載入一次，所以直接 export 一個實例即可。要注意的是全域狀態讓單元測試難以隔離，需要搭配依賴注入或在測試前後重置狀態。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="觀察者模式與應用場景.html">觀察者模式</a>
+      <a href="工廠模式及其應用.html">工廠模式</a>
+      <a href="設計模式及其重要性.html">設計模式總覽</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  // Singleton simulation
+  let instance = null;
+  let callCount = 0;
+
+  function SimSingleton() {
+    this.createdAt = new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    this.id = Math.random().toString(36).slice(2, 7);
+  }
+
+  function getInstance() {
+    if (!instance) {
+      instance = new SimSingleton();
+    }
+    return instance;
+  }
+
+  const log = document.getElementById('singleton-log');
+
+  function addLine(text, cls) {
+    const empties = log.querySelectorAll('.empty');
+    empties.forEach(e => e.remove());
+    const ln = document.createElement('span');
+    ln.className = 'ln ' + (cls || '');
+    ln.textContent = text;
+    log.appendChild(ln);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  document.getElementById('get-btn').addEventListener('click', () => {
+    callCount++;
+    const obj = getInstance();
+    const isFirst = callCount === 1 && instance === obj && log.querySelectorAll('.ln:not(.empty)').length === 0;
+    const created = log.querySelectorAll('.ln').length === 0 || (callCount === 1);
+
+    addLine(`呼叫 #${callCount}  →  id: ${obj.id}  |  createdAt: ${obj.createdAt}`, callCount === 1 ? 'c-ok' : 'c-dim');
+    if (callCount > 1) {
+      addLine('  ✓ 相同實例（id 與 createdAt 未變）', 'c-ok');
+    } else {
+      addLine('  ★ 首次呼叫，建立新實例', 'c-req');
+    }
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    instance = null;
+    callCount = 0;
+    log.innerHTML = '<span class="ln c-bad">實例已重置，下次呼叫將重新建立</span>';
+  });
+})();
+</script>
+</body>
+</html>

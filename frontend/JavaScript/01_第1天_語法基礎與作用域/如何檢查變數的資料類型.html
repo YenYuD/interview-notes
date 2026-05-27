@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如何檢查資料類型</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 資料類型</div>
+    <h1>typeof 不夠用：<em>null、陣列、NaN 各有專屬檢查法</em></h1>
+    <p class="lede"><code>typeof</code> 是最常用的類型判斷工具，但它有幾個著名的盲點。<b>null 回傳 'object'、陣列也是 'object'</b>，遇到這些情況需要用對應的專屬方法。</p>
+  </header>
+
+  <section>
+    <span class="num">typeof 速查</span>
+    <h2>各類型的 typeof 結果與例外</h2>
+    <table>
+      <tr><th>值</th><th>typeof</th><th>注意事項</th></tr>
+      <tr><td><code>42</code></td><td><code>'number'</code></td><td></td></tr>
+      <tr><td><code>'hello'</code></td><td><code>'string'</code></td><td></td></tr>
+      <tr><td><code>true</code></td><td><code>'boolean'</code></td><td></td></tr>
+      <tr><td><code>undefined</code></td><td><code>'undefined'</code></td><td></td></tr>
+      <tr><td><code>null</code></td><td><code>'object'</code></td><td>⚠️ 歷史 bug，需另外處理</td></tr>
+      <tr><td><code>[]</code></td><td><code>'object'</code></td><td>⚠️ 用 Array.isArray()</td></tr>
+      <tr><td><code>function(){}</code></td><td><code>'function'</code></td><td>物件的子類型</td></tr>
+      <tr><td><code>Symbol()</code></td><td><code>'symbol'</code></td><td></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">專屬檢查法</span>
+    <h2>特殊值的正確偵測方式</h2>
+    <pre><code><span class="tok-com">// 檢查 null</span>
+value === <span class="tok-key">null</span>
+
+<span class="tok-com">// 檢查陣列</span>
+Array.isArray(value)
+
+<span class="tok-com">// 檢查 NaN（Number.isNaN 比 isNaN 精確）</span>
+Number.isNaN(value)
+
+<span class="tok-com">// 檢查 undefined（安全，即使未宣告也不報錯）</span>
+<span class="tok-key">typeof</span> value === <span class="tok-str">'undefined'</span>
+
+<span class="tok-com">// 同時檢查 null 和 undefined</span>
+value == <span class="tok-key">null</span> <span class="tok-com">// 利用寬鬆相等</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>全域 <code>isNaN('abc')</code> 回傳 true（先強制轉型），但 <code>Number.isNaN('abc')</code> 回傳 false（不轉型）。檢查 NaN 請用 <code>Number.isNaN()</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>instanceof 和 typeof 的差別？</summary><p>typeof 回傳原始類型字串；instanceof 檢查物件是否在某個建構函式的原型鏈上（<code>obj instanceof Array</code>）。instanceof 在跨 iframe 環境可能失效，Array.isArray 更可靠。</p></details>
+      <details><summary>Object.prototype.toString 能做什麼？</summary><p>可以得到更精確的類型字串：<code>Object.prototype.toString.call([]) → '[object Array]'</code>，能區分 null、undefined、Array、Date 等，比 typeof 更精細。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「typeof 是主要工具，但有幾個例外必須記：<span class="hl">typeof null 是 'object'（歷史 bug）</span>，陣列的 typeof 也是 'object'。所以 null 要用 <code>=== null</code> 判斷，陣列要用 <code>Array.isArray()</code>，NaN 要用 <code>Number.isNaN()</code> 而不是全域 isNaN（因為全域版本會先強制轉型）。需要更精細的類型識別時，可用 <code>Object.prototype.toString.call(value)</code>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中的各種資料類型.html">各種資料類型</a>
+      <a href="JavaScript變數null、undefined與未宣告的差異.html">null/undefined/未宣告</a>
+      <a href="JavaScript字串轉數字方法.html">字串轉數字方法</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

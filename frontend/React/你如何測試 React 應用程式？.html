@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>測試 React 應用程式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 測試</div>
+    <h1>三層測試金字塔：從<em>組件單元</em>到<em>端對端流程</em>的完整策略</h1>
+    <p class="lede">React 測試以 <b>Jest</b>（測試執行器）+ <b>React Testing Library</b>（以使用者視角渲染組件）為主力，再搭配 <b>Cypress</b> 跑 E2E 流程。三層覆蓋讓你在速度與信心之間取得平衡。</p>
+  </header>
+
+  <section>
+    <span class="num">測試工具</span>
+    <h2>三個層次對應三種工具</h2>
+    <table>
+      <thead><tr><th>層次</th><th>工具</th><th>測試目標</th><th>速度</th></tr></thead>
+      <tbody>
+        <tr><td>單元測試</td><td>Jest + RTL</td><td>單一組件渲染與邏輯</td><td>最快</td></tr>
+        <tr><td>整合測試</td><td>Jest + RTL</td><td>多組件互動、狀態流動</td><td>中等</td></tr>
+        <tr><td>E2E 測試</td><td>Cypress</td><td>完整使用者流程</td><td>最慢</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>React Testing Library 的核心原則：<b>以使用者能感知的方式查詢元素</b>（優先用 <code>getByRole</code>、<code>getByText</code>，而非 class 或 id），讓測試更貼近真實使用行為。</p></div>
+  </section>
+
+  <section>
+    <span class="num">單元 ＋ 整合測試</span>
+    <h2>Jest + React Testing Library</h2>
+    <pre><code><span class="tok-com">// 單元測試：確認組件正確渲染</span>
+<span class="tok-key">import</span> { render, screen } <span class="tok-key">from</span> <span class="tok-str">'@testing-library/react'</span>;
+<span class="tok-key">import</span> MyComponent <span class="tok-key">from</span> <span class="tok-str">'./MyComponent'</span>;
+
+<span class="tok-fn">test</span>(<span class="tok-str">'顯示正確文字'</span>, () =&gt; {
+  <span class="tok-fn">render</span>(&lt;MyComponent /&gt;);
+  <span class="tok-fn">expect</span>(screen.<span class="tok-fn">getByText</span>(<span class="tok-str">'Hello, World!'</span>)).<span class="tok-fn">toBeInTheDocument</span>();
+});
+
+<span class="tok-com">// 整合測試：模擬使用者互動後驗證 UI 更新</span>
+<span class="tok-key">import</span> { render, fireEvent, screen } <span class="tok-key">from</span> <span class="tok-str">'@testing-library/react'</span>;
+
+<span class="tok-fn">test</span>(<span class="tok-str">'點擊按鈕後更新子組件'</span>, () =&gt; {
+  <span class="tok-fn">render</span>(&lt;ParentComponent /&gt;);
+  <span class="tok-fn">fireEvent</span>.<span class="tok-fn">click</span>(screen.<span class="tok-fn">getByText</span>(<span class="tok-str">'更新子組件'</span>));
+  <span class="tok-fn">expect</span>(screen.<span class="tok-fn">getByText</span>(<span class="tok-str">'子組件已更新'</span>)).<span class="tok-fn">toBeInTheDocument</span>();
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">E2E ＆ 快照</span>
+    <h2>Cypress 與 Snapshot 測試</h2>
+    <pre><code><span class="tok-com">// Cypress E2E：模擬真實登入流程</span>
+<span class="tok-fn">describe</span>(<span class="tok-str">'登入流程'</span>, () =&gt; {
+  <span class="tok-fn">it</span>(<span class="tok-str">'應導向 dashboard'</span>, () =&gt; {
+    cy.<span class="tok-fn">visit</span>(<span class="tok-str">'/login'</span>);
+    cy.<span class="tok-fn">get</span>(<span class="tok-str">'input[name="username"]'</span>).<span class="tok-fn">type</span>(<span class="tok-str">'user'</span>);
+    cy.<span class="tok-fn">get</span>(<span class="tok-str">'input[name="password"]'</span>).<span class="tok-fn">type</span>(<span class="tok-str">'password'</span>);
+    cy.<span class="tok-fn">get</span>(<span class="tok-str">'button[type="submit"]'</span>).<span class="tok-fn">click</span>();
+    cy.<span class="tok-fn">url</span>().<span class="tok-fn">should</span>(<span class="tok-str">'include'</span>, <span class="tok-str">'/dashboard'</span>);
+  });
+});</code></pre>
+    <div class="aside">快照測試（Snapshot）用 <code>expect(tree).toMatchSnapshot()</code> 記錄組件的渲染輸出，後續變更時會 diff 比對。適合防止意外的 UI 迴歸，但過多快照會讓測試維護成本上升。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React Testing Library 為什麼不建議用 class selector 查詢元素？</summary><p>RTL 的設計哲學是「測試使用者能感知的行為，而不是實作細節」。用 class 或 data-testid 查詢，若組件重構但行為不變，測試可能誤報失敗。優先用 <code>getByRole</code>（ARIA role）、<code>getByText</code>、<code>getByLabelText</code>，讓測試更具韌性。</p></details>
+      <details><summary>什麼情況下需要 mock？</summary><p>當測試涉及外部依賴（API 呼叫、計時器、瀏覽器 API）時用 Jest 的 <code>jest.mock()</code> 或 <code>jest.spyOn()</code>。隔離外部依賴讓測試穩定、可重複。API mock 也可用 <b>MSW（Mock Service Worker）</b>，更貼近真實 HTTP 行為。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 測試我用三層策略：<span class="hl">Jest + React Testing Library</span> 處理單元和整合測試——RTL 讓我以使用者視角查詢元素，而不是實作細節；<span class="hl">Cypress</span> 負責端對端流程，驗證完整使用者旅程。快照測試適合防止 UI 迴歸，但不能取代行為測試。測試優先用 <code>getByRole</code>、<code>getByText</code> 查詢，讓測試貼近真實行為。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的錯誤邊界（error boundaries）是做什麼用的？.html">錯誤邊界</a>
+      <a href="你如何除錯（debug）React 應用程式？.html">除錯 React</a>
+      <a href="你如何將 React 應用程式在地化（localize）？.html">應用程式在地化</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

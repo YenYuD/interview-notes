@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>call 與 apply 的差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式・this 控制</div>
+    <h1>同樣借 <em>this</em>，差在參數怎麼傳：<em>call vs apply</em></h1>
+    <p class="lede"><code>call</code> 和 <code>apply</code> 都能讓你指定函式執行時的 <b>this</b>，差別只有一個：<b>call 逐一列舉參數，apply 傳入陣列</b>。ES6 展開運算子出現後，apply 的使用場景大幅縮減。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>同樣的 this，不同的參數格式</h2>
+    <table>
+      <tr><th></th><th><code>call(thisArg, a, b, c)</code></th><th><code>apply(thisArg, [a, b, c])</code></th></tr>
+      <tr><td>參數形式</td><td>逐一列舉（comma-separated）</td><td>陣列一次傳入</td></tr>
+      <tr><td>執行時機</td><td>立即執行</td><td>立即執行</td></tr>
+      <tr><td>記憶法</td><td><b>C</b>all → <b>C</b>ommas</td><td><b>A</b>pply → <b>A</b>rray</td></tr>
+    </table>
+    <pre><code>function add(a, b) { return a + b; }
+
+add.call(null, 1, 2);      // 3 — 參數逐一列舉
+add.apply(null, [1, 2]);   // 3 — 參數包成陣列
+
+// ES6 之後，apply 可用展開運算子取代
+add.call(null, ...[1, 2]); // 3</code></pre>
+  </section>
+
+  <section>
+    <span class="num">使用情境</span>
+    <h2>什麼時候真的需要它們？</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>借用方法（Method Borrowing）</small>
+        <pre><code>function greet() {
+  console.log(`Hi, I'm ${this.name}`);
+}
+greet.call({ name: 'Alice' }); // Hi, I'm Alice</code></pre>
+      </div>
+      <div class="chip info">
+        <small>apply 合併陣列（老寫法）</small>
+        <pre><code>const a = [1, 2, 3], b = [4, 5, 6];
+// 等同 a.push(...b)
+Array.prototype.push.apply(a, b);</code></pre>
+      </div>
+    </div>
+    <div class="callout tip"><span class="ico">✅</span><p>現代 JavaScript 中，<code>apply</code> 最常見的功能（把陣列展開為參數）幾乎都被<b>展開運算子 <code>...</code></b> 取代，call 反而更常見。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>call / apply 和 bind 有什麼不同？</summary><p><code>call</code>/<code>apply</code> 立即執行並返回結果；<code>bind</code> 回傳一個綁定了 this 的<b>新函式</b>，不立即執行，適合做事件處理器或回呼。</p></details>
+      <details><summary>箭頭函式能用 call / apply 改變 this 嗎？</summary><p>不能。箭頭函式的 this 在定義時就詞法綁定，<code>call</code>/<code>apply</code>/<code>bind</code> 都無法覆蓋它。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>call</code> 和 <code>apply</code> 都能在呼叫函式時<span class="hl">明確指定 this 的值</span>，兩者立即執行、行為相同，唯一差別是參數格式：<code>call</code> 逐一列舉，<code>apply</code> 傳陣列——口訣是 <span class="hl">C 代表 Commas，A 代表 Array</span>。ES6 後，apply 的陣列場景幾乎被展開運算子取代，但借用方法時兩者都還很常見。與 <code>bind</code> 的差別是 bind 不立即執行，返回新函式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋 JavaScript 的 Function.prototype.bind.html">Function.prototype.bind</a>
+      <a href="this關鍵字常見陷阱.html">this 常見陷阱</a>
+      <a href="解釋JavaScript中this的運作原理.html">this 運作原理</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

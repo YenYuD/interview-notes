@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 測試工具</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>選對工具，測試才<em>不是負擔</em></h1>
+    <p class="lede">Jest、Mocha、Jasmine、Cypress 各有定位。<b>不是誰比誰好，是誰最適合這個場景</b>——理解差異，才能在面試和實際專案中做出正確選擇。</p>
+  </header>
+
+  <section>
+    <span class="num">工具全覽</span>
+    <h2>四大工具怎麼選</h2>
+    <table>
+      <tr><th>工具</th><th>定位</th><th>強項</th><th>典型用途</th></tr>
+      <tr><td><b>Jest</b></td><td>全功能框架</td><td>零配置、快照測試、內建 mock</td><td>React/Node.js 專案首選</td></tr>
+      <tr><td><b>Vitest</b></td><td>Vite 生態全功能</td><td>與 Vite 同配置、速度極快</td><td>Vite 專案直接替換 Jest</td></tr>
+      <tr><td><b>Mocha</b></td><td>測試執行器</td><td>彈性高、可搭任意斷言庫</td><td>需要客製化的後端/函式庫</td></tr>
+      <tr><td><b>Jasmine</b></td><td>BDD 框架</td><td>內建 spy/mock，無依賴</td><td>Angular 預設、老專案</td></tr>
+      <tr><td><b>Cypress</b></td><td>E2E 框架</td><td>真實瀏覽器、時間旅行除錯</td><td>前端整合與 E2E 測試</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">💡</span><p>2024 年新專案：<b>Vite 生態用 Vitest，其他用 Jest</b>；E2E 首選 Cypress 或 Playwright。Mocha/Jasmine 多見於既有專案維護。</p></div>
+  </section>
+
+  <section>
+    <span class="num">語法對照</span>
+    <h2>Jest vs Mocha+Chai</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>Jest（內建斷言）</small>
+        <pre><code>test(<span class="tok-str">'adds 1+2'</span>, () =&gt; {
+  <span class="tok-fn">expect</span>(<span class="tok-fn">sum</span>(1,2)).<span class="tok-fn">toBe</span>(3);
+});</code></pre>
+      </div>
+      <div class="chip info">
+        <small>Mocha + Chai（組合式）</small>
+        <pre><code><span class="tok-fn">describe</span>(<span class="tok-str">'sum'</span>, () =&gt; {
+  <span class="tok-fn">it</span>(<span class="tok-str">'adds 1+2'</span>, () =&gt; {
+    <span class="tok-fn">expect</span>(<span class="tok-fn">sum</span>(1,2)).to.<span class="tok-fn">equal</span>(3);
+  });
+});</code></pre>
+      </div>
+    </div>
+    <p>Jest 自帶斷言（<code>expect().toBe()</code>）；Mocha 需額外引入 Chai（<code>expect().to.equal()</code>）。語法相近，換框架切換成本不高。</p>
+  </section>
+
+  <section>
+    <span class="num">Cypress 特色</span>
+    <h2>E2E 測試為何選 Cypress</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>真實瀏覽器執行</h4><p>不是 jsdom 模擬，是真實 Chrome/Firefox，CSS、動畫、網路請求全都真的跑。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>時間旅行（Time Travel）</h4><p>每個指令執行後都有快照，可以倒帶查看每一步發生什麼，除錯超直覺。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>自動等待</h4><p>不需要手動 <code>sleep</code>，Cypress 自動等 DOM 出現、網路完成再往下走。</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Jest 和 Vitest 差在哪裡？</summary><p>Vitest 與 Vite 共用設定（vite.config.ts），不需要另外配 babel；速度更快（利用 esbuild）。Jest 生態更成熟，plugin 多。Vite 專案直接用 Vitest，非 Vite 專案沿用 Jest 即可。</p></details>
+      <details><summary>Cypress 和 Playwright 怎麼選？</summary><p>兩者能力相近。Playwright 原生支援多瀏覽器並行（Chromium/Firefox/WebKit）、速度稍快；Cypress DX（開發者體驗）和除錯介面更友善。看團隊偏好和 CI 環境。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我依場景選工具：<span class="hl">Unit / Integration 測試用 Jest</span>，如果是 Vite 專案就換 Vitest；<span class="hl">E2E 用 Cypress 或 Playwright</span>。Jest 吸引我的是零配置和內建 mock；Cypress 的時間旅行除錯很省時。Mocha 和 Jasmine 我在老專案維護有用過，彈性更高但需要自己組工具鏈。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="熱門JavaScript測試框架.html">熱門測試框架比較</a>
+      <a href="單元測試整合測試與端對端測試差異.html">測試金字塔</a>
+      <a href="如何為JavaScript編寫單元測試.html">撰寫單元測試</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

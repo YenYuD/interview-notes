@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State vs Context vs 外部狀態管理</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 狀態管理</div>
+    <h1>從 Local State 到 Redux：<em>三個問題</em>決定你該用什麼</h1>
+    <p class="lede">狀態管理沒有萬用答案，關鍵是問三個問題：<b>這個狀態只有幾個組件需要嗎？更新頻率高嗎？需要中間件或 devtools 嗎？</b> 答案決定用 State、Context 還是外部工具。</p>
+  </header>
+
+  <section>
+    <span class="num">決策矩陣</span>
+    <h2>三種選擇的適用場景</h2>
+    <table>
+      <thead><tr><th>選擇</th><th>適用情境</th><th>不適合</th></tr></thead>
+      <tbody>
+        <tr><td><b>useState / useReducer</b></td><td>單一組件或幾個相鄰組件的本地狀態；表單、UI 開關、計數器</td><td>多個遠距組件需要同步</td></tr>
+        <tr><td><b>Context</b></td><td>跨多層傳遞但不常變動的全域資料；主題、語言、登入使用者</td><td>高頻更新（每次都觸發所有 consumer）</td></tr>
+        <tr><td><b>Redux / Zustand / Jotai</b></td><td>大型應用、複雜狀態邏輯、需要 devtools、跨頁面狀態</td><td>小型應用（overkill）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">決策流程</span>
+    <h2>問自己三個問題</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>這個狀態只屬於當前組件或其直接子組件？</b> → 用 <code>useState</code> / <code>useReducer</code>，保持本地</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>需要多層傳遞且更新不頻繁？</b> → 用 <b>Context</b>，搭配 <code>useMemo</code> 優化 value</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>狀態複雜、高頻更新、需要中間件或 time-travel debug？</b> → 用外部狀態管理工具（Redux Toolkit、Zustand）</div>
+      </div>
+    </div>
+    <div class="callout tip"><span class="ico">✅</span><p>現代輕量選擇：<b>Zustand</b> 設定極簡、<b>Jotai</b> 以 atom 為單位做細粒度訂閱，比 Redux 輕量許多，適合中型應用取代 Context 高頻更新的問題。</p></div>
+  </section>
+
+  <section>
+    <span class="num">常見誤用</span>
+    <h2>避免這些反模式</h2>
+    <div class="chips">
+      <div class="chip warn">
+        <small>Context 高頻更新</small>
+        把計數器、表單輸入等高頻狀態放進 Context，導致所有 consumer 每次擊鍵都重渲
+      </div>
+      <div class="chip warn">
+        <small>過早引入 Redux</small>
+        小型應用就引入 Redux，徒增 boilerplate 和複雜度，useState 完全夠用
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Context 和 Redux 的核心差異是什麼？</summary><p>Context 是 React 內建的跨層傳值機制，無快取、無 devtools、任何 value 變更都重渲所有 consumer。Redux 是獨立狀態容器，有 devtools、時間旅行、中間件（非同步 action）、selector 細粒度訂閱，適合複雜業務邏輯。Context 是「傳值管道」，Redux 是「狀態管理系統」。</p></details>
+      <details><summary>什麼時候考慮 Zustand 而不是 Redux？</summary><p>Zustand 設定極簡（幾行就能建立 store）、沒有 boilerplate、支援細粒度訂閱、可在 React 樹之外讀寫狀態。若不需要 Redux 的中間件生態（如 redux-saga）或強型別 action，Zustand 是更輕量的選擇。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我用三個問題決定：狀態只屬於當前組件就用 <span class="hl">useState / useReducer</span>，本地管理最簡單；需要多層共享但更新不頻繁（主題、語言）就用 <span class="hl">Context</span>，但要注意 Context 高頻更新會讓所有 consumer 重渲；狀態複雜、需要中間件、devtools 或 time-travel debug 才引入 <span class="hl">Redux Toolkit 或 Zustand</span>。總原則是從最小工具開始，只在真正需要時升級。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="在 React 中使用 Context 有哪些陷阱？.html">Context 的陷阱</a>
+      <a href="如何優化 React Context 的效能以減少重新渲染？.html">Context 效能優化</a>
+      <a href="Flux 模式（Flux pattern）是什麼？它有哪些優點？.html">Flux 模式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>箭頭函式 Arrow Functions</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>箭頭函式最重要的特性是 <em>lexical this</em>，不是簡短語法</h1>
+    <p class="lede">很多人把箭頭函式當「短一點的寫法」，但它最關鍵的差異是 <b><code>this</code> 的綁定方式</b>：箭頭函式的 <code>this</code> 在定義當下就固定了，不會被呼叫方式改變。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>語法對比：從完整到精簡</h2>
+    <pre><code><span class="tok-com">// 一般函式</span>
+<span class="tok-key">function</span> <span class="tok-fn">add</span>(x: <span class="tok-fn">number</span>, y: <span class="tok-fn">number</span>): <span class="tok-fn">number</span> {
+  <span class="tok-key">return</span> x + y;
+}
+
+<span class="tok-com">// 箭頭函式</span>
+<span class="tok-key">const</span> add = (x: <span class="tok-fn">number</span>, y: <span class="tok-fn">number</span>): <span class="tok-fn">number</span> =&gt; x + y;
+
+<span class="tok-com">// 常見用途：陣列操作</span>
+<span class="tok-key">const</span> doubled = [1,2,3].map(n =&gt; n * 2);    <span class="tok-com">// [2, 4, 6]</span>
+<span class="tok-key">const</span> evens   = [1,2,3].filter(n =&gt; n % 2 === 0); <span class="tok-com">// [2]</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>lexical this：class 裡的 callback 最常踩的坑</h2>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">Timer</span> {
+  seconds = 0;
+
+  <span class="tok-com">// ✅ 箭頭函式：this 固定指向 Timer 實例</span>
+  startWithArrow() {
+    setInterval(() =&gt; {
+      <span class="tok-key">this</span>.seconds++;
+    }, 1000);
+  }
+
+  <span class="tok-com">// ❌ 一般函式：this 被 setInterval 改變了</span>
+  startWithRegular() {
+    setInterval(<span class="tok-key">function</span>() {
+      <span class="tok-key">this</span>.seconds++; <span class="tok-com">// undefined（strict mode）或 window</span>
+    }, 1000);
+  }
+}</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>一般函式的 <code>this</code> 由「誰呼叫它」決定（動態綁定）；箭頭函式的 <code>this</code> 由「在哪裡定義它」決定（靜態 / 詞法綁定）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>主要差異對比</h2>
+    <table>
+      <thead><tr><th></th><th>一般函式</th><th>箭頭函式</th></tr></thead>
+      <tbody>
+        <tr><td><code>this</code> 綁定</td><td>動態（由呼叫方式決定）</td><td>靜態（繼承外層的 <code>this</code>）</td></tr>
+        <tr><td>可作建構子</td><td>✅ <code>new Foo()</code></td><td>❌</td></tr>
+        <tr><td><code>arguments</code> 物件</td><td>✅</td><td>❌</td></tr>
+        <tr><td>命名（自我遞迴）</td><td>✅ 有函式名稱</td><td>❌（通常匿名）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>箭頭函式可以用 call/apply/bind 改變 this 嗎？</summary><p>不行。箭頭函式的 <code>this</code> 在定義時就固定了，<code>call</code>/<code>apply</code>/<code>bind</code> 傳入的 <code>this</code> 會被忽略。這是它的設計意圖：確保 <code>this</code> 永遠可預測。</p></details>
+      <details><summary>什麼情況下不該用箭頭函式？</summary><p>物件的 method 定義（<code>this</code> 應指向物件本身）、需要 <code>arguments</code> 物件、需要作為建構子（<code>new</code>）時，應使用一般函式。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「箭頭函式和一般函式最重要的差異是 <span class="hl"><code>this</code> 的綁定方式</span>。一般函式的 <code>this</code> 是動態的，由呼叫方式決定；箭頭函式是 lexical this，在定義時就固定繼承外層的 <code>this</code>。這讓它特別適合 class 裡的 callback——像是傳給 <code>setTimeout</code> 或陣列操作的函式，<span class="hl">不怕 <code>this</code> 被偷走</span>。除了 this，箭頭函式也沒有 <code>arguments</code> 物件且不能當建構子。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="008 var、let、const 的差異.html">var、let、const</a>
+      <a href="010 存取修飾詞 Access Modifiers.html">存取修飾詞</a>
+      <a href="021 函式多載 Function Overloads.html">函式多載</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

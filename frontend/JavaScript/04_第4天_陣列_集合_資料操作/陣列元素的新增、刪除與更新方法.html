@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陣列新增刪除更新</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 陣列</div>
+    <h1>push / pop 之外，<em>splice 才是萬用刀</em></h1>
+    <p class="lede">操作陣列內容只需記住三個維度：<b>新增</b>（頭 / 尾 / 指定位置）、<b>刪除</b>（頭 / 尾 / 指定位置）、<b>更新</b>（直接索引賦值）。</p>
+  </header>
+
+  <section>
+    <span class="num">方法速查</span>
+    <h2>新增、刪除、更新總覽</h2>
+    <table>
+      <thead><tr><th>操作</th><th>方法</th><th>位置</th><th>回傳值</th></tr></thead>
+      <tbody>
+        <tr><td>新增</td><td><code>push(el)</code></td><td>尾端</td><td>新長度</td></tr>
+        <tr><td>新增</td><td><code>unshift(el)</code></td><td>開頭</td><td>新長度</td></tr>
+        <tr><td>新增</td><td><code>splice(i, 0, el)</code></td><td>任意位置</td><td>[]（被刪掉的）</td></tr>
+        <tr><td>刪除</td><td><code>pop()</code></td><td>尾端</td><td>被移除的元素</td></tr>
+        <tr><td>刪除</td><td><code>shift()</code></td><td>開頭</td><td>被移除的元素</td></tr>
+        <tr><td>刪除</td><td><code>splice(i, n)</code></td><td>任意位置</td><td>被刪掉的元素陣列</td></tr>
+        <tr><td>更新</td><td><code>arr[i] = val</code></td><td>任意位置</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">splice 解剖</span>
+    <h2><code>splice(start, deleteCount, ...items)</code></h2>
+    <pre><code><span class="tok-key">let</span> arr = [1, 2, 3, 4];
+
+<span class="tok-com">// 在 index 1 刪 2 個，插入 'a', 'b'</span>
+arr.<span class="tok-fn">splice</span>(1, 2, <span class="tok-str">'a'</span>, <span class="tok-str">'b'</span>);
+<span class="tok-com">// arr → [1, 'a', 'b', 4]，回傳 [2, 3]</span>
+
+<span class="tok-com">// 只插入，不刪除</span>
+arr.<span class="tok-fn">splice</span>(2, 0, <span class="tok-str">'x'</span>);
+<span class="tok-com">// arr → [1, 'a', 'x', 'b', 4]</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><code>splice</code> 會<b>直接修改原陣列</b>。如果需要不可變操作，改用 <code>toSpliced()</code>（ES2023）或展開運算子組合新陣列。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>push / unshift 哪個效能較好？</summary><p><code>push</code>（尾端）通常比 <code>unshift</code>（開頭）快，因為 unshift 要把所有現有元素往後移一位，時間複雜度是 O(n)；push 是 O(1)（均攤）。</p></details>
+      <details><summary>刪掉一個元素還有哪些方式？</summary><p>除 splice，還可以用 <code>filter</code> 建立不含目標元素的新陣列（不可變方式）。<code>delete arr[i]</code> 雖然可以，但只把值變成 <code>undefined</code>，長度不變，通常不建議。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「陣列的增刪改主要靠幾個方法：<span class="hl">push / pop 操作尾端，unshift / shift 操作開頭，splice 可以在任意位置增刪</span>。如果在意不可變性，我會用 filter 或展開語法建立新陣列，避免直接改動原始資料。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="陣列迭代方法.html">陣列迭代方法</a>
+      <a href="如何在陣列迭代中取得元素索引.html">迭代時取得索引</a>
+      <a href="複製物件與陣列的方法.html">複製物件與陣列</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

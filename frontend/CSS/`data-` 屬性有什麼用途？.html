@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>data- 屬性的用途</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS / HTML</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">HTML / DOM</div>
+    <h1><em>data-</em> 屬性：DOM 的自訂資料口袋，現在還有人用嗎？</h1>
+    <p class="lede"><b>data-*</b> 屬性讓開發者在 HTML 元素上儲存自訂資料，不污染語意標記。在 JavaScript 框架流行前被廣泛使用，如今最合理的用途是作為<b>測試選擇器</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>data- 屬性的三種用途</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>儲存私有資料（過時做法）</strong>
+          — 在框架出現前，常用於在 DOM 上掛載頁面私有資料，現在資料應存在 JavaScript 狀態中。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>第三方函式庫的觸發器</strong>
+          — Bootstrap 仍使用 <code>data-bs-toggle</code>、<code>data-bs-target</code> 等屬性控制元件行為。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>E2E 測試選擇器（現代最佳用途）</strong>
+          — 用 <code>data-testid</code> 或 <code>data-cy</code> 標記元素，讓 Playwright/Cypress 穩定選取，不污染 class 或 id 的語意。
+        </div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// Bootstrap 用法</span>
+<span class="tok-str">&lt;button data-bs-toggle="modal" data-bs-target="#myModal"&gt;</span>
+  開啟 Modal
+<span class="tok-str">&lt;/button&gt;</span>
+
+<span class="tok-com">// E2E 測試用法</span>
+<span class="tok-str">&lt;button data-testid="submit-btn"&gt;</span>送出<span class="tok-str">&lt;/button&gt;</span>
+<span class="tok-com">// Playwright: await page.getByTestId('submit-btn').click()</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">注意事項</span>
+    <h2>為什麼不推薦儲存業務資料</h2>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>data- 屬性的值可以被使用者在開發者工具中直接修改，<strong>不應存放敏感或影響業務邏輯的資料</strong>。業務資料應存在 JavaScript 狀態（React state、Vuex 等），透過虛擬 DOM 或響應式系統同步到 DOM。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>如何在 JavaScript 中讀取 data- 屬性？</summary>
+        <p>透過 <code>element.dataset</code> API：<code>el.dataset.testid</code> 讀取 <code>data-testid</code>。屬性名稱中的 kebab-case 會自動轉為 camelCase（如 <code>data-user-id</code> → <code>el.dataset.userId</code>）。也可用 <code>el.getAttribute('data-testid')</code>。</p>
+      </details>
+      <details>
+        <summary>data- 屬性可以用 CSS 選取嗎？</summary>
+        <p>可以，用屬性選擇器：<code>[data-active="true"] { color: red; }</code>。這是一種不依賴 class 的條件樣式技巧，常見於元件庫。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>data-*</code> 屬性讓我們在 HTML 元素上附加自訂資料而不破壞語意。在框架流行前它常用來在 DOM 上儲存業務資料，但現在<span class="hl">不建議這樣做</span>——因為使用者可以輕易在開發者工具中修改它，資料應存在 JS 狀態中。目前我認為最合理的用途是<span class="hl">為 E2E 測試（如 Playwright、Cypress）提供穩定的選取點</span>，用 <code>data-testid</code> 標記，不污染 class 或 id 的語意用途。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="功能偵測、功能推斷和使用 UA 字串有什麼差別？.html">功能偵測 vs UA 字串</a>
+      <a href="doctype 有什麼作用？.html">doctype 的作用</a>
+      <a href="將 HTML5 視為開放網路平台，HTML5 的基本建構組成有哪些？.html">HTML5 基本建構</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

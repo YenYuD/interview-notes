@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 預處理器的喜好與不滿</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 工具鏈</div>
+    <h1>Sass 和 Less 的<em>真實痛點</em>——用過才知道</h1>
+    <p class="lede">CSS 預處理器帶來了真實的開發效率提升，但也有令人頭疼的相依性問題。這題考的是你有沒有<b>真正用過</b>、有沒有獨立的技術判斷。</p>
+  </header>
+
+  <section>
+    <span class="num">喜歡的部分</span>
+    <h2>主要價值點</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>Sass 優點</small>
+        <ul style="padding-left:1rem; margin-top:0.4rem;">
+          <li>巢狀選擇器讓 BEM 結構可讀性高</li>
+          <li><code>@mixin</code> / <code>@include</code> 消除大量重複 CSS</li>
+          <li><code>@each</code>、<code>@for</code> 批量生成樣式</li>
+          <li>模組化 <code>@use</code>、<code>@forward</code> 管理設計 token</li>
+        </ul>
+      </div>
+      <div class="chip info">
+        <small>Less 優點</small>
+        以 JavaScript 撰寫，與 Node.js 生態配合良好，可在瀏覽器端直接編譯
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">不滿的部分</span>
+    <h2>真實踩過的雷</h2>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><strong>Sass + node-sass</strong>：<code>node-sass</code> 是 C++ 綁定套件，每次切換 Node.js 版本就需要重新 <code>npm rebuild</code>，在 CI/CD 環境中特別痛苦。建議改用純 JavaScript 實作的 <strong>Dart Sass</strong>（即現在官方推薦的 <code>sass</code> 套件）。</p>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><strong>Less 的 @ 前綴</strong>：Less 變數用 <code>@my-color</code>，但 <code>@media</code>、<code>@import</code>、<code>@keyframes</code> 也用 <code>@</code>，容易造成視覺混淆，也讓工具分析更複雜。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>node-sass 和 sass（Dart Sass）有什麼差別？</summary>
+        <p><code>node-sass</code> 是 LibSass（C++）的 Node 綁定，速度快但維護已停止，且跨平台建置問題多。<code>sass</code> 是官方 Dart Sass 的 Node 實作，純 JS 安裝簡單、支援最新語法（<code>@use</code>、<code>@forward</code>），是現在推薦的選擇。</p>
+      </details>
+      <details>
+        <summary>Sass 的 @import 和 @use 有什麼差別？</summary>
+        <p><code>@import</code>（舊版）全域匯入，所有變數/mixin 進入全域作用域，容易名稱衝突，已被棄用。<code>@use</code>（新版）有命名空間，使用時需加前綴（如 <code>vars.$primary</code>），避免污染，是現在的標準寫法。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我主要用過 Sass。喜歡的是<span class="hl">巢狀結構配合 BEM 可讀性很高</span>，Mixin 消除重複，<code>@each</code> 批量生成 utility class 很方便。最大的痛點是 <span class="hl">node-sass 的跨 Node 版本問題</span>——每次升級 Node 就要重新建置，CI 上特別麻煩；現在我改用 Dart Sass（<code>npm install sass</code>），純 JS 安裝，完全沒有這個問題。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="使用 CSS 預處理器的優缺點是什麼？.html">CSS 預處理器優缺點</a>
+      <a href="你曾在本地或生產環境中使用過哪些現有的 CSS 框架？.html">常用 CSS 框架評比</a>
+      <a href="撰寫高效 CSS 時有哪些常見的陷阱？.html">高效 CSS 的陷阱</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

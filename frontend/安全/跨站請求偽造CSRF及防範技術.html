@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSRF 跨站請求偽造</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全</div>
+    <h1>借你的<em>登入狀態</em>，幹你不知道的事</h1>
+    <p class="lede">你登入了銀行、cookie 還在。這時去逛惡意網站，它偷偷對銀行送出請求——瀏覽器<b>自動帶上你的 cookie</b>，銀行以為是你本人。這就是 CSRF。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 一鍵看攻擊成不成立</span>
+    <h2>有沒有防護，差很多</h2>
+    <p>情境：你已登入銀行。惡意網站發出一筆「轉帳」請求。切換防護，再按「攻擊」：</p>
+
+    <div class="lab">
+      <div class="lab-label">伺服器防護</div>
+      <div class="toggle-row" id="row">
+        <button class="on bad" data-k="off">❌ 無防護</button>
+        <button data-k="token">✅ CSRF Token</button>
+        <button data-k="samesite">✅ SameSite Cookie</button>
+      </div>
+      <button class="btn-primary" id="attack" style="background:var(--bad)">😈 惡意網站發出轉帳請求</button>
+      <div class="log" id="out" style="max-height:none"><div class="ln empty">// 按上面的按鈕模擬攻擊…</div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">防禦手段</span>
+    <h2>三道防線</h2>
+    <table>
+      <tr><th>手段</th><th>原理</th></tr>
+      <tr><td><b>CSRF Token</b></td><td>伺服器發一個不可預測的隨機 token 藏在表單，第三方網站拿不到 → 驗證失敗</td></tr>
+      <tr><td><b>SameSite Cookie</b></td><td><code>Strict/Lax</code> 讓 cookie 不隨跨站請求送出 → 攻擊請求沒有身分</td></tr>
+      <tr><td><b>檢查來源</b></td><td>核對 <code>Origin</code>/<code>Referer</code>，搭配正確 CORS 設定</td></tr>
+    </table>
+    <div class="callout info"><span class="ico">💡</span><p>現代瀏覽器多數 cookie 預設 <code>SameSite=Lax</code>，已擋掉大部分 CSRF；但<b>跨站表單 POST</b>等情境仍建議搭配 token 雙保險。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>CSRF 和 XSS 差在哪？</summary><p>XSS 是「在你瀏覽器跑攻擊者的腳本」；CSRF 是「用你的身分送出請求，攻擊者看不到回應」。CSRF 利用的是瀏覽器自動帶 cookie 的行為。</p></details>
+      <details><summary>用 JWT 放 localStorage 還會 CSRF 嗎？</summary><p>若 token 放 localStorage 並由 JS 手動加到 header，瀏覽器不會自動帶，CSRF 風險降低——但改成更怕 XSS（腳本能讀 localStorage）。是一種取捨。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CSRF 是惡意網站<span class="hl">借用使用者已登入的 cookie</span>，偷偷以他的名義送出請求。攻擊者看不到回應，但操作會生效。防禦我用三招：<span class="hl">CSRF token</span>（第三方拿不到的隨機值）、<span class="hl">SameSite cookie</span>（跨站不帶 cookie）、核對 Origin/Referer。它和 XSS 不同——CSRF 是冒用身分，XSS 是執行腳本。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="跨站腳本攻擊XSS及防範方法.html">XSS</a>
+      <a href="常見安全標頭及其用途.html">安全標頭</a>
+      <a href="JavaScript安全認證與授權實作.html">認證與授權</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), out=document.getElementById('out');
+  let mode='off';
+  document.getElementById('attack').addEventListener('click',()=>{
+    out.querySelector('.empty')?.remove(); out.innerHTML='';
+    out.insertAdjacentHTML('beforeend','<div class="ln c-req">惡意網站 → POST /transfer（瀏覽器自動帶上銀行 cookie）</div>');
+    if(mode==='off') out.insertAdjacentHTML('beforeend','<div class="ln c-bad">→ 伺服器只看 cookie，以為是本人 → 轉帳成功 💥（攻擊成立）</div>');
+    else if(mode==='token') out.insertAdjacentHTML('beforeend','<div class="ln c-ok">→ 請求缺少有效 CSRF token（第三方拿不到）→ 拒絕 ✓</div>');
+    else out.insertAdjacentHTML('beforeend','<div class="ln c-ok">→ SameSite=Strict：跨站請求根本不帶 cookie → 未登入 → 拒絕 ✓</div>');
+    out.scrollTop=out.scrollHeight;
+  });
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); mode=b.dataset.k; out.innerHTML='<div class="ln empty">// 按上面的按鈕模擬攻擊…</div>'; });
+</script>
+</body>
+</html>

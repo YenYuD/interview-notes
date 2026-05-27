@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>詞法作用域概念</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 作用域</div>
+    <h1>函式記住它在哪裡被定義，<em>不是在哪裡被呼叫</em></h1>
+    <p class="lede"><b>詞法作用域（Lexical Scope）</b>意味著變數的可見範圍在程式碼撰寫時就決定了，而非執行時。這個特性讓<b>閉包（Closure）</b>成為可能：函式帶著它出生時的作用域一起旅行。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>定義位置決定作用域</h2>
+    <pre><code><span class="tok-key">function</span> outerFunction() {
+  <span class="tok-key">let</span> outerVar = <span class="tok-str">'I am outside!'</span>;
+
+  <span class="tok-key">function</span> innerFunction() {
+    <span class="tok-com">// innerFunction 定義在 outerFunction 內部</span>
+    <span class="tok-com">// 所以可以存取 outerVar（詞法作用域）</span>
+    console.log(outerVar); <span class="tok-com">// 'I am outside!'</span>
+  }
+
+  innerFunction();
+}
+outerFunction();</code></pre>
+    <div class="aside">「詞法」（Lexical）就是指「程式碼文字的位置」。函式在哪裡被寫下來，它的作用域鏈就在那裡被確定，不受後來的呼叫位置影響。</div>
+  </section>
+
+  <section>
+    <span class="num">通往閉包</span>
+    <h2>詞法作用域 + 函式回傳 = 閉包</h2>
+    <pre><code><span class="tok-key">function</span> outerFunction() {
+  <span class="tok-key">let</span> outerVar = <span class="tok-str">'I am outside!'</span>;
+
+  <span class="tok-key">return</span> <span class="tok-key">function</span> innerFunction() {
+    console.log(outerVar); <span class="tok-com">// 仍然可以存取！</span>
+  };
+}
+
+<span class="tok-key">const</span> fn = outerFunction(); <span class="tok-com">// outerFunction 已執行完畢</span>
+fn(); <span class="tok-com">// 'I am outside!' — 閉包保住了 outerVar</span></code></pre>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>閉包的本質就是函式透過詞法作用域「記住」了它被建立時的外部環境，即使那個外部函式已執行完畢。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>JavaScript 是靜態作用域還是動態作用域？</summary><p>靜態（詞法）作用域。動態作用域語言（如早期 Lisp）的作用域由呼叫鏈決定；JS 由定義位置決定。this 的行為有點像動態作用域（受呼叫方式影響），但作用域鏈本身是靜態的。</p></details>
+      <details><summary>詞法作用域和閉包的關係？</summary><p>閉包是詞法作用域的直接結果：函式帶著它定義時的環境（lexical environment）參考走，即使外層函式已返回，內層函式仍能存取那個環境中的變數。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「詞法作用域的意思是：<span class="hl">函式能存取哪些外部變數，由它定義的位置決定，而不是呼叫的位置</span>。JS 是靜態（詞法）作用域語言，所以巢狀函式可以存取外層宣告的變數。這也是閉包的基礎——函式帶著自己出生時的作用域一起被回傳，<span class="hl">外層函式執行完畢後，內層函式仍能存取外層的變數</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript作用域概念說明.html">作用域概念說明</a>
+      <a href="全域作用域_函式作用域_區塊作用域差異.html">三種作用域差異</a>
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let/var/const 差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

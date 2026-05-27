@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>媒體查詢實作經驗</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 響應式</div>
+    <h1>媒體查詢：不只是斷點，<em>也是行為切換的開關</em></h1>
+    <p class="lede">媒體查詢讓同一套 CSS 在不同裝置條件下呈現不同版面。從傳統的寬度斷點，到現代的<b>偏好設定查詢</b>（暗色模式、減少動態），媒體查詢的應用範圍遠超響應式版面。</p>
+  </header>
+
+  <section>
+    <span class="num">實作案例</span>
+    <h2>行動端版面切換的典型場景</h2>
+    <pre><code><span class="tok-com">/* 行動優先：先定義行動端樣式 */</span>
+<span class="tok-key">.nav</span> {
+  display: flex;
+  flex-direction: column;  <span class="tok-com">/* 行動：垂直堆疊 */</span>
+  position: fixed;
+  bottom: 0;
+}
+
+<span class="tok-com">/* 桌機：水平導覽列 */</span>
+<span class="tok-key">@media</span> (min-width: 768px) {
+  <span class="tok-key">.nav</span> {
+    flex-direction: row;
+    position: static;
+    border-bottom: 1px solid <span class="tok-str">#eee</span>;
+  }
+}</code></pre>
+    <div class="aside">
+      <strong>實際案例：</strong>將行動端堆疊藥丸導覽列（bottom navigation），在超過 768px 斷點後切換為水平固定頂端的分頁導覽列。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">現代媒體查詢</span>
+    <h2>不只是尺寸斷點</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>prefers-color-scheme</small>
+        偵測作業系統暗色模式設定
+      </div>
+      <div class="chip info">
+        <small>prefers-reduced-motion</small>
+        偵測使用者偏好減少動畫（前庭障礙無障礙）
+      </div>
+      <div class="chip info">
+        <small>hover: none</small>
+        偵測裝置不支援 hover（觸控裝置）
+      </div>
+      <div class="chip info">
+        <small>print</small>
+        列印時隱藏導覽、顯示連結 URL
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>min-width 和 max-width 哪個更推薦？</summary>
+        <p>行動優先策略用 <code>min-width</code>（基礎樣式是行動端，再用 min-width 往上覆蓋）；桌機優先用 <code>max-width</code>（反過來）。現代開發推薦行動優先，因為行動裝置比例越來越高，且行動端樣式作為預設更簡潔。</p>
+      </details>
+      <details>
+        <summary>Tailwind 的 sm/md/lg/xl 斷點是怎麼設計的？</summary>
+        <p>Tailwind 採用行動優先：無前綴的 class（如 <code>flex</code>）是所有尺寸都套用；加前綴（如 <code>md:flex</code>）表示在 md 斷點（768px）以上才套用。這讓行動端樣式是預設，桌機樣式是覆蓋，符合行動優先原則。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「有實作過響應式版面，主要用<span class="hl">行動優先策略</span>：先定義行動端樣式，再用 <code>min-width</code> 媒體查詢在更大視口覆蓋。典型案例是把行動端的底部固定導覽，在平板以上切換為水平頂部導覽列。現代媒體查詢我也會用 <span class="hl">prefers-color-scheme</span> 支援暗色模式、<span class="hl">prefers-reduced-motion</span> 照顧前庭障礙使用者，這些都是現代前端的標準實踐。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你能解釋響應式網站開發與行動優先策略之間的差異嗎？.html">響應式開發 vs 行動優先策略</a>
+      <a href="你能舉一個除了 `screen` 以外的 `@media` 屬性範例嗎？.html">@media 媒體類型</a>
+      <a href="How is responsive design different from adaptive design?.html">響應式 vs 自適應設計</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

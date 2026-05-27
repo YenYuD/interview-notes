@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Injection 防範</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全 · SQL Injection</div>
+    <h1>使用者輸入不該直接<em>拼進 SQL 字串</em></h1>
+    <p class="lede">SQL injection 讓攻擊者透過輸入欄位改寫資料庫查詢邏輯，輕則繞過登入，重則傾洩整張 users 表。<b>根治方法只有一個：把資料和 SQL 指令徹底分離</b>——用參數化查詢，讓 DB 自己負責跳脫。</p>
+  </header>
+
+  <section>
+    <span class="num">危險 vs 安全</span>
+    <h2>字串拼接 vs 參數化查詢</h2>
+    <pre><code><span class="tok-com">// ❌ 危險：字串拼接 — 輸入 ' OR '1'='1 即可登入任何帳號</span>
+<span class="tok-key">const</span> query = <span class="tok-str">`SELECT * FROM users WHERE name = '</span>${userInput}<span class="tok-str">'`</span>;
+db.<span class="tok-fn">query</span>(query);
+
+<span class="tok-com">// ✅ 安全：參數化查詢（mysql2 / pg）— 輸入被當純資料處理</span>
+<span class="tok-key">const</span> query = <span class="tok-str">'SELECT * FROM users WHERE name = ?'</span>;
+db.<span class="tok-fn">query</span>(query, [userInput]);
+
+<span class="tok-com">// ✅ 安全：pg（node-postgres）使用 $1 佔位符</span>
+<span class="tok-key">const</span> { rows } = <span class="tok-key">await</span> pool.<span class="tok-fn">query</span>(
+  <span class="tok-str">'SELECT * FROM users WHERE id = $1'</span>,
+  [userId]
+);</code></pre>
+
+    <div class="callout tip"><span class="ico">✅</span><p>參數化查詢不是「幫你跳脫特殊字元」，而是讓資料庫驅動程式把參數當<b>資料值</b>處理，完全不可能被當成 SQL 指令解析。</p></div>
+  </section>
+
+  <section>
+    <span class="num">ORM 與工具層</span>
+    <h2>讓框架幫你處理</h2>
+    <div class="chips">
+      <div class="chip good">Sequelize / TypeORM<small>ORM 預設使用參數化查詢，findAll where 條件自動安全</small></div>
+      <div class="chip good">Prisma<small>所有查詢方法都是類型安全且參數化的</small></div>
+      <div class="chip warn">Raw query<small>ORM 也能寫 raw SQL，此時仍需手動用佔位符，不可拼接</small></div>
+    </div>
+
+    <pre><code><span class="tok-com">// Sequelize ORM — 安全，自動處理</span>
+User.<span class="tok-fn">findAll</span>({ where: { id: userId } });
+
+<span class="tok-com">// Sequelize raw query — 仍需參數化</span>
+sequelize.<span class="tok-fn">query</span>(<span class="tok-str">'SELECT * FROM users WHERE id = :id'</span>,
+  { replacements: { id: userId } });</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>前端工程師需要了解 SQL injection 嗎？</summary><p>需要。前端若直接串接 Firebase / Supabase 等 BaaS，仍需理解 Row Level Security 和查詢規則。全端場景更是必考。面試官問這題是在測你對資料流的安全意識。</p></details>
+      <details><summary>除了參數化查詢，還有哪些補充防禦？</summary><p>最小權限（應用程式 DB 帳號只給必要的 SELECT/INSERT 權限，不給 DROP）、輸入格式驗證（先確認型別合法再查詢）、儲存程序（將查詢邏輯封裝在 DB 層）。但這些都是補充，根本防禦還是參數化查詢。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「SQL injection 的根因是把使用者輸入拼接到 SQL 字串裡，讓攻擊者改變查詢邏輯。我的防禦是永遠用<span class="hl">參數化查詢</span>，讓資料庫把輸入當純資料而非指令。用 ORM（Sequelize / Prisma）時預設就是安全的，但寫 raw query 時仍要用佔位符。補充的話再加<span class="hl">最小權限原則</span>，限制 DB 帳號只有必要的操作權。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="輸入驗證與安全性重要性.html">輸入驗證重要性</a>
+      <a href="JavaScript安全認證與授權實作.html">認證與授權實作</a>
+      <a href="JavaScript安全漏洞識別工具與技術.html">漏洞識別工具</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

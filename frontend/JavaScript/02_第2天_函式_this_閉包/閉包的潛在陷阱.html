@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>閉包的潛在陷阱</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">閉包・陷阱</div>
+    <h1>閉包「記得太多」：<em>記憶體洩漏、var 迴圈陷阱</em></h1>
+    <p class="lede">閉包保留外層變數的參考——這是它的強大之處，也是它的危險所在。<b>記憶體洩漏、迴圈中共用變數、除錯困難</b>是最常見的三個坑。</p>
+  </header>
+
+  <section>
+    <span class="num">陷阱一（最高頻）</span>
+    <h2>var 迴圈：所有閉包共用同一個 i</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>var：全部輸出 3</small>
+        <pre><code>function createFns() {
+  const fns = [];
+  for (var i = 0; i &lt; 3; i++) {
+    fns.push(() =&gt; console.log(i));
+  }
+  return fns;
+}
+createFns()[0](); // 3 ← 不是 0！</code></pre>
+      </div>
+      <div class="chip good">
+        <small>let：每次迭代建立獨立綁定</small>
+        <pre><code>function createFns() {
+  const fns = [];
+  for (let i = 0; i &lt; 3; i++) {
+    fns.push(() =&gt; console.log(i));
+  }
+  return fns;
+}
+createFns()[0](); // 0 ✅</code></pre>
+      </div>
+    </div>
+    <div class="callout tip"><span class="ico">✅</span><p><code>let</code> 在每次迴圈迭代都建立<b>新的區塊作用域綁定</b>，各閉包各自持有獨立的 <code>i</code>，是解決此問題的現代方式。</p></div>
+  </section>
+
+  <section>
+    <span class="num">陷阱二</span>
+    <h2>記憶體洩漏：閉包讓大物件無法被 GC</h2>
+    <pre><code>function createClosure() {
+  const largeArray = new Array(1_000_000).fill('data');
+  return function() {
+    // 只用到 largeArray[0]，但整個陣列被閉包保住了
+    console.log(largeArray[0]);
+  };
+}
+
+const fn = createClosure();
+// largeArray 無法被垃圾回收，直到 fn 不再被引用</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>若不再需要閉包，明確將變數設為 <code>null</code>（如 <code>fn = null</code>）可切斷參考，讓 GC 釋放記憶體。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>除了 let，var 迴圈陷阱還有哪些舊解法？</summary><p>ES6 前常用：IIFE 包住每次迭代的 i，建立新的作用域 —— <code>fns.push((function(i) { return () => console.log(i); })(i))</code>。現在有 let 後已無必要。</p></details>
+      <details><summary>WeakRef / FinalizationRegistry 能解決閉包洩漏嗎？</summary><p>部分能。<code>WeakRef</code> 對目標持弱參考，不妨礙 GC；<code>FinalizationRegistry</code> 可在物件被 GC 後執行清理。但一般情況下正確管理閉包生命週期仍是最佳方式。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「閉包的主要陷阱有三個：第一，<span class="hl">var 迴圈</span>——所有閉包共用同一個 var 變數，用 <code>let</code> 解決；第二，<span class="hl">記憶體洩漏</span>——閉包會持住外層所有引用的變數，不再需要時要手動解除；第三，<span class="hl">除錯困難</span>——多層巢狀閉包的作用域鏈很難追蹤。其中 var 迴圈問題最常考，記住 var 是函式作用域，let 是區塊作用域，每次迭代建立新綁定。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何使用閉包建立私有變數.html">閉包建立私有變數</a>
+      <a href="JavaScript閉包是什麼及其用途.html">閉包是什麼及其用途</a>
+      <a href="JavaScript中高階函式的定義.html">高階函式定義</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

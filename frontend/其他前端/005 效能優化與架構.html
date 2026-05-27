@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>效能優化與架構：CSR / SSR / SSG</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">其他前端</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">其他前端</div>
+    <h1>CSR、SSR、SSG：選錯<em>渲染策略</em>，效能和 SEO 都輸</h1>
+    <p class="lede">這三種渲染方式各有場景，面試官要的不是背定義，而是<b>你能說出取捨理由</b>。React 效能優化也是同理——先知道「為什麼慢」，才能選對工具。</p>
+  </header>
+
+  <section>
+    <span class="num">渲染策略比較</span>
+    <h2>CSR / SSR / SSG 一眼看清楚</h2>
+    <table>
+      <tr><th>策略</th><th>渲染時機</th><th>優點</th><th>缺點</th><th>適用場景</th></tr>
+      <tr>
+        <td><b>CSR</b></td>
+        <td>瀏覽器下載 JS 後</td>
+        <td>互動感強、伺服器壓力低</td>
+        <td>SEO 差、首屏慢（白屏）</td>
+        <td>管理後台、登入後頁面</td>
+      </tr>
+      <tr>
+        <td><b>SSR</b></td>
+        <td>每次請求時伺服器動態生成</td>
+        <td>SEO 好、首屏快</td>
+        <td>伺服器壓力大、TTFB 較高</td>
+        <td>動態新聞、個人化頁面</td>
+      </tr>
+      <tr>
+        <td><b>SSG</b></td>
+        <td>Build time 預先生成靜態 HTML</td>
+        <td>速度極快、CDN 友善</td>
+        <td>內容更新需重新 build</td>
+        <td>部落格、電商首頁、文件站</td>
+      </tr>
+    </table>
+    <div class="callout tip"><span class="ico">💡</span><p>Next.js 支援<b>混合策略</b>：同一個應用可以部分頁面 SSG、部分 SSR，甚至每個元件選擇是 Server Component 還是 Client Component。</p></div>
+  </section>
+
+  <section>
+    <span class="num">React 效能優化</span>
+    <h2>四招減少不必要的渲染</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>React.memo / useMemo / useCallback</h4>
+          <p>props 沒變就跳過重渲染（memo）、快取計算結果（useMemo）、快取函式引用（useCallback）。<b>不要亂加</b>——無效 memo 有開銷，先 profile 再優化。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>Code Splitting</h4>
+          <p>用 <code>React.lazy + Suspense</code> 做路由層級的懶載入，減小初始 Bundle size，加快首屏。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>正確的 key 與虛擬滾動</h4>
+          <p>列表 key 用穩定 ID；渲染萬筆資料時用 <code>react-window</code> / <code>react-virtual</code> 只 render 可見範圍。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">4</div>
+        <div class="flow-body">
+          <h4>避免 props 傳匿名函式</h4>
+          <p><code>&lt;Btn onClick={() =&gt; ...}&gt;</code> 每次 render 都是新函式，導致子元件即使 memo 也白搭。改用 useCallback 包裝。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>ISR（Incremental Static Regeneration）是什麼？</summary><p>Next.js 的第四種策略：SSG 頁面在 revalidate 時間過後，下一次請求時伺服器背景重建，使用者先看舊快取。兼顧速度與資料新鮮度，適合每隔幾分鐘更新的頁面（如新聞列表）。</p></details>
+      <details><summary>React.lazy 的限制？</summary><p>只支援 default export 的元件。需搭配 Suspense 提供 fallback，且不支援 SSR（需用 Next.js 的 dynamic import 取代）。</p></details>
+      <details><summary>如何找到哪個元件導致效能問題？</summary><p>用 React DevTools 的 Profiler 錄製，找 render 耗時長的元件；用 Chrome Performance 找 Long Task；用 why-did-you-render 函式庫找不必要的重渲染。先量測再優化。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「選渲染策略我看三個維度：SEO 需求、資料更新頻率、互動程度。管理後台 SEO 不重要選 <span class="hl">CSR</span>；部落格或電商首頁選 <span class="hl">SSG</span> 最快；動態個人化且需要 SEO 的選 <span class="hl">SSR</span>。React 效能優化我優先看 Code Splitting 減小 Bundle，再用 React DevTools 找真正的熱點，才針對性加 <span class="hl">React.memo / useCallback</span>，避免無謂的優化成本。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="004 React 核心.html">004 React 核心</a>
+      <a href="006 現代化工具 (Next.js, Tailwind, TS).html">006 Next.js 現代工具</a>
+      <a href="007 其他技術問題.html">007 其他技術問題</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

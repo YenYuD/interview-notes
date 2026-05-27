@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同源政策</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>同源政策：瀏覽器<em>阻止跨域請求</em>的核心安全機制</h1>
+    <p class="lede">同源政策是瀏覽器的安全基石，限制不同來源的頁面互相存取資料，<b>防範 XSS 和 CSRF 攻擊</b>。理解它才能正確設定 CORS 或選擇跨域替代方案。</p>
+  </header>
+
+  <section>
+    <span class="num">什麼是「同源」</span>
+    <h2>協定 + 主機 + 埠號，三個都要完全一樣</h2>
+    <table>
+      <thead><tr><th>URL 比較</th><th>與 http://example.com:80 同源？</th><th>原因</th></tr></thead>
+      <tbody>
+        <tr><td><code>http://example.com/page2</code></td><td>✅ 同源</td><td>協定/主機/埠號相同</td></tr>
+        <tr><td><code>https://example.com</code></td><td>❌ 不同源</td><td>協定不同（https vs http）</td></tr>
+        <tr><td><code>http://sub.example.com</code></td><td>❌ 不同源</td><td>主機不同（子域名不同）</td></tr>
+        <tr><td><code>http://example.com:8080</code></td><td>❌ 不同源</td><td>埠號不同（8080 vs 80）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">繞過限制的方式</span>
+    <h2>三種合法的跨域解法</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>CORS（推薦）</small>
+        <p>伺服器在回應加上 <code>Access-Control-Allow-Origin</code> header，明確允許跨域請求</p>
+      </div>
+      <div class="chip info">
+        <small>代理伺服器</small>
+        <p>前端請求同源的後端代理，由後端轉發到目標 API，瀏覽器不知道有跨域</p>
+      </div>
+      <div class="chip info">
+        <small>JSONP（舊方案）</small>
+        <p>利用 script 標籤不受同源限制，現代已不建議</p>
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>同源政策只限制<b>瀏覽器端的腳本</b>。伺服器之間的通訊不受此限制，這就是為什麼代理伺服器是一個有效解法。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>CORS 的 preflight 請求是什麼？</summary>
+        <p>對於複雜請求（非簡單請求，如 PUT/DELETE 或帶自訂 header），瀏覽器會先發一個 OPTIONS 請求詢問伺服器是否允許，伺服器確認後才發送實際請求。</p>
+      </details>
+      <details>
+        <summary>同源政策限制的是什麼？不限制什麼？</summary>
+        <p>限制：<code>fetch()/XHR</code> 請求、讀取 Cookie/localStorage、讀取 iframe 的 DOM。不限制：載入 img/script/CSS、a 標籤導向、form submit（但 JS 無法讀回應）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「同源政策是瀏覽器的安全機制，規定頁面只能向<span class="hl">相同協定、主機、埠號</span>的來源發出請求，防止惡意網站竊取其他網站的資料。跨域解法主要有三種：最常用的是 <span class="hl">CORS</span>（伺服器在 header 明確允許）；其次是代理伺服器（前端打同源 API，後端代轉）；舊技術 JSONP 現已不建議使用。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JSONP原理與非Ajax差異.html">JSONP 跨域方案</a>
+      <a href="iframe間的通訊方式.html">iframe 跨域通訊</a>
+      <a href="使用Fetch API發送HTTP請求.html">Fetch API 請求</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

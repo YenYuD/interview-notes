@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSP 內容安全政策</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全 · CSP</div>
+    <h1>給瀏覽器一份<em>白名單</em>，讓注入的腳本跑不起來</h1>
+    <p class="lede">Content Security Policy 是一層設在 HTTP header 的防線，讓瀏覽器只信任你指定來源的資源。<b>就算 XSS 注入成功，腳本沒在白名單裡照樣被攔截</b>。這是縱深防禦的關鍵第二道牆。</p>
+  </header>
+
+  <section>
+    <span class="num">核心機制</span>
+    <h2>一行 header，告訴瀏覽器誰可以執行</h2>
+    <p>CSP 透過 HTTP response header 或 <code>&lt;meta&gt;</code> 標籤傳送給瀏覽器，瀏覽器在載入資源前先查白名單，違規的一律阻擋：</p>
+    <pre><code><span class="tok-com"># 最基本：只允許同源腳本，禁止 inline script</span>
+<span class="tok-key">Content-Security-Policy</span>: default-src 'self'; script-src 'self'
+
+<span class="tok-com"># 常見生產設定：腳本限同源或指定 CDN，圖片放寬</span>
+<span class="tok-key">Content-Security-Policy</span>: <span class="tok-str">default-src 'self'; script-src 'self' https://cdn.example.com; img-src *</span>
+
+<span class="tok-com"># meta 標籤方式（不能設 frame-ancestors，安全性略低）</span>
+<span class="tok-fn">&lt;meta</span> http-equiv="Content-Security-Policy"
+      content="default-src 'self'"<span class="tok-fn">&gt;</span></code></pre>
+
+    <table>
+      <tr><th>指令</th><th>控制什麼資源</th><th>常用值</th></tr>
+      <tr><td><code>default-src</code></td><td>所有資源的 fallback</td><td><code>'self'</code></td></tr>
+      <tr><td><code>script-src</code></td><td>JavaScript 來源</td><td><code>'self' https://cdn.x.com</code></td></tr>
+      <tr><td><code>style-src</code></td><td>CSS 來源</td><td><code>'self' 'unsafe-inline'</code></td></tr>
+      <tr><td><code>img-src</code></td><td>圖片來源</td><td><code>* data:</code></td></tr>
+      <tr><td><code>connect-src</code></td><td>fetch / XHR / WebSocket</td><td><code>'self' https://api.x.com</code></td></tr>
+      <tr><td><code>frame-ancestors</code></td><td>誰能用 iframe 嵌入（防 Clickjacking）</td><td><code>'none'</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">常見踩雷</span>
+    <h2>開了這些就等於沒開</h2>
+    <div class="chips">
+      <div class="chip bad"><code>'unsafe-inline'</code><small>允許 inline JS/CSS → XSS 依然可注入</small></div>
+      <div class="chip bad"><code>'unsafe-eval'</code><small>允許 eval() → 動態執行字串漏洞</small></div>
+      <div class="chip good">nonce / hash<small>需要 inline 時的安全替代：每次請求帶唯一 nonce</small></div>
+      <div class="chip info">Report-Only 模式<small>先用 Content-Security-Policy-Report-Only 監測，再正式上線</small></div>
+    </div>
+    <div class="callout tip"><span class="ico">✅</span><p><b>部署策略</b>：先設 <code>Content-Security-Policy-Report-Only</code> + <code>report-uri</code> 收集違規報告，確認不阻塞正常功能後，再換成正式 <code>Content-Security-Policy</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>CSP 跟 X-Frame-Options 有什麼關係？</summary><p><code>X-Frame-Options</code> 只能防 Clickjacking，CSP 的 <code>frame-ancestors</code> 功能相同且更靈活（可允許特定來源），現代瀏覽器兩者並用以向後相容。</p></details>
+      <details><summary>React / Vue 應用怎麼設 CSP？</summary><p>SPA 通常有 inline style/script（如 styled-components），需要設 nonce 或 hash。Webpack / Vite 有對應 CSP plugin 自動生成 nonce。<code>style-src 'unsafe-inline'</code> 是最後手段。</p></details>
+      <details><summary>CSP 能防所有 XSS 嗎？</summary><p>不能 100%。CSP 是縱深防禦的第二層，不能取代第一層的輸出跳脫。攻擊者若能控制白名單內某個 CDN，或利用 JSONP endpoint，仍可繞過。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CSP 是透過 HTTP header 告訴瀏覽器哪些來源的資源才可載入執行，是 XSS 的<span class="hl">縱深防禦第二道牆</span>——就算攻擊者成功注入腳本，只要不在白名單裡，瀏覽器就阻擋。設定時我會避免 <span class="hl">'unsafe-inline'</span>，改用 nonce；上線前先用 <span class="hl">Report-Only</span> 模式收集違規，確認不阻斷正常流程才切換正式模式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="跨站腳本攻擊XSS及防範方法.html">XSS 攻擊與防範</a>
+      <a href="常見安全標頭及其用途.html">常見安全標頭</a>
+      <a href="防範點擊劫持攻擊方法.html">Clickjacking 防範</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

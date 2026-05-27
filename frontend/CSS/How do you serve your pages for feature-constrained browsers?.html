@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>為功能受限瀏覽器提供頁面</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 瀏覽器相容</div>
+    <h1>當瀏覽器「跟不上」，你有幾套<em>降落策略</em>？</h1>
+    <p class="lede">面對功能受限的舊版瀏覽器，核心策略是<b>優雅降級</b>與<b>漸進增強</b>。搭配功能偵測工具，讓所有使用者都能獲得基本可用的體驗。</p>
+  </header>
+
+  <section>
+    <span class="num">核心策略</span>
+    <h2>兩種設計哲學</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>漸進增強（Progressive Enhancement）</small>
+        先建構最基礎可用的體驗，瀏覽器支援時再疊加進階功能。<strong>由下而上</strong>。
+      </div>
+      <div class="chip info">
+        <small>優雅降級（Graceful Degradation）</small>
+        先為現代瀏覽器打造完整功能，再確保舊版瀏覽器有基本可用的版本。<strong>由上而下</strong>。
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>漸進增強被認為更健全，因為你從「必定能用」的基礎出發，而不是事後打補丁。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實用工具</span>
+    <h2>四種常見技術</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>caniuse.com</strong> — 查詢 CSS/JS 功能在各瀏覽器的支援率，評估是否需要備用方案。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>Autoprefixer</strong> — 自動為 CSS 加入 <code>-webkit-</code>、<code>-moz-</code> 等廠商前綴，解決前綴問題。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>Modernizr</strong> — JavaScript 功能偵測函式庫，根據支援情況在 <code>&lt;html&gt;</code> 加 class，讓 CSS 條件樣式更簡單。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>CSS <code>@supports</code></strong> — 原生 CSS 功能查詢，不支援某屬性時可套用備用樣式。
+          <pre><code><span class="tok-key">@supports</span> (display: grid) {
+  .layout { display: grid; }
+}
+<span class="tok-com">/* 不支援 grid 的瀏覽器，此區塊直接跳過 */</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>漸進增強和優雅降級哪個更好？</summary>
+        <p>多數情況下漸進增強更推薦：從最低可用基礎出發，確保所有使用者都有可接受的體驗；現代功能作為「加分項」疊加。優雅降級則常見於改版既有系統或需要快速支援新功能時。</p>
+      </details>
+      <details>
+        <summary><code>@supports</code> 和 Modernizr 如何選擇？</summary>
+        <p><code>@supports</code> 是原生 CSS，針對 CSS 功能偵測最優先使用，無需額外函式庫。Modernizr 適合需要偵測 JavaScript API（如 WebGL、ServiceWorker）或需要在舊版瀏覽器中使用 CSS class 做條件樣式的情境。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「面對功能受限的瀏覽器，我主要採用<span class="hl">漸進增強</span>策略——先確保基礎體驗可用，再用 CSS <span class="hl"><code>@supports</code></span> 功能查詢為現代瀏覽器加入進階樣式。建置工具層面，<span class="hl">Autoprefixer</span> 自動處理廠商前綴；在評估是否要支援某功能前，我會先查 caniuse.com 確認支援率，再決定是否需要 polyfill 或降級方案。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="功能偵測、功能推斷和使用 UA 字串有什麼差別？.html">功能偵測 vs 功能推斷 vs UA 字串</a>
+      <a href="你會如何解決瀏覽器特定的樣式問題？.html">解決瀏覽器特定樣式問題</a>
+      <a href="使用 CSS 預處理器的優缺點是什麼？.html">CSS 預處理器優缺點</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

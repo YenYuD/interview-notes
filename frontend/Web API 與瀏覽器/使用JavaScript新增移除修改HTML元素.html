@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 操作 DOM 元素</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>DOM 操作三部曲：<em>新增</em>、<em>移除</em>、<em>修改</em> HTML 元素</h1>
+    <p class="lede">JavaScript 透過 DOM API 動態控制頁面結構。掌握 <b>createElement</b>、<b>appendChild</b>、<b>remove</b> 和 <b>classList</b> 這幾個核心方法，就能應付大多數 DOM 操作需求。</p>
+  </header>
+
+  <section>
+    <span class="num">新增元素</span>
+    <h2>createElement + appendChild</h2>
+    <pre><code><span class="tok-com">// 建立 → 設定內容 → 插入</span>
+<span class="tok-key">const</span> div = document.createElement(<span class="tok-str">'div'</span>);
+div.textContent = <span class="tok-str">'Hello World'</span>;
+div.className = <span class="tok-str">'card'</span>;
+document.body.appendChild(div);
+
+<span class="tok-com">// 插入到特定位置（某元素之前）</span>
+<span class="tok-key">const</span> ref = document.getElementById(<span class="tok-str">'target'</span>);
+ref.parentNode.insertBefore(div, ref);
+
+<span class="tok-com">// 現代寫法：更靈活的 insertAdjacentHTML</span>
+ref.insertAdjacentHTML(<span class="tok-str">'beforebegin'</span>, <span class="tok-str">'&lt;p&gt;New paragraph&lt;/p&gt;'</span>);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">移除與修改</span>
+    <h2>直接移除 + classList 切換樣式</h2>
+    <pre><code><span class="tok-com">// 移除元素</span>
+el.remove();  <span class="tok-com">// 現代寫法，直接呼叫</span>
+el.parentNode.removeChild(el);  <span class="tok-com">// 舊寫法</span>
+
+<span class="tok-com">// 修改類別</span>
+el.classList.add(<span class="tok-str">'active'</span>);
+el.classList.remove(<span class="tok-str">'hidden'</span>);
+el.classList.toggle(<span class="tok-str">'open'</span>);    <span class="tok-com">// 有就移除，沒有就新增</span>
+el.classList.contains(<span class="tok-str">'active'</span>); <span class="tok-com">// 回傳 boolean</span>
+
+<span class="tok-com">// 修改屬性</span>
+el.setAttribute(<span class="tok-str">'data-id'</span>, <span class="tok-str">'42'</span>);
+el.style.backgroundColor = <span class="tok-str">'#f0f0f0'</span>;</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>修改樣式時，優先用 <b>classList</b> 切換 CSS 類別，而不是直接改 style 屬性。這樣樣式定義留在 CSS，JavaScript 只做邏輯控制，更易維護。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>大量 DOM 操作時如何避免效能問題？</summary>
+        <p>用 <code>DocumentFragment</code> 批次建立元素，最後一次性插入 DOM：<code>const frag = document.createDocumentFragment(); // 把所有元素加到 frag; container.appendChild(frag);</code>。這樣只觸發一次 reflow/repaint。</p>
+      </details>
+      <details>
+        <summary>innerHTML 和 createElement 有什麼效能差異？</summary>
+        <p><code>innerHTML</code> 插入少量簡單 HTML 時較快且方便，但有 XSS 風險且會重建子樹（破壞事件監聽器）；<code>createElement</code> 更安全、更可控，適合動態新增需要綁定事件的元素。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「DOM 操作三個核心動作：<span class="hl">新增</span>用 createElement + appendChild；<span class="hl">移除</span>用 element.remove()；<span class="hl">修改</span>樣式優先用 classList.add/remove/toggle，修改屬性用 setAttribute 或直接存取屬性。批次插入時用 DocumentFragment 可以減少 reflow 次數。插入使用者內容記得用 textContent 而非 innerHTML，避免 XSS。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="什麼是DOM及其結構.html">什麼是 DOM</a>
+      <a href="innerHTML與textContent的差異.html">innerHTML vs textContent</a>
+      <a href="如何使用JavaScript操作CSS樣式.html">JS 操作 CSS 樣式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

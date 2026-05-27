@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 錯誤傳播</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 錯誤處理</div>
+    <h1>錯誤會<em>往上爬</em>，直到有人接住它</h1>
+    <p class="lede">未被捕捉的錯誤沿著<b>呼叫堆疊</b>一層層向上傳播，最終若到達全域就讓程式掛掉。同步、Promise、async/await 三種情境，接錯的方式各不同。</p>
+  </header>
+
+  <section>
+    <span class="num">同步傳播</span>
+    <h2>呼叫堆疊向上爬的路徑</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">a</span>() {
+  <span class="tok-key">throw new</span> <span class="tok-fn">Error</span>(<span class="tok-str">'出問題了'</span>);
+}
+<span class="tok-key">function</span> <span class="tok-fn">b</span>() { <span class="tok-fn">a</span>(); }   <span class="tok-com">// 沒 catch，繼續往上傳</span>
+
+<span class="tok-key">try</span> {
+  <span class="tok-fn">b</span>();
+} <span class="tok-key">catch</span> (e) {
+  console.<span class="tok-fn">error</span>(e.message); <span class="tok-com">// '出問題了'</span>
+}</code></pre>
+    <div class="aside">堆疊傳播方向：<strong>a → b → try-catch</strong>。每一層如果沒有 try…catch，錯誤就繼續往外層呼叫者傳遞。</div>
+  </section>
+
+  <section>
+    <span class="num">非同步情境</span>
+    <h2>Promise 與 async/await 的差異</h2>
+    <table>
+      <thead>
+        <tr><th>情境</th><th>拋出方式</th><th>捕捉方式</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>同步</td>
+          <td><code>throw new Error()</code></td>
+          <td><code>try…catch</code></td>
+        </tr>
+        <tr>
+          <td>Promise chain</td>
+          <td><code>Promise.reject()</code> 或 <code>throw</code> in <code>.then()</code></td>
+          <td>鏈結尾 <code>.catch()</code></td>
+        </tr>
+        <tr>
+          <td>async/await</td>
+          <td><code>throw</code> 在 async 函式內</td>
+          <td><code>try…catch</code> 包住 <code>await</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">// async/await</span>
+<span class="tok-key">async function</span> <span class="tok-fn">loadData</span>() {
+  <span class="tok-key">try</span> {
+    <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-fn">fetch</span>(<span class="tok-str">'/api'</span>);
+    <span class="tok-key">return await</span> res.<span class="tok-fn">json</span>();
+  } <span class="tok-key">catch</span> (e) {
+    console.<span class="tok-fn">error</span>(<span class="tok-str">'請求失敗：'</span>, e.message);
+  }
+}</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>未捕捉的 Promise rejection：</b>若 Promise 鏈沒有 <code>.catch()</code>，瀏覽器會觸發 <code>unhandledrejection</code> 事件，Node.js 則可能終止程序。記得全域監聽作為兜底。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>什麼情況下需要「重新拋出（re-throw）」錯誤？</summary>
+        <p>當 catch 只想處理特定錯誤類型，其他錯誤不應吞掉時。做法：<code>if (e instanceof NetworkError) handleIt(); else throw e;</code>。這樣讓外層能捕捉到真正需要處理的錯誤。</p>
+      </details>
+      <details>
+        <summary>如何全域捕捉未處理的錯誤？</summary>
+        <p>瀏覽器：<code>window.addEventListener('error', handler)</code> 捕同步錯誤；<code>window.addEventListener('unhandledrejection', handler)</code> 捕 Promise。這是錯誤監控（Sentry 等工具）的基礎。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 的錯誤傳播遵循<span class="hl">呼叫堆疊向上冒泡</span>的規則：throw 後若當層沒有 catch，就往呼叫者傳，直到被接住或到達全域。非同步的情況不一樣——Promise 的錯誤要用 <span class="hl">.catch()</span> 接，async/await 則用 <span class="hl">try…catch</span> 包 await。未捕捉的 rejection 在現代瀏覽器會觸發 <code>unhandledrejection</code> 事件，正式專案裡我會全域監聽它送進錯誤追蹤服務。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何使用trycatch區塊處理錯誤.html">如何使用 try…catch</a>
+      <a href="非同步操作錯誤處理.html">非同步操作錯誤處理</a>
+      <a href="finally區塊的用途.html">finally 區塊的用途</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

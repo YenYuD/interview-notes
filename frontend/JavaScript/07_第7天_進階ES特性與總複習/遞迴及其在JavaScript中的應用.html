@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>遞迴在 JavaScript 中的應用</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JAVASCRIPT</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT / 演算法基礎</div>
+    <h1>函式呼叫自己，<br>直到問題<em>小到能直接回答</em></h1>
+    <p class="lede"><b>遞迴</b>把大問題拆成相同結構的小問題，直到碰到<b>基底條件</b>（base case）就停止。DOM 樹遍歷、深度優先搜尋、分治演算法，都是遞迴的天然棲息地。</p>
+  </header>
+
+  <section>
+    <span class="num">核心結構</span>
+    <h2>每個遞迴函式必須有兩件事</h2>
+    <div class="chips">
+      <div class="chip good">基底條件<small>直接回傳答案，終止遞迴</small></div>
+      <div class="chip good">遞迴條件<small>用更小的輸入呼叫自身，逼近基底</small></div>
+    </div>
+    <pre><code><span class="tok-com">// 階乘：n! = n × (n-1)!</span>
+<span class="tok-key">function</span> <span class="tok-fn">factorial</span>(n) {
+  <span class="tok-key">if</span> (n === 0) <span class="tok-key">return</span> 1;          <span class="tok-com">// 基底條件</span>
+  <span class="tok-key">return</span> n * <span class="tok-fn">factorial</span>(n - 1);    <span class="tok-com">// 遞迴條件</span>
+}
+<span class="tok-fn">factorial</span>(4); <span class="tok-com">// 24  (4×3×2×1)</span></code></pre>
+    <div class="callout warn"><span class="ico">✕</span><p>忘記基底條件 → 無限遞迴 → <strong>stack overflow</strong>（RangeError: Maximum call stack size exceeded）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">實務應用</span>
+    <h2>遞迴最自然的三個場景</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>DOM / 樹狀結構遍歷</h4>
+          <p>子節點數量不定、深度不定，遞迴比迴圈更直覺。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>分治演算法（快速排序、合併排序）</h4>
+          <p>把陣列拆一半遞迴處理，再合併。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>JSON / 巢狀物件深層操作</h4>
+          <p>深度複製、深度比較、深度搜尋鍵值，都靠遞迴走訪任意深度。</p>
+        </div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// 深度扁平化陣列（任意層）</span>
+<span class="tok-key">function</span> <span class="tok-fn">deepFlat</span>(arr) {
+  <span class="tok-key">return</span> arr.<span class="tok-fn">reduce</span>((acc, val) =>
+    acc.<span class="tok-fn">concat</span>(<span class="tok-fn">Array.isArray</span>(val) ? <span class="tok-fn">deepFlat</span>(val) : val), []);
+}
+<span class="tok-fn">deepFlat</span>([1, [2, [3, [4]]]]); <span class="tok-com">// [1, 2, 3, 4]</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">效能：尾遞迴 vs 記憶化</span>
+    <h2>避免爆 call stack 的兩種策略</h2>
+    <table>
+      <thead><tr><th>技術</th><th>做法</th><th>適用場景</th></tr></thead>
+      <tbody>
+        <tr><td>尾遞迴（Tail Call）</td><td>遞迴呼叫放在函式最後一步，引擎可優化成迴圈</td><td>JS 引擎支援有限（Safari 才有 TCO）</td></tr>
+        <tr><td>記憶化（Memoization）</td><td>快取已算過的結果，避免重複計算</td><td>費氏數列等有大量重複子問題的場景</td></tr>
+        <tr><td>Trampoline</td><td>將遞迴改成回傳 thunk，迴圈驅動</td><td>需要真正避免 stack overflow 時</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">// 記憶化費氏數列 O(n) vs 純遞迴 O(2^n)</span>
+<span class="tok-key">function</span> <span class="tok-fn">fib</span>(n, memo = {}) {
+  <span class="tok-key">if</span> (n <= 1) <span class="tok-key">return</span> n;
+  <span class="tok-key">if</span> (memo[n]) <span class="tok-key">return</span> memo[n];
+  memo[n] = <span class="tok-fn">fib</span>(n - 1, memo) + <span class="tok-fn">fib</span>(n - 2, memo);
+  <span class="tok-key">return</span> memo[n];
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>遞迴和迴圈在效能上有什麼差異？</summary>
+        <p>每次遞迴呼叫都會在 call stack 推入一個新的 stack frame（含局部變數、返回位址），因此記憶體消耗通常比等價的迴圈更高。深度很大時（例如 10,000+ 層）有爆 call stack 的風險。現代 JS 引擎對尾遞迴的 TCO 優化支援不一，通常把深度遞迴改寫成迴圈或用 Trampoline 更穩妥。</p>
+      </details>
+      <details>
+        <summary>什麼是 mutual recursion（相互遞迴）？</summary>
+        <p>函式 A 呼叫函式 B，函式 B 再呼叫函式 A，形成循環。例如判斷奇偶數：<code>isEven(n)</code> → <code>isOdd(n-1)</code> → <code>isEven(n-1)</code>…。同樣需要明確的基底條件，否則也會 stack overflow。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「遞迴是函式呼叫自身來解決問題，需要兩個必要條件：<span class="hl">基底條件</span>（直接回傳，終止遞迴）和<span class="hl">遞迴條件</span>（縮小問題範圍再呼叫自身）。最適合用在結構上天然遞迴的問題，例如 DOM 遍歷、深度複製、快速排序。效能上要注意 call stack 深度，對有大量重複子問題的場景（如費氏數列）要加上<span class="hl">記憶化</span>把時間複雜度從指數降到線性。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中的迭代器與生成器及其應用.html">迭代器與生成器</a>
+      <a href="JavaScript中Symbol的用途.html">Symbol 的用途</a>
+      <a href="模板字面量及其用法.html">模板字面量</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

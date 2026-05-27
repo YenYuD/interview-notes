@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單元 / 整合 / E2E 測試差異</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  .pyramid-wrap { display:flex; flex-direction:column; align-items:center; gap:0; margin:1.5rem 0; }
+  .pyramid-layer {
+    display:flex; align-items:center; justify-content:center;
+    border-radius:6px; cursor:pointer;
+    font-weight:700; font-size:0.9rem;
+    transition:filter .15s, transform .15s;
+    color:#fff; position:relative;
+  }
+  .pyramid-layer:hover { filter:brightness(1.1); transform:scaleX(1.02); }
+  .pyramid-layer.active { outline:3px solid var(--accent); outline-offset:2px; }
+  .pyr-unit  { width:40%;  height:3rem; background:#3b82f6; }
+  .pyr-integ { width:65%;  height:3rem; background:#8b5cf6; margin:4px 0; }
+  .pyr-e2e   { width:90%;  height:3rem; background:#ef4444; }
+  .pyr-label { font-size:.75rem; margin-left:.5rem; opacity:.85; }
+  .pyramid-info {
+    background:var(--card); border:1.5px solid var(--border);
+    border-radius:10px; padding:1.2rem 1.4rem; margin-top:1rem;
+    min-height:5rem; transition:opacity .2s;
+  }
+  .pyramid-info h4 { margin:0 0 .4rem; }
+  .pyramid-info p { margin:0; font-size:.92rem; color:var(--ink-soft); }
+  .ratio-row { display:flex; gap:.5rem; font-size:.78rem; color:var(--ink-soft); margin-top:.5rem; align-items:center; }
+  .ratio-bar { height:8px; border-radius:4px; display:inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試 · ⭐ 必考</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>測試金字塔：<em>粒度不同，成本不同</em></h1>
+    <p class="lede">Unit、Integration、E2E 三層測試各有職責。<b>越靠塔底越快越便宜</b>，越靠塔頂越貼近真實使用者但越慢。好的測試策略是把大量預算投在底層，少量投在頂層。</p>
+  </header>
+
+  <section>
+    <span class="num">互動圖解</span>
+    <h2>點層級看差異</h2>
+    <p>點選下方金字塔各層，查看範圍、工具與特性：</p>
+    <div class="pyramid-wrap">
+      <div class="pyramid-layer pyr-e2e" id="pyr-e2e">E2E 端對端<span class="pyr-label">慢・貴・真實</span></div>
+      <div class="pyramid-layer pyr-integ" id="pyr-integ">Integration 整合<span class="pyr-label">中等</span></div>
+      <div class="pyramid-layer pyr-unit active" id="pyr-unit">Unit 單元<span class="pyr-label">快・便宜</span></div>
+    </div>
+    <div class="pyramid-info" id="pyr-info">
+      <h4>🔵 Unit 單元測試</h4>
+      <p>範圍：單一函式或元件。與外部完全隔離（依賴全 mock）。<br>
+      工具：Jest、Vitest、Mocha。<br>
+      特性：毫秒級執行、可大量鋪，是迴歸防線第一道。</p>
+      <div class="ratio-row">建議比例：<span class="ratio-bar" style="width:120px;background:#3b82f6"></span>70%</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>三層一眼看清</h2>
+    <table>
+      <tr><th></th><th>Unit 單元</th><th>Integration 整合</th><th>E2E 端對端</th></tr>
+      <tr><td><b>測試對象</b></td><td>單一函式/元件</td><td>多模組合作</td><td>完整使用者流程</td></tr>
+      <tr><td><b>是否 mock</b></td><td>全部 mock</td><td>部分 mock</td><td>幾乎不 mock</td></tr>
+      <tr><td><b>速度</b></td><td>毫秒</td><td>秒</td><td>數秒～分鐘</td></tr>
+      <tr><td><b>維護成本</b></td><td>低</td><td>中</td><td>高</td></tr>
+      <tr><td><b>常用工具</b></td><td>Jest / Vitest</td><td>Jest + Supertest</td><td>Cypress / Playwright</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">程式碼範例</span>
+    <h2>三層各長什麼樣</h2>
+    <p>Unit：函式輸入輸出直接斷言</p>
+    <pre><code><span class="tok-com">// sum.test.js</span>
+<span class="tok-fn">test</span>(<span class="tok-str">'adds 1 + 2 to equal 3'</span>, () =&gt; {
+  <span class="tok-fn">expect</span>(<span class="tok-fn">add</span>(1, 2)).<span class="tok-fn">toBe</span>(3);
+});</code></pre>
+    <p>Integration：多模組串起來，只 mock 外部 I/O</p>
+    <pre><code><span class="tok-com">// API route + DB layer 整合測試</span>
+<span class="tok-key">const</span> response = <span class="tok-key">await</span> <span class="tok-fn">request</span>(app).<span class="tok-fn">get</span>(<span class="tok-str">'/users'</span>);
+<span class="tok-fn">expect</span>(response.status).<span class="tok-fn">toBe</span>(200);
+<span class="tok-fn">expect</span>(response.body).toEqual(expect.<span class="tok-fn">arrayContaining</span>([...]));</code></pre>
+    <p>E2E：真實瀏覽器操作，驗使用者流程</p>
+    <pre><code><span class="tok-com">// Cypress 登入流程</span>
+cy.<span class="tok-fn">visit</span>(<span class="tok-str">'/login'</span>);
+cy.<span class="tok-fn">get</span>(<span class="tok-str">'input[name="username"]'</span>).<span class="tok-fn">type</span>(<span class="tok-str">'testuser'</span>);
+cy.<span class="tok-fn">get</span>(<span class="tok-str">'button[type="submit"]'</span>).<span class="tok-fn">click</span>();
+cy.<span class="tok-fn">url</span>().<span class="tok-fn">should</span>(<span class="tok-str">'include'</span>, <span class="tok-str">'/dashboard'</span>);</code></pre>
+    <div class="callout tip"><span class="ico">💡</span><p>E2E 找不到問題，不代表 bug 不存在；<b>Unit 先找好，E2E 只確認流程通</b>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>測試金字塔比例建議是多少？</summary><p>業界常見參考：Unit 70%、Integration 20%、E2E 10%。E2E 越多，CI/CD 越慢且越脆。</p></details>
+      <details><summary>什麼情況下 E2E 最有價值？</summary><p>跨多個服務的關鍵使用者流程（結帳、登入、送出表單）。這些場景光靠 Unit 無法保障端到端正確性。</p></details>
+      <details><summary>整合測試和 E2E 怎麼抉擇？</summary><p>整合測試不需要瀏覽器，速度快 10x 以上；如果後端 API 本身正確已足夠，就不需要跑 E2E。E2E 留給前後串起來才能驗證的流程。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會用<span class="hl">測試金字塔</span>來分配：底層大量 Unit test，快速驗函式邏輯；中層 Integration test 驗模組串接，例如 API route 加 DB；頂層少量 E2E 驗關鍵使用者流程，像登入或結帳。<span class="hl">越往上越貼近真實，但也越慢越貴</span>，所以比例大約是 7:2:1。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript測試工具.html">JavaScript 測試工具</a>
+      <a href="測試驅動開發概念說明.html">TDD 概念說明</a>
+      <a href="程式碼覆蓋率與測試品質評估.html">程式碼覆蓋率</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const info = {
+    'pyr-unit': {
+      title: '🔵 Unit 單元測試',
+      desc: '範圍：單一函式或元件。與外部完全隔離（依賴全 mock）。<br>工具：Jest、Vitest、Mocha。<br>特性：毫秒級執行、可大量鋪，是迴歸防線第一道。',
+      ratio: 120, color: '#3b82f6', pct: '70%'
+    },
+    'pyr-integ': {
+      title: '🟣 Integration 整合測試',
+      desc: '範圍：多個模組、服務間的互動（例如 API + DB）。mock 只留在最外層。<br>工具：Jest + Supertest、Vitest + msw。<br>特性：秒級，能抓到模組介面不合的問題。',
+      ratio: 70, color: '#8b5cf6', pct: '20%'
+    },
+    'pyr-e2e': {
+      title: '🔴 E2E 端對端測試',
+      desc: '範圍：模擬真實使用者，從瀏覽器到後端走完整流程。幾乎不 mock。<br>工具：Cypress、Playwright、Selenium。<br>特性：最真實，但慢、維護成本高。',
+      ratio: 28, color: '#ef4444', pct: '10%'
+    }
+  };
+
+  const pyrInfo = document.getElementById('pyr-info');
+
+  ['pyr-unit', 'pyr-integ', 'pyr-e2e'].forEach(id => {
+    document.getElementById(id).addEventListener('click', () => {
+      ['pyr-unit', 'pyr-integ', 'pyr-e2e'].forEach(x => document.getElementById(x).classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      const d = info[id];
+      pyrInfo.innerHTML = `<h4>${d.title}</h4><p>${d.desc}</p><div class="ratio-row">建議比例：<span class="ratio-bar" style="width:${d.ratio}px;background:${d.color}"></span>${d.pct}</div>`;
+    });
+  });
+</script>
+</body>
+</html>

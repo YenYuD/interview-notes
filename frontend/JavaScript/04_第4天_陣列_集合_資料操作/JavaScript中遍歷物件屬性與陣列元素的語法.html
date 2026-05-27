@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>遍歷物件與陣列語法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 遍歷</div>
+    <h1>for...in 遍歷物件，<em>for...of 遍歷可迭代物件</em></h1>
+    <p class="lede">搞混這兩者是高頻地雷。<b>for...in</b> 走的是「可列舉屬性的鍵」，包含原型鏈；<b>for...of</b> 走的是「迭代器吐出的值」，只能用在可迭代物件（陣列、字串、Map、Set…）。</p>
+  </header>
+
+  <section>
+    <span class="num">物件遍歷</span>
+    <h2>四種遍歷物件屬性的方式</h2>
+    <table>
+      <thead><tr><th>方式</th><th>包含繼承屬性？</th><th>包含不可列舉？</th><th>回傳</th></tr></thead>
+      <tbody>
+        <tr><td><code>for...in</code></td><td>✅（需 hasOwn 過濾）</td><td>❌</td><td>鍵（字串）</td></tr>
+        <tr><td><code>Object.keys()</code></td><td>❌</td><td>❌</td><td>自身可列舉鍵陣列</td></tr>
+        <tr><td><code>Object.entries()</code></td><td>❌</td><td>❌</td><td>[key, value] 陣列</td></tr>
+        <tr><td><code>Object.getOwnPropertyNames()</code></td><td>❌</td><td>✅</td><td>自身所有鍵陣列</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-key">const</span> obj = { a: 1, b: 2 };
+
+<span class="tok-com">// 安全遍歷（過濾原型鏈）</span>
+<span class="tok-key">for</span> (<span class="tok-key">const</span> key <span class="tok-key">in</span> obj) {
+  <span class="tok-key">if</span> (Object.<span class="tok-fn">hasOwn</span>(obj, key)) console.<span class="tok-fn">log</span>(key, obj[key]);
+}
+
+<span class="tok-com">// 更推薦：Object.entries() 搭配解構</span>
+Object.<span class="tok-fn">entries</span>(obj).<span class="tok-fn">forEach</span>(([k, v]) => console.<span class="tok-fn">log</span>(k, v));</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>直接用 <code>for...in</code> 不過濾，可能會遍歷到原型鏈上的屬性，造成 bug。現代寫法優先用 <code>Object.keys()</code> 或 <code>Object.entries()</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">陣列遍歷</span>
+    <h2>for...of 是遍歷陣列的現代首選</h2>
+    <pre><code><span class="tok-key">const</span> arr = [1, 2, 3];
+
+<span class="tok-com">// for...of：簡潔、可 break</span>
+<span class="tok-key">for</span> (<span class="tok-key">const</span> n <span class="tok-key">of</span> arr) console.<span class="tok-fn">log</span>(n);
+
+<span class="tok-com">// 同時需要 index</span>
+<span class="tok-key">for</span> (<span class="tok-key">const</span> [i, n] <span class="tok-key">of</span> arr.<span class="tok-fn">entries</span>()) console.<span class="tok-fn">log</span>(i, n);</code></pre>
+    <div class="aside">對陣列用 <code>for...in</code> 是常見錯誤——它會遍歷索引字串 <code>'0' '1' '2'</code>，還可能包含陣列上擴充的屬性，盡量避免。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>for...in 和 for...of 的本質差異？</summary><p><code>for...in</code> 列舉物件的<b>可列舉屬性鍵</b>，適用於任何物件；<code>for...of</code> 依賴<b>可迭代協議（[Symbol.iterator]）</b>，只適用於有實作 iterator 的物件（陣列、字串、Map、Set 等）。</p></details>
+      <details><summary>Object.entries() 的鍵順序保證嗎？</summary><p>ES2015+ 規範物件整數鍵按升序、其餘鍵按插入順序排列。<code>Object.entries()</code> 遵循此規則，實務上可視為插入順序。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「遍歷物件我優先用 <span class="hl">Object.entries()</span>，可以同時拿到 key 和 value，語意清晰又不會踩原型鏈的坑；遍歷陣列用 <span class="hl">for...of</span> 或 forEach，需要同時拿 index 時搭配 <code>.entries()</code> 解構。<code>for...in</code> 用在物件時要記得加 <code>Object.hasOwn</code> 過濾。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="陣列迭代方法.html">陣列迭代方法</a>
+      <a href="如何在陣列迭代中取得元素索引.html">迭代時取得索引</a>
+      <a href="Set與Map是什麼及其用法.html">Set 與 Map 用法</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 事件迴圈</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · 事件迴圈</div>
+    <h1>單執行緒，卻能<em>不卡住</em>地處理非同步</h1>
+    <p class="lede">JS 只有一條呼叫堆疊。事件迴圈的工作是：堆疊一空，就<b>先清光微任務（Promise），再做一個巨任務（setTimeout）</b>，如此循環。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 一步步看執行順序</span>
+    <h2>猜猜這段印出什麼？</h2>
+    <pre><code>console.log('Start');
+setTimeout(() =&gt; console.log('Timeout'), 0);
+Promise.resolve().then(() =&gt; console.log('Promise'));
+console.log('End');</code></pre>
+    <p>按「下一步」，看每個任務跑去哪個佇列、又何時被取出執行：</p>
+
+    <div class="lab">
+      <div class="lab-label">事件迴圈視覺化</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;font-family:var(--mono);font-size:.72rem">
+        <div><div style="color:var(--ink-soft);margin-bottom:.3rem">📞 呼叫堆疊</div><div id="stack" style="background:var(--paper);border:1px solid var(--line);border-radius:8px;min-height:88px;padding:.4rem"></div></div>
+        <div><div style="color:var(--info);margin-bottom:.3rem">⚡ 微任務</div><div id="micro" style="background:var(--info-soft);border:1px solid var(--info);border-radius:8px;min-height:88px;padding:.4rem"></div></div>
+        <div><div style="color:var(--accent);margin-bottom:.3rem">🕒 巨任務</div><div id="macro" style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;min-height:88px;padding:.4rem"></div></div>
+      </div>
+      <div style="display:flex;gap:.6rem;margin-top:1rem">
+        <button class="btn-primary" id="next">下一步 →</button>
+        <button class="btn-ghost" id="reset">重置</button>
+      </div>
+      <div class="log" id="out" style="max-height:none"><div class="ln empty">// 主控台輸出會顯示在這…</div></div>
+    </div>
+    <div class="aside">關鍵規則：每做完<b>一個</b>巨任務，會先把<b>全部</b>微任務清空，才做下一個巨任務。所以 Promise 永遠贏 setTimeout。</div>
+  </section>
+
+  <section>
+    <span class="num">三個角色</span>
+    <h2>誰排哪個佇列</h2>
+    <table>
+      <tr><th>佇列</th><th>誰會進來</th><th>優先序</th></tr>
+      <tr><td>微任務</td><td><code>.then/.catch/.finally</code>、<code>await</code>、<code>queueMicrotask</code></td><td><b style="color:var(--good)">高</b></td></tr>
+      <tr><td>巨任務</td><td><code>setTimeout</code>、I/O、UI 事件</td><td>低</td></tr>
+    </table>
+    <div class="callout warn"><span class="ico">⚠️</span><p>微任務若無限產生微任務，會「餓死」巨任務（畫面更新、計時器都卡住）。別在 <code>.then</code> 裡無止境再 resolve。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>setTimeout(fn, 0) 真的 0ms 嗎？</summary><p>不是。它只保證「至少 0ms 後、且堆疊清空、且微任務都清完」才執行，實際常有 ~4ms 最小延遲。</p></details>
+      <details><summary>Web API 算在 JS 引擎裡嗎？</summary><p>不算。計時器、fetch 等由瀏覽器（或 Node 的 C++ API）在別的執行緒處理，完成後才把回呼丟回佇列，所以 JS 單執行緒也不阻塞。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 是單執行緒，靠事件迴圈處理非同步。同步碼先在<span class="hl">呼叫堆疊</span>跑完，非同步回呼依類型進<span class="hl">微任務</span>或<span class="hl">巨任務</span>佇列。事件迴圈的規則是：堆疊一空，先<span class="hl">清光所有微任務，再執行一個巨任務</span>。所以 Promise 的 then 一定排在 setTimeout 前面。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="微任務佇列概念解析.html">微任務佇列</a>
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="async await 是什麼及其如何簡化非同步程式碼.html">async / await</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const stack=document.getElementById('stack'), micro=document.getElementById('micro'), macro=document.getElementById('macro'), out=document.getElementById('out');
+  // 每一步：描述 + 各區內容快照 + 輸出
+  const steps=[
+    {s:["log('Start')"],mi:[],ma:[],o:null},
+    {s:[],mi:[],ma:[],o:'Start'},
+    {s:["setTimeout"],mi:[],ma:["Timeout cb"],o:null,note:'setTimeout 交給 Web API → 回呼排入巨任務'},
+    {s:["Promise.then"],mi:["Promise cb"],ma:["Timeout cb"],o:null,note:'.then 回呼排入微任務'},
+    {s:["log('End')"],mi:["Promise cb"],ma:["Timeout cb"],o:null},
+    {s:[],mi:["Promise cb"],ma:["Timeout cb"],o:'End',note:'同步碼跑完，堆疊清空 → 換微任務'},
+    {s:["Promise cb"],mi:[],ma:["Timeout cb"],o:null,note:'取出微任務執行'},
+    {s:[],mi:[],ma:["Timeout cb"],o:'Promise',note:'微任務清空 → 才換巨任務'},
+    {s:["Timeout cb"],mi:[],ma:[],o:null},
+    {s:[],mi:[],ma:[],o:'Timeout',note:'完成 ✓'},
+  ];
+  let i=0;
+  function box(arr){ return arr.length? arr.map(x=>`<div>${x}</div>`).join('') : '<span style="opacity:.4">空</span>'; }
+  function render(){
+    const st=steps[i];
+    stack.innerHTML=box(st.s); micro.innerHTML=box(st.mi); macro.innerHTML=box(st.ma);
+    if(i===0){ out.innerHTML='<div class="ln empty">// 主控台輸出會顯示在這…</div>'; }
+    if(st.o){ const em=out.querySelector('.empty'); if(em)em.remove(); out.insertAdjacentHTML('beforeend',`<div class="ln c-ok">${st.o}</div>`); }
+    if(st.note){ out.insertAdjacentHTML('beforeend',`<div class="ln c-dim">// ${st.note}</div>`); out.scrollTop=out.scrollHeight; }
+  }
+  document.getElementById('next').addEventListener('click',()=>{ if(i<steps.length-1){ i++; render(); } });
+  document.getElementById('reset').addEventListener('click',()=>{ i=0; render(); });
+  render();
+</script>
+</body>
+</html>

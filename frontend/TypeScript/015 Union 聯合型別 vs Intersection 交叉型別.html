@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Union vs Intersection</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TypeScript</div>
+    <h1><code>|</code> 是「或」，<code>&amp;</code> 是<em>「且」</em></h1>
+    <p class="lede">Union <code>B | C</code>：值是其中<b>一種</b>，只能安全用<b>共有</b>屬性。Intersection <code>B &amp; C</code>：值同時是兩者，<b>所有</b>屬性都要有。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 哪些屬性能安全存取</span>
+    <h2>切換 | 和 &amp;，看可用屬性怎麼變</h2>
+    <pre><code>interface B { name: string; email: string; }
+interface C { name: string; age: number; }</code></pre>
+
+    <div class="lab">
+      <div class="lab-label">組合方式</div>
+      <div class="toggle-row" id="row">
+        <button class="on" data-k="union">type A = B | C（或）</button>
+        <button data-k="inter">type A = B &amp; C（且）</button>
+      </div>
+      <div id="props" style="display:grid;gap:.5rem"></div>
+      <div class="log" id="out" style="max-height:none"></div>
+    </div>
+    <div class="aside">直覺反過來：Union 是型別變「寬」、可用屬性卻變「窄」（只剩交集）；Intersection 是型別變「窄」、屬性卻變「全」（聯集）。</div>
+  </section>
+
+  <section>
+    <span class="num">場景</span>
+    <h2>各自用在哪</h2>
+    <table>
+      <tr><th></th><th>Union <code>|</code></th><th>Intersection <code>&amp;</code></th></tr>
+      <tr><td>意義</td><td>是其中一種</td><td>同時都是</td></tr>
+      <tr><td>可存取</td><td>共有屬性（需 narrowing 才用各自的）</td><td>全部屬性</td></tr>
+      <tr><td>典型用途</td><td>參數接受多型別 <code>string | number</code></td><td>合併多個 interface</td></tr>
+    </table>
+    <div class="callout info"><span class="ico">💡</span><p>用 Union 時，靠 <b>narrowing</b>（<code>in</code>、<code>typeof</code>、判別式聯合 discriminated union）縮型別後，才能安全存取各自獨有的屬性。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼是判別式聯合（discriminated union）？</summary><p>給每個成員一個共同的字面量標籤欄位（如 <code>type:'a'|'b'</code>），用 <code>switch(x.type)</code> 縮窄，TS 就知道分支裡是哪個型別。是處理 Union 最好用的模式。</p></details>
+      <details><summary>兩個有衝突屬性的型別做 &amp; 會怎樣？</summary><p>若同名屬性型別不相容（如 <code>name:string</code> 與 <code>name:number</code>），交叉後該屬性變成 <code>never</code>，實際上無法建立值。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">Union | 是『或』</span>，值是其中一種，只能直接用共有屬性，要用各自的得先 narrowing；<span class="hl">Intersection &amp; 是『且』</span>，值同時符合所有型別、擁有全部屬性。Union 常用在參數接受多型別，Intersection 常用來合併多個 interface。處理 Union 我會用判別式聯合來安全縮型別。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="004 Interface 介面是什麼.html">Interface</a>
+      <a href="014 條件型別 Conditional Types.html">條件型別</a>
+      <a href="011 泛型 Generics 是什麼.html">泛型</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), props=document.getElementById('props'), out=document.getElementById('out');
+  const all=[{k:'name',inB:true,inC:true},{k:'email',inB:true,inC:false},{k:'age',inB:false,inC:true}];
+  function render(mode){
+    props.innerHTML=all.map(p=>{
+      const ok = mode==='union' ? (p.inB&&p.inC) : (p.inB||p.inC);
+      const col = ok?'var(--good)':'var(--bad)';
+      return `<div style="display:flex;justify-content:space-between;border:1.5px solid ${col};border-radius:8px;padding:.45rem .8rem;font-family:var(--mono);font-size:.8rem">
+        <span>a.${p.k}</span><span style="color:${col}">${ok?'✓ 可安全存取':'✗ 編譯錯誤'}</span></div>`;
+    }).join('');
+    out.innerHTML = mode==='union'
+      ? '<div class="ln c-dim">B | C → 只保證有「交集」屬性：name</div>'
+      : '<div class="ln c-dim">B &amp; C → 擁有「聯集」屬性：name + email + age</div>';
+  }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(b.dataset.k); });
+  render('union');
+</script>
+</body>
+</html>

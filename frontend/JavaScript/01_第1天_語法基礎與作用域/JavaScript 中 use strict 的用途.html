@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>use strict 嚴格模式</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 語法基礎</div>
+    <h1>一行指令讓 JS 引擎<em>從寬容模式切換為嚴格執法</em></h1>
+    <p class="lede"><code>'use strict'</code> 啟用嚴格模式後，<b>靜默失敗變成拋錯</b>，意外全域變數不再被容忍。ES6 模組與 class 內建嚴格模式，但傳統腳本仍需手動聲明。</p>
+  </header>
+
+  <section>
+    <span class="num">嚴格模式做了什麼</span>
+    <h2>三大核心限制</h2>
+    <div class="chips">
+      <div class="chip bad"><small>禁止</small>未宣告變數賦值（防意外全域）</div>
+      <div class="chip bad"><small>禁止</small>刪除不可刪除屬性</div>
+      <div class="chip bad"><small>禁止</small>重複參數名稱</div>
+    </div>
+    <pre><code><span class="tok-com">// 不使用嚴格模式</span>
+<span class="tok-fn">defineNumber</span>() { count = <span class="tok-num">123</span>; } <span class="tok-com">// count 成為全域變數！</span>
+
+<span class="tok-com">// 啟用嚴格模式</span>
+<span class="tok-str">'use strict'</span>;
+count = <span class="tok-num">123</span>; <span class="tok-com">// ReferenceError: count is not defined</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">使用方式</span>
+    <h2>全域 vs 函式層級</h2>
+    <table>
+      <tr><th>用法</th><th>寫法</th><th>生效範圍</th></tr>
+      <tr><td>全域嚴格</td><td>放在 JS 檔案第一行</td><td>整個腳本</td></tr>
+      <tr><td>函式嚴格</td><td>放在函式體第一行</td><td>該函式內部</td></tr>
+      <tr><td>ES6 模組</td><td>無需聲明</td><td>自動嚴格</td></tr>
+      <tr><td>class 內部</td><td>無需聲明</td><td>自動嚴格</td></tr>
+    </table>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>現代前端幾乎都透過打包工具處理 ES6 模組，天然嚴格模式。但理解其規則仍是面試必備知識。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>嚴格模式下 this 有什麼不同？</summary><p>非嚴格模式中，頂層函式的 this 指向全域物件（瀏覽器是 window）；嚴格模式下是 <code>undefined</code>，可避免意外污染全域。</p></details>
+      <details><summary>能在執行中途「取消」嚴格模式嗎？</summary><p>不能。嚴格模式是單向切換，一旦在某個作用域宣告就無法撤銷。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>'use strict'</code> 讓 JavaScript 以更嚴格的規則執行。最重要的效果是<span class="hl">禁止意外建立全域變數</span>、讓原本靜默失敗的操作改為拋出錯誤。放在檔案最頂端是全域生效，放在函式內只影響該函式。ES6 模組和 class 內部<span class="hl">自動啟用嚴格模式</span>，所以現代開發中大部分情況已無需手動宣告。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let/var/const 差異</a>
+      <a href="JavaScript作用域概念說明.html">作用域概念</a>
+      <a href="JavaScript變數null、undefined與未宣告的差異.html">null/undefined/未宣告</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

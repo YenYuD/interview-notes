@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promise 運作原理</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · Promise</div>
+    <h1>非同步操作的<em>承諾書</em>：三種狀態，只轉換一次</h1>
+    <p class="lede">Promise 是一個代表「未來結果」的物件。<b>建立後進入 pending；操作成功轉 fulfilled、失敗轉 rejected</b>——狀態一旦確定，就永遠不變。</p>
+  </header>
+
+  <section>
+    <span class="num">三種狀態</span>
+    <h2>Promise 的生命週期</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>pending</b> — 初始狀態，操作尚未完成。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>fulfilled</b> — 呼叫 <code>resolve(value)</code> 後轉入；可用 <code>.then()</code> 取值。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>rejected</b> — 呼叫 <code>reject(reason)</code> 後轉入；可用 <code>.catch()</code> 處理。</div>
+      </div>
+    </div>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>fulfilled 和 rejected 合稱 <b>settled（已確定）</b>。settled 後再呼叫 resolve/reject 無效，狀態不會再改變。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">建立與使用</span>
+    <h2>Promise 的基本語法</h2>
+    <pre><code><span class="tok-key">const</span> p = <span class="tok-key">new</span> <span class="tok-fn">Promise</span>((resolve, reject) => {
+  <span class="tok-com">// 非同步操作...</span>
+  <span class="tok-key">const</span> ok = <span class="tok-key">true</span>;
+  <span class="tok-key">if</span> (ok) <span class="tok-fn">resolve</span>(<span class="tok-str">'成功！'</span>);
+  <span class="tok-key">else</span>    <span class="tok-fn">reject</span>(<span class="tok-key">new</span> <span class="tok-fn">Error</span>(<span class="tok-str">'失敗'</span>));
+});
+
+p.<span class="tok-fn">then</span>((val) => console.<span class="tok-fn">log</span>(val))   <span class="tok-com">// '成功！'</span>
+ .<span class="tok-fn">catch</span>((err) => console.<span class="tok-fn">error</span>(err))
+ .<span class="tok-fn">finally</span>(() => console.<span class="tok-fn">log</span>(<span class="tok-str">'都會跑'</span>));</code></pre>
+    <table>
+      <tr><th>方法</th><th>觸發時機</th><th>回傳</th></tr>
+      <tr><td><code>.then(fn)</code></td><td>fulfilled</td><td>新的 Promise</td></tr>
+      <tr><td><code>.catch(fn)</code></td><td>rejected</td><td>新的 Promise</td></tr>
+      <tr><td><code>.finally(fn)</code></td><td>任何 settled</td><td>新的 Promise</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">Promise 鏈結</span>
+    <h2>用 .then() 串接多步驟</h2>
+    <p>每個 <code>.then()</code> 都回傳一個新 Promise，讓你把多步非同步操作攤平成一條線，告別 Callback Hell：</p>
+    <pre><code><span class="tok-fn">fetch</span>(<span class="tok-str">'/api/user'</span>)
+  .<span class="tok-fn">then</span>((res) => res.<span class="tok-fn">json</span>())
+  .<span class="tok-fn">then</span>((user) => <span class="tok-fn">fetch</span>(<span class="tok-str">`/api/posts?uid=${user.id}`</span>))
+  .<span class="tok-fn">then</span>((res) => res.<span class="tok-fn">json</span>())
+  .<span class="tok-fn">then</span>((posts) => console.<span class="tok-fn">log</span>(posts))
+  .<span class="tok-fn">catch</span>((err) => console.<span class="tok-fn">error</span>(err)); <span class="tok-com">// 任一步出錯都到這</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Promise 的 .then() 回呼是同步還是非同步執行？</summary>
+        <p>永遠是非同步——即使 Promise 已是 fulfilled，<code>.then()</code> 的回呼也會進入<b>微任務佇列</b>，等同步程式碼跑完才執行。這確保行為一致性。</p>
+      </details>
+      <details>
+        <summary>Promise.resolve() 和 new Promise(resolve => resolve()) 有差嗎？</summary>
+        <p>功能上等價，但 <code>Promise.resolve(value)</code> 更簡潔。若傳入的值本身就是 Promise，會直接回傳該 Promise；若是 thenable，則會跟隨其狀態。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Promise 是代表非同步操作未來結果的物件，有三種狀態：<span class="hl">pending、fulfilled、rejected</span>，一旦確定就不可更改。用 <code>new Promise((resolve, reject) => …)</code> 建立，<span class="hl"><code>.then()</code> 接成功、<code>.catch()</code> 接失敗</span>，並且可以鏈結串接多步非同步邏輯，解決 Callback Hell。所有 <code>.then()</code> 回呼都走微任務佇列，保證非同步執行。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="非同步操作中的回呼函式概念.html">Callback 回呼函式</a>
+      <a href="使用Promise取代Callback的優缺點.html">Promise 取代 Callback</a>
+      <a href="async await 是什麼及其如何簡化非同步程式碼.html">async / await</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

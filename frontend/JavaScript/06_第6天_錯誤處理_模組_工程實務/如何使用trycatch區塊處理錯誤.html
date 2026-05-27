@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如何使用 try…catch 處理錯誤</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 錯誤處理</div>
+    <h1>try…catch 不只是<em>包住錯誤</em>，還要分層處理</h1>
+    <p class="lede"><b>try…catch</b> 是 JavaScript 同步錯誤處理的核心語法。關鍵不在會不會寫，而在於「在對的層級 catch」「何時 re-throw」「finally 怎麼用」——這才是面試想測的。</p>
+  </header>
+
+  <section>
+    <span class="num">基本結構</span>
+    <h2>三個區塊各自的職責</h2>
+    <pre><code><span class="tok-key">try</span> {
+  <span class="tok-com">// 可能拋出錯誤的程式碼</span>
+  <span class="tok-key">const</span> data = JSON.<span class="tok-fn">parse</span>(invalidJson);
+} <span class="tok-key">catch</span> (error) {
+  <span class="tok-com">// 接住錯誤，error 物件有 .name、.message、.stack</span>
+  console.<span class="tok-fn">error</span>(<span class="tok-str">'解析失敗：'</span>, error.message);
+} <span class="tok-key">finally</span> {
+  <span class="tok-com">// 無論是否出錯，都執行（清理資源）</span>
+  setLoading(<span class="tok-key">false</span>);
+}</code></pre>
+    <div class="chips">
+      <div class="chip good">try<small>保護區，拋出後立即跳 catch</small></div>
+      <div class="chip info">catch (e)<small>e.name / e.message / e.stack</small></div>
+      <div class="chip good">finally<small>必定執行，適合 cleanup</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">進階技巧</span>
+    <h2>巢狀 vs 重新拋出</h2>
+    <p>並非所有錯誤都應在同一層處理。兩種進階用法：</p>
+
+    <h3>巢狀 catch：細粒度錯誤隔離</h3>
+    <pre><code><span class="tok-key">try</span> {
+  <span class="tok-key">const</span> user = <span class="tok-key">await</span> <span class="tok-fn">fetchUser</span>();
+  <span class="tok-key">try</span> {
+    <span class="tok-key">const</span> posts = <span class="tok-key">await</span> <span class="tok-fn">fetchPosts</span>(user.id);
+  } <span class="tok-key">catch</span> (postsErr) {
+    <span class="tok-com">// 貼文失敗不影響使用者資訊的顯示</span>
+    console.<span class="tok-fn">warn</span>(<span class="tok-str">'貼文載入失敗'</span>, postsErr.message);
+  }
+} <span class="tok-key">catch</span> (userErr) {
+  <span class="tok-com">// 使用者載入失敗才是嚴重問題</span>
+  showError(userErr.message);
+}</code></pre>
+
+    <h3>重新拋出（re-throw）：只處理自己能處理的</h3>
+    <pre><code><span class="tok-key">try</span> {
+  <span class="tok-fn">riskyOp</span>();
+} <span class="tok-key">catch</span> (e) {
+  <span class="tok-key">if</span> (e <span class="tok-key">instanceof</span> NetworkError) {
+    <span class="tok-fn">retry</span>();         <span class="tok-com">// 處理得了的自己來</span>
+  } <span class="tok-key">else</span> {
+    <span class="tok-key">throw</span> e;         <span class="tok-com">// 處理不了的往上傳，不要吞掉</span>
+  }
+}</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>常見錯誤：catch 之後什麼都不做</b>（空 catch block）。這會讓錯誤被靜默吞掉，完全無法除錯。至少要 <code>console.error(e)</code> 或 re-throw。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>catch 能夠捕捉所有錯誤嗎？</summary>
+        <p>不能。SyntaxError（非執行時）、跨執行緒的 Worker 錯誤、以及未 await 的 rejected Promise 都不會被同步 try…catch 捕捉。非同步錯誤需要 async/await 搭配 try…catch 或 <code>.catch()</code>。</p>
+      </details>
+      <details>
+        <summary>error 物件上有哪些屬性？</summary>
+        <p>標準屬性：<code>name</code>（錯誤類型，如 <code>'TypeError'</code>）、<code>message</code>（可讀說明）、<code>stack</code>（堆疊追蹤字串）。自訂錯誤可擴充更多屬性（如 <code>errorCode</code>、<code>statusCode</code>）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我使用 try…catch 時有幾個原則：第一，<span class="hl">只在能處理的層級 catch</span>，不在每個函式都包一層；第二，catch 到處理不了的錯誤要 <span class="hl">re-throw</span>，不能吞掉；第三，用 finally 做資源清理，例如關閉 loading 狀態。非同步的部分用 async/await 搭配 try…catch，效果與同步一致。整個原則是：錯誤應在<span class="hl">最了解它的那一層</span>被處理，而不是到處 catch 又到處忽略。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript錯誤傳播概念解析.html">錯誤傳播概念</a>
+      <a href="finally區塊的用途.html">finally 區塊的用途</a>
+      <a href="如何建立自訂錯誤物件.html">自訂錯誤物件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

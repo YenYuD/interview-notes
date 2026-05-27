@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>querySelector vs getElementById</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1><em>querySelector</em> 支援任何 CSS 選擇器，<em>getElementById</em> 速度更快</h1>
+    <p class="lede">兩者都用來從 DOM 選取元素，但 <code>querySelector</code> 靈活性遠勝，可用類別、屬性、偽類等；<code>getElementById</code> 只認 ID，但<b>效能更好</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">差異對照</span>
+    <h2>選擇器彈性 vs 效能</h2>
+    <table>
+      <thead><tr><th>面向</th><th>querySelector</th><th>getElementById</th></tr></thead>
+      <tbody>
+        <tr><td>選擇器</td><td>任何有效的 CSS 選擇器</td><td>僅限 ID</td></tr>
+        <tr><td>回傳值</td><td>第一個符合的元素或 null</td><td>符合 ID 的元素或 null</td></tr>
+        <tr><td>效能</td><td>較慢（需解析 CSS 選擇器）</td><td>較快（直接查找 ID）</td></tr>
+        <tr><td>多元素版本</td><td><code>querySelectorAll()</code></td><td><code>getElementsByClassName()</code> 等</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">彈性展示</span>
+    <h2>querySelector 能做更多</h2>
+    <pre><code><span class="tok-com">// getElementById — 只能選 ID</span>
+document.getElementById(<span class="tok-str">'header'</span>);
+
+<span class="tok-com">// querySelector — 支援所有 CSS 選擇器</span>
+document.querySelector(<span class="tok-str">'#header'</span>);           <span class="tok-com">// 同上（加 # 前綴）</span>
+document.querySelector(<span class="tok-str">'.btn.primary'</span>);       <span class="tok-com">// 多重類別</span>
+document.querySelector(<span class="tok-str">'input[type="email"]'</span>); <span class="tok-com">// 屬性選擇器</span>
+document.querySelector(<span class="tok-str">'li:first-child'</span>);    <span class="tok-com">// 偽類</span>
+document.querySelector(<span class="tok-str">'nav > ul > li'</span>);     <span class="tok-com">// 後代選擇</span></code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>用 ID 選取時，若效能要求高（如在迴圈中大量選取），優先用 <code>getElementById</code>；一般情況 <code>querySelector</code> 的可讀性更好。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>querySelectorAll 回傳的是什麼？可以直接用 forEach 嗎？</summary>
+        <p>回傳 <code>NodeList</code>，不是 Array。現代瀏覽器的 NodeList 支援 <code>forEach</code>，但若需要 <code>map</code>/<code>filter</code> 等方法，要先用 <code>Array.from()</code> 或展開運算子 <code>[...nodes]</code> 轉成陣列。</p>
+      </details>
+      <details>
+        <summary>querySelector 找不到元素時回傳什麼？存取它的屬性會怎樣？</summary>
+        <p>回傳 <code>null</code>。存取 <code>null.textContent</code> 等屬性會拋出 TypeError。要養成習慣在操作前先確認元素不為 null：<code>if (el) el.textContent = '...'</code>。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">querySelector</span> 接受任何 CSS 選擇器，可以選類別、屬性、偽類等，靈活性高；<span class="hl">getElementById</span> 只能用 ID 選取，但直接查找內部索引，效能更好。一般開發用 querySelector 可讀性更好，效能敏感的場景（如大量 DOM 操作）才特別用 getElementById。兩者找不到元素都回傳 null。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="什麼是DOM及其結構.html">什麼是 DOM</a>
+      <a href="使用JavaScript新增移除修改HTML元素.html">JS 操作 DOM 元素</a>
+      <a href="DOM中屬性與屬性值的差異.html">DOM Attribute vs Property</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

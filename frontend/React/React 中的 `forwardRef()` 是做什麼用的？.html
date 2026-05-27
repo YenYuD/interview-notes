@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>forwardRef</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT HOOKS</div>
+    <h1><code>forwardRef</code>：讓父組件的 ref 能<em>穿透</em>自訂組件，直達 DOM</h1>
+    <p class="lede">預設情況下，父組件無法用 ref 直接存取子函式組件內部的 DOM。<b>forwardRef</b> 讓自訂組件把父層傳來的 ref「轉送」給內部的 DOM 元素或類別組件實例。</p>
+  </header>
+
+  <section>
+    <span class="num">為什麼需要它</span>
+    <h2>問題：ref 傳進功能組件會消失</h2>
+    <pre><code><span class="tok-com">// 沒有 forwardRef 時，這樣寫 ref 是 null</span>
+<span class="tok-key">function</span> <span class="tok-fn">MyInput</span>(props) {
+  <span class="tok-key">return</span> &lt;input {...props} /&gt;;
+}
+
+<span class="tok-key">const</span> ref = <span class="tok-fn">useRef</span>();
+&lt;MyInput ref={ref} /&gt;  <span class="tok-com">// ⚠️ ref.current 是 null！</span>
+
+<span class="tok-com">// 用 forwardRef 包裝後，ref 轉發到 input</span>
+<span class="tok-key">const</span> MyInput = <span class="tok-fn">forwardRef</span>((props, ref) =&gt;
+  &lt;input ref={ref} {...props} /&gt;
+);
+<span class="tok-com">// 現在 ref.current 指向真正的 &lt;input&gt; DOM 元素</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">完整範例</span>
+    <h2>父組件點按鈕、聚焦子組件的 input</h2>
+    <pre><code><span class="tok-key">const</span> FancyInput = <span class="tok-fn">forwardRef</span>((props, ref) =&gt; (
+  &lt;input className=<span class="tok-str">"fancy"</span> ref={ref} {...props} /&gt;
+));
+
+<span class="tok-key">function</span> <span class="tok-fn">Form</span>() {
+  <span class="tok-key">const</span> inputRef = <span class="tok-fn">useRef</span>();
+
+  <span class="tok-key">return</span> (
+    &lt;&gt;
+      &lt;FancyInput ref={inputRef} placeholder=<span class="tok-str">"輸入..."</span> /&gt;
+      &lt;button onClick={() =&gt; inputRef.current?.<span class="tok-fn">focus</span>()}&gt;
+        聚焦
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>React 19 起，<code>ref</code> 可以作為普通 prop 傳遞，不再需要 <code>forwardRef</code> 包裹。但了解 <code>forwardRef</code> 仍是面試必備，因為大量現有程式碼仍在使用。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>forwardRef 可以搭配 useImperativeHandle 嗎？</summary><p>可以，而且這是進階用法：<code>useImperativeHandle</code> 讓你自定義 ref 暴露的 API（而非整個 DOM），例如只暴露 <code>focus()</code> 和 <code>reset()</code> 兩個方法，隱藏其餘 DOM 屬性。</p></details>
+      <details><summary>類別組件需要 forwardRef 嗎？</summary><p>不需要，類別組件本身就可以直接接收 ref，<code>ref.current</code> 指向組件實例。<code>forwardRef</code> 只是為了功能組件。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>forwardRef</code> 讓功能組件能把父層傳來的 ref<span class="hl">轉發給內部的 DOM 元素</span>。預設情況下，ref 傳入功能組件會是 null，因為函式沒有實例。用 <code>forwardRef</code> 包裹後，組件接收第二個參數 <code>ref</code>，再把它附到目標元素。常見用途是設計可複用的 Input、Modal 等組件，讓呼叫者能直接操作 DOM（如聚焦、捲動）。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 `useRef` hook 是什麼？什麼時候應該使用它？.html">useRef hook</a>
+      <a href="在 React 中使用 Hooks 有什麼優點？.html">Hooks 的優點</a>
+      <a href="受控（controlled）與非受控（uncontrolled）React 組件有什麼區別？.html">受控 vs 非受控組件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

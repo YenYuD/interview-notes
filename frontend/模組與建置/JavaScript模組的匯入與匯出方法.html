@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 模組匯入與匯出方法</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">模組與建置</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">MODULE &amp; BUILD</div>
+    <h1><em>export</em> 與 <em>import</em>：模組進出的所有姿勢</h1>
+    <p class="lede">命名匯出、預設匯出、命名空間匯入、動態 import——每種寫法都有適合的場景，<b>一次搞懂全部組合</b>才不會在 code review 卡關。</p>
+  </header>
+
+  <section>
+    <span class="num">匯出方式</span>
+    <h2>命名匯出 vs 預設匯出</h2>
+
+    <div class="chips">
+      <div class="chip good">命名匯出<small>可多個，用 { }</small></div>
+      <div class="chip info">預設匯出<small>每模組一個，不用 { }</small></div>
+    </div>
+
+    <pre><code><span class="tok-com">// ── 命名匯出（Named Export） ──</span>
+<span class="tok-key">export const</span> PI = 3.14;
+<span class="tok-key">export function</span> <span class="tok-fn">add</span>(a, b) { <span class="tok-key">return</span> a + b; }
+<span class="tok-key">export class</span> <span class="tok-fn">Calculator</span> { <span class="tok-com">/* … */</span> }
+
+<span class="tok-com">// 也可以一次打包匯出</span>
+<span class="tok-key">export</span> { PI, add, Calculator };
+
+<span class="tok-com">// ── 預設匯出（Default Export） ──</span>
+<span class="tok-key">export default function</span> <span class="tok-fn">greet</span>(name) {
+  <span class="tok-key">return</span> <span class="tok-str">`Hello, </span>${name}<span class="tok-str">!`</span>;
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">匯入方式</span>
+    <h2>四種匯入組合</h2>
+
+    <pre><code><span class="tok-com">// 1. 匯入命名匯出</span>
+<span class="tok-key">import</span> { add, PI } <span class="tok-key">from</span> <span class="tok-str">'./math'</span>;
+
+<span class="tok-com">// 2. 匯入並重新命名</span>
+<span class="tok-key">import</span> { add <span class="tok-key">as</span> sum } <span class="tok-key">from</span> <span class="tok-str">'./math'</span>;
+
+<span class="tok-com">// 3. 匯入預設匯出（名稱自訂）</span>
+<span class="tok-key">import</span> greet <span class="tok-key">from</span> <span class="tok-str">'./greeting'</span>;
+
+<span class="tok-com">// 4. 匯入全部（命名空間）</span>
+<span class="tok-key">import</span> * <span class="tok-key">as</span> Math <span class="tok-key">from</span> <span class="tok-str">'./math'</span>;
+Math.<span class="tok-fn">add</span>(1, 2); <span class="tok-com">// 2</span></code></pre>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>命名空間匯入（import *）會破壞 Tree Shaking</b>：打包器無法確定你實際用了哪些匯出，傾向保留全部。除非需要動態存取，否則建議明確列出需要的項目。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">動態匯入</span>
+    <h2>import() — 用到才載入</h2>
+    <p>靜態 <code>import</code> 必須在頂層，動態 <code>import()</code> 回傳 Promise，可在條件判斷或事件觸發時才載入，是 Code Splitting 的基礎。</p>
+
+    <pre><code><span class="tok-com">// 按需載入（Code Splitting）</span>
+<span class="tok-key">async function</span> <span class="tok-fn">loadChart</span>() {
+  <span class="tok-key">const</span> { Chart } = <span class="tok-key">await import</span>(<span class="tok-str">'./chart'</span>);
+  <span class="tok-key">return new</span> <span class="tok-fn">Chart</span>();
+}
+
+<span class="tok-com">// React lazy 底層就是這樣運作</span>
+<span class="tok-key">const</span> HeavyComponent = React.<span class="tok-fn">lazy</span>(
+  () => <span class="tok-key">import</span>(<span class="tok-str">'./HeavyComponent'</span>)
+);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>預設匯出和命名匯出各自適合什麼場景？</summary>
+        <p>預設匯出適合「這個模組就是一個主要東西」的情境，如 React 元件檔案（一個檔案一個元件）。命名匯出適合工具函式庫、常數集合等「一個模組多個相關功能」的情境，而且對 Tree Shaking 更友善。</p>
+      </details>
+      <details>
+        <summary>import 能在條件式裡用嗎？</summary>
+        <p>靜態 <code>import</code> 只能在模組頂層，不能放在 <code>if</code>、函式或迴圈裡。若需要條件載入，使用動態 <code>import()</code>，它回傳 Promise，可搭配 async/await 使用。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「ESM 有兩種匯出：<span class="hl">命名匯出</span>可以多個，用 <code>{ }</code> 匯入，對 Tree Shaking 友善；<span class="hl">預設匯出</span>每個模組只能有一個，匯入時可自訂名稱。此外還有<span class="hl">動態 import()</span>，回傳 Promise，可在用到時才載入，是打包器做 Code Splitting 的基礎，React.lazy 就是這樣實作的。實務上我盡量用命名匯出，除非是 React 元件這類一檔一主體的場景才用預設匯出。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="模組是什麼及其重要性.html">模組是什麼</a>
+      <a href="CommonJS與ESM比較.html">CommonJS vs ESM</a>
+      <a href="模組打包中的Tree Shaking概念.html">Tree Shaking</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

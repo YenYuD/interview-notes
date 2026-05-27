@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 呼叫 API 的方法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · HTTP 請求</div>
+    <h1>XHR、fetch、Axios：<em>選對工具</em>打 API</h1>
+    <p class="lede">從 callback-based 的 XHR，到回傳 Promise 的 fetch，再到功能豐富的 Axios——每種方式有其適用場景。<b>現代開發首選 fetch 或 Axios</b>，理解差異才能回答面試官的追問。</p>
+  </header>
+
+  <section>
+    <span class="num">四種方法比較</span>
+    <h2>從舊到新，一張表看差異</h2>
+    <table>
+      <tr><th>方法</th><th>回傳</th><th>環境</th><th>特色</th></tr>
+      <tr><td><code>XMLHttpRequest</code></td><td>無（事件回呼）</td><td>瀏覽器</td><td>舊式、冗長，僅維護遺留代碼用</td></tr>
+      <tr><td><code>fetch</code></td><td>Promise</td><td>瀏覽器 + Node 18+</td><td>原生、輕量，需手動處理非 2xx 錯誤</td></tr>
+      <tr><td><code>Axios</code></td><td>Promise</td><td>通用</td><td>攔截器、自動 JSON、非 2xx 自動拋錯</td></tr>
+      <tr><td><code>jQuery.ajax</code></td><td>jqXHR（類 Promise）</td><td>瀏覽器</td><td>僅存在已引入 jQuery 的舊專案</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">主角：fetch vs Axios</span>
+    <h2>最常被問的關鍵差異</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>fetch — 原生但需留意</small>
+        <pre style="margin:0;font-size:.68rem">const res = await fetch('/api/data');
+// fetch 不會在 4xx/5xx 時拋錯！
+if (!res.ok) throw new Error(res.status);
+const data = await res.json();</pre>
+      </div>
+      <div class="chip good">
+        <small>Axios — 更省心</small>
+        <pre style="margin:0;font-size:.68rem">const { data } = await axios.get('/api/data');
+// 非 2xx 自動拋錯，且自動解析 JSON
+// 支援 interceptors、cancelToken 等</pre>
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>fetch 的常見陷阱</b>：HTTP 404 / 500 不會讓 Promise reject——只有網路層錯誤（如斷線）才會。必須手動檢查 <code>response.ok</code>，否則 4xx/5xx 會被當作成功處理。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">XHR 的歷史地位</span>
+    <h2>了解就好，不推薦新寫</h2>
+    <pre><code><span class="tok-key">const</span> xhr = <span class="tok-key">new</span> <span class="tok-fn">XMLHttpRequest</span>();
+xhr.<span class="tok-fn">open</span>(<span class="tok-str">'GET'</span>, <span class="tok-str">'/api/data'</span>, <span class="tok-key">true</span>);
+xhr.onreadystatechange = <span class="tok-key">function</span> () {
+  <span class="tok-key">if</span> (xhr.readyState === 4 && xhr.status === 200) {
+    console.<span class="tok-fn">log</span>(JSON.<span class="tok-fn">parse</span>(xhr.responseText));
+  }
+};
+xhr.<span class="tok-fn">send</span>();</code></pre>
+    <div class="aside">XHR 基於事件回呼，程式碼冗長且難以組合。了解它的意義在於：理解 Promise / fetch 解決了什麼問題。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>fetch 和 Axios 怎麼取消請求？</summary>
+        <p>fetch 用 <code>AbortController</code>：建立 controller，傳 <code>signal</code> 給 fetch，呼叫 <code>controller.abort()</code> 取消。Axios 也支援 AbortController，舊版用 <code>CancelToken</code>（已棄用）。</p>
+      </details>
+      <details>
+        <summary>在 Node.js 環境能用 fetch 嗎？</summary>
+        <p>Node 18+ 內建 fetch（基於 undici）；更早版本需安裝 <code>node-fetch</code> 或直接用 Axios（通用支援 Node 與瀏覽器）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 呼叫 API 主要有三種方式：老式的 <code>XMLHttpRequest</code> 基於事件回呼、較冗長；現代的原生 <span class="hl">fetch</span> 回傳 Promise，語法簡潔但要注意它<span class="hl">不會對 4xx/5xx 自動拋錯</span>，需手動檢查 <code>response.ok</code>；第三方的 <span class="hl">Axios</span> 則自動解析 JSON、非 2xx 自動拋錯，並支援攔截器，是需要更多功能時的選擇。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="async await 是什麼及其如何簡化非同步程式碼.html">async / await</a>
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="JavaScript同步與非同步函式差異.html">同步與非同步差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

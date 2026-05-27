@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>視覺隱藏但螢幕閱讀器可存取</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS / 無障礙</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 無障礙（a11y）</div>
+    <h1>視覺隱藏不等於<em>無障礙隱藏</em>——要分清楚用哪個</h1>
+    <p class="lede">有時需要視覺上隱藏內容，但讓<b>螢幕閱讀器仍能讀到</b>（如圖示的文字說明）。常見的 <b>display:none</b>、<b>visibility:hidden</b> 會同時對螢幕閱讀器隱藏，用錯會造成無障礙問題。</p>
+  </header>
+
+  <section>
+    <span class="num">方法比較</span>
+    <h2>各種隱藏方式的無障礙影響</h2>
+    <table>
+      <thead>
+        <tr><th>方法</th><th>視覺隱藏</th><th>螢幕閱讀器</th><th>推薦度</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>display: none</code></td><td>✓</td><td>也隱藏 ✗</td><td>❌ 若需無障礙不可用</td></tr>
+        <tr><td><code>visibility: hidden</code></td><td>✓</td><td>也隱藏 ✗</td><td>❌ 若需無障礙不可用</td></tr>
+        <tr><td><code>hidden</code> 屬性</td><td>✓</td><td>也隱藏 ✗</td><td>❌ 若需無障礙不可用</td></tr>
+        <tr><td><code>.sr-only</code> class</td><td>✓（縮到 1px）</td><td>可存取 ✓</td><td>✅ 推薦</td></tr>
+        <tr><td><code>position: absolute; left: -99999px</code></td><td>✓</td><td>通常可存取</td><td>△ 可導覽元素不建議</td></tr>
+        <tr><td><code>text-indent: -9999px</code></td><td>✓（僅文字）</td><td>通常可存取</td><td>△ 只適用 block 文字</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">最佳實踐</span>
+    <h2>標準的 sr-only class 寫法</h2>
+    <pre><code><span class="tok-com">/* Tailwind 的 sr-only（業界標準） */</span>
+<span class="tok-key">.sr-only</span> {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: <span class="tok-fn">rect</span>(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+<span class="tok-com">/* 使用範例：圖示按鈕的螢幕閱讀器文字 */</span>
+<span class="tok-str">&lt;button&gt;
+  &lt;svg aria-hidden="true"&gt;...&lt;/svg&gt;
+  &lt;span class="sr-only"&gt;關閉對話框&lt;/span&gt;
+&lt;/button&gt;</span></code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>直接使用 Tailwind 的 <code>sr-only</code> class 或 Bootstrap 的 <code>visually-hidden</code>，這些都是經過實戰驗證的實作，不需要自己手寫。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>aria-hidden 和 sr-only 有什麼差別？</summary>
+        <p><code>aria-hidden="true"</code> 從無障礙樹中移除元素，螢幕閱讀器看不到，但視覺上仍顯示（適合裝飾性圖示）。<code>.sr-only</code> 視覺隱藏但無障礙樹可存取（適合補充說明文字）。兩者方向相反，根據需求選擇。</p>
+      </details>
+      <details>
+        <summary>focus-visible 和 sr-only 可以怎麼搭配？</summary>
+        <p>Bootstrap 的 <code>visually-hidden-focusable</code> class：元素平時用 sr-only 隱藏，但當獲得鍵盤 focus 時變為可見（<code>:focus-within</code>）。常見用途是「跳至主要內容」的 skip link，供鍵盤使用者快速跳過導覽列。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「要視覺隱藏但讓螢幕閱讀器仍能存取，不能用 <code>display:none</code> 或 <code>visibility:hidden</code>，因為<span class="hl">這兩者也會對螢幕閱讀器隱藏</span>。標準做法是 <span class="hl"><code>.sr-only</code> class</span>——把元素縮到 1px、clip 裁切、加負 margin，視覺上不可見但仍在無障礙樹中。我直接用 Tailwind 的 <code>sr-only</code> 或 Bootstrap 的 <code>visually-hidden</code>，這些都是經過實戰驗證的實作。典型用途是圖示按鈕加文字說明，讓螢幕閱讀器知道按鈕的用途。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="設計或開發多語言網站時，有哪些事情需要特別注意？.html">多語言網站設計注意事項</a>
+      <a href="描述偽元素並討論其用途.html">CSS 偽元素</a>
+      <a href="CSS 的 `display` 屬性是什麼？能舉幾個使用範例嗎？.html">display 屬性完整介紹</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 重新渲染</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">React 核心</div>
+    <h1>重新渲染 ≠ <em>重新操作 DOM</em></h1>
+    <p class="lede">「重新渲染」只是 React <b>再執行一次組件函式</b>、產生新的虛擬 DOM 拿去 diff。真正改不改真實 DOM，要看 diff 有沒有差異。搞懂這點，才知道怎麼優化。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 誰會跟著重渲染？</span>
+    <h2>父層一渲染，子層全跟著？</h2>
+    <p>父組件重新渲染時，<b>預設所有子組件都會跟著重渲染</b>（即使 props 沒變）。切換有沒有用 <code>React.memo</code> 包子組件：</p>
+
+    <div class="lab">
+      <div class="lab-label">子組件是否用 React.memo</div>
+      <div class="toggle-row" id="row">
+        <button class="on bad" data-m="off">未包 memo</button>
+        <button data-m="on">用 React.memo 包</button>
+      </div>
+      <button class="btn-primary" id="render">父組件 setState（觸發重渲染）</button>
+      <div class="log" id="log" style="max-height:none"><div class="ln empty">// 點上面按鈕，看哪些組件重新執行…</div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">何時會重渲染</span>
+    <h2>三個觸發來源</h2>
+    <ul>
+      <li>自己的 <b>state 改變</b>（<code>useState</code> setter / <code>setState</code>）</li>
+      <li>收到<b>新的 props</b></li>
+      <li><b>父組件重渲染</b> → 子組件預設跟著重渲染</li>
+    </ul>
+    <div class="callout tip"><span class="ico">✅</span><p>優化工具：<code>React.memo</code>（props 沒變就跳過）、<code>useMemo</code>（記住值）、<code>useCallback</code>（記住函式引用），避免不必要的重渲染。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>重新渲染一定會更新 DOM 嗎？</summary><p>不會。重渲染只是重跑函式 + diff；若 diff 沒差異，真實 DOM 完全不動。所以重渲染本身沒那麼貴，貴的是大量重渲染累積的計算。</p></details>
+      <details><summary>為什麼傳 inline function 給 memo 子組件還是重渲染？</summary><p>因為每次渲染都建立新的函式引用，props 被視為「變了」。用 <code>useCallback</code> 穩定引用才能讓 memo 生效。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「重新渲染是 React <span class="hl">再執行一次組件函式</span>、產生新虛擬 DOM 去 diff，<span class="hl">不等於一定改真實 DOM</span>。觸發來源是 state 改變、收到新 props、或父層重渲染。我會用 <span class="hl">React.memo / useMemo / useCallback</span> 來避免不必要的重渲染，但只在實際有效能問題時才優化，避免過早優化。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的虛擬 DOM 是如何運作的？它的優點和缺點是什麼？.html">虛擬 DOM</a>
+      <a href="React 中的 `useMemo` hook 是什麼？什麼時候應該使用它？.html">useMemo</a>
+      <a href="React 中的 `useCallback` hook 是什麼？什麼時候應該使用它？.html">useCallback</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), log=document.getElementById('log');
+  let memo=false;
+  function reset(){ log.innerHTML='<div class="ln empty">// 點上面按鈕，看哪些組件重新執行…</div>'; }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); memo=b.dataset.m==='on'; reset(); });
+  document.getElementById('render').addEventListener('click',()=>{
+    log.innerHTML='';
+    const add=(h,c)=>log.insertAdjacentHTML('beforeend',`<div class="ln ${c||''}">${h}</div>`);
+    add('Parent 重新渲染 ▶','c-req');
+    add('&nbsp;&nbsp;Child (props 未變)…','c-dim');
+    if(memo) add('&nbsp;&nbsp;→ React.memo：props 相同，<b>跳過重渲染</b> ✓','c-ok');
+    else add('&nbsp;&nbsp;→ 未 memo：<b>仍跟著重新執行</b>（多餘）✗','c-bad');
+  });
+</script>
+</body>
+</html>

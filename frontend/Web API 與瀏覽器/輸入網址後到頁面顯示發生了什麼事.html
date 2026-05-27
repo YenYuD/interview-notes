@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>輸入網址後發生了什麼</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>輸入網址按 Enter：<em>DNS → TCP → HTTP → Render</em> 七個步驟</h1>
+    <p class="lede">這是最常被問到的系統設計題之一。從網址到頁面顯示，涵蓋<b>網路層</b>（DNS、TCP、TLS）和<b>瀏覽器渲染層</b>（DOM、CSSOM、Layout）的完整流程。</p>
+  </header>
+
+  <section>
+    <span class="num">完整流程</span>
+    <h2>七個步驟從 URL 到畫面</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>DNS 查詢</b>：把網域名稱解析成 IP 位址。查詢順序：本機 hosts → 瀏覽器快取 → ISP DNS → 根 DNS</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>TCP 三向握手</b>：SYN → SYN-ACK → ACK，建立可靠連線</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>TLS 握手</b>（HTTPS）：驗證憑證、協商加密演算法</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>HTTP 請求</b>：<code>GET / HTTP/1.1</code>，附帶 Cookie、Accept 等 header</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>伺服器回應</b>：回傳 HTML（狀態碼 200 OK）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>解析 HTML → DOM Tree</b>：遇到 CSS 載入樣式、遇到 script 暫停解析（除非 async/defer）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>渲染</b>：DOM + CSSOM → Render Tree → Layout（計算位置）→ Paint（繪製）→ Composite（合成）</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">渲染關鍵路徑</span>
+    <h2>影響首屏速度的渲染流程</h2>
+    <table>
+      <thead><tr><th>步驟</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>Render Tree</td><td>DOM + CSSOM 合併，濾掉 display:none 的節點</td></tr>
+        <tr><td>Layout（Reflow）</td><td>計算每個元素的位置和大小</td></tr>
+        <tr><td>Paint（Repaint）</td><td>把元素繪製成像素</td></tr>
+        <tr><td>Composite</td><td>把各層合成最終畫面（GPU 加速的部分）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>script 標籤的阻塞問題</b>：預設 script 會暫停 HTML 解析；加 <code>defer</code> 等 HTML 解析完後執行（保持順序）；加 <code>async</code> 下載完就執行（不保證順序）。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>如何優化這個流程加速頁面載入？</summary>
+        <p>DNS 預解析（dns-prefetch）、HTTP/2 多路復用、CDN 縮短網路距離、壓縮資源（gzip/Brotli）、減少重排觸發、Critical CSS 內嵌加快首次渲染、script 加 defer/async。</p>
+      </details>
+      <details>
+        <summary>Reflow 和 Repaint 的觸發時機和代價？</summary>
+        <p>Reflow（Layout 重新計算）代價最大，修改寬高、位置、字型大小時觸發；Repaint 代價次之，修改顏色、背景等視覺屬性時觸發；只修改 transform/opacity 只觸發 Composite，代價最小。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「流程分兩大階段：<span class="hl">網路層</span>是 DNS 查詢 → TCP 三向握手（HTTPS 加 TLS）→ HTTP 請求與回應；<span class="hl">渲染層</span>是解析 HTML 建 DOM Tree、解析 CSS 建 CSSOM、兩者合併成 Render Tree、計算 Layout → Paint → Composite。關鍵點：script 標籤預設阻塞 HTML 解析，應加 <code>defer</code> 或 <code>async</code>；減少 Reflow 是效能優化的重要方向。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="document load 事件與 DOMContentLoaded 事件的差異.html">DOMContentLoaded vs load</a>
+      <a href="什麼是DOM及其結構.html">什麼是 DOM</a>
+      <a href="使用Fetch API發送HTTP請求.html">Fetch API 請求</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

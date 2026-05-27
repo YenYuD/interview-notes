@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>何時使用 unknown 型別</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1><em>unknown</em> 是「型別安全版的 any」——用之前先確認</h1>
+    <p class="lede">兩者都能接受任何值，但 <code>unknown</code> 強制你在操作前做型別檢查。<b>這正是 TypeScript 的精神</b>：承認「我不知道型別」，同時不放棄安全性。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>any vs unknown：一個允許亂來，一個要求確認</h2>
+    <pre><code><span class="tok-com">// any — TS 完全不管（危險）</span>
+<span class="tok-key">let</span> a: <span class="tok-fn">any</span> = <span class="tok-str">"hello"</span>;
+a.toFixed(2);    <span class="tok-com">// ✅ 編譯過，但 runtime 炸</span>
+
+<span class="tok-com">// unknown — 使用前必須 narrowing（安全）</span>
+<span class="tok-key">let</span> b: <span class="tok-fn">unknown</span> = <span class="tok-str">"hello"</span>;
+b.toUpperCase(); <span class="tok-com">// ❌ 編譯錯誤</span>
+
+<span class="tok-key">if</span> (<span class="tok-key">typeof</span> b === <span class="tok-str">"string"</span>) {
+  b.toUpperCase(); <span class="tok-com">// ✅ narrowing 後才能操作</span>
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>三個常見使用場景</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>外部 API 回傳 / JSON.parse</strong>
+          <pre><code><span class="tok-key">async function</span> <span class="tok-fn">fetchData</span>(): Promise&lt;<span class="tok-fn">unknown</span>&gt; {
+  <span class="tok-key">const</span> res = <span class="tok-key">await</span> fetch(<span class="tok-str">"/api/user"</span>);
+  <span class="tok-key">return</span> res.json();
+}
+<span class="tok-com">// 呼叫端必須自行 narrow 才能使用</span></code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>catch block 的 error</strong>
+          <pre><code><span class="tok-key">try</span> { ... } <span class="tok-key">catch</span> (error: <span class="tok-fn">unknown</span>) {
+  <span class="tok-key">if</span> (error <span class="tok-key">instanceof</span> Error) {
+    console.log(error.message); <span class="tok-com">// ✅</span>
+  }
+}</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>泛用 callback</strong>
+          <pre><code><span class="tok-key">function</span> <span class="tok-fn">invoke</span>(cb: <span class="tok-fn">unknown</span>): <span class="tok-fn">void</span> {
+  <span class="tok-key">if</span> (<span class="tok-key">typeof</span> cb === <span class="tok-str">"function"</span>) cb();
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>什麼時候選哪個</h2>
+    <table>
+      <thead><tr><th>情境</th><th>建議</th></tr></thead>
+      <tbody>
+        <tr><td>真的不知道型別，但要安全使用</td><td><code>unknown</code></td></tr>
+        <tr><td>漸進式遷移 JS → TS 的過渡期</td><td><code>any</code>（暫時）</td></tr>
+        <tr><td>幾乎所有情境</td><td><code>unknown</code> 優先</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>unknown 是什麼時候加入 TypeScript 的？</summary><p>TypeScript 3.0（2018）加入，目的就是提供「型別安全版的 any」。在此之前，社群的做法是用 any 再加手動 narrowing，或用泛型約束。</p></details>
+      <details><summary>unknown 和 never 都是特殊型別，差在哪？</summary><p><code>unknown</code> 是 top type（所有型別都是它的子型別，任何值都可以賦給它）；<code>never</code> 是 bottom type（它是所有型別的子型別，沒有任何值屬於它）。兩者在型別層級上是兩個極端。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl"><code>unknown</code> 是型別安全版的 <code>any</code></span>。兩者都接受任何值，但 <code>any</code> 讓你直接操作而放棄型別檢查；<code>unknown</code> 強制你在操作前先做 narrowing（typeof、instanceof 等），才能存取屬性或呼叫方法。實務上，<span class="hl">接收外部 API 回傳、JSON.parse 結果、catch block 的 error 都應用 unknown</span>。幾乎所有「不確定型別」的場景都應優先選 unknown，而不是 any。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="001 TypeScript 型別系統面試筆記.html">型別系統總覽</a>
+      <a href="009 never 與 void 回傳型別的差異.html">never vs void</a>
+      <a href="019 型別斷言 Type Assertions.html">型別斷言</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

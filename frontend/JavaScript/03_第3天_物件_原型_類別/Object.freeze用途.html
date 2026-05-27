@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Object.freeze 用途</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1>凍住它：<em>Object.freeze()</em> 讓物件無法再變動</h1>
+    <p class="lede"><code>Object.freeze()</code> 讓物件進入完全唯讀狀態：<b>屬性值不能改、不能新增、不能刪除</b>。是實現不可變物件最直接的原生方法——但只凍表層。</p>
+  </header>
+
+  <section>
+    <span class="num">效果一覽</span>
+    <h2>凍結後做什麼都沒用</h2>
+    <pre><code><span class="tok-key">const</span> obj = { name: <span class="tok-str">'John'</span>, age: 30 };
+Object.<span class="tok-fn">freeze</span>(obj);
+
+obj.name = <span class="tok-str">'Doe'</span>;     <span class="tok-com">// ✗ 靜默失敗（strict mode 拋 TypeError）</span>
+obj.city = <span class="tok-str">'Taipei'</span>; <span class="tok-com">// ✗ 無法新增</span>
+<span class="tok-key">delete</span> obj.age;      <span class="tok-com">// ✗ 無法刪除</span>
+
+console.log(obj); <span class="tok-com">// { name: 'John', age: 30 }（原封不動）</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">限制：淺層凍結</span>
+    <h2>巢狀物件仍然可變</h2>
+    <pre><code><span class="tok-key">const</span> config = Object.<span class="tok-fn">freeze</span>({
+  db: { host: <span class="tok-str">'localhost'</span>, port: 5432 }
+});
+
+config.db.port = 9999; <span class="tok-com">// ✓ 成功！freeze 沒有深入 db 物件</span>
+console.log(config.db.port); <span class="tok-com">// 9999</span></code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>freeze 只凍第一層。深層不可變需要遞迴呼叫 freeze，或使用 Immer、Immutable.js。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>freeze、seal、preventExtensions 三者的差異？</summary><p>三者的限制程度遞減：<code>freeze</code>（不可改值 + 不可新增 / 刪除）＞ <code>seal</code>（可改值 + 不可新增 / 刪除）＞ <code>preventExtensions</code>（可改值、可刪除 + 僅不可新增）。</p></details>
+      <details><summary>如何確認物件是否被凍結？</summary><p>用 <code>Object.isFrozen(obj)</code>，回傳布林值。類似的有 <code>Object.isSealed()</code>、<code>Object.isExtensible()</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>Object.freeze()</code> 讓物件進入完全唯讀，<span class="hl">不能改值、不能加屬性、不能刪屬性</span>，常用於常數配置或保護關鍵狀態。注意它是<span class="hl">淺層凍結</span>，巢狀物件不受影響。嚴格模式下違規操作會拋 TypeError，否則靜默失敗。深層不可變需要遞迴 freeze 或搭配函式庫。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中可變與不可變物件差異.html">可變 vs 不可變物件</a>
+      <a href="Object.seal的用途.html">Object.seal 詳解</a>
+      <a href="Object.preventExtensions的用途.html">Object.preventExtensions</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

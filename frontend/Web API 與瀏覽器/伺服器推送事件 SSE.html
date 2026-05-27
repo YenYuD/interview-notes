@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伺服器推送事件 SSE</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>SSE：<em>伺服器單向推送</em>，比 WebSocket 更簡單的即時方案</h1>
+    <p class="lede">Server-Sent Events 讓伺服器透過<b>持久 HTTP 連線</b>主動推送資料給瀏覽器。<b>不需要雙向通訊</b>時，SSE 比 WebSocket 更輕巧，且支援<b>自動重連</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">SSE vs WebSocket</span>
+    <h2>場景決定選哪個</h2>
+    <table>
+      <thead><tr><th>屬性</th><th>SSE (EventSource)</th><th>WebSocket</th></tr></thead>
+      <tbody>
+        <tr><td>通訊方向</td><td>單向：僅伺服器 → 客戶端</td><td>雙向：兩端都能主動發送</td></tr>
+        <tr><td>協定</td><td>普通 HTTP</td><td>ws:// / wss://</td></tr>
+        <tr><td>資料格式</td><td>僅文字</td><td>文字 + 二進位</td></tr>
+        <tr><td>自動重連</td><td>✅ 內建</td><td>❌ 需自行實作</td></tr>
+        <tr><td>使用難度</td><td>簡單（EventSource API）</td><td>較複雜</td></tr>
+        <tr><td>適合場景</td><td>通知、即時數據、日誌串流</td><td>聊天、遊戲、協作工具</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">客戶端用法</span>
+    <h2>三行程式碼建立即時串流</h2>
+    <pre><code><span class="tok-key">const</span> source = <span class="tok-key">new</span> EventSource(<span class="tok-str">'/api/notifications'</span>);
+
+source.addEventListener(<span class="tok-str">'message'</span>, (e) => {
+  console.log(<span class="tok-str">'推送：'</span>, e.data);   <span class="tok-com">// 接收訊息</span>
+});
+
+source.addEventListener(<span class="tok-str">'error'</span>, () => {
+  <span class="tok-com">// EventSource 會自動重連，通常不需額外處理</span>
+});
+
+<span class="tok-com">// 關閉連線</span>
+source.close();</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>SSE 支援<b>自訂事件類型</b>，伺服器發送 <code>event: notification</code>，客戶端就監聽 <code>'notification'</code> 而非 <code>'message'</code>，方便分類處理。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>SSE 有什麼限制？</summary>
+        <p>只能傳文字資料；瀏覽器對同一網域的 SSE 連線有上限（約 6 條，HTTP/2 可緩解）；只能伺服器 → 客戶端單向，需要客戶端發送時要另外用 fetch/XHR。</p>
+      </details>
+      <details>
+        <summary>ChatGPT 的串流輸出是用什麼技術？</summary>
+        <p>正是 SSE！伺服器把 AI 生成的內容一段段推送過來，客戶端的 EventSource 接收並即時顯示，形成逐字輸出的效果。也有些實作用 fetch() 的 ReadableStream。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「SSE 透過 EventSource API 建立持久 HTTP 連線，讓伺服器主動推送資料給客戶端，適合<span class="hl">不需要雙向通訊</span>的場景，如通知、即時資料更新、AI 串流輸出。比 WebSocket 簡單，基於普通 HTTP，原生支援<span class="hl">自動重連</span>。需要雙向通訊才升級用 WebSocket。ChatGPT 的逐字輸出就是 SSE 的典型應用。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋 WebSocket API 概念.html">WebSocket API</a>
+      <a href="JavaScript中的Workers用途.html">Web Workers</a>
+      <a href="使用Fetch API發送HTTP請求.html">Fetch API</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

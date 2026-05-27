@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>setTimeout vs setImmediate vs process.nextTick</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · Node.js 計時器</div>
+    <h1>三種「等一下再跑」，<em>執行順序卻大不同</em></h1>
+    <p class="lede"><code>process.nextTick</code> 比微任務還快；<code>setImmediate</code> 在目前事件迴圈階段結束後才跑；<code>setTimeout(fn, 0)</code> 更後面。<b>不懂順序，debug 容易翻車。</b></p>
+  </header>
+
+  <section>
+    <span class="num">優先順序</span>
+    <h2>Node.js 非同步執行的先後</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>① 同步程式碼</b>跑完，呼叫堆疊清空。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>② process.nextTick 佇列</b>：清空全部（Node 專屬，比微任務還早）。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>③ 微任務佇列</b>：Promise.then 等，全部清空。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>④ 巨任務</b>：setImmediate（check 階段）、setTimeout/setInterval（timers 階段），依事件迴圈 phase 順序。</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-fn">setTimeout</span>(() => console.<span class="tok-fn">log</span>(<span class="tok-str">'setTimeout'</span>), 0);
+<span class="tok-fn">setImmediate</span>(() => console.<span class="tok-fn">log</span>(<span class="tok-str">'setImmediate'</span>));
+process.<span class="tok-fn">nextTick</span>(() => console.<span class="tok-fn">log</span>(<span class="tok-str">'nextTick'</span>));
+Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() => console.<span class="tok-fn">log</span>(<span class="tok-str">'Promise'</span>));
+
+<span class="tok-com">// 輸出：nextTick → Promise → setTimeout/setImmediate（後兩者順序可能互換）</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">三者比較</span>
+    <h2>各自的定位與使用情境</h2>
+    <table>
+      <tr><th>API</th><th>環境</th><th>觸發時機</th><th>常見用途</th></tr>
+      <tr><td><code>setTimeout(fn, 0)</code></td><td>通用</td><td>至少 0ms 後（巨任務）</td><td>延後執行、給 UI 更新插入空隙</td></tr>
+      <tr><td><code>setImmediate(fn)</code></td><td>Node.js</td><td>I/O 回呼後、timers 之前的 check 階段</td><td>I/O 密集場景，避免 timer 不確定性</td></tr>
+      <tr><td><code>process.nextTick(fn)</code></td><td>Node.js</td><td>目前操作完成後、任何 I/O 前</td><td>確保回呼在 API 返回後、下一次事件迴圈前執行</td></tr>
+    </table>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><code>setImmediate</code> 和 <code>process.nextTick</code> 都是 Node.js 專屬——瀏覽器環境沒有這兩個 API。面試若問這題，通常是針對 Node.js 場景。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>setTimeout(fn, 0) 和 setImmediate 哪個先跑？</summary>
+        <p>在<b>主模組</b>（非 I/O 回呼內）呼叫時，順序<b>不確定</b>——取決於 timer 精度。但在 I/O 回呼<b>內部</b>呼叫時，<code>setImmediate</code> 一定先於 <code>setTimeout</code>，因為 check 階段在 timers 階段之前。</p>
+      </details>
+      <details>
+        <summary>process.nextTick 濫用有什麼風險？</summary>
+        <p>和微任務一樣，若在 nextTick 回呼中持續加入新的 nextTick，會餓死後面的微任務和巨任務，導致 I/O 事件永遠無法執行。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三者的執行優先順序：<span class="hl">process.nextTick</span> 最快，在目前操作完成後、任何 I/O 前執行；接著是<span class="hl"> Promise（微任務）</span>；再來才是巨任務——其中 <span class="hl">setImmediate</span> 在 I/O 回呼後的 check 階段執行，<span class="hl">setTimeout</span> 在 timers 階段。在 I/O 回呼內，setImmediate 會在 setTimeout 之前執行；在主模組兩者順序不確定。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript事件迴圈介紹.html">事件迴圈介紹</a>
+      <a href="微任務佇列概念解析.html">微任務佇列</a>
+      <a href="JavaScript同步與非同步函式差異.html">同步與非同步差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

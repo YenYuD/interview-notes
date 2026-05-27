@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 預處理器的優缺點</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 工具鏈</div>
+    <h1>Sass/Less 帶來了<em>可維護性</em>，但 CSS 原生能力正在追上</h1>
+    <p class="lede"><b>CSS 預處理器</b>（Sass、Less、Stylus）用變數、巢狀、Mixin 解決了原生 CSS 的重複與維護問題。但原生 CSS 變數和 CSS Modules 已能替代許多場景，選擇需評估收益與成本。</p>
+  </header>
+
+  <section>
+    <span class="num">核心評估</span>
+    <h2>優缺點對照</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>優點</small>
+        <ul style="padding-left:1rem; margin-top:0.4rem;">
+          <li>巢狀選擇器，結構更清晰</li>
+          <li>變數統一管理主題色彩</li>
+          <li>Mixin 消除重複 CSS</li>
+          <li>迴圈/映射處理批量樣式</li>
+          <li>多檔案拆分，建置時合併</li>
+        </ul>
+      </div>
+      <div class="chip bad">
+        <small>缺點</small>
+        <ul style="padding-left:1rem; margin-top:0.4rem;">
+          <li>需要額外編譯步驟，增加建置時間</li>
+          <li>Sass 的 node-sass 跨 Node 版本常需重編</li>
+          <li>Less 的 <code>@</code> 前綴與 CSS <code>@media</code> 等關鍵字容易混淆</li>
+          <li>可能撰寫「超前」語法，卻非未來原生 CSS</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>原生 <strong>CSS 自訂屬性（CSS Variables）</strong> 已能在執行時動態更新（預處理器變數只是靜態替換），且支援 JavaScript 互動，部分場景比 Sass 變數更強大。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">現代考量</span>
+    <h2>還需要預處理器嗎？</h2>
+    <table>
+      <thead>
+        <tr><th>需求</th><th>預處理器</th><th>現代替代</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>變數管理</td><td>Sass <code>$var</code></td><td>CSS Custom Properties <code>--var</code></td></tr>
+        <tr><td>巢狀選擇器</td><td>Sass 巢狀</td><td>原生 CSS Nesting（現代瀏覽器已支援）</td></tr>
+        <tr><td>模組作用域</td><td>多檔案 import</td><td>CSS Modules、Scoped CSS（Vue）</td></tr>
+        <tr><td>複雜邏輯/迴圈</td><td>Sass @each/@for</td><td>仍需 Sass（原生無對等品）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>CSS 變數和 Sass 變數有什麼本質差異？</summary>
+        <p>Sass 變數在<strong>編譯時</strong>靜態替換，最終輸出的 CSS 中已是固定值。CSS 自訂屬性在<strong>執行時</strong>存在，可以用 JavaScript 動態修改（<code>el.style.setProperty('--color', 'red')</code>），支援繼承和作用域覆蓋，是真正的動態變數。</p>
+      </details>
+      <details>
+        <summary>PostCSS 和 Sass 有什麼不同？</summary>
+        <p>Sass 是有固定語法的預處理器。PostCSS 是轉換工具鏈，透過外掛（plugin）處理 CSS：可自動加前綴（Autoprefixer）、支援未來語法（postcss-preset-env）、甚至做 CSS Modules。兩者可以並存，PostCSS 更靈活但需自行組合外掛。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「CSS 預處理器帶來的核心優點是<span class="hl">變數、巢狀、Mixin</span>，讓大型 CSS 可維護。缺點是需要編譯步驟，且 Sass 的 node-sass 跨 Node 版本時常需重新建置。現在我會先評估：<span class="hl">原生 CSS 變數已能取代 Sass 變數</span>，原生 Nesting 也已普及；複雜的迴圈或設計 token 系統，Sass 還是有價值。新專案我傾向搭配 CSS Modules 或 Tailwind，減少對預處理器的依賴。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="描述你對曾使用過的 CSS 預處理器的喜好與不滿.html">CSS 預處理器的喜好與不滿</a>
+      <a href="你曾在本地或生產環境中使用過哪些現有的 CSS 框架？.html">常用 CSS 框架評比</a>
+      <a href="撰寫高效 CSS 時有哪些常見的陷阱？.html">撰寫高效 CSS 的陷阱</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Suspense</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 非同步</div>
+    <h1>Suspense：宣告式地<em>處理等待狀態</em>，告別手寫 loading flag</h1>
+    <p class="lede">以往要處理非同步載入，得手動管理 <code>isLoading</code> state。<b>Suspense</b> 讓你宣告「等待時顯示什麼」，子組件自行決定何時就緒，父層只負責 <b>fallback UI</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">兩大使用場景</span>
+    <h2>程式碼分割 vs 資料獲取</h2>
+    <table>
+      <thead><tr><th>場景</th><th>搭配 API</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>程式碼分割</td>
+          <td><code>React.lazy()</code></td>
+          <td>懶載入組件，讓 bundle 更小、初始載入更快</td>
+        </tr>
+        <tr>
+          <td>資料獲取</td>
+          <td><code>use()</code> hook（React 19）<br>或 react-query / Relay</td>
+          <td>組件「懸停」直到資料就緒，由 Suspense 展示 fallback</td>
+        </tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-key">import</span> { Suspense, lazy } <span class="tok-key">from</span> <span class="tok-str">'react'</span>;
+
+<span class="tok-key">const</span> Chart = <span class="tok-fn">lazy</span>(() =&gt; <span class="tok-key">import</span>(<span class="tok-str">'./Chart'</span>));
+
+<span class="tok-key">function</span> <span class="tok-fn">Dashboard</span>() {
+  <span class="tok-key">return</span> (
+    &lt;Suspense fallback={&lt;div&gt;圖表載入中...&lt;/div&gt;}&gt;
+      &lt;Chart /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">優點</span>
+    <h2>為什麼比 isLoading flag 好</h2>
+    <div class="chips">
+      <div class="chip good"><small>宣告式</small>父層定義等待 UI，子層專注業務邏輯</div>
+      <div class="chip good"><small>可組合</small>多個非同步組件可共用一個 Suspense 邊界</div>
+      <div class="chip good"><small>與 Concurrent Mode 整合</small>React 可優先渲染就緒的部分</div>
+    </div>
+    <div class="callout info"><span class="ico">ℹ️</span><p>Suspense 的資料獲取功能在 React 18 後趨於穩定；搭配 <code>use()</code> hook（React 19）或 react-query v5 的 <code>suspense: true</code> 選項使用最順暢。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Suspense 和 Error Boundary 有什麼關係？</summary><p>建議把 Suspense 搭配 Error Boundary 一起使用：Suspense 處理「載入中」狀態，Error Boundary 處理「載入失敗」狀態，兩者互補覆蓋所有非同步場景。</p></details>
+      <details><summary>React.lazy 只能用在組件最上層嗎？</summary><p>React.lazy 必須在模組頂層呼叫（不能在函式內部動態呼叫），因為它需要在渲染前就確定懶加載的目標。但 <code>&lt;Suspense&gt;</code> 邊界可以放在任何位置。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Suspense 讓我用<span class="hl">宣告式的方式</span>處理非同步等待，搭配 <code>React.lazy</code> 做程式碼分割，或搭配支援 Suspense 的資料庫做資料獲取。當子組件尚未就緒，Suspense 顯示 <code>fallback</code>；就緒後自動切換到正式內容。好處是父組件只定義『等待時的 UI』，不需手動管理 isLoading flag，<span class="hl">關注點更乾淨</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 應用程式中的程式碼分割（code splitting）是什麼？.html">程式碼分割</a>
+      <a href="React 中的錯誤邊界（error boundaries）是做什麼用的？.html">錯誤邊界</a>
+      <a href="React Fiber 是什麼？它如何改進先前的做法？.html">React Fiber</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

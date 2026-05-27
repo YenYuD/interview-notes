@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>非同步操作錯誤處理</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 非同步 · 錯誤處理</div>
+    <h1>非同步錯誤不跑同步的路，<em>catch 位置</em>決定一切</h1>
+    <p class="lede">同步程式碼用 try…catch 很直覺，但非同步的錯誤「不在同一個 tick」發生——<b>Promise</b> 的 rejection 與 <b>async/await</b> 的拋出，有各自的捕捉方式。</p>
+  </header>
+
+  <section>
+    <span class="num">兩種寫法</span>
+    <h2>async/await vs Promise chain</h2>
+    <pre><code><span class="tok-com">// ① async/await — 同步感，try…catch 包住</span>
+<span class="tok-key">async function</span> <span class="tok-fn">loadUser</span>(id) {
+  <span class="tok-key">try</span> {
+    <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-fn">fetch</span>(<span class="tok-str">`/api/users/${id}`</span>);
+    <span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-fn">Error</span>(<span class="tok-str">`HTTP ${res.status}`</span>);
+    <span class="tok-key">return await</span> res.<span class="tok-fn">json</span>();
+  } <span class="tok-key">catch</span> (e) {
+    console.<span class="tok-fn">error</span>(<span class="tok-str">'載入使用者失敗：'</span>, e.message);
+    <span class="tok-key">return null</span>;
+  }
+}
+
+<span class="tok-com">// ② Promise chain — .catch() 在鏈末</span>
+<span class="tok-fn">fetch</span>(<span class="tok-str">'/api/users/1'</span>)
+  .<span class="tok-fn">then</span>(res => res.<span class="tok-fn">json</span>())
+  .<span class="tok-fn">then</span>(user => console.<span class="tok-fn">log</span>(user))
+  .<span class="tok-fn">catch</span>(e => console.<span class="tok-fn">error</span>(<span class="tok-str">'失敗：'</span>, e.message));</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>fetch 不會對 4xx/5xx 拋出錯誤！</b>只有網路失敗才 reject。收到 HTTP 錯誤狀態時 <code>res.ok</code> 為 false，需自行 <code>throw</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">進階：平行請求的錯誤</span>
+    <h2>Promise.all vs Promise.allSettled</h2>
+    <table>
+      <thead>
+        <tr><th>方法</th><th>有一個 reject 時</th><th>適用情境</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>Promise.all</code></td>
+          <td>整體立刻 reject，其他 Promise 結果丟棄</td>
+          <td>全部成功才有意義的請求</td>
+        </tr>
+        <tr>
+          <td><code>Promise.allSettled</code></td>
+          <td>等全部完成，每個結果標記 fulfilled/rejected</td>
+          <td>部分失敗也可繼續的請求</td>
+        </tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-key">const</span> results = <span class="tok-key">await</span> Promise.<span class="tok-fn">allSettled</span>([
+  <span class="tok-fn">fetch</span>(<span class="tok-str">'/api/a'</span>),
+  <span class="tok-fn">fetch</span>(<span class="tok-str">'/api/b'</span>),
+]);
+results.<span class="tok-fn">forEach</span>(r => {
+  <span class="tok-key">if</span> (r.status === <span class="tok-str">'fulfilled'</span>) console.<span class="tok-fn">log</span>(r.value);
+  <span class="tok-key">else</span> console.<span class="tok-fn">error</span>(<span class="tok-str">'失敗：'</span>, r.reason);
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>為什麼不能用同步 try…catch 捕捉普通 Promise 的錯誤？</summary>
+        <p>因為 Promise 的 reject 發生在下一個 microtask（微任務），已離開當前的同步執行上下文。try…catch 只能捕捉同步拋出的錯誤，而 <code>await</code> 關鍵字的作用就是把非同步結果「同步化」，讓 try…catch 得以捕捉。</p>
+      </details>
+      <details>
+        <summary>如何避免每個 async 函式都寫重複的 try…catch？</summary>
+        <p>可以寫一個 wrapper：<code>const [err, data] = await to(promise)</code>（類似 Go 風格）；或在 axios/fetch 封裝層統一處理，只把業務層需要的錯誤向上拋。避免錯誤處理邏輯散落各處。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「非同步錯誤處理有兩種主要方式：<span class="hl">async/await 搭配 try…catch</span> 讀起來像同步，是我的首選；<span class="hl">Promise chain 搭配 .catch()</span> 適合純 Promise 風格。兩個陷阱要注意：第一，fetch 的 HTTP 錯誤不會自動 reject，要自己檢查 <code>res.ok</code>；第二，平行請求用 <code>Promise.allSettled</code> 比 <code>Promise.all</code> 更容錯——後者只要一個失敗就全部丟棄。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何使用trycatch區塊處理錯誤.html">如何使用 try…catch</a>
+      <a href="finally區塊的用途.html">finally 區塊的用途</a>
+      <a href="JavaScript錯誤傳播概念解析.html">錯誤傳播概念</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

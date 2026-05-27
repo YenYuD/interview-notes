@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>組合模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 模式</div>
+    <h1>組合優於繼承：用<em>小組件堆出複雜 UI</em></h1>
+    <p class="lede">React 官方建議用<b>組合（Composition）</b>而非繼承（Inheritance）來重用組件邏輯。通過 <b>children</b> 或 <b>slot props</b> 讓組件保持開放，呼叫者決定填入什麼，實現高複用性與靈活性。</p>
+  </header>
+
+  <section>
+    <span class="num">兩種組合方式</span>
+    <h2>Children 和 Slot Props</h2>
+    <pre><code><span class="tok-com">// 方式一：children prop（最常見）</span>
+<span class="tok-key">function</span> <span class="tok-fn">Card</span>({ children, title }) {
+  <span class="tok-key">return</span> (
+    &lt;div className=<span class="tok-str">"card"</span>&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      &lt;div className=<span class="tok-str">"card-body"</span>&gt;{children}&lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+<span class="tok-com">// 方式二：具名 slot（傳 JSX 作為 prop）</span>
+<span class="tok-key">function</span> <span class="tok-fn">Layout</span>({ sidebar, main }) {
+  <span class="tok-key">return</span> (
+    &lt;div className=<span class="tok-str">"layout"</span>&gt;
+      &lt;aside&gt;{sidebar}&lt;/aside&gt;
+      &lt;main&gt;{main}&lt;/main&gt;
+    &lt;/div&gt;
+  );
+}
+
+<span class="tok-com">// 使用：像樂高積木一樣組合</span>
+&lt;Layout
+  sidebar={&lt;NavigationMenu /&gt;}
+  main={&lt;ArticleList /&gt;}
+/&gt;</code></pre>
+  </section>
+
+  <section>
+    <span class="num">為何優於繼承</span>
+    <h2>繼承在 UI 組件的問題</h2>
+    <div class="chips">
+      <div class="chip bad"><small>繼承的問題</small>父類改動影響所有子類；子類難以理解哪些是繼承來的</div>
+      <div class="chip good"><small>組合的優點</small>依賴關係明確（props 可見）；組件獨立、可單獨測試</div>
+    </div>
+    <div class="aside">React 官方文件明確說：「如果你想在組件之間共享非 UI 功能，可以把它抽取成單獨的 JavaScript 模組，而不是用繼承擴展它。」</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Compound Component 模式是什麼？</summary><p>Compound Component 是組合的進階版：一組組件共享隱式 state，例如 <code>&lt;Select&gt;</code> + <code>&lt;Option&gt;</code>。通常透過 Context 在父組件和子組件間共享資料，使用者使用時組合自由但行為一致。</p></details>
+      <details><summary>什麼時候還是需要繼承？</summary><p>React 生態幾乎不需要用繼承。唯一的官方例外是 Error Boundary，必須繼承 <code>React.Component</code>。其他場景用組合 + Custom Hook 都能解決。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 推崇組合而非繼承，讓組件透過 <code>children</code> 或具名 prop 接收 JSX，呼叫者決定填入什麼內容。好處是<span class="hl">依賴關係透明、組件獨立</span>，修改一個組件不會意外影響其他組件。實務上 Card、Modal、Layout 等容器型組件都是組合模式的典型應用，比繼承更容易理解和維護。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 Render Props 是什麼？它們有什麼用途？.html">Render Props</a>
+      <a href="React 中的高階組件（higher order components, HOCs）是什麼？.html">高階組件 HOC</a>
+      <a href="解釋 React 中的呈現型組件與容器型組件模式（presentational vs container component pattern）.html">呈現型 vs 容器型組件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

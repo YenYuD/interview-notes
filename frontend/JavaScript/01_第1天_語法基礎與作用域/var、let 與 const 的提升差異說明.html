@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>var/let/const 提升差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 提升</div>
+    <h1>三種宣告都會提升，<em>但初始化的時機完全不同</em></h1>
+    <p class="lede"><code>var</code>、<code>let</code>、<code>const</code> 都會在編譯期被提升，差別在於：<b>var 提升並初始化為 undefined</b>，<b>let/const 提升但不初始化</b>，宣告前存取就踩進 TDZ（暫時性死區）。</p>
+  </header>
+
+  <section>
+    <span class="num">三種提升行為</span>
+    <h2>宣告前存取結果</h2>
+    <table>
+      <tr><th>宣告</th><th>提升？</th><th>初始化值</th><th>宣告前存取</th></tr>
+      <tr><td><code>var</code></td><td>✓</td><td><code>undefined</code></td><td><code>undefined</code></td></tr>
+      <tr><td><code>let</code></td><td>✓</td><td>未初始化（TDZ）</td><td><b style="color:var(--bad)">ReferenceError</b></td></tr>
+      <tr><td><code>const</code></td><td>✓</td><td>未初始化（TDZ）</td><td><b style="color:var(--bad)">ReferenceError</b></td></tr>
+    </table>
+    <pre><code>console.log(a); <span class="tok-com">// undefined（var 提升＋初始化）</span>
+<span class="tok-key">var</span> a = <span class="tok-num">10</span>;
+
+console.log(b); <span class="tok-com">// ReferenceError（TDZ）</span>
+<span class="tok-key">let</span> b = <span class="tok-num">20</span>;
+
+console.log(c); <span class="tok-com">// ReferenceError（TDZ）</span>
+<span class="tok-key">const</span> c = <span class="tok-num">30</span>;</code></pre>
+  </section>
+
+  <section>
+    <span class="num">TDZ 概念</span>
+    <h2>暫時性死區（Temporal Dead Zone）</h2>
+    <p>let/const 的 TDZ 是從<b>區塊開始到宣告行執行完成</b>之間的區段。這個期間變數已存在作用域中（已提升），但處於「未初始化」狀態，任何存取都會拋出 ReferenceError。</p>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>TDZ 的設計目的是讓開發者養成「先宣告再使用」的習慣，避免 var 那種宣告前存取得到 undefined 的靜默錯誤。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>函式宣告的提升和 var 一樣嗎？</summary><p>不一樣。函式宣告（function declaration）連函式定義一起提升，可在宣告前呼叫；var 只提升宣告，值是 undefined，在宣告前呼叫會得到 TypeError。</p></details>
+      <details><summary>const 一定要在宣告時賦值嗎？</summary><p>是的。const 必須在宣告時初始化，否則 SyntaxError。這與 let 不同，let 可以先宣告不賦值。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三種宣告都會提升，但行為不同。<span class="hl">var 提升並初始化為 undefined</span>，所以宣告前存取不會報錯，只會得到 undefined；<span class="hl">let/const 提升但不初始化</span>，宣告前存取進入 TDZ 直接 ReferenceError。TDZ 強迫你先宣告再使用，避免了 var 的靜默 bug。實務上我只用 let/const，從根本避開這些提升陷阱。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript提升機制說明.html">提升機制說明</a>
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let/var/const 差異</a>
+      <a href="避免提升問題的方法.html">避免提升問題</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

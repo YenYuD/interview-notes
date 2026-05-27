@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>撰寫高效 CSS 的常見陷阱</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 效能</div>
+    <h1>瀏覽器從右到左讀選擇器——你寫 CSS 的方向<em>反了</em></h1>
+    <p class="lede">CSS 效能問題常見於<b>低效選擇器</b>和<b>觸發重排的屬性</b>。理解瀏覽器如何匹配選擇器、哪些屬性觸發 reflow/repaint，就能寫出更流暢的 CSS。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念一</span>
+    <h2>選擇器：從右到左匹配</h2>
+    <p>瀏覽器從<strong>最右邊（關鍵選擇器）</strong>開始篩選 DOM，再向上確認父元素是否符合。選擇器鏈越短，瀏覽器工作量越少。</p>
+    <div class="chips">
+      <div class="chip bad">
+        <small>低效：通用/標籤關鍵選擇器</small>
+        <code>div span</code>、<code>* { ... }</code>——先找所有 span，再逐一往上確認父元素是否為 div
+      </div>
+      <div class="chip good">
+        <small>高效：單一 class 關鍵選擇器</small>
+        <code>.nav-link</code>——直接命中，無需向上走訪
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><strong>BEM 方法論</strong>的副作用就是高效 CSS：所有樣式盡量用單一 class 命中（如 <code>.block__element--modifier</code>），選擇器又短又明確。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">核心概念二</span>
+    <h2>避免觸發 Reflow 的屬性</h2>
+    <table>
+      <thead>
+        <tr><th>觸發層級</th><th>代表屬性</th><th>效能影響</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Reflow（重排）</td><td>width、height、padding、margin、top/left</td><td>最重：重新計算整個版面</td></tr>
+        <tr><td>Repaint（重繪）</td><td>color、background-color、visibility</td><td>中：重繪像素，不改版面</td></tr>
+        <tr><td>Composite（合成）</td><td>transform、opacity</td><td>最輕：只在 GPU 合成層處理</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>動畫盡量只改 <strong>transform</strong> 和 <strong>opacity</strong>，瀏覽器可在 GPU 合成層處理，不觸發 reflow，效能最佳。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>什麼是強制同步佈局（Forced Synchronous Layout）？</summary>
+        <p>在 JavaScript 中先修改 DOM 樣式，然後馬上讀取 <code>offsetWidth</code>、<code>scrollTop</code> 等佈局屬性，瀏覽器必須立即強制重新計算佈局，而不能等到下一幀批次處理。這會造成效能瓶頸，應盡量批次讀寫或用 <code>requestAnimationFrame</code> 分離讀寫操作。</p>
+      </details>
+      <details>
+        <summary>will-change 屬性有什麼用？</summary>
+        <p><code>will-change: transform</code> 提前告知瀏覽器這個元素的 transform 即將改變，讓瀏覽器提前建立 GPU 合成層。但不要濫用——過多合成層會消耗大量記憶體，只在確定有效能問題時才針對性使用。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「寫高效 CSS 有兩個主要關注點：一是<span class="hl">選擇器效率</span>——瀏覽器從右到左匹配，通用選擇器（<code>*</code>）或標籤選擇器作為關鍵選擇器時會匹配大量元素；盡量用單一 class 直接命中。二是<span class="hl">避免觸發 reflow</span>——改變 width、height 等版面屬性會讓整個頁面重新計算；動畫盡量只改 <code>transform</code> 和 <code>opacity</code>，瀏覽器在 GPU 合成層處理，效能最佳。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋瀏覽器如何判斷哪些元素符合 CSS 選擇器.html">瀏覽器 CSS 選擇器匹配機制</a>
+      <a href="有什麼理由讓你選擇使用 `translate()` 而非 `absolute` 定位，或反之？為什麼？.html">translate() vs absolute 定位</a>
+      <a href="什麼是 CSS 選擇器的特異性（specificity），它如何運作？.html">CSS 選擇器特異性</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

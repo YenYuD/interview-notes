@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS display 屬性</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS</div>
+    <h1>一個屬性決定元素如何<em>佔據空間</em></h1>
+    <p class="lede"><b>display</b> 是 CSS 最基礎也最關鍵的屬性，決定元素以何種「盒模型」呈現於文件流中。從 <b>block</b>、<b>inline</b> 到 <b>flex</b>、<b>grid</b>，選對 display 就選對了版面的骨架。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>display 常見值一覽</h2>
+    <p>每個值決定元素如何在頁面佔位、能否設定尺寸、以及對周圍元素的影響。</p>
+    <table>
+      <thead>
+        <tr><th>值</th><th>行為</th><th>代表元素</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>block</code></td><td>獨佔整行，可設寬高</td><td><code>div</code>、<code>p</code>、<code>section</code></td></tr>
+        <tr><td><code>inline</code></td><td>與文字並排，不可設寬高</td><td><code>span</code>、<code>a</code>、<code>strong</code></td></tr>
+        <tr><td><code>inline-block</code></td><td>並排但可設寬高</td><td>按鈕、圖示</td></tr>
+        <tr><td><code>flex</code></td><td>區塊容器 + flexbox 子軸控制</td><td>導覽列、卡片列</td></tr>
+        <tr><td><code>grid</code></td><td>區塊容器 + 二維格線控制</td><td>整體頁面佈局</td></tr>
+        <tr><td><code>none</code></td><td>從文件流中完全移除，不佔空間</td><td>隱藏元素</td></tr>
+        <tr><td><code>table</code> / <code>table-cell</code></td><td>模擬 table/td 行為</td><td>古早版面技巧</td></tr>
+        <tr><td><code>list-item</code></td><td>產生清單標記（bullet）</td><td><code>li</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">重點提醒</span>
+    <h2>常見混淆點</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>display: none</small>
+        完全移除，子元素也不顯示，不佔空間
+      </div>
+      <div class="chip info">
+        <small>visibility: hidden</small>
+        元素隱藏但仍佔空間，螢幕閱讀器通常忽略
+      </div>
+      <div class="chip bad">
+        <small>inline 不能設寬高</small>
+        設了 width/height 也無效；需要改用 inline-block
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>現代版面幾乎都用 <strong>flex</strong> 或 <strong>grid</strong>，<code>inline-block</code> 則常見於按鈕與小元件；<code>table-*</code> 系列屬於老式技巧，新專案不推薦。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary><code>display: none</code> 和 <code>visibility: hidden</code> 有什麼差別？</summary>
+        <p><code>display: none</code> 讓元素完全離開文件流，不佔任何空間，子元素也一起消失。<code>visibility: hidden</code> 只是讓元素不可見，但仍佔據原本空間，子元素可個別設 <code>visibility: visible</code> 來重新顯示。</p>
+      </details>
+      <details>
+        <summary><code>inline-block</code> 和 <code>flex</code> 都能並排，應該怎麼選？</summary>
+        <p>單一元素需要並排且設尺寸時用 <code>inline-block</code>；需要排版一組子元素（對齊、間距、換行）時用 <code>flex</code>，更強大且語意更清楚。</p>
+      </details>
+      <details>
+        <summary><code>flex</code> 和 <code>inline-flex</code> 的差別？</summary>
+        <p><code>flex</code> 容器本身是 block 級別（獨佔一行）；<code>inline-flex</code> 容器本身是 inline 級別（可與文字並排），但內部子元素排版方式完全相同。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>display</code> 屬性決定元素在文件流的佈局模式。<span class="hl">block 獨佔一行、inline 與文字並排、inline-block 並排且可設尺寸</span>；現代版面主要用 <span class="hl">flex 處理一維排版、grid 處理二維排版</span>。<code>none</code> 會讓元素完全脫離文件流，與 <code>visibility: hidden</code>（仍佔空間）不同。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="`block`、`inline` 和 `inline-block` 有什麼差別？.html">block、inline 和 inline-block 的差別</a>
+      <a href="你有嘗試過新的 CSS Flexbox 或 Grid 規範嗎？.html">CSS Flexbox 與 Grid</a>
+      <a href="有哪些清除浮動的技術，各自適合什麼情境？.html">清除浮動技術</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useRef hook</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT HOOKS</div>
+    <h1><code>useRef</code>：存東西但<em>不觸發重渲</em>，或直接操作 DOM</h1>
+    <p class="lede"><code>useRef</code> 回傳一個 <code>{ current: value }</code> 物件，它的值改變時<b>不會觸發重新渲染</b>。有兩大用途：直接存取 <b>DOM 元素</b>，以及在渲染間<b>保存可變值</b>（如 timer ID、前一次的 state）。</p>
+  </header>
+
+  <section>
+    <span class="num">兩大用途</span>
+    <h2>DOM ref vs 可變值儲存</h2>
+    <pre><code><span class="tok-com">// 用途一：存取 DOM 元素</span>
+<span class="tok-key">function</span> <span class="tok-fn">FocusInput</span>() {
+  <span class="tok-key">const</span> inputRef = <span class="tok-fn">useRef</span>(<span class="tok-key">null</span>);
+  <span class="tok-fn">useEffect</span>(() =&gt; { inputRef.current?.<span class="tok-fn">focus</span>(); }, []);
+  <span class="tok-key">return</span> &lt;input ref={inputRef} /&gt;;
+}
+
+<span class="tok-com">// 用途二：跨渲染儲存值（不觸發重渲）</span>
+<span class="tok-key">function</span> <span class="tok-fn">Timer</span>() {
+  <span class="tok-key">const</span> timerRef = <span class="tok-fn">useRef</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-key">const</span> start = () =&gt; {
+    timerRef.current = <span class="tok-fn">setInterval</span>(() =&gt; console.<span class="tok-fn">log</span>(<span class="tok-str">'tick'</span>), 1000);
+  };
+  <span class="tok-key">const</span> stop = () =&gt; <span class="tok-fn">clearInterval</span>(timerRef.current);
+
+  <span class="tok-key">return</span> &lt;&gt;&lt;button onClick={start}&gt;開始&lt;/button&gt;&lt;button onClick={stop}&gt;停止&lt;/button&gt;&lt;/&gt;;
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">useRef vs useState</span>
+    <h2>選哪個的判斷標準</h2>
+    <div class="chips">
+      <div class="chip info"><small>useState</small>值改變需要更新畫面 → 用 state</div>
+      <div class="chip info"><small>useRef</small>值改變不需要更新畫面 → 用 ref（如 timer ID、前一次值）</div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>不要把 <code>useRef</code> 當作 state 的替代——如果你需要 React 對值的改變有所反應（重渲、顯示在 UI 上），那就是 <code>useState</code> 的工作。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>useRef 和 createRef 有什麼差別？</summary><p><code>createRef</code> 每次渲染都建立新物件；<code>useRef</code> 在組件整個生命週期回傳同一個物件。在功能組件內應用 <code>useRef</code>；<code>createRef</code> 是類別組件的舊版方式。</p></details>
+      <details><summary>在 useEffect 裡讀取 ref.current 需要加到依賴陣列嗎？</summary><p>不需要，React 保證 ref 物件穩定（引用不變）。但 <code>ref.current</code> 的值不受 React 追蹤，若需依賴它的值觸發 effect，要用 state 而非 ref。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>useRef</code> 回傳一個在渲染間持久存在的 <code>{ current }</code> 物件，修改它<span class="hl">不觸發重新渲染</span>。主要有兩個用途：一是透過 <code>ref={ref}</code> 直接存取 DOM 元素（如聚焦、捲動）；二是儲存不需要觸發 UI 更新的可變值（如 timer ID、前一次的 props）。判斷用 ref 還是 state，看值的改變是否需要反映在畫面上。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 `forwardRef()` 是做什麼用的？.html">forwardRef</a>
+      <a href="受控（controlled）與非受控（uncontrolled）React 組件有什麼區別？.html">受控 vs 非受控組件</a>
+      <a href="React 中的 `useCallback` hook 是什麼？什麼時候應該使用它？.html">useCallback</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

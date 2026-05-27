@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事件處理器中 this 綁定解析</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">this・事件處理器</div>
+    <h1>addEventListener 裡的 <em>this</em>：普通函式是元素，<em>箭頭函式是外層</em></h1>
+    <p class="lede">在 DOM 事件處理器中，<b>普通函式的 this 指向觸發事件的元素</b>（即 <code>event.currentTarget</code>）；<b>箭頭函式的 this 繼承外層定義時的上下文</b>，不是元素。這是一個常見的混淆點。</p>
+  </header>
+
+  <section>
+    <span class="num">核心行為</span>
+    <h2>同樣的 addEventListener，不同的 this</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>普通函式：this 是按鈕元素</small>
+        <pre><code>btn.addEventListener('click', function() {
+  console.log(this);          // &lt;button&gt; 元素
+  console.log(this === btn);  // true
+});</code></pre>
+      </div>
+      <div class="chip bad">
+        <small>箭頭函式：this 是外層（通常是 window）</small>
+        <pre><code>btn.addEventListener('click', () =&gt; {
+  console.log(this);          // window / undefined
+  console.log(this === btn);  // false
+});</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">三種解法</span>
+    <h2>需要「既有元素 this 又有物件 this」時怎麼辦？</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>bind(obj)</strong> — 強制把 this 鎖定到物件
+          <pre><code>btn.addEventListener('click', handleClick.bind(myObj));</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>箭頭函式包住物件方法</strong> — 繼承外層 this（myObj）
+          <pre><code>const myObj = {
+  name: 'Widget',
+  init() {
+    btn.addEventListener('click', () =&gt; {
+      console.log(this.name); // 'Widget' ✅
+    });
+  }
+};</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>用 event.currentTarget</strong> — 不依賴 this，直接從事件物件取元素
+          <pre><code>btn.addEventListener('click', (e) =&gt; {
+  console.log(e.currentTarget); // 按鈕元素，箭頭函式也適用
+});</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="callout tip"><span class="ico">✅</span><p>現代前端（尤其 React/Vue）幾乎不再直接依賴事件處理器中的 <code>this</code> 來取得 DOM 元素；改用 <code>event.currentTarget</code> 或框架的 ref，語意更明確。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>event.target 和 event.currentTarget 有什麼不同？</summary><p><code>target</code> 是實際觸發事件的元素（可能是子元素）；<code>currentTarget</code> 是目前正在處理該事件的元素（綁定處理器的那個）。普通函式中的 this 等同於 currentTarget。</p></details>
+      <details><summary>React 的合成事件（SyntheticEvent）和原生 addEventListener 行為一樣嗎？</summary><p>React class component 中，方法若不 bind 或用箭頭函式，this 會是 undefined（因為 class 預設嚴格模式）。React 事件物件是合成的，但 this 行為和原生一致——取決於函式類型。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「在 addEventListener 中，<span class="hl">普通函式的 this 指向觸發事件的 DOM 元素</span>；箭頭函式沒有自己的 this，繼承外層上下文，通常是 window 或 undefined。要同時使用物件 this 又要操作元素，可以用 <code>bind</code> 固定，或用箭頭函式包住物件方法。<span class="hl">現代實務更推薦直接用 <code>event.currentTarget</code></span> 取元素，不依賴 this，語意更清晰。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="this關鍵字常見陷阱.html">this 常見陷阱</a>
+      <a href="解釋JavaScript中this的運作原理.html">this 運作原理</a>
+      <a href="解釋 JavaScript 的 Function.prototype.bind.html">Function.prototype.bind</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

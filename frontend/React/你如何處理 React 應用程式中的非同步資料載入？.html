@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 非同步資料載入</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 資料獲取</div>
+    <h1>非同步資料載入：<em>useEffect + 三個 state</em> 是基礎，Custom Hook 是最佳實踐</h1>
+    <p class="lede">React 的資料獲取核心模式是在 <b>useEffect</b> 內發起請求，用三個 state 管理 <b>data / loading / error</b>。把這個模式封裝成 <b>Custom Hook</b>，讓多組件共用並減少重複程式碼。</p>
+  </header>
+
+  <section>
+    <span class="num">基礎模式</span>
+    <h2>useEffect + 三個 state</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">DataFetchingComponent</span>() {
+  <span class="tok-key">const</span> [data, setData]       = <span class="tok-fn">useState</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">const</span> [loading, setLoading] = <span class="tok-fn">useState</span>(<span class="tok-key">true</span>);
+  <span class="tok-key">const</span> [error, setError]     = <span class="tok-fn">useState</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-fn">useEffect</span>(() =&gt; {
+    <span class="tok-key">async function</span> <span class="tok-fn">fetchData</span>() {
+      <span class="tok-key">try</span> {
+        <span class="tok-key">const</span> res    = <span class="tok-key">await</span> <span class="tok-fn">fetch</span>(<span class="tok-str">'https://api.example.com/data'</span>);
+        <span class="tok-key">const</span> result = <span class="tok-key">await</span> res.<span class="tok-fn">json</span>();
+        <span class="tok-fn">setData</span>(result);
+      } <span class="tok-key">catch</span> (err) {
+        <span class="tok-fn">setError</span>(err);
+      } <span class="tok-key">finally</span> {
+        <span class="tok-fn">setLoading</span>(<span class="tok-key">false</span>);
+      }
+    }
+    <span class="tok-fn">fetchData</span>();
+  }, []);   <span class="tok-com">// 空陣列 = 只在 mount 時執行一次</span>
+
+  <span class="tok-key">if</span> (loading) <span class="tok-key">return</span> &lt;div&gt;載入中...&lt;/div&gt;;
+  <span class="tok-key">if</span> (error)   <span class="tok-key">return</span> &lt;div&gt;錯誤：{error.message}&lt;/div&gt;;
+  <span class="tok-key">return</span> &lt;div&gt;{JSON.<span class="tok-fn">stringify</span>(data)}&lt;/div&gt;;
+}</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>不能直接在 useEffect 的回呼函式宣告為 <code>async</code>——因為 async 函式回傳 Promise，而 useEffect 的回傳值必須是清除函式或 <code>undefined</code>。改在裡面定義並呼叫一個 async 函式。</p></div>
+  </section>
+
+  <section>
+    <span class="num">最佳實踐</span>
+    <h2>封裝成 useFetch Custom Hook</h2>
+    <pre><code><span class="tok-com">// useFetch.js - 可跨組件重用</span>
+<span class="tok-key">function</span> <span class="tok-fn">useFetch</span>(url) {
+  <span class="tok-key">const</span> [data, setData]       = <span class="tok-fn">useState</span>(<span class="tok-key">null</span>);
+  <span class="tok-key">const</span> [loading, setLoading] = <span class="tok-fn">useState</span>(<span class="tok-key">true</span>);
+  <span class="tok-key">const</span> [error, setError]     = <span class="tok-fn">useState</span>(<span class="tok-key">null</span>);
+
+  <span class="tok-fn">useEffect</span>(() =&gt; {
+    <span class="tok-key">let</span> cancelled = <span class="tok-key">false</span>;   <span class="tok-com">// 防止 race condition</span>
+    <span class="tok-key">async function</span> <span class="tok-fn">fetchData</span>() {
+      <span class="tok-key">try</span> {
+        <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-fn">fetch</span>(url);
+        <span class="tok-key">if</span> (!cancelled) <span class="tok-fn">setData</span>(<span class="tok-key">await</span> res.<span class="tok-fn">json</span>());
+      } <span class="tok-key">catch</span> (err) {
+        <span class="tok-key">if</span> (!cancelled) <span class="tok-fn">setError</span>(err);
+      } <span class="tok-key">finally</span> {
+        <span class="tok-key">if</span> (!cancelled) <span class="tok-fn">setLoading</span>(<span class="tok-key">false</span>);
+      }
+    }
+    <span class="tok-fn">fetchData</span>();
+    <span class="tok-key">return</span> () =&gt; { cancelled = <span class="tok-key">true</span>; };   <span class="tok-com">// 清除：取消舊請求的 state 更新</span>
+  }, [url]);
+
+  <span class="tok-key">return</span> { data, loading, error };
+}
+
+<span class="tok-com">// 組件使用方式</span>
+<span class="tok-key">const</span> { data, loading, error } = <span class="tok-fn">useFetch</span>(<span class="tok-str">'https://api.example.com/data'</span>);</code></pre>
+    <div class="aside">生產環境建議考慮 <b>TanStack Query（React Query）</b> 或 <b>SWR</b>：自動快取、去重複請求、背景重新驗證、stale-while-revalidate 策略，遠比手寫 Custom Hook 完善。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼是 Race Condition？如何防止？</summary><p>當 URL 快速切換時，後發出的請求可能比先發出的更早回應，導致舊資料覆蓋新資料。防止方式：在 useEffect 的清除函式（cleanup）設一個 <code>cancelled</code> flag，若 effect 已被清除則不更新 state；或用 AbortController 取消前一個請求。</p></details>
+      <details><summary>React Query / SWR 解決了哪些手寫 useFetch 沒有解決的問題？</summary><p>自動的快取管理（相同 key 的請求不重複發）、背景重新驗證（視窗 focus 時自動 refetch）、分頁與無限捲動、樂觀更新（optimistic update）、請求去重複、全域 loading/error 狀態。這些手寫都要從零處理。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 非同步資料載入的基礎模式是在 <span class="hl">useEffect 裡定義 async 函式</span>發起請求，用三個 state 管理 data、loading、error，finally 確保 loading 一定關閉。這個模式可以封裝成 <span class="hl">Custom Hook（useFetch）</span>跨組件重用，並要在清除函式設 cancelled flag 防止 race condition。生產環境我會優先選 <span class="hl">TanStack Query 或 SWR</span>，它們處理了快取、去重複請求和背景更新，遠比手寫完善。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="在 React 中進行資料獲取時有哪些常見的陷阱？.html">資料獲取的陷阱</a>
+      <a href="React Suspense 是什麼？它實現了什麼功能？.html">React Suspense</a>
+      <a href="React 中的 `useEffect` 和 `useLayoutEffect` 有什麼區別？.html">useEffect vs useLayoutEffect</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

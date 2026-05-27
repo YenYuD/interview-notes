@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promise.all vs Promise.allSettled</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · Promise 並發</div>
+    <h1>一個<em>失敗就放棄</em>，還是等全部結算？</h1>
+    <p class="lede"><b>Promise.all</b> 奉行「全成功或全失敗」；<b>Promise.allSettled</b> 等所有 Promise 都有結果，無論成敗，再逐一告訴你每個的狀態。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>一張表看清楚</h2>
+    <table>
+      <tr><th></th><th>Promise.all</th><th>Promise.allSettled</th></tr>
+      <tr><td>等待策略</td><td>等全部 fulfilled</td><td>等全部 settled（含 rejected）</td></tr>
+      <tr><td>有人 reject</td><td>立即 reject，其餘結果丟棄</td><td>繼續等，最後回傳所有結果</td></tr>
+      <tr><td>回傳值</td><td><code>[val1, val2, …]</code></td><td><code>[{status, value/reason}, …]</code></td></tr>
+      <tr><td>適合情境</td><td>全成功才有意義（如結帳）</td><td>想看每個結果（如批次操作）</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">行為對比</span>
+    <h2>同樣的輸入，不同的輸出</h2>
+    <pre><code><span class="tok-key">const</span> promises = [
+  Promise.<span class="tok-fn">resolve</span>(1),
+  Promise.<span class="tok-fn">reject</span>(<span class="tok-str">'失敗了'</span>),
+  Promise.<span class="tok-fn">resolve</span>(3),
+];
+
+<span class="tok-com">// Promise.all → 立即 reject</span>
+Promise.<span class="tok-fn">all</span>(promises)
+  .<span class="tok-fn">catch</span>((err) => console.<span class="tok-fn">log</span>(err));  <span class="tok-com">// '失敗了'</span>
+
+<span class="tok-com">// Promise.allSettled → 等全部，回傳每個狀態</span>
+Promise.<span class="tok-fn">allSettled</span>(promises)
+  .<span class="tok-fn">then</span>((results) => console.<span class="tok-fn">log</span>(results));
+<span class="tok-com">// [
+//   { status: 'fulfilled', value: 1 },
+//   { status: 'rejected',  reason: '失敗了' },
+//   { status: 'fulfilled', value: 3 },
+// ]</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">選哪個？</span>
+    <h2>決策流程</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">任何一個失敗就應該整批報錯（例如：前端需要所有資料才能渲染）→ 用 <b>Promise.all</b>。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">想收集所有結果、失敗的也要看（例如：批次上傳、並行健康檢查）→ 用 <b>Promise.allSettled</b>。</div>
+      </div>
+    </div>
+    <div class="aside">Promise.allSettled 回傳的物件中，成功的有 <code>value</code>，失敗的有 <code>reason</code>——記得用 <code>result.status === 'fulfilled'</code> 判斷再取值。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Promise.any 和 Promise.race 又是什麼？</summary>
+        <p><code>Promise.race</code>：第一個 settled（不論成敗）就回傳；常用於設超時。<code>Promise.any</code>（ES2021）：第一個 fulfilled 就回傳；全部 rejected 才 reject，適合多個備援來源取最快成功的。</p>
+      </details>
+      <details>
+        <summary>Promise.allSettled 什麼時候才會 reject？</summary>
+        <p>幾乎不會。它本身只有在傳入非 iterable 等程式錯誤時才 reject；輸入的 Promise 就算全部 rejected，它仍然 resolve（帶著全 rejected 的結果陣列）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「兩者都是平行等待多個 Promise。<span class="hl">Promise.all</span> 只要有任一個 reject 就立即 reject，適合全部成功才有意義的場景。<span class="hl">Promise.allSettled</span> 會等所有 Promise 都有結果，以 <code>{status, value/reason}</code> 的物件陣列回傳每個的狀態，適合需要看到所有結果（包括失敗）的批次操作。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Promise.all的用途.html">Promise.all 用途</a>
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="微任務佇列概念解析.html">微任務佇列</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

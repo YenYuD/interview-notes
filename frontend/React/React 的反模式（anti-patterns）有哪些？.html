@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 反模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 最佳實踐</div>
+    <h1>這六個 React 反模式，<em>讓 bug 悄悄進門</em></h1>
+    <p class="lede">寫 React 最常見的壞習慣：直接改 state、用索引當 key、在 render 裡寫函式……每一個看似無害，卻可能讓你的應用程式<b>出現難以追蹤的 bug 或效能問題</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">六大反模式</span>
+    <h2>看一眼就能記住的對比</h2>
+    <table>
+      <thead><tr><th>反模式</th><th>問題</th><th>正確做法</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>直接修改 state</td>
+          <td>React 偵測不到變化，UI 不更新</td>
+          <td>用 <code>setState</code> 或 <code>useState</code> setter 建立新物件</td>
+        </tr>
+        <tr>
+          <td>用陣列索引當 key</td>
+          <td>重排/增刪時 key 錯位，狀態對應到錯的節點</td>
+          <td>用資料的穩定唯一 ID</td>
+        </tr>
+        <tr>
+          <td>render 裡定義內聯函式</td>
+          <td>每次渲染建立新函式引用，子組件 memo 失效</td>
+          <td>用 <code>useCallback</code> 或提到組件外</td>
+        </tr>
+        <tr>
+          <td>深度巢狀 state</td>
+          <td>更新時需手動深度複製，容易遺漏</td>
+          <td>扁平化 state 結構；或用 Immer</td>
+        </tr>
+        <tr>
+          <td>用已棄用生命週期</td>
+          <td><code>componentWillMount</code> 等不安全，可能觸發兩次</td>
+          <td>改用 <code>useEffect</code> 或 <code>componentDidMount</code></td>
+        </tr>
+        <tr>
+          <td>缺少 key 的清單渲染</td>
+          <td>React 只能用位置對比，效率差、容易出 bug</td>
+          <td>每個列表項必須有唯一 key</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">最危險的一個</span>
+    <h2>直接 mutate state：看似沒事，其實很危險</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>反模式</small>
+        <code>state.items.push(newItem);</code><br>
+        <code>setState(state); // 同一引用，React 不重渲</code>
+      </div>
+      <div class="chip good">
+        <small>正確</small>
+        <code>setState(prev => ({</code><br>
+        <code>&nbsp;&nbsp;...prev,</code><br>
+        <code>&nbsp;&nbsp;items: [...prev.items, newItem]</code><br>
+        <code>}));</code>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>過度使用 useEffect 算是反模式嗎？</summary><p>是的！React 官方文件特別指出，如果你只是根據 props 或 state 計算衍生值、或同步兩個 state，這些都不需要 <code>useEffect</code>。過度使用 Effect 是 React 最常見的現代反模式之一。</p></details>
+      <details><summary>過度使用 Context 是反模式嗎？</summary><p>Context 頻繁變動時，所有 consumer 都會重渲，可能造成效能問題。對頻繁更新的全域狀態（如表單輸入），Context 並非最佳選擇，應考慮 Zustand 等外部工具。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 常見反模式包括：<span class="hl">直接修改 state</span>（React 偵測不到變化）、<span class="hl">用陣列索引當 key</span>（重排時狀態錯位）、在 render 裡定義內聯函式（每次新建引用破壞 memo 優化）。核心原則是：state 要不可變、key 要穩定唯一、副作用只在 useEffect 裡做。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="為什麼 React 建議不要直接修改（mutate）State？.html">為何不能直接修改 State</a>
+      <a href="在 React 中使用陣列索引（array indices）作為 `key` 的值有什麼後果？.html">用 index 當 key 的後果</a>
+      <a href="React 中的 `useCallback` hook 是什麼？什麼時候應該使用它？.html">useCallback</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

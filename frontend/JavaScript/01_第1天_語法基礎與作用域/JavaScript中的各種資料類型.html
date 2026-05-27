@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 資料類型</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 資料類型</div>
+    <h1>原始值 vs 參考值：<em>一個複製，一個共享</em></h1>
+    <p class="lede">JavaScript 的類型分兩大類：<b>7 種 Primitive（原始）</b>和<b>Object（參考）</b>。原始值按值複製，物件按參考共享。這個差異決定了賦值、比較、函式傳參的所有行為。</p>
+  </header>
+
+  <section>
+    <span class="num">7 種原始類型</span>
+    <h2>Primitive Types</h2>
+    <table>
+      <tr><th>類型</th><th>typeof</th><th>說明</th></tr>
+      <tr><td><code>number</code></td><td><code>'number'</code></td><td>整數與浮點數統一一種類型</td></tr>
+      <tr><td><code>string</code></td><td><code>'string'</code></td><td>字元序列，不可變</td></tr>
+      <tr><td><code>boolean</code></td><td><code>'boolean'</code></td><td>true / false</td></tr>
+      <tr><td><code>undefined</code></td><td><code>'undefined'</code></td><td>宣告未賦值</td></tr>
+      <tr><td><code>null</code></td><td><code>'object'</code> ⚠️</td><td>明確設為空（歷史 bug）</td></tr>
+      <tr><td><code>symbol</code></td><td><code>'symbol'</code></td><td>唯一不可變值，常用作物件鍵</td></tr>
+      <tr><td><code>bigint</code></td><td><code>'bigint'</code></td><td>任意精度整數，用 <code>n</code> 結尾</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">參考類型</span>
+    <h2>Object 家族</h2>
+    <div class="chips">
+      <div class="chip info"><small>Object</small>鍵值對集合 <code>{}</code></div>
+      <div class="chip info"><small>Array</small>有序集合 <code>[]</code></div>
+      <div class="chip info"><small>Function</small>可呼叫的物件</div>
+      <div class="chip info"><small>Map / Set</small>ES6 新增集合結構</div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>型別強制轉換是 JS 的經典陷阱：<code>'5' + 2 = '52'</code>（字串串接），<code>'5' - 2 = 3</code>（數字相減）。<code>+</code> 的行為取決於運算元類型。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">typeof 速查</span>
+    <h2>各類型的 typeof 結果</h2>
+    <pre><code><span class="tok-key">typeof</span> <span class="tok-num">42</span>          <span class="tok-com">// 'number'</span>
+<span class="tok-key">typeof</span> <span class="tok-str">'hello'</span>     <span class="tok-com">// 'string'</span>
+<span class="tok-key">typeof</span> <span class="tok-key">true</span>        <span class="tok-com">// 'boolean'</span>
+<span class="tok-key">typeof</span> <span class="tok-key">undefined</span>   <span class="tok-com">// 'undefined'</span>
+<span class="tok-key">typeof</span> <span class="tok-key">null</span>        <span class="tok-com">// 'object' ← bug！</span>
+<span class="tok-key">typeof</span> Symbol()    <span class="tok-com">// 'symbol'</span>
+<span class="tok-key">typeof</span> BigInt(<span class="tok-num">1</span>)   <span class="tok-com">// 'bigint'</span>
+<span class="tok-key">typeof</span> {}          <span class="tok-com">// 'object'</span>
+<span class="tok-key">typeof</span> []          <span class="tok-com">// 'object' ← 需用 Array.isArray()</span>
+<span class="tok-key">typeof</span> <span class="tok-fn">function</span>(){} <span class="tok-com">// 'function'</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>原始值和物件的賦值行為差異？</summary><p>原始值賦值是複製值本身；物件賦值是複製參考位址（reference）。兩個變數指向同一物件時，透過任一變數修改都會影響另一個。</p></details>
+      <details><summary>如何正確判斷一個值是陣列？</summary><p>用 <code>Array.isArray(value)</code>，因為 typeof [] 回傳 'object'，無法區分陣列和普通物件。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 有 7 種原始類型：number、string、boolean、undefined、null、symbol、bigint，還有 Object 這個參考類型。<span class="hl">原始值按值傳遞、複製</span>；物件按參考傳遞、共享記憶體位址。typeof 是常用的類型判斷工具，但有兩個例外需要特別注意：<span class="hl">typeof null 是 'object'</span>（歷史 bug），<span class="hl">陣列要用 Array.isArray()</span> 而不是 typeof。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何檢查變數的資料類型.html">如何檢查資料類型</a>
+      <a href="JavaScript變數null、undefined與未宣告的差異.html">null/undefined/未宣告</a>
+      <a href="JavaScript字串轉數字方法.html">字串轉數字方法</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

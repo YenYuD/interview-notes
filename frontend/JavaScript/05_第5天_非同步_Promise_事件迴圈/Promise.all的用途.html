@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promise.all 用途</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · Promise 並發</div>
+    <h1><em>全部成功才算贏</em>：Promise.all 的平行策略</h1>
+    <p class="lede">需要同時打三支 API、等全部回來再組裝畫面？<b>Promise.all</b> 讓你一次發出、等待最慢的那個，只要有一個失敗就整批 reject。</p>
+  </header>
+
+  <section>
+    <span class="num">核心行為</span>
+    <h2>Promise.all 怎麼運作</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">傳入 Promise 陣列，所有 Promise <b>同時開始</b>執行（非依序）。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">等最慢的那個完成，回傳 <b>按原陣列順序排列的結果陣列</b>（非完成順序）。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">任一 Promise reject → 立即 reject，不等其他人，結果陣列丟棄。</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-key">const</span> [user, posts, cart] = <span class="tok-key">await</span> Promise.<span class="tok-fn">all</span>([
+  <span class="tok-fn">fetchUser</span>(id),
+  <span class="tok-fn">fetchPosts</span>(id),
+  <span class="tok-fn">fetchCart</span>(id),
+]);
+<span class="tok-com">// 三支請求平行發出，最慢的決定總等待時間</span></code></pre>
+    <div class="aside">若三支 API 各需 300ms，依序 await 要等 900ms；Promise.all 只等 300ms（最慢那支）。</div>
+  </section>
+
+  <section>
+    <span class="num">失敗快速機制</span>
+    <h2>任一失敗 = 全部放棄</h2>
+    <pre><code>Promise.<span class="tok-fn">all</span>([
+  Promise.<span class="tok-fn">resolve</span>(<span class="tok-str">'A'</span>),
+  Promise.<span class="tok-fn">reject</span>(<span class="tok-str">'B 壞了！'</span>),
+  Promise.<span class="tok-fn">resolve</span>(<span class="tok-str">'C'</span>),
+]).<span class="tok-fn">catch</span>((err) => console.<span class="tok-fn">error</span>(err)); <span class="tok-com">// 'B 壞了！'</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>若你希望即使有些請求失敗也能看到其他結果，請改用 <b>Promise.allSettled()</b>——它等所有 Promise 都 settled，回傳每個的狀態與值/原因。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">適用情境</span>
+    <h2>用 Promise.all 的時機</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>適合</small>
+        多支 API 請求之間沒有依賴關係，且只要有任何一支失敗就應該整批報錯（例如購物車結帳的多步驟 API）。
+      </div>
+      <div class="chip bad">
+        <small>不適合</small>
+        需要看到所有結果（包含失敗的）。改用 <code>Promise.allSettled</code>。
+      </div>
+      <div class="chip bad">
+        <small>不適合</small>
+        只要有一個 resolve 就繼續。改用 <code>Promise.any</code> 或 <code>Promise.race</code>。
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Promise.all 傳入空陣列會怎樣？</summary>
+        <p>立即 resolve，回傳空陣列 <code>[]</code>。</p>
+      </details>
+      <details>
+        <summary>Promise.all 裡可以混入非 Promise 值嗎？</summary>
+        <p>可以。非 Promise 的值會被自動包成 <code>Promise.resolve(value)</code>，放進結果陣列中對應位置。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>Promise.all</code> 接受一個 Promise 陣列，<span class="hl">所有請求同時發出</span>，等最慢的完成後，依原陣列順序回傳結果。<span class="hl">任一個 reject 就立即 reject 整體</span>，其他結果丟棄。適合多支 API 同時打、結果都需要的場景，可以大幅縮短等待時間。如果需要容忍部分失敗，改用 Promise.allSettled。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Promiseall與PromiseallSettled的差異.html">Promise.all vs allSettled</a>
+      <a href="什麼是Promise及其運作原理.html">Promise 運作原理</a>
+      <a href="async await 是什麼及其如何簡化非同步程式碼.html">async / await</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

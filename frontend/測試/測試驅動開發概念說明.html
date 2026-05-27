@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>測試驅動開發 TDD</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>TDD：<em>先紅後綠，再重構</em>的開發節奏</h1>
+    <p class="lede">Test-Driven Development 不只是一種測試技巧，更是<b>設計思維</b>——先想清楚「我的程式碼該怎麼被使用」，才開始實作。紅→綠→重構，三步一循環。</p>
+  </header>
+
+  <section>
+    <span class="num">Red-Green-Refactor</span>
+    <h2>三步循環</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot" style="background:#ef4444">紅</div>
+        <div class="flow-body">
+          <h4>Red：先寫一個會失敗的測試</h4>
+          <p>功能還沒實作，測試必定失敗（紅燈）。這一步確認測試本身是有效的——如果一開始就通過，測試可能沒有在測正確的東西。</p>
+          <pre><code><span class="tok-fn">test</span>(<span class="tok-str">'adds 1 + 2 to equal 3'</span>, () =&gt; {
+  <span class="tok-fn">expect</span>(<span class="tok-fn">add</span>(1, 2)).<span class="tok-fn">toBe</span>(3); <span class="tok-com">// add 未定義，紅燈</span>
+});</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot" style="background:#22c55e">綠</div>
+        <div class="flow-body">
+          <h4>Green：寫讓測試通過的最小程式碼</h4>
+          <p>不求完美，只求通過。這步強迫你聚焦在當前需求，不過度設計。</p>
+          <pre><code><span class="tok-key">function</span> <span class="tok-fn">add</span>(a, b) {
+  <span class="tok-key">return</span> a + b; <span class="tok-com">// 最小實作，綠燈</span>
+}</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot" style="background:#3b82f6">重構</div>
+        <div class="flow-body">
+          <h4>Refactor：在測試保護下改善設計</h4>
+          <p>重構命名、抽共用函式、改資料結構——測試是安全網，大膽改。改完確認測試仍然全綠。</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout tip"><span class="ico">💡</span><p>每個循環盡量<b>小步前進</b>（5~15 分鐘完成一個紅→綠→重構）。步子太大會讓 debug 變難。</p></div>
+  </section>
+
+  <section>
+    <span class="num">優缺點</span>
+    <h2>TDD 的真實代價與收益</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>好處</small>
+        <p>設計更清晰（先想 API 介面）</p>
+        <p>測試即文件</p>
+        <p>重構有安全網</p>
+        <p>Debug 更快定位</p>
+      </div>
+      <div class="chip bad">
+        <small>成本</small>
+        <p>初期開發速度較慢</p>
+        <p>UI / 需求頻繁變動時，測試維護成本高</p>
+        <p>學習曲線：需要訓練「先測試」的思維</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>TDD 和 BDD 的差別？</summary><p>TDD 聚焦在技術行為（函式輸入輸出）；BDD（Behaviour-Driven Development）聚焦在業務行為（Given-When-Then 語法），讓非工程師也能讀懂。兩者不互斥，BDD 是 TDD 的延伸。</p></details>
+      <details><summary>什麼情況不適合 TDD？</summary><p>UI 原型設計、實驗性探索階段、需求極度不確定時。先快速做出可視化結果再補測試是務實選擇。TDD 最有價值的場景是：核心業務邏輯、演算法實作、API 設計。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「TDD 是紅→綠→重構的三步循環。我先寫一個確定失敗的測試，然後寫最小程式碼讓它通過，最後在測試保護下重構。好處是<span class="hl">測試同時是設計工具</span>——先想程式碼怎麼被呼叫，能逼出更乾淨的介面。代價是初期速度慢，所以我會在核心邏輯和業務規則用 TDD，<span class="hl">UI 和探索階段則是先做再補測試</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何為JavaScript編寫單元測試.html">撰寫單元測試</a>
+      <a href="撰寫可維護且有效測試的最佳實踐.html">測試最佳實踐</a>
+      <a href="單元測試整合測試與端對端測試差異.html">測試金字塔</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retina 顯示器圖形處理</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS / 圖形</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 響應式圖形</div>
+    <h1>高 DPI 螢幕讓圖片模糊——<em>srcset</em> 是現代解法</h1>
+    <p class="lede">Retina（高像素比）螢幕若顯示普通解析度圖片，會出現模糊。解法是提供<b>多解析度版本</b>讓瀏覽器自動選擇，或直接改用<b>SVG</b>——天生無損縮放。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>什麼是 Retina / 高像素比</h2>
+    <p>Retina 是 Apple 的行銷術語，指 <strong>device pixel ratio（DPR）&gt; 1</strong> 的螢幕。DPR=2 意思是：一個 CSS 像素由 2×2=4 個實體像素渲染。普通圖片會被拉伸而模糊。</p>
+    <div class="aside">
+      現今幾乎所有行動裝置螢幕都是高 DPI（DPR 2-3），所以「Retina 處理」不只是 Mac 的問題。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">解決方案</span>
+    <h2>三種方法</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>1. srcset + sizes（首選）</strong>
+          <pre><code><span class="tok-str">&lt;img</span>
+  src="/img/photo-800.jpg"
+  srcset="/img/photo-400.jpg 400w,
+          /img/photo-800.jpg 800w,
+          /img/photo-1200.jpg 1200w"
+  sizes="(min-width: 768px) 50vw, 100vw"
+  alt="範例"
+<span class="tok-str">/&gt;</span></code></pre>
+          瀏覽器根據視口寬度和 DPR 自動選最合適的圖片。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>2. 使用 SVG（圖示最佳解）</strong>
+          SVG 是向量格式，無論任何 DPR 都清晰渲染，且可用 CSS 改色。圖示永遠優先使用 SVG。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>3. CSS background-image 用 @media</strong>
+          用 <code>min-resolution: 2dppx</code> 媒體查詢，高 DPI 螢幕載入 2x 背景圖。
+        </div>
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>不支援 <code>srcset</code> 的極舊瀏覽器（IE11）會直接使用 <code>src</code> 的備用圖，符合漸進增強原則，不需要特別處理。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>srcset 中的 w 描述符和 x 描述符有什麼差別？</summary>
+        <p><code>w</code> 描述符（如 <code>400w</code>）指圖片的實際像素寬度，需要配合 <code>sizes</code> 讓瀏覽器計算最佳選擇，更靈活。<code>x</code> 描述符（如 <code>2x</code>）直接對應 DPR，適合固定尺寸的圖片（圖示、頭像），寫法更簡單。</p>
+      </details>
+      <details>
+        <summary>&lt;picture&gt; 元素和 srcset 有什麼不同？</summary>
+        <p><code>srcset</code> 讓瀏覽器自動選擇最合適的解析度版本。<code>&lt;picture&gt;</code> 讓開發者完全控制——可針對不同裝置提供完全不同的圖片（art direction），如手機顯示裁切版、桌機顯示全版，或提供 WebP 格式而舊瀏覽器退回 JPEG。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Retina 指 DPR &gt; 1 的高像素比螢幕，普通圖片在上面顯示會模糊。解法一是用 <span class="hl">srcset 提供多解析度版本</span>讓瀏覽器自動選最合適的，搭配 <code>sizes</code> 考慮視口寬度；解法二是<span class="hl">改用 SVG</span>，向量格式本來就不失真，是圖示的最佳選擇。避免始終提供最高解析度——行動裝置浪費流量，高解析度圖片在普通螢幕也沒有可見差異。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你為什麼會在圖片標籤中使用 `srcset` 屬性？請說明瀏覽器評估此屬性內容的過程。.html">srcset 屬性詳解</a>
+      <a href="你熟悉 SVG 的樣式設定嗎？.html">SVG 樣式設定</a>
+      <a href="什麼是漸進式渲染（progressive rendering）？.html">漸進式渲染</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

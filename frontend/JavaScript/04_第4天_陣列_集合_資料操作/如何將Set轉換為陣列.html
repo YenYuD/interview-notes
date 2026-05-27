@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set 轉陣列</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · Set</div>
+    <h1>Set 去重後，<em>一行轉回陣列</em></h1>
+    <p class="lede">Set 是集合，陣列才能用 map/filter/sort。轉換方式只有兩種：<b>展開運算子</b> <code>[...set]</code> 和 <b>Array.from(set)</b>，選哪個都對，差別在語境偏好。</p>
+  </header>
+
+  <section>
+    <span class="num">兩種寫法</span>
+    <h2>對比展開運算子與 Array.from()</h2>
+    <pre><code><span class="tok-key">const</span> s = <span class="tok-key">new</span> <span class="tok-fn">Set</span>([1, 2, 3, 2, 1]);
+
+<span class="tok-com">// 方式 1：展開運算子（更簡潔）</span>
+<span class="tok-key">const</span> arr1 = [...s];         <span class="tok-com">// [1, 2, 3]</span>
+
+<span class="tok-com">// 方式 2：Array.from()（語意更明確）</span>
+<span class="tok-key">const</span> arr2 = Array.<span class="tok-fn">from</span>(s);  <span class="tok-com">// [1, 2, 3]</span>
+
+<span class="tok-com">// 最常見的去重慣用法</span>
+<span class="tok-key">const</span> unique = [...<span class="tok-key">new</span> <span class="tok-fn">Set</span>(someArray)];</code></pre>
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p><code>Array.from()</code> 還支援第二個 <b>mapFn</b> 參數：<code>Array.from(set, x => x * 2)</code>，可以在轉換的同時做映射，比展開後再 map 少一次迭代。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實用場景</span>
+    <h2>去重的完整流程</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>原始陣列（含重複）</strong>
+          <code>[1, 2, 2, 3, 3, 3]</code>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>傳入 Set 自動去重</strong>
+          <code>new Set([1, 2, 2, 3, 3, 3])</code> → Set {1, 2, 3}
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>轉回陣列繼續操作</strong>
+          <code>[...new Set(...)]</code> → <code>[1, 2, 3]</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Set 轉陣列後，順序保證嗎？</summary><p>保證。Set 保留插入順序，轉換成陣列後元素順序和插入順序一致。</p></details>
+      <details><summary>可以從陣列直接轉回 Set 再轉回陣列嗎？效能如何？</summary><p>可以，但對大型陣列會建立兩個中間資料結構。一般業務場景無需擔心效能，資料量極大時可考慮用 filter + indexOf 或 reduce 手動去重。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「把 Set 轉成陣列有兩種方式：<span class="hl">展開運算子 <code>[...set]</code> 和 <code>Array.from(set)</code></span>，效果相同。最常見的應用是陣列去重：<code>[...new Set(arr)]</code>，一行搞定，比 filter + indexOf 更簡潔且效能更好。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Set與Map是什麼及其用法.html">Set 與 Map 用法</a>
+      <a href="展開運算子及其用法.html">展開運算子用法</a>
+      <a href="Set與Map如何判斷物件相等性.html">Set/Map 相等性判斷</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

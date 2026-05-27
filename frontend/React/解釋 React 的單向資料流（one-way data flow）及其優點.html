@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單向資料流</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 架構</div>
+    <h1>單向資料流：資料<em>只能往下傳</em>，訊息靠 callback 往上回</h1>
+    <p class="lede">React 的資料流是嚴格的<b>由上到下</b>：父組件透過 props 傳資料給子組件，子組件只能讀。若子組件需要「通知」父組件，就呼叫父組件傳下來的 <b>callback 函式</b>。這讓資料流<b>可預測、易追蹤</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">資料流方向</span>
+    <h2>Props 向下，Events 向上</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Parent</b> 持有 state（<code>data</code>），透過 props 往下傳，並把 <code>handleChange</code> callback 也傳下去</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Child</b> 從 props 讀取 <code>data</code>（唯讀），使用者操作時呼叫 <code>props.onChange(newValue)</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Parent</b> 的 <code>handleChange</code> 被觸發，更新自己的 state，React 重渲子組件</div>
+      </div>
+    </div>
+    <div class="callout info"><span class="ico">ℹ️</span><p>「資料往下，事件往上」是 React 單向資料流的核心口訣。這也是為什麼 React 和雙向綁定（Angular）的思維方式不同。</p></div>
+  </section>
+
+  <section>
+    <span class="num">優點</span>
+    <h2>為什麼單向比雙向好</h2>
+    <table>
+      <thead><tr><th>面向</th><th>單向（React）</th><th>雙向（ng1 style）</th></tr></thead>
+      <tbody>
+        <tr><td>可預測性</td><td>資料來源唯一，追蹤容易</td><td>任何層都能改狀態，難以追蹤</td></tr>
+        <tr><td>除錯</td><td>看 state 就知道 UI 會長什麼樣</td><td>連鎖更新難以重現</td></tr>
+        <tr><td>效能</td><td>React 可優化重渲策略</td><td>過度觸發更新</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>prop drilling 是什麼？如何解決？</summary><p>Prop drilling 是資料需要穿越多層中間組件才能到達目標子組件，中間層組件被迫傳遞不關心的 props。解法：Context API（避免逐層傳遞）或狀態管理工具（Redux、Zustand）。</p></details>
+      <details><summary>單向資料流和 Flux/Redux 有什麼關係？</summary><p>Flux 模式把單向資料流擴展到全域狀態管理層：所有狀態變更都必須透過 Action → Dispatcher → Store，而不是直接修改。Redux 繼承並簡化了這個模式。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 的單向資料流是：資料透過<span class="hl"> props 由父往子傳遞</span>，子組件只能讀取不能修改。子組件要影響父組件的狀態，只能呼叫父組件傳來的 callback 函式——『資料往下，事件往上』。好處是<span class="hl">資料來源唯一、行為可預測</span>，任何時刻都能透過 state 推導出 UI 長什麼樣，大幅降低除錯難度。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 State 和 Props 有什麼區別？.html">State vs Props</a>
+      <a href="Flux 模式（Flux pattern）是什麼？它有哪些優點？.html">Flux 模式</a>
+      <a href="你如何決定何時使用 React State、Context 或外部狀態管理工具？.html">State / Context 選擇</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

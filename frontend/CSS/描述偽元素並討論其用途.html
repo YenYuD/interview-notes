@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 偽元素</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 選擇器</div>
+    <h1><em>偽元素</em>：不加 HTML 也能插入視覺內容</h1>
+    <p class="lede">CSS <b>偽元素（pseudo-elements）</b>讓你在不修改 HTML 結構的前提下，對元素的特定部分設定樣式或插入裝飾內容。<b>::before</b>、<b>::after</b>、<b>::first-line</b> 是最常用的三個。</p>
+  </header>
+
+  <section>
+    <span class="num">常見偽元素</span>
+    <h2>四個最實用的偽元素</h2>
+    <table>
+      <thead>
+        <tr><th>偽元素</th><th>用途</th><th>典型應用</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>::before</code></td><td>在元素內容前插入生成內容</td><td>裝飾符號、工具提示箭頭</td></tr>
+        <tr><td><code>::after</code></td><td>在元素內容後插入生成內容</td><td>clearfix、引號裝飾</td></tr>
+        <tr><td><code>::first-line</code></td><td>段落第一行的樣式</td><td>排版裝飾</td></tr>
+        <tr><td><code>::first-letter</code></td><td>段落第一個字母的樣式</td><td>書籍首字放大</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">/* Clearfix：用 ::after 清除浮動 */</span>
+<span class="tok-key">.clearfix::after</span> {
+  content: <span class="tok-str">''</span>;
+  display: block;
+  clear: both;
+}
+
+<span class="tok-com">/* 工具提示的三角箭頭（不需要額外 HTML） */</span>
+<span class="tok-key">.tooltip::after</span> {
+  content: <span class="tok-str">''</span>;
+  border: 6px solid transparent;
+  border-top-color: <span class="tok-str">#333</span>;
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: <span class="tok-fn">translateX</span>(-50%);
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">偽元素 vs 偽類別</span>
+    <h2>常被混淆的差別</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>偽元素 :: 雙冒號</small>
+        針對元素的「某個部分」或插入生成內容：<code>::before</code>、<code>::after</code>、<code>::first-line</code>
+      </div>
+      <div class="chip info">
+        <small>偽類別 : 單冒號</small>
+        根據元素的「狀態」選取：<code>:hover</code>、<code>:focus</code>、<code>:nth-child()</code>
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>CSS3 規範才區分雙冒號（偽元素）和單冒號（偽類別）。為相容舊瀏覽器，舊有的 <code>:before</code>、<code>:after</code> 單冒號寫法大多數瀏覽器仍支援，但新程式碼應用 <code>::</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>::before 和 ::after 需要 content 屬性嗎？</summary>
+        <p>是的，<code>::before</code> 和 <code>::after</code> 必須有 <code>content</code> 屬性（即使設為空字串 <code>content: ''</code>）才會在 DOM 中生成元素。缺少 <code>content</code> 則偽元素不存在，其他樣式也無效。</p>
+      </details>
+      <details>
+        <summary>偽元素生成的內容在 DOM 中嗎？</summary>
+        <p>不在標準 DOM 中（無法用 JavaScript querySelector 選取），但存在於渲染樹中，對螢幕閱讀器通常不可見（除非特別設定）。這就是為什麼它適合純裝飾用途，而非有語意的內容。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「偽元素讓我在不修改 HTML 的情況下，對元素特定部分設定樣式或插入裝飾內容。最常用的是 <span class="hl"><code>::before</code> 和 <code>::after</code></span>，需要 <code>content</code> 屬性才生效。實際用途包括 <span class="hl">clearfix</span>（<code>::after</code> 加 <code>clear: both</code>）、工具提示的三角箭頭等——這些視覺裝飾不需要在 HTML 中加 div，保持了結構與樣式的關注點分離。注意偽元素用雙冒號 <code>::</code>，偽類別（<code>:hover</code>）用單冒號。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="描述 `float` 及其運作方式.html">float 與 clearfix</a>
+      <a href="什麼是 CSS 選擇器的特異性（specificity），它如何運作？.html">CSS 選擇器特異性</a>
+      <a href="有哪些清除浮動的技術，各自適合什麼情境？.html">清除浮動技術</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

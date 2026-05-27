@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJAX 完整說明</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>AJAX 完整解析：<em>非同步資料交換</em>如何讓頁面不再閃爍重載</h1>
+    <p class="lede">AJAX 讓網頁在背景和伺服器交換資料，現在幾乎都用 <b>fetch() API</b> 實作。理解整個流程——從請求到事件迴圈——能讓你在面試中展現深度。</p>
+  </header>
+
+  <section>
+    <span class="num">AJAX 運作流程</span>
+    <h2>fetch() 的六個步驟</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>發出請求</b>：<code>fetch(url, options)</code> 啟動非同步 HTTP 請求</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>回傳 Promise</b>：主執行緒繼續執行，不阻塞 UI</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>收到回應</b>：resolve 後得到 Response 物件</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>解析資料</b>：<code>response.json()</code> / <code>response.text()</code> 等</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>更新 UI</b>：操作 DOM 顯示資料</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>錯誤處理</b>：<code>.catch()</code> 處理網路失敗（注意 HTTP 錯誤不會 reject）</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">fetch() 完整範例</span>
+    <h2>包含正確錯誤處理</h2>
+    <pre><code><span class="tok-key">async function</span> <span class="tok-fn">loadUser</span>(id) {
+  <span class="tok-key">try</span> {
+    <span class="tok-key">const</span> res = <span class="tok-key">await</span> fetch(<span class="tok-str">`/api/users/${id}`</span>);
+
+    <span class="tok-key">if</span> (!res.ok) {             <span class="tok-com">// 必須手動檢查 HTTP 狀態</span>
+      <span class="tok-key">throw new</span> Error(<span class="tok-str">`Error: ${res.status}`</span>);
+    }
+
+    <span class="tok-key">const</span> user = <span class="tok-key">await</span> res.json();
+    renderUser(user);          <span class="tok-com">// 更新 UI</span>
+  } <span class="tok-key">catch</span> (err) {
+    console.error(<span class="tok-str">'Failed:'</span>, err);
+  }
+}</code></pre>
+    <div class="aside">
+      <p>fetch() 的 then/catch 回調在<b>事件迴圈的微任務佇列</b>中執行，優先於 setTimeout 等巨任務，保證回應後及時更新 UI。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>AJAX 如何處理競態條件（Race Condition）？</summary>
+        <p>使用者快速連點觸發多次請求時，舊請求的回應可能比新請求晚到。解法：AbortController 取消舊請求，或用變數追蹤最新請求的 ID，只處理最新的回應。</p>
+      </details>
+      <details>
+        <summary>AJAX 和 SPA（單頁應用程式）有什麼關係？</summary>
+        <p>SPA 的核心就是 AJAX——頁面載入一次後，所有資料都透過 AJAX 取得，再由前端路由（pushState）管理 URL，完全不重新載入頁面。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「AJAX 是讓頁面在背景和伺服器交換資料的技術，現代實作用 fetch()。流程是：呼叫 fetch() 回傳 Promise，主執行緒不阻塞，回應後解析資料再更新 DOM。兩個重點：<span class="hl">fetch() 在 HTTP 錯誤時不會 reject，要手動檢查 response.ok</span>；多個並發請求要考慮競態條件，必要時用 AbortController 取消過期的請求。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="AJAX的優缺點.html">AJAX 優缺點</a>
+      <a href="使用Fetch API發送HTTP請求.html">Fetch API 用法</a>
+      <a href="XMLHttpRequest與fetch在JavaScript與瀏覽器中的差異.html">XHR vs fetch() 比較</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

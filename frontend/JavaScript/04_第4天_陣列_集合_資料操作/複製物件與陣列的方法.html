@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>複製物件與陣列的方法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 複製</div>
+    <h1>淺拷貝一行搞定，<em>深拷貝要選對工具</em></h1>
+    <p class="lede">複製物件或陣列時，最重要的問題是：你需要<b>淺拷貝</b>（只複製第一層）還是<b>深拷貝</b>（完整獨立複製）？選錯工具，巢狀資料改了會互相影響。</p>
+  </header>
+
+  <section>
+    <span class="num">淺拷貝</span>
+    <h2>展開運算子 vs Object.assign()</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>推薦：展開運算子</small>
+        <code>[...arr]</code> / <code>{ ...obj }</code>
+      </div>
+      <div class="chip info">
+        <small>傳統：Object.assign</small>
+        <code>Object.assign({}, obj)</code>
+      </div>
+    </div>
+    <pre><code><span class="tok-key">const</span> obj = { a: 1, b: { c: 2 } };
+
+<span class="tok-key">const</span> shallow = { ...obj };
+shallow.a = 99;        <span class="tok-com">// ✅ 不影響 obj.a</span>
+shallow.b.c = 99;      <span class="tok-com">// ❌ 影響 obj.b.c（同參考！）</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">深拷貝</span>
+    <h2>三種選擇，各有限制</h2>
+    <table>
+      <thead><tr><th>方法</th><th>支援循環參考</th><th>支援函式/undefined</th><th>備註</th></tr></thead>
+      <tbody>
+        <tr><td><code>structuredClone()</code></td><td>✅</td><td>❌</td><td>原生 API，現代環境推薦</td></tr>
+        <tr><td><code>JSON.parse(JSON.stringify())</code></td><td>❌（會出錯）</td><td>❌（被忽略）</td><td>簡單資料的快速方法</td></tr>
+        <tr><td><code>_.cloneDeep()</code>（Lodash）</td><td>✅</td><td>✅</td><td>最完整，需引入函式庫</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">// 現代推薦：structuredClone</span>
+<span class="tok-key">const</span> deep = <span class="tok-fn">structuredClone</span>(obj);
+deep.b.c = 99; <span class="tok-com">// ✅ 完全不影響 obj</span></code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><code>JSON.parse(JSON.stringify())</code> 遇到 <code>undefined</code>、函式、<code>Date</code>（轉字串）、循環參考（報錯）會出問題。現代環境優先用 <code>structuredClone()</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>structuredClone() 有哪些限制？</summary><p>不能複製函式、DOM 節點、Error 物件（部分）等；支援 Date、RegExp、Map、Set、ArrayBuffer 等。Node.js 17+ 和現代瀏覽器都有原生支援。</p></details>
+      <details><summary>陣列有哪些內建的淺拷貝方法？</summary><p><code>[...arr]</code>、<code>arr.slice()</code>、<code>Array.from(arr)</code>、<code>[].concat(arr)</code> 都是淺拷貝。<code>arr.slice()</code> 是最傳統的寫法。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「淺拷貝我用展開運算子 <code>{ ...obj }</code> 或 <code>[...arr]</code>，簡潔且語意清晰。深拷貝優先用 <span class="hl">structuredClone()</span>，原生 API 支援循環參考；如果要相容舊環境或需要處理函式，用 Lodash 的 <code>_.cloneDeep</code>。<code>JSON.parse(JSON.stringify())</code> 只在資料純粹（無函式、無循環）時才用。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="淺拷貝與深拷貝差異說明.html">淺拷貝與深拷貝差異</a>
+      <a href="展開運算子及其用法.html">展開運算子用法</a>
+      <a href="使用展開運算子於陣列與物件的優勢.html">展開運算子優勢</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

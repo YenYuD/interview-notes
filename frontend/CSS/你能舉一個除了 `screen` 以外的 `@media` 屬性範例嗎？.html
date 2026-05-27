@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@media 媒體類型</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 媒體查詢</div>
+    <h1><em>@media</em> 不只有 screen：四種媒體類型的完整圖像</h1>
+    <p class="lede"><b>@media</b> 查詢不只用於響應式版面斷點。它支援四種媒體類型，讓樣式能針對不同輸出裝置（印表機、螢幕閱讀器）分別定義，是無障礙設計的重要工具。</p>
+  </header>
+
+  <section>
+    <span class="num">四種媒體類型</span>
+    <h2>@media 的完整分類</h2>
+    <table>
+      <thead>
+        <tr><th>類型</th><th>適用裝置</th><th>常見用途</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>screen</code></td><td>螢幕（電腦、平板、手機）</td><td>響應式斷點、暗色模式</td></tr>
+        <tr><td><code>print</code></td><td>印表機</td><td>隱藏導覽列、調整字體為黑色</td></tr>
+        <tr><td><code>speech</code></td><td>螢幕閱讀器（語音朗讀）</td><td>針對語音輸出調整內容</td></tr>
+        <tr><td><code>all</code></td><td>所有裝置（預設值）</td><td>通用樣式（不指定類型時即為 all）</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">/* print：隱藏不需要印出的元素 */</span>
+<span class="tok-key">@media print</span> {
+  <span class="tok-key">.topbar, .nav, footer</span> { display: none; }
+  <span class="tok-key">body</span> { color: black; font-size: 12pt; }
+  <span class="tok-key">a::after</span> { content: <span class="tok-str">" ("</span> attr(href) <span class="tok-str">")"</span>; }
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">現代媒體特性</span>
+    <h2>不只是類型：媒體特性查詢</h2>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>現代 @media 更常用<strong>媒體特性（media features）</strong>而非類型，如 <code>prefers-color-scheme</code>（暗色模式）、<code>prefers-reduced-motion</code>（減少動態效果）、<code>min-width</code>（斷點）。</p>
+    </div>
+    <pre><code><span class="tok-com">/* 暗色模式 */</span>
+<span class="tok-key">@media</span> (prefers-color-scheme: dark) {
+  <span class="tok-key">body</span> { background: <span class="tok-str">#1a1a1a</span>; color: <span class="tok-str">#eee</span>; }
+}
+
+<span class="tok-com">/* 減少動態效果（無障礙） */</span>
+<span class="tok-key">@media</span> (prefers-reduced-motion: reduce) {
+  <span class="tok-key">*</span> { animation: none !important; transition: none !important; }
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>@media print 有哪些常見的實用技巧？</summary>
+        <p>1. 隱藏導覽列、按鈕、廣告；2. 展開所有 details 元素（<code>details { display: block; }</code>）；3. 顯示連結完整 URL（<code>a::after { content: " (" attr(href) ")" }</code>）；4. 避免標題和內文分頁（<code>h2 { page-break-after: avoid; }</code>）。</p>
+      </details>
+      <details>
+        <summary>@media 查詢可以組合嗎？</summary>
+        <p>可以。用 <code>and</code> 組合條件：<code>@media screen and (min-width: 768px)</code>；用 <code>,</code>（等同 or）：<code>@media screen, print</code>；用 <code>not</code> 否定：<code>@media not print</code>。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「@media 有四種類型：<code>screen</code>（螢幕）、<span class="hl"><code>print</code>（印表機）</span>、<code>speech</code>（螢幕閱讀器）、<code>all</code>（全部）。<code>print</code> 最實用：可以隱藏導覽列、設黑色字體、加顯連結 URL，讓頁面印出來好看。除了媒體類型，現代更常用<span class="hl">媒體特性查詢</span>，如 <code>prefers-color-scheme: dark</code> 支援暗色模式、<code>prefers-reduced-motion</code> 照顧前庭障礙用戶，這些都是無障礙設計的標準做法。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你曾使用或實作過媒體查詢或行動裝置專屬的版面 CSS 嗎？.html">媒體查詢實作經驗</a>
+      <a href="你能解釋響應式網站開發與行動優先策略之間的差異嗎？.html">響應式開發 vs 行動優先</a>
+      <a href="How is responsive design different from adaptive design?.html">響應式 vs 自適應設計</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

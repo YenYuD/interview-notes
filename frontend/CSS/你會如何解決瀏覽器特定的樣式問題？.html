@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>解決瀏覽器特定的樣式問題</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 跨瀏覽器</div>
+    <h1>瀏覽器特定 CSS 問題的<em>系統化解法</em></h1>
+    <p class="lede">遇到瀏覽器特定樣式問題，解法有從治本到治標的多個層次：優先選擇<b>工具自動處理</b>，再考慮<b>框架/重置</b>，最後才用<b>針對性 hack</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">解決策略</span>
+    <h2>由通用到針對性的解法</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>Autoprefixer</strong>（建置工具層）
+          自動加入 <code>-webkit-</code>、<code>-moz-</code> 等廠商前綴，不需要手動追蹤各屬性的前綴需求
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>Normalize.css / CSS Reset</strong>（基礎樣式層）
+          消除瀏覽器預設樣式差異，是最廣泛的防範手段
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>Bootstrap 等框架</strong>
+          已在內部處理大量跨瀏覽器問題，使用框架可直接繼承這些修正
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>PostCSS + 轉換外掛</strong>
+          使用現代 CSS 語法，PostCSS 自動轉換為各目標瀏覽器的相容語法
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>瀏覽器特定樣式表</strong>（最後手段）
+          確認問題所在瀏覽器後，用伺服器端渲染針對該瀏覽器載入特定樣式表
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">現代工作流</span>
+    <h2>建置工具層自動化</h2>
+    <pre><code><span class="tok-com">/* 你寫的 CSS */</span>
+<span class="tok-key">.box</span> {
+  display: flex;
+  user-select: none;
+}
+
+<span class="tok-com">/* Autoprefixer 輸出 */</span>
+<span class="tok-key">.box</span> {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-user-select: none;
+  user-select: none;
+}</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>現代工作流配合 <code>.browserslistrc</code> 或 <code>package.json</code> 的 <code>"browserslist"</code> 設定，Autoprefixer 和 Babel 都會根據目標瀏覽器範圍自動決定需要哪些轉換，不需要手動管理。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>如何確認是哪個瀏覽器的問題？</summary>
+        <p>1. 在各瀏覽器開發者工具中比較元素的計算樣式（Computed Styles）；2. 用 BrowserStack 或 LambdaTest 做跨瀏覽器測試；3. 查 caniuse.com 確認該屬性在問題瀏覽器的支援狀況；4. 搜尋「CSS 屬性名 + 瀏覽器名 + bug」通常能找到已知問題。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「解決瀏覽器特定樣式問題，我會先從通用工具開始：<span class="hl">Autoprefixer</span> 自動加廠商前綴、<span class="hl">Normalize.css</span> 消除預設樣式差異，這兩層能防範大多數常見問題。已知問題可以查 caniuse.com 確認支援情況，再決定是否需要 polyfill 或備用寫法。必要時用 <span class="hl">CSS @supports 功能查詢</span>做條件樣式，比 UA 偵測可靠。只有在非常特殊的瀏覽器專屬 bug 時，才考慮針對性樣式表。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="How do you serve your pages for feature-constrained browsers?.html">為功能受限瀏覽器提供頁面</a>
+      <a href="重置和標準化 CSS 有什麼差別？你會選擇哪個，為什麼？.html">CSS Reset vs Normalize</a>
+      <a href="功能偵測、功能推斷和使用 UA 字串有什麼差別？.html">功能偵測 vs UA 字串</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

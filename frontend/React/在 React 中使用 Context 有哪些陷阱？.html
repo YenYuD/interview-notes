@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context 的陷阱</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT CONTEXT</div>
+    <h1>Context 不是免費的：<em>任何變動都讓所有 consumer 重渲</em></h1>
+    <p class="lede">Context 很方便，但被頻繁更新的值放進去，會讓所有使用 <code>useContext</code> 的組件<b>全部重新渲染</b>，即使它們只用到 Context 裡的一小部分。用前先評估是否合適。</p>
+  </header>
+
+  <section>
+    <span class="num">核心問題</span>
+    <h2>Context 值一變，所有 consumer 都重渲</h2>
+    <pre><code><span class="tok-com">// 每次 ParentComponent 的 count 變，ChildA 也重渲</span>
+<span class="tok-com">// 即使 ChildA 只用到 user，跟 count 無關</span>
+<span class="tok-key">const</span> ctx = { user, count };
+&lt;MyContext.Provider value={ctx}&gt;
+  &lt;ChildA /&gt;  <span class="tok-com">// useContext(MyContext) → 用到 user</span>
+  &lt;ChildB /&gt;  <span class="tok-com">// useContext(MyContext) → 用到 count</span>
+&lt;/MyContext.Provider&gt;</code></pre>
+  </section>
+
+  <section>
+    <span class="num">三種緩解策略</span>
+    <h2>如何減少不必要的重渲</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>拆分 Context</b>：把 <code>UserContext</code> 和 <code>CountContext</code> 分開，各自 consume 各自關心的。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>useMemo 記憶 Context 值</b>：<code>const value = useMemo(() =&gt; ({ state, dispatch }), [state])</code>，避免物件引用每次重建。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>use-context-selector</b>：第三方函式庫，讓你只訂閱 Context 的某個欄位，類似 Redux 的 selector。</div>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>Context 最適合頻率低的全域資料，如主題（theme）、語系（locale）、登入狀態。頻繁變動的資料（如表單輸入、游標位置）應考慮 Zustand、Jotai 等外部工具。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Context.Provider 的 value 用物件時為何每次都重渲？</summary><p>每次渲染 Provider 的父組件時，<code>value={{ user, count }}</code> 都建立新的物件引用，即使值相同。React 比較的是引用相等性（===），所以每次都判定「值改變了」。解法：用 <code>useMemo</code>。</p></details>
+      <details><summary>什麼時候應該放棄 Context，改用 Redux 或 Zustand？</summary><p>當 Context 的更新頻率高（如即時狀態）、需要 selector 細粒度訂閱、或需要 middleware（logger、thunk）時，外部狀態管理工具更合適。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Context 的主要陷阱是<span class="hl">值改變時所有 consumer 全部重渲</span>，即使組件只用到其中一小部分。緩解方式有：拆分 Context（按更新頻率分開）、用 useMemo 記憶 Provider 的 value 物件、或引入 use-context-selector。Context 最適合低頻全域資料（主題、登入狀態），頻繁更新的資料要考慮 Zustand 等外部工具。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何優化 React Context 的效能以減少重新渲染？.html">優化 Context 效能</a>
+      <a href="你如何決定何時使用 React State、Context 或外部狀態管理工具？.html">State / Context / 外部工具選擇</a>
+      <a href="React 中的 `useMemo` hook 是什麼？什麼時候應該使用它？.html">useMemo</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

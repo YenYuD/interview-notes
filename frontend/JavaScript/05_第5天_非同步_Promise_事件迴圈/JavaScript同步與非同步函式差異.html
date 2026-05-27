@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同步與非同步函式</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · 執行模型</div>
+    <h1>阻塞還是讓行？<em>同步與非同步</em>的根本差異</h1>
+    <p class="lede">同步程式碼排隊等、一個跑完才跑下一個；非同步程式碼<b>把耗時任務交出去，主執行緒繼續忙</b>，等結果回來再處理。這是理解整個 JS 非同步體系的起點。</p>
+  </header>
+
+  <section>
+    <span class="num">核心對比</span>
+    <h2>同步 vs 非同步</h2>
+    <table>
+      <tr><th></th><th>同步（Synchronous）</th><th>非同步（Asynchronous）</th></tr>
+      <tr><td>執行方式</td><td>逐行，等前一步完成</td><td>發出後繼續執行，完成時回呼</td></tr>
+      <tr><td>主執行緒</td><td>被阻塞</td><td>不阻塞，繼續執行</td></tr>
+      <tr><td>適用場景</td><td>CPU 計算、資料轉換</td><td>網路請求、檔案 I/O、計時器</td></tr>
+      <tr><td>問題</td><td>長時間操作會凍結 UI</td><td>結果順序不可預期，需明確處理</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">執行順序</span>
+    <h2>非同步的「輸出順序」讓人意外</h2>
+    <pre><code>console.<span class="tok-fn">log</span>(<span class="tok-str">'A'</span>);                  <span class="tok-com">// 同步：立刻印</span>
+
+<span class="tok-fn">setTimeout</span>(() => {
+  console.<span class="tok-fn">log</span>(<span class="tok-str">'B'</span>);               <span class="tok-com">// 非同步：進巨任務佇列</span>
+}, 0);
+
+Promise.<span class="tok-fn">resolve</span>().<span class="tok-fn">then</span>(() => {
+  console.<span class="tok-fn">log</span>(<span class="tok-str">'C'</span>);               <span class="tok-com">// 非同步：進微任務佇列</span>
+});
+
+console.<span class="tok-fn">log</span>(<span class="tok-str">'D'</span>);                  <span class="tok-com">// 同步：立刻印</span>
+<span class="tok-com">// 輸出：A → D → C → B</span></code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>記住優先順序：<b>同步 → 微任務（Promise）→ 巨任務（setTimeout）</b>。面試最常考這道題的輸出順序。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">為何需要非同步</span>
+    <h2>瀏覽器只有一條主執行緒</h2>
+    <p>JS 在瀏覽器中是單執行緒：JS 執行期間，畫面渲染、使用者點擊全部暫停。若用同步方式等待 API 回應，使用者會看到「卡頓」甚至「無回應」。</p>
+    <div class="chips">
+      <div class="chip bad">
+        <small>同步阻塞（危險）</small>
+        讀取大型資料時 UI 凍結，使用者無法點擊任何東西。
+      </div>
+      <div class="chip good">
+        <small>非同步非阻塞（正確）</small>
+        把 I/O 交給瀏覽器 Web API，主執行緒繼續處理 UI，完成後再把回呼排入佇列。
+      </div>
+    </div>
+    <div class="aside">async 函式<b>不是</b>在不同執行緒執行——它仍在主執行緒上，只是透過事件迴圈讓出控制權。真正的平行處理需要 Web Workers。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>async 函式是「真的非同步」嗎？</summary>
+        <p>async 函式的<b>同步部分</b>仍在主執行緒同步執行，直到遇到第一個 await 才讓出控制。讓出後，await 後面的程式碼進入微任務佇列，等 Promise resolved 才繼續。</p>
+      </details>
+      <details>
+        <summary>如何在 JS 實現真正的平行（parallel）？</summary>
+        <p>使用 <b>Web Workers</b>（瀏覽器）或 <b>Worker Threads</b>（Node.js）——它們在獨立執行緒運行，透過 postMessage 與主執行緒通訊，適合 CPU 密集型計算。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「同步函式會阻塞主執行緒，前一步完成才執行下一步；非同步函式把耗時操作交給瀏覽器 Web API，<span class="hl">主執行緒繼續執行</span>，完成後透過事件迴圈把回呼排入佇列。JS 是單執行緒，若用同步方式等待 I/O，UI 會凍結。所以網路請求、計時器都應該非同步處理，用 <span class="hl">Promise 或 async/await</span> 管理結果。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript事件迴圈介紹.html">事件迴圈介紹</a>
+      <a href="微任務佇列概念解析.html">微任務佇列</a>
+      <a href="非同步操作中的回呼函式概念.html">回呼函式概念</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

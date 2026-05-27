@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>preventDefault vs stopPropagation</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1><em>preventDefault</em> 阻止預設行為，<em>stopPropagation</em> 阻止傳播</h1>
+    <p class="lede">兩個方法解決不同的問題：<code>preventDefault()</code> 讓瀏覽器<b>不執行元素的預設動作</b>；<code>stopPropagation()</code> 讓事件<b>不再往上（或往下）傳播</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">差異對照</span>
+    <h2>一個管「預設行為」，一個管「事件傳播」</h2>
+    <table>
+      <thead><tr><th>方法</th><th>作用</th><th>常見使用情境</th></tr></thead>
+      <tbody>
+        <tr><td><code>preventDefault()</code></td><td>阻止瀏覽器的預設行為</td><td>阻止表單送出、阻止連結跳轉、阻止右鍵選單</td></tr>
+        <tr><td><code>stopPropagation()</code></td><td>阻止事件繼續冒泡（或捕獲）</td><td>防止父元素的監聽器被意外觸發</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">範例對比</span>
+    <h2>分別處理不同問題</h2>
+    <pre><code><span class="tok-com">// preventDefault：阻止表單送出，自行處理</span>
+form.addEventListener(<span class="tok-str">'submit'</span>, (e) => {
+  e.preventDefault();       <span class="tok-com">// 不送出，自己用 fetch() 處理</span>
+  sendData(new FormData(form));
+});
+
+<span class="tok-com">// stopPropagation：阻止點擊事件冒泡到父層</span>
+modal.addEventListener(<span class="tok-str">'click'</span>, (e) => {
+  e.stopPropagation();      <span class="tok-com">// 防止觸發外層的「點擊關閉 modal」邏輯</span>
+});
+
+document.addEventListener(<span class="tok-str">'click'</span>, () => closeModal());</code></pre>
+    <div class="callout info">
+      <span class="ico">ℹ</span>
+      <p>兩個方法可以同時呼叫，各自獨立不互相影響。另有 <code>stopImmediatePropagation()</code>，連<b>同層的其他監聽器</b>也一併阻止。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+        <details>
+          <summary>return false 等同於什麼？</summary>
+          <p>在 jQuery 的事件處理中，<code>return false</code> 同時執行 <code>preventDefault()</code> 和 <code>stopPropagation()</code>。但在原生 addEventListener 中，<code>return false</code> <b>沒有任何效果</b>，要明確呼叫方法。</p>
+        </details>
+        <details>
+          <summary>passive 事件監聽器是什麼？</summary>
+          <p>加上 <code>{ passive: true }</code> 告知瀏覽器此監聽器不會呼叫 <code>preventDefault()</code>，讓瀏覽器可以提前進行捲動優化，改善滾動效能。</p>
+        </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「兩個方法解決不同問題：<span class="hl">preventDefault()</span> 阻止元素的預設行為，例如阻止 a 標籤跳轉或表單送出；<span class="hl">stopPropagation()</span> 阻止事件繼續冒泡，防止父元素的監聽器被意外觸發。最常見的組合用法是 Modal：點擊 modal 內部時 stopPropagation，防止觸發外層的關閉邏輯。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript事件冒泡與瀏覽器行為.html">事件冒泡說明</a>
+      <a href="如何阻止事件的預設行為.html">如何阻止預設行為</a>
+      <a href="JavaScript事件代理說明.html">事件代理說明</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

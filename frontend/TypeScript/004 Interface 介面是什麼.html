@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interface 介面</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>Interface 是資料結構的<em>契約</em>，不是實作</h1>
+    <p class="lede">Interface 描述一個物件「應該長什麼樣子」，不包含任何執行邏輯。<b>它是 TypeScript 最常用的結構化型別工具</b>，讓函式、class、物件之間能共享同一份形狀定義。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>基本語法與可選屬性</h2>
+    <pre><code><span class="tok-key">interface</span> User {
+  name: <span class="tok-fn">string</span>;
+  age: <span class="tok-fn">number</span>;
+  email?: <span class="tok-fn">string</span>; <span class="tok-com">// ? 表示 optional</span>
+}
+
+<span class="tok-key">const</span> user: User = {
+  name: <span class="tok-str">"Bob"</span>,
+  age: 20,
+  <span class="tok-com">// email 省略也 OK</span>
+};
+
+<span class="tok-com">// Interface 也能描述函式形狀</span>
+<span class="tok-key">interface</span> Formatter {
+  (value: <span class="tok-fn">string</span>): <span class="tok-fn">string</span>;
+}
+<span class="tok-key">const</span> toUpper: Formatter = (v) =&gt; v.toUpperCase();</code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>interface vs type alias：什麼時候選誰</h2>
+    <table>
+      <thead><tr><th></th><th><code>interface</code></th><th><code>type</code></th></tr></thead>
+      <tbody>
+        <tr><td>擴充方式</td><td><code>extends</code>（可重複宣告合併）</td><td><code>&amp;</code> 交叉型別</td></tr>
+        <tr><td>可以描述</td><td>物件、函式、class</td><td>物件、函式、union、primitive</td></tr>
+        <tr><td>重複宣告</td><td>✅ 自動合併（Declaration Merging）</td><td>❌ 報錯</td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>一般規則：<b>物件形狀用 interface，需要 union 或複雜組合用 type</b>。兩者在大多數場景可互換，但 interface 的 Declaration Merging 特性在定義公開 API 時非常有用。</p></div>
+    <pre><code><span class="tok-com">// Declaration Merging — 兩個同名 interface 自動合併</span>
+<span class="tok-key">interface</span> User { name: <span class="tok-fn">string</span>; }
+<span class="tok-key">interface</span> User { age: <span class="tok-fn">number</span>; }
+<span class="tok-com">// 結果等同 { name: string; age: number }</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>interface 的 extends 可以擴充多個嗎？</summary><p>可以，<code>interface Admin extends User, Serializable { ... }</code>，這是 interface 比 class extends 更靈活的地方——class 只能單繼承，interface 可以多 extends。</p></details>
+      <details><summary>什麼是 Declaration Merging？實際用在哪？</summary><p>同名 interface 宣告會自動合併。常見用途：擴充第三方套件的型別定義（如為 Express 的 <code>Request</code> 加上自訂欄位），不需要修改原始定義。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Interface 是 TypeScript 用來<span class="hl">描述物件形狀的契約</span>，只定義有哪些屬性和型別，不包含實作。它的核心優勢是 Declaration Merging——同名 interface 自動合併，適合定義公開 API 或擴充第三方套件型別。與 type alias 的差異在於：<span class="hl">物件形狀優先用 interface，需要 union 或 primitive 才用 type</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="005 從現有 Interface 建立子集型別（Omit、Pick）.html">Omit、Pick 子集型別</a>
+      <a href="016 extends vs implements 的差異.html">extends vs implements</a>
+      <a href="018 Abstract Class 抽象類別.html">Abstract Class</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

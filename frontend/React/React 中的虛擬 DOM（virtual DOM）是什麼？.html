@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>虛擬 DOM</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 核心</div>
+    <h1>虛擬 DOM：React 用<em>記憶體快照</em>決定「最少要動哪裡」</h1>
+    <p class="lede">直接操作真實 DOM 代價高昂。React 在記憶體中維護一棵<b>虛擬 DOM 樹</b>，狀態改變時先比對新舊兩棵樹（diffing），算出最小變更集，再一次性套用到真實 DOM。</p>
+  </header>
+
+  <section>
+    <span class="num">流程</span>
+    <h2>從 setState 到畫面更新的四個步驟</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>觸發</b>：state 或 props 改變</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>渲染（Render）</b>：React 建立新的虛擬 DOM 樹</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>比對（Diffing）</b>：演算法比對新舊虛擬 DOM，找出差異</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>提交（Commit）</b>：僅更新真實 DOM 中發生變化的部分</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">優點與限制</span>
+    <h2>虛擬 DOM 不是萬能的</h2>
+    <div class="chips">
+      <div class="chip good"><small>優點</small>批量更新、最小化 DOM 操作；開發者不需手動操作 DOM</div>
+      <div class="chip good"><small>優點</small>抽象層讓跨平台成為可能（React Native）</div>
+      <div class="chip bad"><small>限制</small>比 vanilla JS 直接操作目標 DOM 多一層計算開銷</div>
+      <div class="chip bad"><small>限制</small>極度頻繁的更新場景，虛擬 DOM diffing 本身也有成本</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>虛擬 DOM 和 Shadow DOM 是一樣的嗎？</summary><p>完全不同。虛擬 DOM 是 React 等函式庫的 JS 技術，在記憶體中比對 UI 差異。Shadow DOM 是瀏覽器原生 API，用於 Web Components 的樣式和結構隔離。</p></details>
+      <details><summary>key 在 diffing 時有什麼作用？</summary><p>diffing 演算法預設用位置比對同層節點。加 <code>key</code> 讓 React 用 identity 而非 position 比對，清單重排時能正確識別節點，避免狀態錯位。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「虛擬 DOM 是 React 在記憶體中維護的 UI 輕量表示。狀態改變時，React 建立新的虛擬 DOM 樹並與舊樹 <span class="hl">diffing 比對</span>，算出最小變更集，最後一次性套用到真實 DOM——稱為協調（reconciliation）。好處是批量、高效地更新 DOM，開發者只需宣告式描述 UI，不用手動操作 DOM。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的「協調」（reconciliation）是什麼？.html">Reconciliation</a>
+      <a href="React Fiber 是什麼？它如何改進先前的做法？.html">React Fiber</a>
+      <a href="React 中 `key` prop 的用途是什麼？.html">key prop</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

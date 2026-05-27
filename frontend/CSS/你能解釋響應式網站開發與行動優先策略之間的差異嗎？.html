@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>響應式開發 vs 行動優先策略</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 響應式設計</div>
+    <h1>響應式是目標，行動優先是<em>撰寫策略</em></h1>
+    <p class="lede"><b>響應式設計</b>讓網站在不同裝置都能正常顯示；<b>行動優先（Mobile First）</b>是撰寫媒體查詢的策略——先定義行動端樣式，再用 <code>min-width</code> 往上覆蓋。兩者互補，不互斥。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>桌機優先 vs 行動優先的寫法差異</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>桌機優先（Desktop First）</small>
+        先寫桌機樣式，用 max-width 針對小螢幕覆蓋——行動端需要「撤銷」許多桌機樣式
+      </div>
+      <div class="chip good">
+        <small>行動優先（Mobile First）</small>
+        先寫行動端樣式作為預設，用 min-width 往上「增加」桌機功能——更乾淨
+      </div>
+    </div>
+    <pre><code><span class="tok-com">/* 行動優先：預設是行動端樣式 */</span>
+<span class="tok-key">.title</span> {
+  font-size: 1.2rem;  <span class="tok-com">/* 行動端預設 */</span>
+}
+
+<span class="tok-key">@media</span> (min-width: 768px) {
+  <span class="tok-key">.title</span> {
+    font-size: 2rem;  <span class="tok-com">/* 平板/桌機覆蓋 */</span>
+  }
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">優點分析</span>
+    <h2>為什麼行動優先更好</h2>
+    <table>
+      <thead>
+        <tr><th>維度</th><th>行動優先</th><th>桌機優先</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>行動效能</td><td>行動端只解析需要的 CSS，不觸發多餘媒體查詢</td><td>行動端需要解析桌機 CSS 再被覆蓋</td></tr>
+        <tr><td>可用性降級</td><td>無論視口多大，基礎內容都可用</td><td>小視口可能遺漏重要功能</td></tr>
+        <tr><td>CSS 複雜度</td><td>往上「加功能」，邏輯清晰</td><td>往下「撤銷功能」，容易出現殘留樣式</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>行動優先的缺點是什麼？</summary>
+        <p>如果網站確實以桌機為主要使用場景（如複雜的企業管理工具），強制從行動端思考可能讓設計更複雜。此外，部分桌機功能（如 hover 效果、多欄版面）難以用「漸進增加」的方式表達。在確定主要使用場景是桌機時，桌機優先可能更直觀。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「響應式設計是目標——網站在各種裝置上都能正常顯示；行動優先是達成這個目標的<span class="hl">撰寫策略</span>——用 <code>min-width</code> 媒體查詢，以行動端樣式為預設，往上疊加桌機功能。相比桌機優先，行動優先的好處是<span class="hl">行動端只解析必要的 CSS</span>，效能更好；而且往上「增加」功能比往下「撤銷」更乾淨。現在幾乎所有框架（Tailwind、Bootstrap 4+）都採用行動優先策略。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="How is responsive design different from adaptive design?.html">響應式 vs 自適應設計</a>
+      <a href="你曾使用或實作過媒體查詢或行動裝置專屬的版面 CSS 嗎？.html">媒體查詢實作經驗</a>
+      <a href="你能舉一個除了 `screen` 以外的 `@media` 屬性範例嗎？.html">@media 媒體類型</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

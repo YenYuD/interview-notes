@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intl 國際化 API</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JAVASCRIPT</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT / ES 進階</div>
+    <h1>不用寫格式邏輯，<br>讓瀏覽器替你<em>說當地語言</em></h1>
+    <p class="lede"><b>Intl</b> 是 ECMAScript 國際化 API 的命名空間，內建日期、數字、字串的語系感知格式化，<b>不需 moment.js</b> 也能輸出「2024年1月1日」或「€1.234,56」。</p>
+  </header>
+
+  <section>
+    <span class="num">核心四件組</span>
+    <h2>Intl 裡最常用的建構子</h2>
+    <table>
+      <thead><tr><th>建構子</th><th>用途</th><th>典型選項</th></tr></thead>
+      <tbody>
+        <tr><td><code>Intl.DateTimeFormat</code></td><td>日期／時間格式化</td><td><code>year, month, day, hour, minute</code></td></tr>
+        <tr><td><code>Intl.NumberFormat</code></td><td>數字／貨幣／百分比</td><td><code>style: 'currency', currency: 'TWD'</code></td></tr>
+        <tr><td><code>Intl.Collator</code></td><td>語系敏感字串排序比較</td><td><code>sensitivity: 'base'</code></td></tr>
+        <tr><td><code>Intl.PluralRules</code></td><td>複數形式選擇</td><td><code>type: 'ordinal'</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✓</span><p>所有建構子都接受 <strong>locale tag</strong>（如 <code>'zh-TW'</code>、<code>'de-DE'</code>）作為第一個參數，第二個是選項物件。建構子建立後可反覆呼叫 <code>.format()</code>，比每次 <code>new</code> 更有效率。</p></div>
+  </section>
+
+  <section>
+    <span class="num">程式碼對照</span>
+    <h2>格式化數字與日期的實際寫法</h2>
+    <pre><code><span class="tok-com">// 貨幣格式（德式）</span>
+<span class="tok-key">const</span> fmt = <span class="tok-key">new</span> Intl.<span class="tok-fn">NumberFormat</span>(<span class="tok-str">'de-DE'</span>, {
+  style: <span class="tok-str">'currency'</span>, currency: <span class="tok-str">'EUR'</span>
+});
+fmt.<span class="tok-fn">format</span>(1234567.89); <span class="tok-com">// "1.234.567,89 €"</span>
+
+<span class="tok-com">// 日期格式（繁中）</span>
+<span class="tok-key">const</span> df = <span class="tok-key">new</span> Intl.<span class="tok-fn">DateTimeFormat</span>(<span class="tok-str">'zh-TW'</span>, {
+  year: <span class="tok-str">'numeric'</span>, month: <span class="tok-str">'long'</span>, day: <span class="tok-str">'numeric'</span>
+});
+df.<span class="tok-fn">format</span>(<span class="tok-key">new</span> <span class="tok-fn">Date</span>());  <span class="tok-com">// "2024年1月1日"</span>
+
+<span class="tok-com">// 字串排序（忽略大小寫）</span>
+[<span class="tok-str">'banana'</span>, <span class="tok-str">'Apple'</span>, <span class="tok-str">'cherry'</span>].<span class="tok-fn">sort</span>(
+  <span class="tok-key">new</span> Intl.<span class="tok-fn">Collator</span>(<span class="tok-str">'en'</span>, { sensitivity: <span class="tok-str">'base'</span> }).<span class="tok-fn">compare</span>
+); <span class="tok-com">// ["Apple", "banana", "cherry"]</span></code></pre>
+    <div class="callout info"><span class="ico">i</span><p><code>Intl.DateTimeFormat</code> 的 <code>formatRelative</code> 並不存在；相對時間（「3 小時前」）需用 <code>Intl.RelativeTimeFormat</code>，這是另一個近年加入的成員。</p></div>
+  </section>
+
+  <section>
+    <span class="num">使用場景 vs 踩雷</span>
+    <h2>什麼時候該用、不該用</h2>
+    <div class="chips">
+      <div class="chip good">電商價格顯示<small>currency + locale，一行搞定</small></div>
+      <div class="chip good">後台報表日期<small>全統一用 DateTimeFormat，不怕時區 label 亂</small></div>
+      <div class="chip bad">效能敏感的熱路徑<small>應快取 formatter 實例，勿每次 new</small></div>
+      <div class="chip info">複雜 i18n<small>搭配 react-intl / i18next 更完整</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary><code>Intl.NumberFormat</code> 和手動用 <code>toLocaleString()</code> 有什麼差？</summary>
+        <p><code>toLocaleString()</code> 內部實際上呼叫 <code>Intl.NumberFormat</code>；差別在於重複格式化同一 locale 時，建立一個 <code>Intl.NumberFormat</code> 實例並反覆呼叫 <code>.format()</code> 效率更高，因為 locale 資料只解析一次。</p>
+      </details>
+      <details>
+        <summary><code>Intl.Collator</code> 和直接用 <code>localeCompare()</code> 差在哪？</summary>
+        <p>同理：<code>localeCompare()</code> 底層也用 <code>Intl.Collator</code>。批次排序大量字串時，先建立 Collator 實例、取出 <code>.compare</code> 方法再傳入 <code>.sort()</code> 更快。</p>
+      </details>
+      <details>
+        <summary>如果瀏覽器不支援某 locale，會怎樣？</summary>
+        <p>瀏覽器會自動降級（fallback）到最接近的支援 locale；可用 <code>Intl.DateTimeFormat.supportedLocalesOf(['zh-TW'])</code> 事先查詢支援清單。現代瀏覽器對主要 locale 覆蓋率很高，IE11 以下才是問題。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>Intl</code> 是瀏覽器內建的國際化 API，核心有 <span class="hl">DateTimeFormat、NumberFormat、Collator</span> 三大建構子，可以根據 locale 格式化日期、貨幣數字、做語系敏感排序。最佳實踐是建立一次 formatter 實例後反覆呼叫 <code>.format()</code>，避免每次都 <span class="hl">new</span> 才高效。對於簡單顯示需求，Intl 已夠用；複雜多語系翻譯才需要搭配 i18n 函式庫。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中Symbol的用途.html">Symbol 的用途</a>
+      <a href="模板字面量及其用法.html">模板字面量</a>
+      <a href="解釋Tagged Templates概念.html">Tagged Templates</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

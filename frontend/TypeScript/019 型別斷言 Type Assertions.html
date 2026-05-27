@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>型別斷言 Type Assertions</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1>型別斷言是你對 TypeScript 說「<em>相信我，我知道型別</em>」</h1>
+    <p class="lede">型別斷言讓你覆蓋 TypeScript 的推斷結果，強制指定型別。<b>它只影響編譯期，不在執行期做任何轉換</b>——斷言錯了，runtime 照樣炸。應視為最後手段，優先用 Type Guard。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>兩種語法</h2>
+    <div class="chips">
+      <div class="chip good"><small><code>as</code> 語法（推薦）</small>JSX/TSX 也能用</div>
+      <div class="chip bad"><small><code>&lt;Type&gt;</code> 語法</small>不能在 JSX 中使用</div>
+    </div>
+    <pre><code><span class="tok-com">// 推薦：as 語法</span>
+<span class="tok-key">const</span> name = (person.name <span class="tok-key">as</span> <span class="tok-fn">string</span>);
+
+<span class="tok-com">// 角括號語法（不能在 .tsx 中使用）</span>
+<span class="tok-key">const</span> name = (&lt;<span class="tok-fn">string</span>&gt;person.name);</code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>常見使用場景</h2>
+    <pre><code><span class="tok-com">// 1. DOM 操作：querySelector 回傳 Element | null</span>
+<span class="tok-key">const</span> input = document.querySelector(<span class="tok-str">"#email"</span>) <span class="tok-key">as</span> HTMLInputElement;
+input.value = <span class="tok-str">"test@example.com"</span>; <span class="tok-com">// ✅ HTMLInputElement 才有 .value</span>
+
+<span class="tok-com">// 2. 非空斷言 ! — 告訴 TS「這不是 null 也不是 undefined」</span>
+<span class="tok-key">const</span> el = document.querySelector(<span class="tok-str">"#app"</span>)!;
+
+<span class="tok-com">// 3. 縮小到更具體的子型別</span>
+<span class="tok-key">type</span> Animal = Cat | Dog;
+<span class="tok-key">function</span> <span class="tok-fn">handleAnimal</span>(a: Animal) {
+  <span class="tok-key">const</span> cat = a <span class="tok-key">as</span> Cat; <span class="tok-com">// 你確定這是 Cat</span>
+}</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>型別斷言不做執行期檢查。斷言錯誤時，TypeScript 沉默，但 runtime 可能出錯：<code>const user = {} as User; user.name.toUpperCase()</code> → 執行期爆炸。</p></div>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>as unknown as T：強制斷言的跳板</h2>
+    <pre><code><span class="tok-key">const</span> num = 42 <span class="tok-key">as</span> <span class="tok-fn">string</span>;           <span class="tok-com">// ❌ 兩個型別沒有重疊</span>
+<span class="tok-key">const</span> num = 42 <span class="tok-key">as unknown as</span> <span class="tok-fn">string</span>; <span class="tok-com">// ✅ 先斷言到 unknown 再跳</span>
+<span class="tok-com">// 這樣做通常代表設計有問題，是最後的逃生口</span></code></pre>
+    <div class="aside">Type Guard 是更好的替代方案：<code>if (typeof x === "string") { ... }</code>，讓 TypeScript 自動推斷而不是強制覆蓋。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>型別斷言和型別轉換（Type Cast）的差別？</summary><p>型別斷言只告訴 TypeScript「這個值的型別是 X」，不產生任何執行期程式碼；型別轉換（如 JavaScript 的 <code>Number("42")</code>）會在執行期真的轉換值。TypeScript 的 <code>as</code> 是純編譯期操作。</p></details>
+      <details><summary>什麼時候應該用 Type Guard 代替斷言？</summary><p>幾乎所有情況都應該優先用 Type Guard（typeof、instanceof、自訂 is 型別守衛），讓 TypeScript 自動推斷而不是強制覆蓋。斷言適合「你確定 TypeScript 推斷不準確且你掌握更多資訊」的情況，如 DOM 存取。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「型別斷言（<code>as Type</code>）讓你<span class="hl">告訴 TypeScript 某個值的確切型別，覆蓋它的推斷</span>。關鍵是它只影響編譯期，不在執行期做任何轉換或驗證——斷言錯了一樣會在 runtime 出錯。常見用途是 DOM 操作（querySelector 回傳 Element，你知道是 HTMLInputElement）和處理外部資料。<span class="hl">斷言應視為最後手段</span>，大多數情況應優先用 Type Guard 讓 TypeScript 自動推斷正確型別。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="012 何時使用 unknown 型別.html">unknown 型別</a>
+      <a href="001 TypeScript 型別系統面試筆記.html">型別系統總覽</a>
+      <a href="013 noImplicitAny 是什麼.html">noImplicitAny</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

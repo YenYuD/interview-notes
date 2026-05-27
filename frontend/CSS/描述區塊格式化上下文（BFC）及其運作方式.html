@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BFC 區塊格式化上下文</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS 版面</div>
+    <h1>子元素一浮動，<em>父層就塌了</em></h1>
+    <p class="lede">浮動元素會脫離流，導致父容器高度算成 0、整個塌掉。解法是讓父層形成一個 <b>BFC（區塊格式化上下文）</b>——一個能「框住」內部浮動的獨立排版環境。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 看父層塌下去再救回來</span>
+    <h2>父層該不該包住浮動子元素？</h2>
+    <p>下面的父容器（虛線框）裡有一個浮動的子方塊。切換父層要不要形成 BFC：</p>
+
+    <div class="lab">
+      <div class="lab-label">父容器設定</div>
+      <div class="toggle-row" id="row">
+        <button class="on bad" data-bfc="off">❌ overflow: visible（沒 BFC）</button>
+        <button data-bfc="on">✅ overflow: hidden（形成 BFC）</button>
+      </div>
+
+      <div style="background:var(--paper);border-radius:10px;padding:1.2rem">
+        <div id="parent" style="border:2px dashed var(--accent);border-radius:8px;padding:8px">
+          <div style="float:left;width:90px;height:64px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:6px;display:grid;place-items:center;font-family:var(--mono);font-size:.72rem;color:var(--accent)">浮動子元素</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:.5rem" id="hint"></div>
+      </div>
+    </div>
+    <div class="aside">沒 BFC 時，父層高度收成只剩 padding（虛線框「夾」住浮動元素之外的空白）；形成 BFC 後，父層會把浮動子元素整個包進去。</div>
+  </section>
+
+  <section>
+    <span class="num">怎麼形成 BFC</span>
+    <h2>滿足任一條件就會建立</h2>
+    <ul>
+      <li><code>float</code> 不為 <code>none</code></li>
+      <li><code>position</code> 為 <code>absolute</code> 或 <code>fixed</code></li>
+      <li><code>display</code> 為 <code>inline-block</code> / <code>flex</code> / <code>grid</code> / <code>table-cell</code> 等</li>
+      <li><code>overflow</code> 不為 <code>visible</code>（最常用的觸發手段：<code>overflow:hidden</code> 或 <code>auto</code>）</li>
+    </ul>
+    <div class="callout info"><span class="ico">💡</span><p>BFC 還有第二個用途：<b>阻止 margin 摺疊</b>。同一個 BFC 內相鄰區塊的垂直 margin 會摺疊，但 BFC 會擋住它與外部元素之間的摺疊。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>現在還會用 overflow:hidden 清浮動嗎？</summary><p>清浮動的經典手段，但副作用是會裁切溢出內容。現代版面多改用 Flexbox / Grid，根本不用浮動，也就不需要清。要清浮動時 <code>clearfix</code>（<code>::after { clear: both }</code>）也是常見做法。</p></details>
+      <details><summary>BFC 和 margin 摺疊有什麼關係？</summary><p>BFC 是個「封閉」環境：內部 margin 可摺疊，但不會跟外部摺疊。把元素放進獨立 BFC，就能避免它的 margin 意外和外層合併。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「BFC 是一個<span class="hl">獨立的區塊排版環境</span>。它最重要的特性是能<span class="hl">包住內部的浮動元素</span>，避免父層高度塌陷，也能<span class="hl">阻止 margin 跟外部摺疊</span>。觸發方式有 <code>overflow:hidden</code>、<code>display:flex/grid</code>、浮動、絕對定位等。實務上現代版面用 Flex/Grid，已經很少遇到要靠 BFC 救塌陷的情況了。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="描述 `float` 及其運作方式.html">float</a>
+      <a href="有哪些清除浮動的技術，各自適合什麼情境？.html">清除浮動</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row = document.getElementById('row');
+  const parent = document.getElementById('parent');
+  const hint = document.getElementById('hint');
+  function render(on){
+    parent.style.overflow = on ? 'hidden' : 'visible';
+    hint.textContent = on
+      ? '父層高度 ≈ 74px：浮動子元素被完整包住 ✓'
+      : '父層高度 ≈ 18px：只剩 padding，浮動子元素「溢」出去了 ✗';
+    hint.style.color = on ? 'var(--good)' : 'var(--bad)';
+  }
+  row.addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    [...row.children].forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    render(b.dataset.bfc === 'on');
+  });
+  render(false);
+</script>
+</body>
+</html>

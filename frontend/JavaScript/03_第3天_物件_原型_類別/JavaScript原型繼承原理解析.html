@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型繼承原理</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 原型</div>
+    <h1>物件直接繼承物件：<em>原型繼承</em>的核心邏輯</h1>
+    <p class="lede">JavaScript 不靠「類別的複製」，而是讓物件<b>持有一條指向原型物件的連結</b>，讀取屬性時沿鏈查找，這就是原型繼承的本質。</p>
+  </header>
+
+  <section>
+    <span class="num">三個關鍵概念</span>
+    <h2>Prototype、[[Prototype]]、prototype 屬性</h2>
+    <table>
+      <thead><tr><th>名稱</th><th>存在於</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td><code>[[Prototype]]</code></td><td>每個物件</td><td>指向上一層原型，可用 <code>Object.getPrototypeOf(obj)</code> 讀取</td></tr>
+        <tr><td><code>__proto__</code></td><td>每個物件（非正式）</td><td><code>[[Prototype]]</code> 的非標準存取器，理解用，生產避免</td></tr>
+        <tr><td><code>.prototype</code></td><td>函式（建構子）</td><td>new 出來的實例的 [[Prototype]] 會指向此物件</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">建立繼承鏈</span>
+    <h2>讓 Dog 繼承 Animal</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">Animal</span>(name) { <span class="tok-key">this</span>.name = name; }
+Animal.prototype.<span class="tok-fn">makeSound</span> = <span class="tok-key">function</span>() {
+  console.log(<span class="tok-key">this</span>.name + <span class="tok-str">' makes a sound.'</span>);
+};
+
+<span class="tok-key">function</span> <span class="tok-fn">Dog</span>(name) {
+  Animal.<span class="tok-fn">call</span>(<span class="tok-key">this</span>, name);  <span class="tok-com">// 借用父建構子</span>
+}
+Object.<span class="tok-fn">setPrototypeOf</span>(Dog.prototype, Animal.prototype);
+
+Dog.prototype.<span class="tok-fn">bark</span> = <span class="tok-key">function</span>() { console.log(<span class="tok-str">'Woof!'</span>); };
+
+<span class="tok-key">const</span> bolt = <span class="tok-key">new</span> Dog(<span class="tok-str">'Bolt'</span>);
+bolt.<span class="tok-fn">makeSound</span>();  <span class="tok-com">// 沿鏈找到 Animal.prototype.makeSound</span>
+bolt.<span class="tok-fn">bark</span>();       <span class="tok-com">// 在 Dog.prototype 上找到</span></code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>建議用 <code>Object.setPrototypeOf()</code> 設定繼承鏈，而非 <code>Object.create()</code>（後者需額外補回 constructor 屬性）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Object.create(null) 有什麼用？</summary><p>建立一個完全沒有 [[Prototype]] 的純粹 dictionary 物件，不繼承 <code>Object.prototype</code>，也就沒有 <code>toString</code>、<code>hasOwnProperty</code> 等方法。常用於實作 Map 型態的純查找表，避免原型汙染。</p></details>
+      <details><summary>hasOwnProperty 和 in 有何差別？</summary><p><code>in</code> 會查找整條原型鏈，<code>hasOwnProperty</code> 只看物件自身屬性，不含繼承屬性。推薦用 <code>Object.hasOwn(obj, key)</code>（ES2022）作為更安全的替代。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JavaScript 的繼承是基於原型：每個物件有一個 <span class="hl">[[Prototype]]</span> 指向另一個物件。存取屬性時，引擎先找自身，找不到就沿原型鏈向上查，直到 <code>null</code>。建構函式的 <span class="hl">.prototype</span> 屬性就是 new 出來的實例的原型，方法放在這裡能讓所有實例共用，省記憶體。<code>class extends</code> 只是這套機制的語法糖。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="原型鏈是什麼及其運作方式.html">原型鏈運作方式（互動）</a>
+      <a href="經典繼承與原型繼承差異.html">經典 vs 原型繼承</a>
+      <a href="如何建立建構子函式.html">如何建立建構子函式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>new 關鍵字的用途</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 建構子</div>
+    <h1>new 不只是「建立」：<em>它做了四件事</em></h1>
+    <p class="lede"><code>new</code> 關鍵字呼叫建構函式時，會自動完成「建立空物件 → 設定原型 → 綁定 this → 回傳物件」四個步驟，缺一不可地建立出一個完整的實例。</p>
+  </header>
+
+  <section>
+    <span class="num">四步驟拆解</span>
+    <h2>new 運算子的完整流程</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>① 建立空物件</strong>：相當於 <code>const obj = {}</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>② 設定原型</strong>：<code>obj.[[Prototype]] = Constructor.prototype</code>，讓實例能存取原型方法</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>③ 執行建構函式</strong>：以新物件為 <code>this</code>，執行建構子的程式碼，設定實例屬性</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>④ 回傳物件</strong>：若建構子沒有明確 return 物件，自動回傳 <code>this</code>（新建的物件）</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">一個陷阱</span>
+    <h2>建構子 return 物件會覆蓋 this</h2>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">Gadget</span>(name) {
+  <span class="tok-key">this</span>.name = name;
+  <span class="tok-key">return</span> { type: <span class="tok-str">'Electronic'</span> }; <span class="tok-com">// 回傳了一個物件</span>
+}
+
+<span class="tok-key">const</span> g = <span class="tok-key">new</span> Gadget(<span class="tok-str">'Phone'</span>);
+console.log(g.type); <span class="tok-com">// 'Electronic'</span>
+console.log(g.name); <span class="tok-com">// undefined（this 被拋棄了）</span></code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>若建構子 return 的是<strong>原始值</strong>（數字、字串…），則忽略，仍回傳 this。只有 return 物件才會覆蓋。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>不加 new 呼叫建構子會怎樣？</summary><p>非嚴格模式：<code>this</code> 指向 <code>window</code>，屬性會掛到全域，且函式回傳 <code>undefined</code>（沒有明確 return）。嚴格模式：<code>this</code> 是 <code>undefined</code>，立刻 TypeError。ES2015 class 則永遠強制要 <code>new</code>。</p></details>
+      <details><summary>如何手動模擬 new 的行為？</summary><p><code>const obj = Object.create(Fn.prototype); Fn.call(obj, ...args); return obj;</code>——這正是 new 的底層語意。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>new</code> 做四件事：<span class="hl">建立空物件、把 [[Prototype]] 指向建構函式的 prototype、以這個新物件為 this 執行建構函式、最後回傳這個物件</span>（除非建構函式自己 return 了另一個物件）。沒有 <code>new</code> 就沒有原型設定，也沒有正確的 <code>this</code> 綁定。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript 中 function Person、Person() 與 new Person 的差異.html">function vs new Person</a>
+      <a href="如何建立建構子函式.html">如何建立建構子函式</a>
+      <a href="JavaScript原型繼承原理解析.html">原型繼承原理</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

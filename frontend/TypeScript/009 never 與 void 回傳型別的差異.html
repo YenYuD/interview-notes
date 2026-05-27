@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>never 與 void 回傳型別</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1><em>void</em> 是「沒有回傳值」，<em>never</em> 是「永遠不會回傳」</h1>
+    <p class="lede">一個字之差，概念天差地遠。<b><code>void</code> 代表函式正常結束但沒有回傳值</b>；<code>never</code> 代表函式根本無法正常結束——它要不是拋出例外，就是進入無窮迴圈。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>核心差異對比</h2>
+    <table>
+      <thead><tr><th></th><th><code>void</code></th><th><code>never</code></th></tr></thead>
+      <tbody>
+        <tr><td>函式會結束？</td><td>✅ 正常結束</td><td>❌ 不會（拋錯 or 無窮）</td></tr>
+        <tr><td>實際值</td><td><code>undefined</code></td><td>不存在（無法被賦值）</td></tr>
+        <tr><td>可賦值給變數</td><td>✅（值是 undefined）</td><td>❌（never 是 bottom type）</td></tr>
+        <tr><td>典型使用場景</td><td>console.log 等副作用函式</td><td>throw 函式、無窮迴圈</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>程式碼對比</h2>
+    <pre><code><span class="tok-com">// void — 有執行完，但不回傳有意義的值</span>
+<span class="tok-key">function</span> <span class="tok-fn">log</span>(msg: <span class="tok-fn">string</span>): <span class="tok-fn">void</span> {
+  console.log(msg); <span class="tok-com">// 執行完畢，回傳 undefined</span>
+}
+
+<span class="tok-com">// never — 一定拋錯，永遠到不了函式結尾</span>
+<span class="tok-key">function</span> <span class="tok-fn">fail</span>(msg: <span class="tok-fn">string</span>): <span class="tok-fn">never</span> {
+  <span class="tok-key">throw new</span> Error(msg);
+}
+
+<span class="tok-com">// never — 無窮迴圈，也永遠回不來</span>
+<span class="tok-key">function</span> <span class="tok-fn">loop</span>(): <span class="tok-fn">never</span> {
+  <span class="tok-key">while</span> (<span class="tok-key">true</span>) {}
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>never 的進階用途：Exhaustive Check</h2>
+    <pre><code><span class="tok-key">type</span> Shape = <span class="tok-str">"circle"</span> | <span class="tok-str">"square"</span>;
+
+<span class="tok-key">function</span> <span class="tok-fn">getArea</span>(shape: Shape): <span class="tok-fn">number</span> {
+  <span class="tok-key">switch</span> (shape) {
+    <span class="tok-key">case</span> <span class="tok-str">"circle"</span>: <span class="tok-key">return</span> Math.PI * 100;
+    <span class="tok-key">case</span> <span class="tok-str">"square"</span>: <span class="tok-key">return</span> 100;
+    <span class="tok-key">default</span>:
+      <span class="tok-com">// 日後新增 "triangle" 卻忘了處理 → 此行編譯報錯</span>
+      <span class="tok-key">const</span> _check: <span class="tok-fn">never</span> = shape;
+      <span class="tok-key">throw new</span> Error(<span class="tok-str">`Unhandled: ${shape}`</span>);
+  }
+}</code></pre>
+    <div class="callout tip"><span class="ico">💡</span><p>Exhaustive Check 展示你讓型別系統在<b>編譯期</b>幫你抓 bug，不是等到 runtime 才發現漏掉了某個 case。面試加分點。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>never 在 Union Type 中有什麼特殊行為？</summary><p><code>never</code> 在 union 中會自動消失：<code>string | never</code> → <code>string</code>。這也是 <code>Exclude</code> utility type 的核心機制——被條件型別標為 <code>never</code> 的成員會從 union 中消失。</p></details>
+      <details><summary>void 和 undefined 有什麼差別？</summary><p><code>void</code> 是回傳型別（表示函式沒有有意義的回傳值），<code>undefined</code> 是值本身。<code>void</code> 型別的變數只能被賦值為 <code>undefined</code>，但用 <code>void</code> 更能表達「這個函式的回傳值不應被使用」的語義。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl"><code>void</code> 表示函式正常結束但沒有回傳有意義的值</span>，實際值是 <code>undefined</code>。<span class="hl"><code>never</code> 表示函式永遠不會正常結束</span>——要不是拋出例外，就是無窮迴圈。<code>never</code> 是 TypeScript 的底部型別，沒有任何值屬於它，且在 union 中會自動消失。進階用途是 exhaustive check：在 switch default 中把剩餘型別賦值給 <code>never</code>，若有漏掉的 case 就會在編譯期報錯。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="001 TypeScript 型別系統面試筆記.html">型別系統總覽</a>
+      <a href="012 何時使用 unknown 型別.html">unknown 型別</a>
+      <a href="014 條件型別 Conditional Types.html">條件型別</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

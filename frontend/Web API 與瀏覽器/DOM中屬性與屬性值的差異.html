@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOM 屬性 vs 屬性值</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>HTML Attribute vs DOM Property：<em>靜態初始值</em>與<em>動態當前狀態</em>的差異</h1>
+    <p class="lede">Attribute 寫在 HTML 標記裡，<b>固定不動</b>；Property 存在 DOM 物件上，<b>隨使用者操作即時變化</b>。這個差異在表單開發與 debug 時尤為關鍵。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>一句話區分兩者</h2>
+    <table>
+      <thead><tr><th>面向</th><th>Attribute（屬性）</th><th>Property（屬性值）</th></tr></thead>
+      <tbody>
+        <tr><td>定義位置</td><td>HTML 標記</td><td>DOM 物件</td></tr>
+        <tr><td>狀態</td><td>靜態（初始值）</td><td>動態（當前值）</td></tr>
+        <tr><td>存取方式</td><td><code>getAttribute()</code> / <code>setAttribute()</code></td><td>直接存取 <code>element.value</code></td></tr>
+        <tr><td>使用者操作後</td><td>不變</td><td>隨之改變</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">經典範例</span>
+    <h2><code>&lt;input&gt;</code> 的 value 最能說明這個差異</h2>
+    <pre><code><span class="tok-com">// HTML: &lt;input id="name" value="初始值" /&gt;</span>
+
+<span class="tok-key">const</span> input = document.getElementById(<span class="tok-str">'name'</span>);
+
+<span class="tok-com">// 使用者在輸入框輸入「新文字」後：</span>
+input.getAttribute(<span class="tok-str">'value'</span>); <span class="tok-com">// "初始值" ← Attribute 永遠不變</span>
+input.value;               <span class="tok-com">// "新文字" ← Property 反映當前狀態</span></code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>要取得使用者<b>目前輸入的內容</b>，一定要用 <code>element.value</code>（Property），而不是 <code>getAttribute('value')</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>什麼情況下 Attribute 和 Property 的值會不同步？</summary>
+        <p>使用者互動後（如修改 input 的值、勾選 checkbox），Property 會更新但 Attribute 不會。若透過 JS 呼叫 <code>setAttribute()</code>，兩者才會同步。</p>
+      </details>
+      <details>
+        <summary>布林 Attribute 如 disabled、checked 有何特殊行為？</summary>
+        <p>HTML 中只要 Attribute 存在就生效（值是 "true" 還是 "false" 都沒差），但 Property 回傳的是布林值 <code>true/false</code>，語義更清晰。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Attribute 是 HTML 標記裡寫的初始值，靜態不變，用 <span class="hl">getAttribute()</span> 存取；Property 是 DOM 物件上的屬性，反映元素的當前狀態，會隨使用者操作改變。最常見的例子就是 <code>&lt;input&gt;</code> 的 value：<span class="hl">getAttribute('value') 永遠回傳初始值，element.value 才是使用者目前輸入的內容</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="什麼是DOM及其結構.html">什麼是 DOM 及其結構</a>
+      <a href="使用JavaScript新增移除修改HTML元素.html">JS 操作 DOM 元素</a>
+      <a href="innerHTML與textContent的差異.html">innerHTML vs textContent</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

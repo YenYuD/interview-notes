@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>為何 function foo 無法作為 IIFE</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式宣告・IIFE</div>
+    <h1>解析器把它當宣告，加 <code>()</code> 就報錯：<em>function foo 不是 IIFE</em></h1>
+    <p class="lede"><b>IIFE（Immediately Invoked Function Expression）</b> 要求的是<b>函式表達式</b>，不接受函式宣告。解決辦法：用括號把函式包起來，讓解析器把它當表達式。</p>
+  </header>
+
+  <section>
+    <span class="num">為什麼會出錯</span>
+    <h2>解析器的判斷規則</h2>
+    <p>JavaScript 解析器在句子開頭看到 <code>function</code>，就把它認定為<b>函式宣告</b>。函式宣告後面直接接 <code>()</code> 是語法錯誤，因為宣告語句不能立即執行。</p>
+    <div class="chips">
+      <div class="chip bad">
+        <small>錯誤：函式宣告無法 IIFE</small>
+        <pre><code>function foo(){}(); // ❌ SyntaxError</code></pre>
+      </div>
+      <div class="chip good">
+        <small>正確：括號讓它變成表達式</small>
+        <pre><code>(function foo(){})();  // ✅ 執行
+(function foo(){}());  // ✅ 也可以</code></pre>
+      </div>
+    </div>
+    <div class="callout info"><span class="ico">ℹ️</span><p>兩種括號位置都合法：<code>(fn)()</code> 括號包函式本體；<code>(fn())</code> 括號包整個呼叫。現代 linter 偏好前者。</p></div>
+  </section>
+
+  <section>
+    <span class="num">為什麼需要 IIFE</span>
+    <h2>封裝作用域，避免污染全域</h2>
+    <pre><code>(function() {
+  var secret = '只在這裡可見';
+  console.log(secret); // OK
+})();
+
+console.log(secret); // ❌ ReferenceError</code></pre>
+    <p>ES6 模組化（<code>import/export</code>）普及後，IIFE 的封裝需求大幅降低；但在非模組環境（舊版瀏覽器腳本、CDN 引入的 lib）中仍然常見。</p>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>除了括號，還有其他方式讓函式宣告變成表達式嗎？</summary><p>可以在 function 前加一元運算子：<code>!function foo(){}()</code> 或 <code>void function foo(){}()</code>，都能讓解析器把它當作表達式。但返回值會被改變，實務上較少見。</p></details>
+      <details><summary>ES6 之後 IIFE 還有用嗎？</summary><p>ES6 模組中每個檔案已是獨立作用域，大部分 IIFE 使用情境被取代。但在需要立即執行的 async IIFE（<code>(async () =&gt; { await ... })()</code>）仍有用武之地。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>function foo(){}</code> 被解析器視為<span class="hl">函式宣告，不能立即執行</span>。要讓它成為 IIFE，需要用括號把它包住，讓解析器把它當成<span class="hl">函式表達式</span>，寫成 <code>(function foo(){})()</code>。IIFE 的用途是建立私有作用域，避免變數污染全域——在 ES6 模組普及前是常見的封裝手段。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript 中 function foo 與 var foo=function 的差異.html">函式宣告 vs 函式表達式</a>
+      <a href="JavaScript匿名函式的典型應用.html">匿名函式的典型應用</a>
+      <a href="如何使用閉包建立私有變數.html">閉包建立私有變數</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

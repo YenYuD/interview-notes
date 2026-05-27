@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useEffect vs useLayoutEffect</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT HOOKS</div>
+    <h1><code>useEffect</code> vs <code>useLayoutEffect</code>：差在<em>瀏覽器畫面繪製的前後</em></h1>
+    <p class="lede">兩者都處理副作用，但執行時機不同：<b>useEffect</b> 在畫面繪製後非同步執行，不阻塞 UI；<b>useLayoutEffect</b> 在 DOM 變更後、繪製前同步執行，適合需要「先量完再畫」的場景。</p>
+  </header>
+
+  <section>
+    <span class="num">執行時序</span>
+    <h2>視覺化時間軸</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">React 計算 DOM 變更（Render 階段）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">React 套用 DOM 變更（Commit 階段）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>useLayoutEffect</b> ← 在這裡執行（同步，畫面尚未更新）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">瀏覽器繪製畫面（Paint）</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>useEffect</b> ← 在這裡執行（非同步，畫面已更新）</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">選用指南</span>
+    <h2>何時用哪個</h2>
+    <table>
+      <thead><tr><th>Hook</th><th>適合場景</th><th>注意</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>useEffect</code></td>
+          <td>API 請求、訂閱、事件監聽器、日誌</td>
+          <td>預設首選，99% 的副作用都用這個</td>
+        </tr>
+        <tr>
+          <td><code>useLayoutEffect</code></td>
+          <td>讀取 DOM 尺寸/位置後立即調整樣式（防閃爍）</td>
+          <td>同步執行會阻塞渲染，謹慎使用</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>如果 <code>useEffect</code> 造成視覺閃爍（先畫錯、再修正），才考慮換成 <code>useLayoutEffect</code>。典型例子：tooltip 位置計算、動畫起始點測量。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>SSR 時 useLayoutEffect 有什麼問題？</summary><p>伺服器沒有 DOM，<code>useLayoutEffect</code> 在 SSR 時會發出警告，並且不會執行。解法：改用 <code>useEffect</code>，或用 <code>typeof window !== 'undefined'</code> 包裹。</p></details>
+      <details><summary>cleanup 函式在 useLayoutEffect 中的執行時機？</summary><p>cleanup 在下一次 effect 執行前、或組件卸載時執行，時機和 <code>useEffect</code> 相同。差別只在 effect 本身的執行時機（繪製前 vs 後）。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「兩者都處理副作用，差別在執行時機：<code>useEffect</code> 在瀏覽器<span class="hl">繪製畫面後非同步執行</span>，不阻塞 UI，是絕大多數副作用的首選；<code>useLayoutEffect</code> 在 DOM 套用後、<span class="hl">繪製前同步執行</span>，用於需要讀取 DOM 尺寸並立即調整的場景（否則會閃爍）。實務上優先用 <code>useEffect</code>，有視覺閃爍問題時再換。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="`useEffect` 的依賴陣列（dependency array）會影響什麼？.html">useEffect 依賴陣列</a>
+      <a href="React 中的 `useRef` hook 是什麼？什麼時候應該使用它？.html">useRef hook</a>
+      <a href="React Hooks 的規則是什麼？.html">Hooks 規則</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

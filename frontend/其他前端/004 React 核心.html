@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 核心面試精要</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">其他前端</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">其他前端</div>
+    <h1>Virtual DOM 不是魔法，是<em>精準的差異比對</em></h1>
+    <p class="lede">React 的效能核心是 <b>Reconciliation</b>：先在記憶體裡算出新舊差異，再最小化操作真實 DOM。理解這個機制，key / state / props / refs 的設計就全說得通了。</p>
+  </header>
+
+  <section>
+    <span class="num">核心機制</span>
+    <h2>Virtual DOM 運作流程</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>State 改變</h4>
+          <p>元件呼叫 <code>setState</code> 或 hook 更新，觸發重新渲染。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>產生新 Virtual DOM</h4>
+          <p>React 在記憶體中建立新的 JS 物件樹，代表預期的 UI 狀態。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>Diffing 演算法</h4>
+          <p>新舊 Virtual DOM 逐節點比較，同層比較、不同 type 直接替換、列表靠 <code>key</code> 識別。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">4</div>
+        <div class="flow-body">
+          <h4>Commit — 更新真實 DOM</h4>
+          <p>只操作有差異的節點，最小化 DOM 操作成本。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">四大常考題</span>
+    <h2>key、state、props、refs 一次搞清楚</h2>
+    <table>
+      <tr><th>概念</th><th>一句話</th><th>踩雷提醒</th></tr>
+      <tr>
+        <td><b>key</b></td>
+        <td>Diffing 的唯一識別，幫 React 判斷哪筆新增/刪除/移動</td>
+        <td>別用 index 當 key——重排時會導致狀態錯亂</td>
+      </tr>
+      <tr>
+        <td><b>props</b></td>
+        <td>父傳子的唯讀資料，元件不能自己改</td>
+        <td>過深的 props drilling 改用 Context 或狀態管理</td>
+      </tr>
+      <tr>
+        <td><b>state</b></td>
+        <td>元件內部的可變資料，改動觸發重新渲染</td>
+        <td>不要直接 mutate state（<code>arr.push</code>），要產生新物件</td>
+      </tr>
+      <tr>
+        <td><b>useRef</b></td>
+        <td>直接訪問 DOM 節點，或存不觸發 re-render 的可變值</td>
+        <td>計時器 ID、第三方插件操作點 — 不要拿來存顯示用的狀態</td>
+      </tr>
+    </table>
+    <div class="callout warn"><span class="ico">⚠️</span><p>把 <b>index 當 key</b> 是常見的效能陷阱：列表重排時，React 會以為每個元素「沒變」，導致輸入框等有 state 的子元件狀態出錯。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>React 的 Diffing 演算法有哪些假設前提？</summary><p>1. 不同 type 的元素產生不同的樹（直接拆掉重建）。2. 列表元素靠 key 識別。這讓複雜度從 O(n³) 降到 O(n)。</p></details>
+      <details><summary>什麼時候用 useRef 而不是 useState？</summary><p>當你要存的值「變了也不想觸發 re-render」時，例如計時器 ID、前一次 props 值、第三方 DOM 插件的實例。若值變動需要更新畫面，才用 useState。</p></details>
+      <details><summary>Controlled vs Uncontrolled component 差在哪？</summary><p>Controlled：input value 由 React state 控制，每次輸入都觸發 setState。Uncontrolled：用 ref 直接讀 DOM 值，表單提交時才讀取。Controlled 更易於驗證與聯動，Uncontrolled 適合簡單表單。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 在 state 改變時，先產生新的 <span class="hl">Virtual DOM</span>，透過 Diffing 演算法和舊的比較差異，最後只更新有變動的真實 DOM 節點。<span class="hl">key</span> 是 Diffing 在列表中的識別標誌，用 index 當 key 會在重排時導致狀態錯亂。props 是唯讀的父傳子資料，state 是元件內部可變狀態，而 <span class="hl">useRef</span> 用來直接存取 DOM 或儲存不需觸發 re-render 的值。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="003 JavaScript 基礎.html">003 JavaScript 基礎</a>
+      <a href="005 效能優化與架構.html">005 效能優化與架構</a>
+      <a href="006 現代化工具 (Next.js, Tailwind, TS).html">006 Next.js / TypeScript</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

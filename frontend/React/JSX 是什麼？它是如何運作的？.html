@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSX 原理</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 基礎</div>
+    <h1>JSX 不是魔法，它是<em>語法糖衣</em>，背後全是函式呼叫</h1>
+    <p class="lede">JSX 讓你在 JavaScript 裡寫類 HTML 標記，但瀏覽器看不懂它。<b>Babel</b> 在編譯時把每一段 JSX 轉成 <b>React.createElement()</b> 呼叫，最終得到描述畫面的純 JavaScript 物件。</p>
+  </header>
+
+  <section>
+    <span class="num">核心機制</span>
+    <h2>JSX → createElement → React Element</h2>
+    <p>每一行 JSX 都對應一次函式呼叫。下面這兩段程式碼完全等價：</p>
+    <pre><code><span class="tok-com">// 你寫的 JSX</span>
+<span class="tok-key">const</span> el = &lt;h1 className=<span class="tok-str">"title"</span>&gt;你好&lt;/h1&gt;;
+
+<span class="tok-com">// Babel 編譯後</span>
+<span class="tok-key">const</span> el = <span class="tok-fn">React.createElement</span>(<span class="tok-str">'h1'</span>, { className: <span class="tok-str">'title'</span> }, <span class="tok-str">'你好'</span>);</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p>React 17+ 起，Babel 會改用新版 JSX Transform（<code>import { jsx } from 'react/jsx-runtime'</code>），不再需要手動 <code>import React</code>，但原理相同。</p></div>
+  </section>
+
+  <section>
+    <span class="num">三大特性</span>
+    <h2>面試最常考的 JSX 細節</h2>
+    <div class="chips">
+      <div class="chip info"><small>嵌入運算式</small>用 <code>{}</code> 插入任意 JS 運算式；不能用陳述式（if、for）</div>
+      <div class="chip info"><small>XSS 防護</small>React DOM 預設跳脫（escape）所有插值，防止注入攻擊</div>
+      <div class="chip info"><small>JSX 是運算式</small>編譯後是函式呼叫，可放在 if/for 裡、賦值給變數</div>
+    </div>
+    <pre><code><span class="tok-key">const</span> name = <span class="tok-str">'Yenyu'</span>;
+<span class="tok-com">// 嵌入運算式</span>
+<span class="tok-key">const</span> el = &lt;p&gt;Hi, {name}！今天是 {<span class="tok-key">new</span> Date().toLocaleDateString()}。&lt;/p&gt;;</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>為什麼不能在 JSX 插值裡寫 if 陳述式？</summary><p>因為 <code>{}</code> 期待的是「運算式（expression）」而非「陳述式（statement）」。若需條件渲染，改用三元運算式 <code>condition ? A : B</code> 或 <code>&&</code> 短路。</p></details>
+      <details><summary>JSX 屬性名為何用 camelCase（如 className、onClick）？</summary><p>因為 JSX 最終是 JavaScript，而 JS 保留字和命名慣例限制了某些屬性，例如 <code>class</code> 是保留字所以改為 <code>className</code>。</p></details>
+      <details><summary>不用 JSX 能寫 React 嗎？</summary><p>可以，直接呼叫 <code>React.createElement</code> 就行，只是可讀性差很多。JSX 完全是可選的語法糖。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JSX 是 JavaScript 的語法擴充，允許在 JS 裡寫類 HTML 的標記。它本身不是有效的 JS，需要透過 <span class="hl">Babel 編譯成 React.createElement() 呼叫</span>，回傳描述畫面的純 JS 物件（React Element）。JSX 支援用 <code>{}</code> 嵌入運算式，且 React 會自動跳脫插值，<span class="hl">預防 XSS 攻擊</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React Node、React Element 和 React Component 之間有什麼區別？.html">Node / Element / Component 的差別</a>
+      <a href="React 中的虛擬 DOM（virtual DOM）是什麼？.html">虛擬 DOM</a>
+      <a href="React 是什麼？請描述 React 的優點.html">React 核心優點</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

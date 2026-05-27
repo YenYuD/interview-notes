@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如何建立自訂錯誤物件</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 錯誤處理</div>
+    <h1>繼承 Error，讓<em>錯誤有身份</em>，catch 才精準</h1>
+    <p class="lede">自訂錯誤類別讓你可以用 <b>instanceof</b> 判斷錯誤類型，不再靠字串比對 message。API 層的 <b>NetworkError</b>、驗證層的 <b>ValidationError</b>——名字清楚，處理才清楚。</p>
+  </header>
+
+  <section>
+    <span class="num">基本寫法</span>
+    <h2>繼承 Error 類別</h2>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">ValidationError</span> <span class="tok-key">extends</span> Error {
+  <span class="tok-fn">constructor</span>(message, field) {
+    <span class="tok-key">super</span>(message);          <span class="tok-com">// 設定 this.message</span>
+    <span class="tok-key">this</span>.name = <span class="tok-str">'ValidationError'</span>;
+    <span class="tok-key">this</span>.field = field;       <span class="tok-com">// 自訂屬性：哪個欄位有問題</span>
+  }
+}
+
+<span class="tok-key">try</span> {
+  <span class="tok-key">throw new</span> <span class="tok-fn">ValidationError</span>(<span class="tok-str">'Email 格式錯誤'</span>, <span class="tok-str">'email'</span>);
+} <span class="tok-key">catch</span> (e) {
+  <span class="tok-key">if</span> (e <span class="tok-key">instanceof</span> ValidationError) {
+    console.<span class="tok-fn">log</span>(<span class="tok-str">`欄位 ${e.field}：${e.message}`</span>);
+  } <span class="tok-key">else</span> {
+    <span class="tok-key">throw</span> e; <span class="tok-com">// 不認識的錯誤往上傳</span>
+  }
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">實務分類</span>
+    <h2>按錯誤來源建立錯誤層次</h2>
+    <div class="chips">
+      <div class="chip bad">NetworkError<small>HTTP / 連線失敗</small></div>
+      <div class="chip bad">ValidationError<small>使用者輸入格式錯誤</small></div>
+      <div class="chip bad">AuthError<small>401 / 403 未授權</small></div>
+      <div class="chip info">AppError<small>業務邏輯錯誤基底類別</small></div>
+    </div>
+    <pre><code><span class="tok-key">class</span> <span class="tok-fn">NetworkError</span> <span class="tok-key">extends</span> Error {
+  <span class="tok-fn">constructor</span>(message, statusCode) {
+    <span class="tok-key">super</span>(message);
+    <span class="tok-key">this</span>.name = <span class="tok-str">'NetworkError'</span>;
+    <span class="tok-key">this</span>.statusCode = statusCode;
+  }
+  <span class="tok-fn">logError</span>() {
+    console.<span class="tok-fn">error</span>(<span class="tok-str">`[${this.name}] ${this.statusCode}: ${this.message}`</span>);
+  }
+}
+
+<span class="tok-com">// 使用時</span>
+<span class="tok-key">if</span> (!res.ok) <span class="tok-key">throw new</span> <span class="tok-fn">NetworkError</span>(<span class="tok-str">'Not Found'</span>, <span class="tok-str">404</span>);</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>記得設 this.name：</b>繼承 Error 後 <code>this.name</code> 仍然是 <code>'Error'</code>，不設的話 <code>error.name</code> 會誤導，也讓 stack trace 顯示錯誤。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+        <details>
+          <summary>為什麼要在 constructor 呼叫 super(message)？</summary>
+          <p>因為 <code>Error</code> 的建構子負責設定 <code>this.message</code> 與 <code>this.stack</code>。若不呼叫 super，這些屬性就不會被設定，堆疊追蹤也會指向錯誤的位置。在繼承內建類別時，super() 必須在存取 this 之前呼叫。</p>
+        </details>
+        <details>
+          <summary>instanceof 在跨 iframe 或多個 realms 時會失效，怎麼辦？</summary>
+          <p>在不同的執行環境（realm）下，各自有獨立的 Error 建構子，跨 realm 的 instanceof 比對會失敗。解法：改用 <code>error.name === 'ValidationError'</code> 字串比對；或使用 Symbol 標記（<code>error[Symbol.for('errorType')] = 'ValidationError'</code>）。</p>
+        </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我用 <code>class XxxError extends Error</code> 建立自訂錯誤，並在 constructor 呼叫 <code>super(message)</code> 確保 stack trace 正確，再手動設定 <span class="hl">this.name</span>。自訂錯誤的最大優點是可以用 <span class="hl">instanceof</span> 精準判斷錯誤類型，在 catch 裡只處理自己認識的錯誤，不認識的 re-throw 給上層。實務上我會按層次定義 NetworkError、ValidationError、AuthError，讓錯誤處理邏輯清楚對應業務邊界。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何使用trycatch區塊處理錯誤.html">如何使用 try…catch</a>
+      <a href="JavaScript錯誤類型.html">JavaScript 錯誤類型</a>
+      <a href="JavaScript錯誤傳播概念解析.html">錯誤傳播概念</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

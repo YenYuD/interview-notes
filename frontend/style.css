@@ -1,0 +1,407 @@
+/* ===================================================================
+   面試題庫・互動筆記 — 共用設計系統
+   紙感編輯風 / 磚紅主色 / Noto Serif 標題 + Noto Sans 內文
+   =================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Noto+Sans+TC:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --paper:       oklch(98% 0.012 85);
+  --paper-2:     oklch(95.5% 0.018 85);
+  --ink:         oklch(26% 0.03 60);
+  --ink-soft:    oklch(45% 0.025 60);
+  --accent:      oklch(58% 0.16 38);    /* 磚紅 */
+  --accent-soft: oklch(92% 0.05 45);
+  --good:        oklch(52% 0.13 155);
+  --good-soft:   oklch(93% 0.05 155);
+  --bad:         oklch(54% 0.19 25);
+  --bad-soft:    oklch(93% 0.06 25);
+  --info:        oklch(52% 0.13 250);
+  --info-soft:   oklch(93% 0.04 250);
+  --line:        oklch(85% 0.02 70);
+  --shadow:      oklch(40% 0.04 60 / 0.12);
+  --mono: "Space Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Noto Sans TC", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.75;
+  background-image: radial-gradient(oklch(90% 0.02 70 / 0.4) 0.5px, transparent 0.5px);
+  background-size: 14px 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(1.6rem, 5vw, 3.5rem) clamp(1.2rem, 5vw, 2rem) 6rem;
+}
+
+/* ---------- 頂部返回列 ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+.topbar a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+.topbar a:hover { color: var(--accent); }
+.topbar .tag {
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ---------- HERO ---------- */
+.hero { margin-bottom: clamp(2.5rem, 7vw, 4rem); }
+.kicker {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+h1 {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-size: clamp(2.1rem, 7vw, 3.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.2rem;
+}
+h1 em {
+  font-style: normal;
+  color: var(--accent);
+  position: relative;
+  white-space: nowrap;
+}
+h1 em::after {
+  content: "";
+  position: absolute;
+  left: -2%; right: -2%; bottom: 0.08em;
+  height: 0.28em;
+  background: var(--accent-soft);
+  z-index: -1;
+  transform: rotate(-1deg);
+}
+.lede {
+  font-size: clamp(1.05rem, 3vw, 1.25rem);
+  color: var(--ink-soft);
+  max-width: 40ch;
+}
+.lede b { color: var(--ink); font-weight: 700; }
+
+/* ---------- 區塊 ---------- */
+section { margin-bottom: clamp(2.8rem, 7vw, 4.5rem); }
+.num {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+h2 {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-size: clamp(1.5rem, 4.5vw, 2.1rem);
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.9rem;
+}
+h3 {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 600;
+  font-size: clamp(1.15rem, 3.2vw, 1.4rem);
+  margin: 1.6rem 0 0.6rem;
+}
+p { margin-bottom: 1rem; }
+.lead { font-size: 1.1rem; color: var(--ink-soft); }
+.hl { background: var(--accent-soft); padding: 0 0.2em; border-radius: 2px; font-weight: 500; }
+
+ul, ol { margin: 0 0 1.1rem 1.3rem; }
+li { margin-bottom: 0.45rem; }
+li::marker { color: var(--accent); }
+
+strong, b { font-weight: 700; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+/* 內文行內 code */
+code {
+  font-family: var(--mono);
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  padding: 0.05em 0.4em;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+/* 程式碼區塊 */
+pre {
+  background: var(--ink);
+  color: oklch(92% 0.02 85);
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem;
+  overflow-x: auto;
+  margin: 1.2rem 0;
+  line-height: 1.65;
+  box-shadow: 0 10px 30px -20px var(--shadow);
+}
+pre code {
+  background: none; border: none; padding: 0;
+  font-size: 0.85rem; color: inherit;
+}
+.tok-key { color: oklch(78% 0.13 70); }
+.tok-str { color: oklch(78% 0.12 155); }
+.tok-com { color: oklch(60% 0.02 85); font-style: italic; }
+.tok-fn  { color: oklch(78% 0.12 250); }
+
+/* ---------- callout / aside ---------- */
+.aside {
+  font-size: 0.96rem;
+  color: var(--ink-soft);
+  border-left: 3px solid var(--accent);
+  padding: 0.3rem 0 0.3rem 1.2rem;
+  margin: 1.5rem 0;
+}
+.aside b { color: var(--ink); }
+
+.callout {
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem;
+  margin: 1.3rem 0;
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+.callout .ico { font-size: 1.2rem; line-height: 1.5; flex-shrink: 0; }
+.callout p { margin: 0; }
+.callout.warn { background: var(--bad-soft); }
+.callout.warn b { color: var(--bad); }
+.callout.tip  { background: var(--good-soft); }
+.callout.tip b { color: var(--good); }
+.callout.info { background: var(--info-soft); }
+.callout.info b { color: var(--info); }
+
+/* ---------- 互動實驗卡 ---------- */
+.lab {
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: clamp(1.3rem, 4vw, 2rem);
+  margin: 1.8rem 0;
+  box-shadow: 0 1px 0 oklch(100% 0 0 / 0.6) inset, 0 10px 30px -20px var(--shadow);
+}
+.lab-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+.lab-label::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+/* ---------- 按鈕 ---------- */
+button {
+  font-family: "Noto Sans TC", sans-serif;
+  cursor: pointer;
+  border: none;
+  font-weight: 700;
+  transition: transform 0.08s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+button:active { transform: scale(0.96); }
+.btn-primary {
+  background: var(--accent);
+  color: var(--paper);
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1.02rem;
+  box-shadow: 0 6px 16px -8px var(--accent);
+}
+.btn-primary:hover { box-shadow: 0 8px 22px -8px var(--accent); }
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--line);
+  padding: 0.6rem 1.1rem;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.btn-ghost:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+/* 分段切換 */
+.toggle-row { display: flex; gap: 0.6rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+.toggle-row button {
+  flex: 1; min-width: 130px;
+  padding: 0.7rem; border-radius: 10px;
+  border: 2px solid var(--line);
+  background: transparent; color: var(--ink-soft);
+  font-weight: 700; font-size: 0.92rem;
+}
+.toggle-row button.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.toggle-row button.on.good { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+.toggle-row button.on.bad  { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+
+/* ---------- 終端機 / log ---------- */
+.log {
+  margin-top: 1.4rem;
+  background: var(--ink);
+  color: oklch(90% 0.02 85);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.log .ln { animation: fadein 0.3s; }
+.log .empty { opacity: 0.4; }
+.log .c-req { color: oklch(78% 0.12 85); }
+.log .c-ok  { color: oklch(74% 0.12 155); }
+.log .c-bad { color: oklch(74% 0.16 25); }
+.log .c-dim { opacity: 0.55; }
+@keyframes fadein { from { opacity: 0; transform: translateX(-6px);} to { opacity: 1; transform: none; } }
+
+/* ---------- 時間軸流程 ---------- */
+.flow { display: flex; flex-direction: column; margin: 1.8rem 0; }
+.flow-step { display: flex; gap: 1rem; align-items: flex-start; position: relative; padding-bottom: 1.5rem; }
+.flow-step:not(:last-child)::before {
+  content: ""; position: absolute; left: 17px; top: 38px; bottom: -4px;
+  width: 2px; background: var(--line);
+}
+.flow-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent); color: var(--paper);
+  display: grid; place-items: center;
+  font-family: var(--mono); font-weight: 700;
+  flex-shrink: 0; z-index: 1; font-size: 0.9rem;
+}
+.flow-dot.good { background: var(--good); }
+.flow-body h4 { font-size: 1.05rem; margin-bottom: 0.2rem; }
+.flow-body p { font-size: 0.92rem; color: var(--ink-soft); margin: 0; }
+
+/* ---------- 對照 chip ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.4rem 0; }
+.chip {
+  border-radius: 9px; padding: 0.5rem 0.9rem;
+  font-family: var(--mono); font-weight: 700; font-size: 0.88rem;
+  border: 1.5px solid;
+}
+.chip small { display: block; font-family: "Noto Sans TC"; font-weight: 400; font-size: 0.68rem; opacity: 0.8; }
+.chip.good { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+.chip.bad  { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+.chip.info { background: var(--info-soft); border-color: var(--info); color: var(--info); }
+
+/* ---------- 對照表 ---------- */
+table { width: 100%; border-collapse: collapse; margin: 1.3rem 0; font-size: 0.92rem; }
+th, td { text-align: left; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--line); }
+th { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); }
+tr:last-child td { border-bottom: none; }
+td code { font-size: 0.82em; }
+
+/* ---------- 面試答題框 ---------- */
+.interview {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 16px;
+  padding: clamp(1.5rem, 5vw, 2.4rem);
+}
+.interview .num { color: oklch(80% 0.12 70); }
+.interview h2 { color: var(--paper); }
+.interview .quote {
+  font-family: "Noto Serif TC", serif;
+  font-size: 1.08rem; line-height: 1.9;
+  border-left: 3px solid var(--accent);
+  padding-left: 1.2rem;
+  color: oklch(92% 0.02 85);
+}
+.interview .quote .hl { background: oklch(58% 0.16 38 / 0.35); padding: 0 0.2em; color: inherit; }
+
+/* ---------- 延伸追問 ---------- */
+.followup { margin: 1.4rem 0; }
+.followup details {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.4rem 1rem;
+  margin-bottom: 0.7rem;
+  background: var(--paper-2);
+}
+.followup summary {
+  cursor: pointer; font-weight: 700; padding: 0.5rem 0;
+  list-style: none; position: relative; padding-right: 1.5rem;
+}
+.followup summary::-webkit-details-marker { display: none; }
+.followup summary::after {
+  content: "+"; position: absolute; right: 0; top: 0.5rem;
+  font-family: var(--mono); color: var(--accent); transition: transform 0.2s;
+}
+.followup details[open] summary::after { transform: rotate(45deg); }
+.followup details p { margin: 0.3rem 0 0.7rem; color: var(--ink-soft); font-size: 0.95rem; }
+
+/* ---------- 相關連結 ---------- */
+footer {
+  margin-top: 4rem; padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono); font-size: 0.85rem; color: var(--ink-soft);
+}
+footer .rel { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+footer .rel a {
+  text-decoration: none; color: var(--accent);
+  background: var(--accent-soft); padding: 0.25rem 0.7rem; border-radius: 999px;
+  font-size: 0.78rem;
+}
+footer .rel a:hover { background: var(--accent); color: var(--paper); }
+
+/* ---------- 索引頁專用 ---------- */
+.index-grid { display: grid; gap: 2.5rem; }
+.cat-title {
+  font-family: "Noto Serif TC", serif; font-weight: 900;
+  font-size: 1.5rem; margin-bottom: 0.2rem;
+  display: flex; align-items: baseline; gap: 0.6rem;
+}
+.cat-title .cnt { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft); font-weight: 400; }
+.cat-desc { color: var(--ink-soft); font-size: 0.92rem; margin-bottom: 1rem; }
+.card-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.8rem; }
+.note-card {
+  display: block; text-decoration: none; color: var(--ink);
+  background: var(--paper-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 1rem 1.1rem;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s;
+}
+.note-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px -16px var(--shadow); border-color: var(--accent); }
+.note-card .nid { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); }
+.note-card .ntitle { font-weight: 700; font-size: 1rem; margin-top: 0.2rem; line-height: 1.35; }
+.note-card .nstar { color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

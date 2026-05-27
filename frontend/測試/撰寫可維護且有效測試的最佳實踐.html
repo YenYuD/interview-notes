@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>測試最佳實踐</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>測試要<em>像說明書</em>，不是像偵探謎題</h1>
+    <p class="lede">好的測試能讓三個月後的你（或新同事）一眼看懂：這段程式碼<b>要做什麼</b>、<b>在什麼條件下</b>、<b>預期結果是什麼</b>。壞的測試是維護地雷。</p>
+  </header>
+
+  <section>
+    <span class="num">AAA 模式</span>
+    <h2>最重要的結構原則</h2>
+    <p><b>Arrange → Act → Assert</b> 三段式讓每個測試職責清晰：</p>
+    <pre><code><span class="tok-fn">test</span>(<span class="tok-str">'正確計算兩數之和'</span>, () =&gt; {
+  <span class="tok-com">// Arrange — 準備資料</span>
+  <span class="tok-key">const</span> a = 1, b = 2;
+
+  <span class="tok-com">// Act — 執行被測行為</span>
+  <span class="tok-key">const</span> result = <span class="tok-fn">add</span>(a, b);
+
+  <span class="tok-com">// Assert — 驗證結果</span>
+  <span class="tok-fn">expect</span>(result).<span class="tok-fn">toBe</span>(3);
+});</code></pre>
+    <div class="aside">段落之間空一行，一眼就看清楚哪裡是設定、哪裡是執行、哪裡是斷言。</div>
+  </section>
+
+  <section>
+    <span class="num">六個核心原則</span>
+    <h2>每個測試都應該符合</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>一個測試，一個行為</h4><p>不要在一個 <code>test()</code> 裡測多件事。失敗時你才能立刻知道是哪個行為壞了。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>測試名稱要像規格書</h4><p>用「當…時，應該…」或「given…when…then…」格式：<code>'當輸入負數，應該回傳 false'</code>，不要 <code>'test1'</code>。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>測試彼此獨立</h4><p>A 測試的狀態不能影響 B 測試。用 <code>beforeEach</code>/<code>afterEach</code> 重置，或避免共用可變狀態。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">4</div><div class="flow-body"><h4>mock 外部依賴，不要 mock 被測邏輯</h4><p>API、DB、時間、亂數這些不可控的才 mock；核心業務邏輯要真實執行才有測試意義。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">5</div><div class="flow-body"><h4>先寫失敗的測試再修 bug</h4><p>用測試重現 bug，確認紅燈後再修。修完變綠燈，這個 bug 永遠不會再偷偷回來。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">6</div><div class="flow-body"><h4>定期刪掉過時測試</h4><p>測試也有技術債。不再反映功能的測試只會造成混亂，該刪就刪。</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">清理範例</span>
+    <h2>afterEach 保持測試隔離</h2>
+    <pre><code><span class="tok-fn">afterEach</span>(() =&gt; {
+  jest.<span class="tok-fn">clearAllMocks</span>(); <span class="tok-com">// 清 mock 呼叫記錄</span>
+});
+
+<span class="tok-com">// 或更徹底：</span>
+<span class="tok-fn">afterEach</span>(() =&gt; {
+  jest.<span class="tok-fn">restoreAllMocks</span>(); <span class="tok-com">// 連 spy 也復原</span>
+});</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼是 FIRST 原則？</summary><p>Fast（快）、Independent（獨立）、Repeatable（可重複）、Self-validating（自我驗證）、Timely（及時寫）。這是評估一個測試是否健康的五個維度。</p></details>
+      <details><summary>測試太多了導致 CI 很慢，怎麼辦？</summary><p>1. Unit 和 Integration 分開跑，PR merge 時才跑整套。2. 只跑受影響的測試（Jest 的 <code>--changedSince</code>）。3. 並行化執行。4. 審視是否有過多重複的覆蓋——同樣的邏輯不需要三層都測。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我寫測試會遵守幾個原則：<span class="hl">AAA 結構</span>讓每個測試目的清楚；<span class="hl">一個測試只測一件事</span>，失敗時定位快；測試名稱寫成規格書語氣，說明「在什麼條件下預期什麼結果」。用 <code>afterEach</code> 清 mock 確保測試隔離。遇到 bug 一定先寫失敗測試再修，讓這個 bug <span class="hl">永遠不會偷偷回來</span>。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何為JavaScript編寫單元測試.html">撰寫單元測試</a>
+      <a href="測試驅動開發概念說明.html">TDD 概念</a>
+      <a href="程式碼覆蓋率與測試品質評估.html">程式碼覆蓋率</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

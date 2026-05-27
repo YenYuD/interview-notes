@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Node / Element / Component</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 概念</div>
+    <h1>Node、Element、Component：<em>三個名詞</em>傻傻分不清楚？</h1>
+    <p class="lede">這三個術語層層包含：<b>Component</b> 是工廠，呼叫後吐出 <b>Element</b>（描述畫面的純物件），而 Element 是 <b>Node</b> 的一種。搞清楚它們的關係是理解 React 渲染流程的第一步。</p>
+  </header>
+
+  <section>
+    <span class="num">三者關係</span>
+    <h2>從大到小：Node ⊇ Element ← Component</h2>
+    <table>
+      <thead><tr><th>名稱</th><th>是什麼</th><th>範例</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>React Node</b></td>
+          <td>任何可渲染的值：Element、字串、數字、<code>null</code>、陣列</td>
+          <td><code>'hello'</code>、<code>123</code>、<code>null</code>、<code>&lt;div&gt;...&lt;/div&gt;</code></td>
+        </tr>
+        <tr>
+          <td><b>React Element</b></td>
+          <td>描述畫面的<b>不可變純物件</b>，由 JSX 或 <code>createElement</code> 建立</td>
+          <td><code>{ type: 'h1', props: { children: 'Hi' }, ... }</code></td>
+        </tr>
+        <tr>
+          <td><b>React Component</b></td>
+          <td>接收 props、回傳 Element 的<b>函式或類別</b>（可複用的 UI 樣板）</td>
+          <td><code>function Button(props) { return &lt;button&gt;...&lt;/button&gt;; }</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">重點區辨</span>
+    <h2>Element 是描述，Component 是工廠</h2>
+    <pre><code><span class="tok-com">// Component：函式，可複用</span>
+<span class="tok-key">function</span> <span class="tok-fn">Greeting</span>({ name }) {
+  <span class="tok-key">return</span> &lt;h1&gt;Hello, {name}&lt;/h1&gt;;  <span class="tok-com">// 回傳 Element</span>
+}
+
+<span class="tok-com">// Element：呼叫 Component 後得到的純物件描述</span>
+<span class="tok-key">const</span> el = &lt;Greeting name=<span class="tok-str">"Yenyu"</span> /&gt;;
+<span class="tok-com">// el = { type: Greeting, props: { name: 'Yenyu' }, ... }</span></code></pre>
+    <div class="aside">Element 是輕量的「快照描述」，React 拿它和舊 Element 比對（diffing）後，才決定要不要更新真正的 DOM。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Element 和 DOM 節點有什麼關係？</summary><p>Element 只是 JS 物件，是「想要什麼」的描述；真正的 DOM 節點由 React DOM 根據 Element 建立和更新，兩者是不同層的東西。</p></details>
+      <details><summary>為什麼 Element 設計成不可變（immutable）？</summary><p>不可變讓 React 可以用引用比較（reference equality）快速判斷是否需要重新渲染，也讓狀態變化更可預測。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React Node 是任何可渲染的值（字串、數字、Element 等）；React Element 是 JSX 或 createElement 產生的<span class="hl">不可變純物件</span>，描述要渲染什麼；React Component 是接收 props、回傳 Element 的<span class="hl">函式或類別</span>，是可複用的 UI 工廠。簡單說：Component 是食譜，Element 是做好的菜描述，Node 是廣義可上桌的任何食物。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JSX 是什麼？它是如何運作的？.html">JSX 運作原理</a>
+      <a href="React 中的虛擬 DOM（virtual DOM）是什麼？.html">虛擬 DOM</a>
+      <a href="React 中的「協調」（reconciliation）是什麼？.html">Reconciliation</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>== 與 === 的差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">語法 · 運算子</div>
+    <h1><code>0 == ''</code> 是 <em>true</em>，但 <code>0 === ''</code> 是 false</h1>
+    <p class="lede"><code>==</code> 比較前會<b>偷偷轉型</b>，常產生反直覺結果；<code>===</code> <b>不轉型</b>，型別不同直接 false。結論很簡單：<b>幾乎永遠用 ===</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 同一組值，兩種比法</span>
+    <h2>看轉型怎麼把你坑了</h2>
+    <p>選一組比較，看 <code>==</code> 和 <code>===</code> 結果差在哪、以及 <code>==</code> 偷偷做了什麼轉型：</p>
+
+    <div class="lab">
+      <div class="lab-label">挑一組值</div>
+      <div class="toggle-row" id="row" style="flex-wrap:wrap">
+        <button class="on" data-i="0">42 與 '42'</button>
+        <button data-i="1">0 與 false</button>
+        <button data-i="2">0 與 ''</button>
+        <button data-i="3">null 與 undefined</button>
+        <button data-i="4">'' 與 '0'</button>
+      </div>
+      <div class="chips">
+        <div class="chip" id="looseChip">==<small id="looseSub">　</small></div>
+        <div class="chip" id="strictChip">===<small id="strictSub">　</small></div>
+      </div>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">差別</span>
+    <h2>一張表看懂</h2>
+    <table>
+      <tr><th></th><th><code>==</code> 寬鬆相等</th><th><code>===</code> 嚴格相等</th></tr>
+      <tr><td>型別轉換</td><td><b style="color:var(--bad)">會</b></td><td>不會</td></tr>
+      <tr><td>比型別</td><td>否</td><td><b style="color:var(--good)">是</b></td></tr>
+      <tr><td>可預期</td><td>低（一堆特例）</td><td>高</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>唯一合理用 <code>==</code> 的時機：<code>x == null</code> 一次檢查 null 和 undefined。其餘一律 <code>===</code>，並用 ESLint 的 <code>eqeqeq</code> 強制。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Object.is() 和 === 差在哪？</summary><p>幾乎一樣，只有兩個邊界不同：<code>Object.is(NaN, NaN)</code> 是 true（=== 是 false），且 <code>Object.is(+0, -0)</code> 是 false（=== 是 true）。</p></details>
+      <details><summary>NaN === NaN 是什麼？</summary><p>是 <code>false</code>——NaN 不等於任何值，包含自己。要判斷用 <code>Number.isNaN()</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">== 會型別轉換</span>再比，容易產生像 <code>0 == ''</code> 為 true 的反直覺結果；<span class="hl">=== 不轉型</span>，型別不同就直接 false，行為可預期。我預設一律用 ===，只有要同時判斷 null 和 undefined 時才用 <code>x == null</code>，並開 ESLint <code>eqeqeq</code> 把關。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中的各種資料類型.html">資料類型</a>
+      <a href="如何檢查變數的資料類型.html">檢查型別</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), log=document.getElementById('log');
+  const lc=document.getElementById('looseChip'), ls=document.getElementById('looseSub');
+  const sc=document.getElementById('strictChip'), ss=document.getElementById('strictSub');
+  const cases=[
+    {a:"42",b:"'42'",loose:true,strict:false,note:"'42' 被轉成數字 42 → 42 == 42"},
+    {a:"0",b:"false",loose:true,strict:false,note:"false 轉成數字 0 → 0 == 0"},
+    {a:"0",b:"''",loose:true,strict:false,note:"'' 轉成數字 0 → 0 == 0"},
+    {a:"null",b:"undefined",loose:true,strict:false,note:"== 視 null 與 undefined 相等（特例）"},
+    {a:"''",b:"'0'",loose:false,strict:false,note:"兩個都是字串、內容不同 → 不轉型也不等"},
+  ];
+  function chip(el,sub,v){ el.className='chip '+(v?'good':'bad'); el.firstChild.textContent= v?'true':'false'; }
+  function render(i){
+    const c=cases[i];
+    chip(lc,ls,c.loose); chip(sc,ss,c.strict);
+    ls.textContent= c.a+' == '+c.b; ss.textContent= c.a+' === '+c.b;
+    log.innerHTML=`<div class="ln">${c.a} == ${c.b} → <span class="${c.loose?'c-ok':'c-bad'}">${c.loose}</span></div>`+
+                  `<div class="ln">${c.a} === ${c.b} → <span class="${c.strict?'c-ok':'c-bad'}">${c.strict}</span></div>`+
+                  `<div class="ln c-dim">// == 做了什麼：${c.note}</div>`;
+  }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(+b.dataset.i); });
+  render(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>取得查詢字串值</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>用 <em>URLSearchParams</em> 輕鬆解析 URL 查詢字串</h1>
+    <p class="lede">過去要手動解析 <code>?page=2&amp;sort=asc</code> 這樣的查詢字串，現在用 <b>URLSearchParams</b> 一行就搞定。這是現代瀏覽器內建 API，不需要任何第三方函式庫。</p>
+  </header>
+
+  <section>
+    <span class="num">基本用法</span>
+    <h2>讀取、檢查、遍歷查詢參數</h2>
+    <pre><code><span class="tok-com">// URL: https://example.com?page=2&amp;sort=asc&amp;tag=js&amp;tag=css</span>
+<span class="tok-key">const</span> params = <span class="tok-key">new</span> URLSearchParams(window.location.search);
+
+<span class="tok-com">// 讀取單一參數</span>
+params.get(<span class="tok-str">'page'</span>);      <span class="tok-com">// "2"（字串，不是數字）</span>
+params.get(<span class="tok-str">'notExist'</span>); <span class="tok-com">// null</span>
+
+<span class="tok-com">// 檢查參數是否存在</span>
+params.has(<span class="tok-str">'sort'</span>);      <span class="tok-com">// true</span>
+
+<span class="tok-com">// 讀取多重值</span>
+params.getAll(<span class="tok-str">'tag'</span>);    <span class="tok-com">// ["js", "css"]</span>
+
+<span class="tok-com">// 遍歷所有參數</span>
+params.forEach((value, key) => console.log(key, value));</code></pre>
+  </section>
+
+  <section>
+    <span class="num">修改查詢字串</span>
+    <h2>URLSearchParams 也可以寫入</h2>
+    <pre><code><span class="tok-key">const</span> params = <span class="tok-key">new</span> URLSearchParams();
+params.set(<span class="tok-str">'page'</span>, <span class="tok-str">'3'</span>);
+params.append(<span class="tok-str">'tag'</span>, <span class="tok-str">'react'</span>);
+params.delete(<span class="tok-str">'sort'</span>);
+
+<span class="tok-com">// 更新 URL 不觸發頁面重新載入（SPA 常見做法）</span>
+history.pushState({}, <span class="tok-str">''</span>, <span class="tok-str">`?${params.toString()}`</span>);</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><code>params.get()</code> 永遠回傳<b>字串</b>或 null，取得數字後需要自行轉型：<code>Number(params.get('page'))</code> 或 <code>+params.get('page')</code>。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>URLSearchParams 和手動解析 location.search 有什麼差別？</summary>
+        <p>URLSearchParams 自動處理 URL 編碼解碼（<code>%20</code> 轉空格等），以及多重值情況，手動解析需要自己處理這些邊界情況，容易有 bug。</p>
+      </details>
+      <details>
+        <summary>React Router 等前端框架如何取得查詢字串？</summary>
+        <p>React Router 提供 <code>useSearchParams()</code> hook，底層也是基於 URLSearchParams，但整合了路由狀態管理，修改參數時不需要直接操作 history API。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「取得查詢字串值最佳實踐是用 <span class="hl">URLSearchParams</span>：<code>const params = new URLSearchParams(window.location.search)</code>，然後用 <code>params.get('key')</code> 取值。它自動處理 URL 編碼，也支援 <code>has()</code> 檢查存在、<code>getAll()</code> 取多重值、<code>set()</code>/<code>delete()</code> 修改。要注意 get() 回傳的永遠是字串，需要數字要自行轉型。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript如何導向新頁面.html">JavaScript 頁面導向</a>
+      <a href="如何使用window.history API.html">window.history API</a>
+      <a href="Window物件與Document物件的差異.html">Window vs Document 物件</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清除浮動技術</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 版面</div>
+    <h1>浮動元素讓父容器<em>高度塌陷</em>——三種清除技術各有適用場景</h1>
+    <p class="lede">float 元素不被父容器計入高度，導致「高度塌陷」問題。有三種清除方法，各有取捨；現代開發更好的解法是直接<b>改用 Flexbox 或 Grid</b>，從根本避免問題。</p>
+  </header>
+
+  <section>
+    <span class="num">三種技術</span>
+    <h2>清除浮動的方法比較</h2>
+    <table>
+      <thead>
+        <tr><th>方法</th><th>寫法</th><th>適用情境</th><th>缺點</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>空 div 法</strong></td>
+          <td><code>&lt;div style="clear:both"&gt;&lt;/div&gt;</code></td>
+          <td>快速修復，不想動 CSS</td>
+          <td>污染 HTML，增加無語意標記</td>
+        </tr>
+        <tr>
+          <td><strong>Clearfix（::after）</strong></td>
+          <td>見下方程式碼</td>
+          <td>大型專案，可複用的 utility class</td>
+          <td>需要加 class，不影響 HTML 結構</td>
+        </tr>
+        <tr>
+          <td><strong>overflow: hidden</strong></td>
+          <td>父元素加 <code>overflow: hidden/auto</code></td>
+          <td>快速、無需額外 class</td>
+          <td>子元素若超出父元素邊界會被裁切</td>
+        </tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">/* Clearfix：推薦方式 */</span>
+<span class="tok-key">.clearfix::after</span> {
+  content: <span class="tok-str">''</span>;
+  display: block;
+  clear: both;
+}</code></pre>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p><code>overflow: hidden/auto</code> 能清除浮動的原因：它建立了新的<strong>區塊格式化上下文（BFC）</strong>，BFC 會包含其浮動子元素。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">現代建議</span>
+    <h2>最好的清除浮動就是不用 float</h2>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>在現代專案中，<strong>用 Flexbox 或 Grid</strong> 替換 float 版面，不會有高度塌陷問題，也不需要 clearfix。float 保留給「文字環繞圖片」這個真正需要它的場景。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>為什麼 overflow: hidden 能清除浮動？</summary>
+        <p>設置 <code>overflow: hidden</code>（或 <code>auto</code>、<code>scroll</code>）會讓父元素建立新的區塊格式化上下文（BFC）。根據 BFC 規範，BFC 容器必須包含其內部的浮動元素，因此父容器的高度會展開以包住浮動子元素。</p>
+      </details>
+      <details>
+        <summary>現代瀏覽器支援 display: flow-root 嗎？</summary>
+        <p><code>display: flow-root</code> 是現代建立 BFC 的正確方式，不像 <code>overflow: hidden</code> 有裁切副作用，語意也更清晰。現代瀏覽器支援良好，但在需要支援較舊瀏覽器時需要確認。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「清除浮動主要有三種方法：<span class="hl">空 div</span>（污染 HTML，不推薦）、<span class="hl">Clearfix</span>（在父元素加 <code>::after { clear: both }</code>，適合可複用場景）、<span class="hl">overflow: hidden</span>（建立新 BFC，快速但子元素會被裁切）。不過在現代專案中，最好的解法是<span class="hl">改用 Flexbox 或 Grid</span>，根本不需要 float 排版，也就不存在高度塌陷問題。float 現在只保留給「文字環繞圖片」這種特定場景。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="描述 `float` 及其運作方式.html">float 的運作方式</a>
+      <a href="描述區塊格式化上下文（BFC）及其運作方式.html">BFC 區塊格式化上下文</a>
+      <a href="你有嘗試過新的 CSS Flexbox 或 Grid 規範嗎？.html">CSS Flexbox 與 Grid</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

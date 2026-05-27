@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 垃圾回收機制</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JavaScript · 記憶體管理</div>
+    <h1>你不 <em>free()</em>，但引擎也不是萬能</h1>
+    <p class="lede">JS 有自動<b>垃圾回收（GC）</b>，但仍會記憶體洩漏。理解「可達性」與「標記清除」，才能知道哪些程式碼會讓記憶體悄悄吃光。</p>
+  </header>
+
+  <section>
+    <span class="num">核心機制</span>
+    <h2>標記清除：GC 的主力演算法</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>標記（Mark）</h4>
+          <p>從根物件（全域變數、執行中的函式參數）出發，遞迴走訪所有可達物件，標記為「存活」。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>清除（Sweep）</h4>
+          <p>掃描整個堆積（heap），回收所有未被標記的物件所佔記憶體。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot good">✓</div>
+        <div class="flow-body">
+          <h4>可達性 = 活著的判準</h4>
+          <p>只要從根節點有任何參考鏈指向物件，它就不會被回收，無論是否「實際用到」。</p>
+        </div>
+      </div>
+    </div>
+    <div class="aside"><b>世代垃圾回收（Generational GC）：</b>V8 等現代引擎將物件分為年輕代（新建物件，頻繁回收）與老年代（存活久的物件，較少回收），大幅降低 GC 停頓時間。</div>
+  </section>
+
+  <section>
+    <span class="num">記憶體洩漏</span>
+    <h2>四種常見的「物件走不掉」情境</h2>
+    <table>
+      <thead>
+        <tr><th>原因</th><th>說明</th><th>修法</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>全域變數</td>
+          <td>意外不加 <code>let/const</code> 宣告，變數掛在 <code>window</code></td>
+          <td>嚴格模式 <code>'use strict'</code></td>
+        </tr>
+        <tr>
+          <td>事件監聽器未移除</td>
+          <td>元件銷毀時未 <code>removeEventListener</code></td>
+          <td>在 cleanup 裡明確移除</td>
+        </tr>
+        <tr>
+          <td>計時器忘了清</td>
+          <td><code>setInterval</code> 的 callback 持有外部參考</td>
+          <td><code>clearInterval</code> 在不需要時呼叫</td>
+        </tr>
+        <tr>
+          <td>脫離的 DOM 節點</td>
+          <td>節點從 DOM 移除，JS 變數仍持有其參考</td>
+          <td>不再需要時將變數設為 <code>null</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>循環參考：</b>舊版 IE 的參考計數演算法會洩漏循環參考，但現代引擎用標記清除已不成問題——因為可達性比參考數更精確。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>WeakMap / WeakRef 與 GC 的關係？</summary>
+        <p><code>WeakMap</code> 的 key 是弱參考，key 物件若無其他強參考，GC 可以回收它，map entry 也會消失。適合快取「以物件為鍵」的資料，不阻止物件被回收。</p>
+      </details>
+      <details>
+        <summary>如何在 Chrome DevTools 偵測記憶體洩漏？</summary>
+        <p>開啟 Memory 面板 → 拍多張 Heap Snapshot → 比較兩次快照的 Objects allocated between snapshots，觀察哪類物件數量持續增加。也可用 Performance 面板觀察 JS Heap Size 是否持續攀升。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 的 GC 主要靠<span class="hl">標記清除</span>：從根物件開始走訪所有可達物件並標記，接著清除未標記的物件。現代引擎還用<span class="hl">世代回收</span>優化效率，讓年輕代頻繁小回收，老年代偶爾大回收。雖然 GC 是自動的，但開發者仍可能造成<span class="hl">記憶體洩漏</span>，常見來源是未移除的事件監聽器、忘清的 setInterval，以及對已移出 DOM 節點的持有參考。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="為何通常不應修改網站的全域 JavaScript 範圍.html">避免污染全域範圍</a>
+      <a href="JavaScript除錯工具與技巧.html">除錯工具與技巧</a>
+      <a href="JavaScript錯誤類型.html">JavaScript 錯誤類型</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漸進式渲染</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS / 效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 效能優化</div>
+    <h1>不等全部載完——<em>盡快顯示</em>才是王道</h1>
+    <p class="lede"><b>漸進式渲染（Progressive Rendering）</b>是一系列「盡快讓使用者看到內容」的技術集合。在行動網路不穩定的環境下，<b>感知載入速度</b>比真實載入速度更重要。</p>
+  </header>
+
+  <section>
+    <span class="num">三大技術</span>
+    <h2>漸進式渲染的主要手法</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>圖片延遲載入（Lazy Loading）</strong>
+          只載入視口內的圖片，使用者捲動到圖片附近時才載入。
+          <pre><code><span class="tok-com">&lt;!-- 現代原生支援 --&gt;</span>
+<span class="tok-str">&lt;img src="photo.jpg" loading="lazy" alt="..."&gt;</span></code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>優先顯示首屏內容（Critical CSS）</strong>
+          將首屏必要的 CSS 內嵌在 HTML 中（inline），其餘樣式非同步載入。讓首次有意義繪製（FMP）盡快發生。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>非同步 HTML 片段（Async Fragments）</strong>
+          後端逐步串流輸出 HTML，瀏覽器邊接收邊渲染，不等整個頁面生成完。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">現代技術</span>
+    <h2>SSR 相關延伸技術</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>Streaming SSR</small>
+        伺服器邊渲染邊串流 HTML，React 18 的 <code>renderToPipeableStream</code> 即此概念
+      </div>
+      <div class="chip info">
+        <small>Progressive Hydration</small>
+        SSR 頁面分優先順序注水，可互動區域先完成，非關鍵區域延後
+      </div>
+      <div class="chip info">
+        <small>Selective Hydration</small>
+        React 18 特性：使用者互動的元件優先完成 hydration
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>img loading="lazy" 和 JavaScript lazy loading 有什麼差別？</summary>
+        <p>原生 <code>loading="lazy"</code> 由瀏覽器原生支援，無 JavaScript 開銷，且能在 DOM 解析時就決定是否延遲下載。JS 方案（IntersectionObserver）在老瀏覽器或 JS 失效時是備案，但現代瀏覽器 <code>loading="lazy"</code> 支援率已相當高，優先使用原生方案。</p>
+      </details>
+      <details>
+        <summary>什麼是 Critical CSS？如何實作？</summary>
+        <p>Critical CSS 是首屏渲染必要的最小 CSS 子集，應內嵌在 HTML <code>&lt;head&gt;</code> 中，讓首次渲染不需等外部 CSS 下載。工具如 <code>critical</code>（npm）可自動提取。其餘 CSS 用 <code>&lt;link rel="preload" as="style"&gt;</code> 非同步預載。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「漸進式渲染是一套「盡快讓使用者看到內容」的技術集合，核心目標是<span class="hl">改善感知載入速度</span>。常見手法有三：<span class="hl">圖片 lazy loading</span>（原生 <code>loading="lazy"</code>）只載入視口內圖片；<span class="hl">Critical CSS</span> 把首屏樣式內嵌在 HTML，其餘非同步載入；<span class="hl">Streaming SSR</span> 讓後端邊渲染邊串流 HTML，瀏覽器邊接收邊顯示。在行動網路環境下，這些技術能顯著提升使用者的等待體驗。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="為什麼將 CSS `link` 放在 `head` 內、將 JS `script` 放在 `body` 之前通常是好主意？.html">CSS/JS 資源擺放順序</a>
+      <a href="你為什麼會在圖片標籤中使用 `srcset` 屬性？請說明瀏覽器評估此屬性內容的過程。.html">srcset 屬性詳解</a>
+      <a href="你曾處理過 Retina 顯示器的圖形嗎？.html">Retina 顯示器圖形處理</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模組模式與封裝</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>用閉包建立<em>私有狀態</em>，避免全域污染</h1>
+    <p class="lede">模組模式利用 IIFE 與閉包創造私有作用域，只把必要的介面暴露出去。在 ES Module 普及之前，這是 JavaScript 管理程式碼組織的主要手段，<b>封裝</b>的思維至今仍適用。</p>
+  </header>
+
+  <section>
+    <span class="num">核心結構</span>
+    <h2>IIFE + 閉包 = 私有 / 公開分離</h2>
+    <pre><code><span class="tok-key">const</span> counter = (<span class="tok-key">function</span> () {
+  <span class="tok-key">let</span> _count = 0; <span class="tok-com">// 私有，外部無法直接存取</span>
+
+  <span class="tok-key">function</span> <span class="tok-fn">_validate</span>(n) { <span class="tok-key">return</span> Number.isInteger(n); }
+
+  <span class="tok-key">return</span> { <span class="tok-com">// 公開 API</span>
+    <span class="tok-fn">increment</span>: (n = 1) => {
+      <span class="tok-key">if</span> (<span class="tok-fn">_validate</span>(n)) _count += n;
+    },
+    <span class="tok-fn">reset</span>: () => { _count = 0; },
+    <span class="tok-fn">getCount</span>: () => _count,
+  };
+})();
+
+counter.<span class="tok-fn">increment</span>();
+counter.<span class="tok-fn">getCount</span>(); <span class="tok-com">// 1</span>
+counter._count;     <span class="tok-com">// undefined（私有保護）</span></code></pre>
+
+    <div class="aside">
+      <b>IIFE（立即執行函式表達式）</b>：<code>(function(){ ... })()</code> 在宣告時立即執行，建立獨立作用域，執行完後作用域消失，但 closure 仍保留對內部變數的參考。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">演進歷史</span>
+    <h2>從 IIFE 到 ES Module</h2>
+    <table>
+      <thead><tr><th>時期</th><th>封裝方式</th><th>問題</th></tr></thead>
+      <tbody>
+        <tr><td>早期 JS（2009 前）</td><td>全域變數、命名空間物件 <code>MyApp.util</code></td><td>容易命名衝突</td></tr>
+        <tr><td>模組模式時期</td><td>IIFE + 閉包</td><td>無法跨文件共用模組</td></tr>
+        <tr><td>CommonJS（Node.js）</td><td><code>module.exports</code> / <code>require</code></td><td>同步載入，不適合瀏覽器</td></tr>
+        <tr><td>ES Module（ES2015+）</td><td><code>export</code> / <code>import</code>（原生靜態分析）</td><td>現代標準，推薦使用</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p><b>現代建議：</b>今天寫新程式碼優先用 ES Module（<code>export</code> / <code>import</code>）；IIFE 模組模式仍有用武之地——如 bundler 生成的 IIFE bundle、或需要在老瀏覽器上手動隔離作用域的場景。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>模組模式如何實現「揭示模組（Revealing Module）」變體？</summary>
+        <p>Revealing Module Pattern 在 IIFE 內部定義所有函式（公開和私有），最後的 return 物件只列出要公開的參考，讓公開介面的宣告集中在一處，程式碼更易讀。<code>return { increment, getCount }</code> 而不是在 return 裡定義函式。</p>
+      </details>
+      <details>
+        <summary>ES Module 和 IIFE 模組模式，封裝機制的本質差異？</summary>
+        <p>IIFE 靠函式作用域（closure）隔離；ES Module 靠語言規範保證模組作用域，<code>import</code> 的 binding 是 live binding（即時綁定），IIFE 的 getter 則是主動呼叫。此外 ES Module 是靜態結構，打包工具可靜態分析並做 Tree Shaking；IIFE 模式是動態的，難以靜態分析。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「模組模式利用 <span class="hl">IIFE 與閉包</span>建立私有作用域——IIFE 內部的變數和函式外部無法存取，只有 return 出來的公開 API 才能被呼叫。核心目的是封裝私有狀態、避免全域命名污染。現代開發用 <span class="hl">ES Module</span>（export/import）取代了手動 IIFE，但模組模式的思維依然重要：理解它有助於理解 Bundler 的 scope hoisting 和 IIFE bundle 輸出格式。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="裝飾者模式介紹與應用.html">裝飾者模式</a>
+      <a href="單例模式概念說明.html">單例模式</a>
+      <a href="設計模式及其重要性.html">設計模式總覽</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

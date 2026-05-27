@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weak 集合差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 記憶體</div>
+    <h1>WeakMap / WeakSet：<em>讓垃圾回收器自己決定</em></h1>
+    <p class="lede">Map/Set 對鍵持有<b>強參考</b>，只要集合存在，鍵就不會被回收。WeakMap/WeakSet 持有<b>弱參考</b>——鍵物件若無其他參考指向它，垃圾回收器可以把它清掉，集合也跟著縮。</p>
+  </header>
+
+  <section>
+    <span class="num">差異總表</span>
+    <h2>四種集合的核心差異</h2>
+    <table>
+      <thead><tr><th>特性</th><th>Map</th><th>WeakMap</th><th>Set</th><th>WeakSet</th></tr></thead>
+      <tbody>
+        <tr><td>鍵／元素類型</td><td>任意</td><td>只能物件</td><td>任意唯一值</td><td>只能物件</td></tr>
+        <tr><td>垃圾回收影響</td><td>阻止回收</td><td>不阻止回收 ✅</td><td>阻止回收</td><td>不阻止回收 ✅</td></tr>
+        <tr><td>可迭代</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td></tr>
+        <tr><td>size 屬性</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">使用情境</span>
+    <h2>Weak 版本的典型用途</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>WeakMap — 關聯私有資料到物件</strong>
+          <p>把額外資料附加在 DOM 節點或某個物件上，不影響它的生命週期。節點被移除後資料自動清除，不會洩漏記憶體。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>WeakSet — 標記已處理的物件</strong>
+          <p>例如遍歷有循環參考的資料結構時，用 WeakSet 記錄已訪問的物件；或追蹤活躍使用者 session 物件，session 結束後自動從集合中消失。</p>
+        </div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// WeakMap 避免記憶體洩漏</span>
+<span class="tok-key">const</span> metadata = <span class="tok-key">new</span> <span class="tok-fn">WeakMap</span>();
+<span class="tok-key">let</span> dom = document.<span class="tok-fn">querySelector</span>(<span class="tok-str">'#app'</span>);
+metadata.<span class="tok-fn">set</span>(dom, { init: <span class="tok-key">true</span> });
+
+dom = <span class="tok-key">null</span>;
+<span class="tok-com">// dom 的強參考消失 → GC 可以回收它</span>
+<span class="tok-com">// metadata 內的那筆資料也跟著消失</span></code></pre>
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p>WeakMap/WeakSet 因為不可迭代、沒有 size，<b>不適合</b>用來儲存需要遍歷或統計的資料；它們的存在價值就是「讓 GC 自己管理」。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>WeakMap 為什麼只能用物件當鍵？</summary><p>弱參考的語意需要 GC 能追蹤物件的存活狀態。原始值（字串、數字）不是 GC 管理的堆積物件，無法建立弱參考，所以只能用物件。</p></details>
+      <details><summary>WeakRef 和 WeakMap 有什麼關係？</summary><p><code>WeakRef</code>（ES2021）是直接暴露弱參考給開發者的低階 API，讓你持有一個物件的弱參考並在需要時 <code>deref()</code> 取值。WeakMap 是更高階的封裝，自動管理弱鍵的生命週期。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Map/Set 對鍵持有強參考，只要集合存在鍵就不會被 GC 回收。WeakMap/WeakSet 只接受物件為鍵，持有的是<span class="hl">弱參考——鍵物件若無其他強參考，GC 可以自動回收它</span>。實際用途是把私有資料附加在 DOM 節點上，不需要手動清理，避免記憶體洩漏。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="Set與Map是什麼及其用法.html">Set 與 Map 用法</a>
+      <a href="JavaScript Map 與一般物件的差異.html">Map vs 一般物件</a>
+      <a href="Set與Map如何判斷物件相等性.html">Set/Map 相等性判斷</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

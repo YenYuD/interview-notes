@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useEffect 依賴陣列</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">React Hooks</div>
+    <h1>依賴陣列決定 effect <em>「何時再跑一次」</em></h1>
+    <p class="lede">第二個參數三種寫法，行為天差地別：<b>沒寫陣列（每次都跑）、空陣列（只跑一次）、有依賴（依賴變才跑）</b>。寫錯就會 effect 狂跑或抓到舊值。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 三種寫法，幾次執行？</span>
+    <h2>切換依賴陣列，看 effect 何時觸發</h2>
+    <p>假設組件重新渲染了 3 次（其中 <code>count</code> 變了 1 次）。看不同依賴陣列下 effect 跑幾次：</p>
+
+    <div class="lab">
+      <div class="lab-label">第二參數寫法</div>
+      <div class="toggle-row" id="row" style="flex-wrap:wrap">
+        <button class="on" data-k="none">省略（不傳）</button>
+        <button data-k="empty">[ ] 空陣列</button>
+        <button data-k="dep">[count]</button>
+      </div>
+      <pre style="margin-top:0"><code id="code"></code></pre>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">三種寫法</span>
+    <h2>速查</h2>
+    <table>
+      <tr><th>第二參數</th><th>effect 何時執行</th><th>類比</th></tr>
+      <tr><td><b>省略</b></td><td>每次渲染後都跑</td><td>—（常是 bug）</td></tr>
+      <tr><td><code>[]</code></td><td>只在初次掛載後跑一次</td><td><code>componentDidMount</code></td></tr>
+      <tr><td><code>[a, b]</code></td><td>a 或 b 變才跑（淺比較）</td><td>依賴更新</td></tr>
+    </table>
+    <div class="callout warn"><span class="ico">⚠️</span><p><b>陳舊閉包</b>：effect 裡用到的 state/props 一定要放進依賴陣列，否則會抓到舊的值。函式依賴記得用 <code>useCallback</code> 穩定引用，否則每次渲染都變、effect 會狂跑。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>cleanup 函式什麼時候跑？</summary><p>effect 回傳的函式會在「下次 effect 執行前」與「組件卸載時」執行，用來清訂閱、清計時器、abort 請求，避免洩漏。</p></details>
+      <details><summary>依賴是物件/陣列時老是重跑？</summary><p>因為淺比較比的是引用，每次渲染新建的物件引用都不同。用 useMemo 穩定它，或只依賴其中的原始值欄位。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「依賴陣列決定 effect 何時重跑：<span class="hl">省略＝每次渲染都跑、[]＝只跑一次、[deps]＝依賴變才跑</span>（淺比較）。最常見的坑是<span class="hl">陳舊閉包</span>——用到的 state/props 沒放進依賴會抓到舊值；函式依賴要用 useCallback 穩定引用。cleanup 函式則在下次執行前與卸載時跑，用來清訂閱、計時器。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 `useEffect` 和 `useLayoutEffect` 有什麼區別？.html">useEffect vs useLayoutEffect</a>
+      <a href="React Hooks 的規則是什麼？.html">Hooks 規則</a>
+      <a href="React 中的 `useCallback` hook 是什麼？什麼時候應該使用它？.html">useCallback</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), code=document.getElementById('code'), log=document.getElementById('log');
+  const data={
+    none:['useEffect(() => {\n  // ...\n}); // 沒有第二參數',
+      ['渲染 #1（掛載）→ <b>執行</b>','渲染 #2 → <b>執行</b>','渲染 #3（count 變）→ <b>執行</b>'],'共 3 次：每次渲染都跑（通常不是你要的）','c-bad'],
+    empty:['useEffect(() => {\n  // ...\n}, []); // 空陣列',
+      ['渲染 #1（掛載）→ <b>執行</b>','渲染 #2 → 跳過','渲染 #3（count 變）→ 跳過'],'共 1 次：只在掛載後跑（≈ componentDidMount）','c-ok'],
+    dep:['useEffect(() => {\n  // 用到 count\n}, [count]);',
+      ['渲染 #1（掛載）→ <b>執行</b>','渲染 #2（count 沒變）→ 跳過','渲染 #3（count 變）→ <b>執行</b>'],'共 2 次：掛載 + count 改變時','c-ok'],
+  };
+  function render(k){
+    const [src,lines,sum,cls]=data[k];
+    code.textContent=src;
+    log.innerHTML=lines.map(l=>`<div class="ln ${l.includes('執行')?'':'c-dim'}">${l}</div>`).join('')+`<div class="ln ${cls}">→ ${sum}</div>`;
+  }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(b.dataset.k); });
+  render('none');
+</script>
+</body>
+</html>

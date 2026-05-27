@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AbortController 中止請求</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">非同步 · Fetch</div>
+    <h1>請求送出去了，<em>還能反悔</em></h1>
+    <p class="lede"><code>AbortController</code> 給你一個 <code>signal</code> 交給 fetch，之後呼叫 <code>abort()</code> 就能取消這個還在飛的請求——使用者離開頁面、或只想要最新一筆結果時超實用。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 送出後按取消</span>
+    <h2>模擬一個 3 秒的請求</h2>
+    <pre><code>const controller = new AbortController();
+fetch(url, { signal: controller.signal })
+  .catch(e =&gt; { if (e.name === 'AbortError') /* 被取消 */ });
+controller.abort(); <span class="tok-com">// 反悔！</span></code></pre>
+
+    <div class="lab">
+      <div class="lab-label">送出請求後可中途取消</div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn-primary" id="send">送出請求（3 秒）</button>
+        <button class="btn-ghost" id="abort">abort() 取消</button>
+      </div>
+      <div style="margin-top:1rem;height:8px;background:var(--paper);border-radius:99px;overflow:hidden;border:1px solid var(--line)">
+        <div id="bar" style="height:100%;width:0;background:var(--accent);transition:width .1s linear"></div>
+      </div>
+      <div class="log" id="out" style="max-height:none"><div class="ln empty">// 按「送出請求」…</div></div>
+    </div>
+    <div class="aside">取消後 fetch 的 promise 會 reject，錯誤的 <code>name</code> 是 <code>AbortError</code>——要在 catch 裡和真正的網路錯誤分開處理。</div>
+  </section>
+
+  <section>
+    <span class="num">三步驟</span>
+    <h2>怎麼用</h2>
+    <ol>
+      <li>建立 <code>const controller = new AbortController()</code>。</li>
+      <li>把 <code>controller.signal</code> 傳進 fetch 選項。</li>
+      <li>需要取消時呼叫 <code>controller.abort()</code>。</li>
+    </ol>
+    <div class="callout tip"><span class="ico">✅</span><p>典型場景：搜尋輸入框 debounce 後，<b>取消前一筆未完成的請求</b>只留最新一筆（避免 race condition 顯示舊結果）；以及元件卸載時取消，防止記憶體洩漏與 setState 警告。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>一個 controller 能取消多個請求嗎？</summary><p>可以。把同一個 <code>signal</code> 傳給多個 fetch，<code>abort()</code> 一次全部取消。但一個 controller 只能用一次，abort 後要重建。</p></details>
+      <details><summary>signal 只能用在 fetch 嗎？</summary><p>不只。<code>addEventListener</code> 也接受 <code>{ signal }</code>，abort 時自動移除監聽器；<code>setTimeout</code> 等也有相容寫法。它是通用的取消信號。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>AbortController</code> 用來取消進行中的非同步操作。建立後把它的 <span class="hl">signal 傳進 fetch</span>，需要時呼叫 <span class="hl">abort()</span>，fetch 就會以 <code>AbortError</code> reject。我常用在<span class="hl">搜尋輸入取消舊請求只留最新</span>、以及元件卸載時取消避免洩漏。同一 signal 也能一次取消多個請求或移除事件監聽器。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="使用Fetch API發送HTTP請求.html">Fetch API</a>
+      <a href="XMLHttpRequest與fetch在JavaScript與瀏覽器中的差異.html">XHR vs fetch</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const bar=document.getElementById('bar'), out=document.getElementById('out');
+  let timer=null, t=0, running=false;
+  function reset(){ clearInterval(timer); running=false; t=0; bar.style.width='0'; }
+  document.getElementById('send').addEventListener('click',()=>{
+    reset(); running=true;
+    out.innerHTML='<div class="ln c-req">fetch(url, { signal }) 送出…</div>';
+    timer=setInterval(()=>{
+      t+=100; bar.style.width=(t/3000*100)+'%';
+      if(t>=3000){ clearInterval(timer); running=false; out.insertAdjacentHTML('beforeend','<div class="ln c-ok">→ 回應成功 ✓（200）</div>'); out.scrollTop=out.scrollHeight; }
+    },100);
+  });
+  document.getElementById('abort').addEventListener('click',()=>{
+    if(!running){ return; }
+    clearInterval(timer); running=false; bar.style.background='var(--bad)';
+    out.insertAdjacentHTML('beforeend','<div class="ln c-bad">controller.abort() → 請求被取消，catch 收到 AbortError ✗</div>'); out.scrollTop=out.scrollHeight;
+    setTimeout(()=>{ bar.style.background='var(--accent)'; bar.style.width='0'; },600);
+  });
+</script>
+</body>
+</html>

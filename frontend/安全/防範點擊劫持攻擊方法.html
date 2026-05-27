@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clickjacking 點擊劫持防範</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全 · Clickjacking</div>
+    <h1>你以為在點「領獎」，其實在點<em>轉帳確認</em></h1>
+    <p class="lede">Clickjacking 把目標網站藏在透明的 iframe 裡，誘使用戶在不知情的情況下點擊。<b>防禦極簡單：一行 header 告訴瀏覽器不准被 iframe 嵌入</b>，就能完全阻斷這類攻擊。</p>
+  </header>
+
+  <section>
+    <span class="num">攻擊原理</span>
+    <h2>三步劫持你的點擊</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>建一個惡意網頁</h4><p>放上「點我領獎」之類的誘餌按鈕。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>把目標站藏在透明 iframe 裡</h4><p><code>opacity: 0</code> 或 <code>z-index</code> 高層疊，讓真正的按鈕（如「確認轉帳」）精準對齊誘餌按鈕。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>用戶點下去</h4><p>以為點誘餌，實際觸發了目標站的敏感操作（轉帳、修改設定、刪除帳號）。</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">防禦方法</span>
+    <h2>Header 二選一（建議並用）</h2>
+
+    <pre><code><span class="tok-com"># 方法一：X-Frame-Options（舊，但相容性好）</span>
+<span class="tok-key">X-Frame-Options</span>: <span class="tok-str">DENY</span>           <span class="tok-com"># 完全禁止被 iframe 嵌入</span>
+<span class="tok-key">X-Frame-Options</span>: <span class="tok-str">SAMEORIGIN</span>     <span class="tok-com"># 只允許同源 iframe</span>
+
+<span class="tok-com"># 方法二：CSP frame-ancestors（新，更彈性）</span>
+<span class="tok-key">Content-Security-Policy</span>: <span class="tok-str">frame-ancestors 'none'</span>
+<span class="tok-key">Content-Security-Policy</span>: <span class="tok-str">frame-ancestors 'self' https://trusted.example.com</span></code></pre>
+
+    <div class="chips">
+      <div class="chip bad">X-Frame-Options: ALLOW-FROM<small>已廢棄，現代瀏覽器不支援</small></div>
+      <div class="chip good">CSP frame-ancestors<small>現代標準，可指定多個允許來源</small></div>
+      <div class="chip info">並用兩者<small>最高相容性：舊瀏覽器吃 X-Frame-Options，新瀏覽器吃 CSP</small></div>
+    </div>
+
+    <div class="callout tip"><span class="ico">✅</span><p>在 Express.js 可用 <b>Helmet.js</b>（<code>helmet()</code>）一次設好所有安全 header，包含 frameguard（預設 <code>SAMEORIGIN</code>）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>JavaScript frame-busting 腳本有用嗎？</summary><p>曾流行（<code>if(top !== self) top.location = self.location</code>），但攻擊者可在 iframe 上加 <code>sandbox="allow-forms"</code> 禁用 JS 輕鬆繞過。應優先用 header，不要依賴 JS。</p></details>
+      <details><summary>電商結帳頁嵌入第三方 iframe，但又要防 Clickjacking，怎麼辦？</summary><p>用 CSP <code>frame-ancestors</code> 精準白名單允許那個來源，而不是設 <code>DENY</code>。注意不同子頁可設不同 CSP。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Clickjacking 是把目標站藏在透明 iframe 裡騙用戶點擊，防禦是在 response header 設 <span class="hl">X-Frame-Options: DENY</span> 或 CSP 的 <span class="hl">frame-ancestors 'none'</span>，讓瀏覽器拒絕被 iframe 嵌入。我會兩個並設以兼容舊瀏覽器，用 Helmet.js 的話 <span class="hl">frameguard</span> 一行搞定。JS frame-busting 不可靠，不該依賴。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="常見安全標頭及其用途.html">常見安全標頭</a>
+      <a href="內容安全政策CSP概念與安全強化.html">CSP 深入說明</a>
+      <a href="跨站請求偽造CSRF及防範技術.html">CSRF 防範</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

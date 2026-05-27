@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State vs Props</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 基礎</div>
+    <h1>State 是組件的<em>記憶</em>，Props 是<em>外部傳入的命令</em></h1>
+    <p class="lede">這是 React 資料流最核心的區分：<b>state</b> 由組件自己管理、可以改變；<b>props</b> 由父組件決定、子組件唯讀。搞清楚「誰擁有這筆資料」，就知道該用哪個。</p>
+  </header>
+
+  <section>
+    <span class="num">對比</span>
+    <h2>State vs Props 一眼看清</h2>
+    <table>
+      <thead><tr><th>面向</th><th>State</th><th>Props</th></tr></thead>
+      <tbody>
+        <tr><td>擁有者</td><td>組件自身</td><td>父組件</td></tr>
+        <tr><td>可變性</td><td>可透過 setter 更新，觸發重渲</td><td>唯讀，子組件不能修改</td></tr>
+        <tr><td>流向</td><td>區域私有</td><td>由上往下（單向資料流）</td></tr>
+        <tr><td>初始化</td><td><code>useState(initialValue)</code></td><td>從父組件 JSX 屬性傳入</td></tr>
+        <tr><td>子組件溝通父組件</td><td>—</td><td>透過父傳下來的 callback fn</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">決策法則</span>
+    <h2>這筆資料該放 state 還是 props？</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">這筆資料會隨時間改變嗎？<b>不會</b> → 不需要 state，直接用 props 或常數。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">有多個組件需要這筆資料嗎？<b>有</b> → 提升 state 到共同祖先（state lifting），透過 props 傳下去。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">只有這個組件自己用？<b>是</b> → 放在這個組件的 state 裡。</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>子組件能修改自己的 props 嗎？</summary><p>不行，props 是唯讀的。如果子組件需要「通知父組件更新」，父組件應傳一個 callback 函式（如 <code>onChange</code>）給子組件，子組件呼叫它。</p></details>
+      <details><summary>State 和 Context 有什麼關係？</summary><p>Context 是「跨層傳遞的 props」，讓你不用每層手動傳。Context 的值通常仍是某個組件的 state，只是透過 Context API 廣播給後代組件。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「State 是組件<span class="hl">自己管理的可變資料</span>，更新時觸發重渲染；Props 是<span class="hl">父組件傳入的唯讀屬性</span>，子組件不能直接修改。判斷該用哪個的關鍵是：這筆資料的擁有者是誰？若只有這個組件需要，放 state；若需要跨組件共享或由父組件控制，用 props。子組件需要影響父組件時，透過父傳下來的 callback 函式溝通。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋 React 的單向資料流（one-way data flow）及其優點.html">單向資料流</a>
+      <a href="解釋在 React 中調用 `useState` 的 setter 函式時會發生什麼事.html">useState setter 行為</a>
+      <a href="你如何決定何時使用 React State、Context 或外部狀態管理工具？.html">State / Context / 外部工具選擇</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

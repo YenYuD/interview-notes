@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>閉包建立私有變數</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">閉包・封裝</div>
+    <h1>外部看不到，只能透過方法操作：<em>閉包私有變數</em></h1>
+    <p class="lede">JavaScript 沒有內建的 <code>private</code>（ES2022 <code>#</code> 之前），但用<b>閉包</b>就能達到同等效果：把狀態藏在外層函式作用域，只暴露受控的操作介面。</p>
+  </header>
+
+  <section>
+    <span class="num">核心模式</span>
+    <h2>工廠函式 + 閉包</h2>
+    <pre><code>function createCounter() {
+  let count = 0; // 私有變數，外部無法直接存取
+
+  return {
+    increment() { count++; return count; },
+    decrement() { count--; return count; },
+    getCount()  { return count; }
+  };
+}
+
+const counter = createCounter();
+console.log(counter.increment()); // 1
+console.log(counter.increment()); // 2
+console.log(counter.count);       // undefined ← 外部看不到！
+console.log(counter.getCount());  // 2</code></pre>
+    <div class="callout info"><span class="ico">ℹ️</span><p><code>count</code> 存在 <code>createCounter</code> 的作用域中，回傳的三個方法形成閉包，「記住」了這個作用域，但外部代碼無法直接讀寫 <code>count</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">優點</span>
+    <h2>封裝帶來什麼好處？</h2>
+    <table>
+      <tr><th>好處</th><th>說明</th></tr>
+      <tr><td>封裝（Encapsulation）</td><td>狀態不被外部隨意修改</td></tr>
+      <tr><td>資料完整性</td><td>只有受控的方法能改變內部狀態，可加入驗證邏輯</td></tr>
+      <tr><td>避免命名衝突</td><td>私有變數不在全域作用域，不會和其他代碼衝突</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">現代替代方案</span>
+    <h2>ES2022 class 私有欄位</h2>
+    <pre><code>class Counter {
+  #count = 0;  // # 前綴 = 真正的私有欄位
+
+  increment() { this.#count++; return this.#count; }
+  getCount()  { return this.#count; }
+}
+
+const c = new Counter();
+c.increment(); // 1
+c.#count;      // ❌ SyntaxError — 外部無法存取</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>ES2022 的 <code>#privateField</code> 是語言層面的真私有，比閉包方案更嚴格（無法被 Proxy 攔截）。新代碼優先考慮 class private fields；閉包方案在非 class 場景、或需要 factory 模式時仍然實用。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>閉包私有變數和 Symbol 作為 key 的「偽私有」有什麼差？</summary><p>Symbol key 的屬性雖然不可枚舉，但仍可透過 <code>Object.getOwnPropertySymbols</code> 取得，本質上不是真私有。閉包的私有變數才是真正無法從外部存取。</p></details>
+      <details><summary>多個 createCounter() 的實例共用同一個 count 嗎？</summary><p>不共用。每次呼叫 <code>createCounter()</code> 都建立新的執行上下文，產生獨立的 <code>count</code>。每個實例各自擁有自己的閉包環境。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「閉包可以用來建立私有變數：<span class="hl">把狀態定義在外層函式的作用域內，只回傳受控的操作方法</span>，外部代碼無法直接存取內部變數。這是 JavaScript 在 ES2022 <code>#private</code> 欄位出現前的常見封裝手段。現代新代碼我優先用 class private fields，語意更明確；閉包方案在<span class="hl">工廠函式或模組模式</span>中仍然很實用。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="閉包的潛在陷阱.html">閉包的潛在陷阱</a>
+      <a href="JavaScript閉包是什麼及其用途.html">閉包是什麼及其用途</a>
+      <a href="JavaScript中高階函式的定義.html">高階函式定義</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工廠模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>把「如何建立物件」<em>封裝起來</em></h1>
+    <p class="lede">工廠模式讓呼叫端不需要知道要 <code>new</code> 哪個具體類別——只告訴工廠「我要什麼」，工廠決定「給哪個」。<b>解耦建立邏輯</b>是核心價值。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>從 if/else 到工廠函式</h2>
+    <p>最初可能寫出散落各地的 <code>if (type === 'dog') new Dog()</code>；工廠模式把這段邏輯集中管理，新增類型只改工廠，不動呼叫端。</p>
+
+    <div class="chips">
+      <div class="chip bad">散落 if/else<small>建立邏輯遍布各處，難維護</small></div>
+      <div class="chip good">工廠函式<small>建立邏輯集中，呼叫端解耦</small></div>
+    </div>
+
+    <pre><code><span class="tok-com">// ✅ 工廠函式：集中管理物件建立</span>
+<span class="tok-key">function</span> <span class="tok-fn">createValidator</span>(type) {
+  <span class="tok-key">const</span> validators = {
+    email:  () => <span class="tok-key">new</span> EmailValidator(),
+    phone:  () => <span class="tok-key">new</span> PhoneValidator(),
+    postal: () => <span class="tok-key">new</span> PostalValidator(),
+  };
+  <span class="tok-key">if</span> (!validators[type]) <span class="tok-key">throw new</span> Error(<span class="tok-str">`未知類型：${type}`</span>);
+  <span class="tok-key">return</span> validators[type]();
+}
+
+<span class="tok-key">const</span> v = <span class="tok-fn">createValidator</span>(<span class="tok-str">'email'</span>); <span class="tok-com">// 呼叫端不知道也不在意 EmailValidator</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">前端應用場景</span>
+    <h2>React 元件工廠 / 測試 Mock</h2>
+    <table>
+      <thead><tr><th>場景</th><th>工廠做什麼</th></tr></thead>
+      <tbody>
+        <tr><td>動態渲染不同類型卡片</td><td>根據 <code>type</code> 回傳對應 React 元件</td></tr>
+        <tr><td>表單驗證策略</td><td>根據欄位類型建立對應 Validator 實例</td></tr>
+        <tr><td>單元測試 mock 工廠</td><td>集中建立假物件，避免每個測試各自 new</td></tr>
+        <tr><td>API 資料轉換</td><td>根據後端 type 欄位建立對應 Model 物件</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <span class="ico">💡</span>
+      <p><b>工廠 vs 建構函式：</b>工廠函式不綁定 <code>this</code>，可以回傳任意物件（包含 Promise）；建構函式強制回傳新實例。TypeScript 中常用工廠函式搭配 Union type 做 discriminated union 的物件建立。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>工廠模式（Factory）vs 抽象工廠（Abstract Factory）的差別？</summary>
+        <p>工廠模式建立單一類型的物件；抽象工廠建立一整「族」相關物件（如 <code>LightThemeFactory</code> 同時建立 Button、Input、Modal 的淺色主題版本），確保同族物件風格一致。</p>
+      </details>
+      <details>
+        <summary>工廠模式的缺點是什麼？</summary>
+        <p>若建立邏輯簡單，工廠反而增加不必要的抽象層；每新增一種類型仍需修改工廠本身（除非用策略物件或 Registry 模式解耦）。物件類型少時，直接 new 反而更清晰。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「工廠模式把物件的<span class="hl">建立邏輯集中封裝</span>，讓呼叫端只需提供類型，不需要直接 new 具體類別。好處是當要新增新類型時只改工廠，呼叫端程式碼不動，符合開放封閉原則。前端常見場景是動態元件渲染和表單驗證策略。要注意的是<span class="hl">若物件類型少且建立邏輯簡單，直接 new 更清晰</span>，不必強行套用工廠。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="策略模式概念說明.html">策略模式</a>
+      <a href="單例模式概念說明.html">單例模式</a>
+      <a href="設計模式及其重要性.html">設計模式總覽</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

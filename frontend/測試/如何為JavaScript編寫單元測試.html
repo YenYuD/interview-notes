@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>撰寫 JavaScript 單元測試</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>單元測試不只是<em>assert 對不對</em>，而是隔離、快速、可信</h1>
+    <p class="lede">好的單元測試有三個特質：<b>只測一件事</b>、<b>不依賴外部狀態</b>、<b>毫秒內完成</b>。學會 describe/it 結構與 mock 依賴，才算真正入門。</p>
+  </header>
+
+  <section>
+    <span class="num">基本結構</span>
+    <h2>describe / test / expect</h2>
+    <p>Jest（及 Vitest、Jasmine）的測試三元組：<b>describe</b> 群組、<b>test/it</b> 案例、<b>expect</b> 斷言。</p>
+    <pre><code><span class="tok-com">// sum.test.js</span>
+<span class="tok-fn">describe</span>(<span class="tok-str">'sum 函式'</span>, () =&gt; {
+  <span class="tok-fn">test</span>(<span class="tok-str">'正數相加'</span>, () =&gt; {
+    <span class="tok-fn">expect</span>(<span class="tok-fn">sum</span>(1, 2)).<span class="tok-fn">toBe</span>(3);
+  });
+
+  <span class="tok-fn">test</span>(<span class="tok-str">'負數相加'</span>, () =&gt; {
+    <span class="tok-fn">expect</span>(<span class="tok-fn">sum</span>(-1, 1)).<span class="tok-fn">toBe</span>(0);
+  });
+});</code></pre>
+    <div class="callout tip"><span class="ico">💡</span><p><code>toBe</code> 用 <code>===</code> 嚴格比對純值；物件/陣列要用 <code>toEqual</code>（深比較）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">常用斷言</span>
+    <h2>Jest Matcher 速查</h2>
+    <table>
+      <tr><th>Matcher</th><th>用途</th></tr>
+      <tr><td><code>toBe(val)</code></td><td>嚴格相等（<code>===</code>），純值用</td></tr>
+      <tr><td><code>toEqual(obj)</code></td><td>深比較物件/陣列</td></tr>
+      <tr><td><code>toBeTruthy() / toBeFalsy()</code></td><td>truthy/falsy 判斷</td></tr>
+      <tr><td><code>toContain(item)</code></td><td>陣列或字串包含某值</td></tr>
+      <tr><td><code>toThrow()</code></td><td>函式是否拋出例外</td></tr>
+      <tr><td><code>toHaveBeenCalledWith()</code></td><td>mock 是否以特定參數被呼叫</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">Mock 依賴</span>
+    <h2>隔離外部依賴是單元測試的核心</h2>
+    <p>單元測試不應真的打 API 或寫 DB。用 <code>jest.fn()</code> / <code>jest.mock()</code> 取代外部依賴：</p>
+    <pre><code><span class="tok-com">// 整個模組都換成 mock</span>
+jest.<span class="tok-fn">mock</span>(<span class="tok-str">'node-fetch'</span>);
+
+<span class="tok-fn">test</span>(<span class="tok-str">'fetchData 回傳 mock 資料'</span>, <span class="tok-key">async</span> () =&gt; {
+  fetch.<span class="tok-fn">mockResolvedValueOnce</span>({
+    json: <span class="tok-key">async</span> () =&gt; ({ data: <span class="tok-str">'42'</span> })
+  });
+
+  <span class="tok-key">const</span> result = <span class="tok-key">await</span> <span class="tok-fn">fetchData</span>(<span class="tok-str">'https://api.example.com'</span>);
+  <span class="tok-fn">expect</span>(result).<span class="tok-fn">toEqual</span>({ data: <span class="tok-str">'42'</span> });
+});</code></pre>
+    <div class="callout warn"><span class="ico">⚠️</span><p>忘記 mock 外部依賴會導致測試在沒有網路的 CI 環境失敗，也讓測試速度暴增。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>beforeEach / afterEach 什麼時候用？</summary><p>每個 test 執行前後需要重置狀態時使用：例如 <code>beforeEach(() =&gt; jest.clearAllMocks())</code> 清除 mock 呼叫記錄，避免測試互相污染。</p></details>
+      <details><summary>單元測試應該測到 100% 覆蓋率嗎？</summary><p>不必追求 100%。覆蓋率是指引，不是目標。應優先測邊界條件（邊界值、null、錯誤路徑），而非追求每行都跑到。有時候 80% 有意義的測試比 100% 形式測試更有價值。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我寫單元測試會遵守三個原則：<span class="hl">只測一個行為</span>、<span class="hl">mock 所有外部依賴</span>、讓測試在毫秒內完成。用 Jest 的話，describe 群組、test 定義案例、expect 斷言結果。依賴 API 或 DB 的地方用 <code>jest.mock()</code> 替換，確保測試在沒有網路也能跑。我也會用 AAA 模式（Arrange、Act、Assert）讓測試邏輯一眼清楚。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何測試JavaScript非同步程式碼.html">測試非同步程式碼</a>
+      <a href="模擬物與存根在測試中的應用.html">Mock 與 Stub</a>
+      <a href="撰寫可維護且有效測試的最佳實踐.html">測試最佳實踐</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

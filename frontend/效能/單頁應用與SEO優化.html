@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPA 與 SEO 優化</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>SPA 流暢，但搜尋引擎<em>看不到你的內容</em></h1>
+    <p class="lede">單頁應用靠 JavaScript 動態渲染，爬蟲若不執行 JS 就看到空殼。<b>SSR</b>（伺服器端渲染）和 <b>SSG</b>（靜態生成）是讓 SPA 兼顧體驗與 SEO 的兩條路。</p>
+  </header>
+
+  <section>
+    <span class="num">問題根源</span>
+    <h2>SPA 為什麼對 SEO 不友善？</h2>
+    <p>傳統 SPA：伺服器只送一個幾乎空白的 HTML，所有內容靠 JS 跑完才出現。搜尋引擎爬蟲可能在 JS 執行前就離開，索引到空頁面。</p>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Googlebot 雖然可以執行 JS，但爬取優先級低於靜態 HTML，且 JS 渲染需等待排程，可能導致索引延遲數天。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">兩種解法</span>
+    <h2>SSR vs SSG：選哪個？</h2>
+    <table>
+      <tr><th></th><th>SSR（伺服器端渲染）</th><th>SSG（靜態生成）</th></tr>
+      <tr><td>何時產生 HTML</td><td>每次請求時在伺服器</td><td>建置時預先產生</td></tr>
+      <tr><td>內容即時性</td><td>每次最新</td><td>建置時快照</td></tr>
+      <tr><td>效能</td><td>TTFB 可能稍慢（需伺服器計算）</td><td>最快（靜態檔直接 CDN）</td></tr>
+      <tr><td>適合場景</td><td>電商、個人化頁面</td><td>部落格、文件、行銷頁</td></tr>
+      <tr><td>React 方案</td><td>Next.js <code>getServerSideProps</code></td><td>Next.js <code>getStaticProps</code></td></tr>
+    </table>
+    <div class="aside">現代框架多數採 <b>Hybrid</b>（混合）：靜態頁 SSG、動態頁 SSR，搭配 ISR（增量靜態再生）在背景更新靜態頁。</div>
+  </section>
+
+  <section>
+    <span class="num">SEO 輔助手段</span>
+    <h2>除了 SSR/SSG 還能做什麼</h2>
+    <div class="chips">
+      <div class="chip info">Meta tags<small>&lt;title&gt;、og:description 等</small></div>
+      <div class="chip info">Canonical URL<small>防止重複內容</small></div>
+      <div class="chip info">Sitemap<small>幫爬蟲找到所有頁面</small></div>
+      <div class="chip info">Structured Data<small>JSON-LD 讓 Google 顯示 Rich Results</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>ISR（增量靜態再生）是什麼？</summary><p>Next.js 的 ISR 允許你設定 <code>revalidate</code> 秒數，靜態頁在背景定期重新生成，讓你兼得 SSG 的速度和動態更新能力，不需完整重新建置。</p></details>
+      <details><summary>React Router 的 SPA 怎麼做 SEO？</summary><p>純 CSR 方案可用 React Helmet 管理 meta tags，但根本解法是改用 Next.js / Remix。若無法遷移，可用 Prerender.io 等服務為爬蟲提供預渲染的靜態 HTML。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「SPA 的 SEO 問題在於<span class="hl">內容由 JS 動態產生，爬蟲可能看到空殼</span>。解法有兩種：<span class="hl">SSR</span> 每次請求都在伺服器渲染完整 HTML，適合動態內容；<span class="hl">SSG</span> 建置時預產生靜態 HTML，適合內容較固定的頁面，部署到 CDN 速度最快。Next.js 可以混用這兩種模式，搭配 ISR 做到靜態頁的定期更新。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="延遲加載概念與效能提升.html">延遲加載</a>
+      <a href="快取概念與效能提升.html">快取概念</a>
+      <a href="優化網路請求提升效能.html">優化網路請求</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

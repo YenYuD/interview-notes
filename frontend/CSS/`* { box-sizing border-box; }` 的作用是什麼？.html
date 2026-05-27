@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>* { box-sizing: border-box }</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 盒模型</div>
+    <h1>一行全域宣告，消滅<em>尺寸計算地獄</em></h1>
+    <p class="lede"><code>* { box-sizing: border-box; }</code> 讓元素的 <b>width/height</b> 包含 padding 和 border，所見即所得。這是現代 CSS 的標準起手式，幾乎所有框架都預設採用。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>content-box vs border-box</h2>
+    <table>
+      <thead>
+        <tr><th>計入尺寸的項目</th><th>content-box（預設）</th><th>border-box</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Content</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Padding</td><td>✗（額外增加）</td><td>✓（包含在內）</td></tr>
+        <tr><td>Border</td><td>✗（額外增加）</td><td>✓（包含在內）</td></tr>
+        <tr><td>Margin</td><td>✗</td><td>✗</td></tr>
+      </tbody>
+    </table>
+    <div class="aside">
+      <strong>實例：</strong>設 <code>width: 100px; padding: 10px; border: 5px</code><br>
+      content-box → 實際寬 <strong>130px</strong>（100 + 20 + 10）<br>
+      border-box → 實際寬 <strong>100px</strong>，content 縮為 70px
+    </div>
+  </section>
+
+  <section>
+    <span class="num">最佳實踐</span>
+    <h2>推薦的全域寫法</h2>
+    <pre><code><span class="tok-key">html</span> {
+  box-sizing: border-box;
+}
+<span class="tok-key">*</span>,
+<span class="tok-key">*::before</span>,
+<span class="tok-key">*::after</span> {
+  box-sizing: inherit; <span class="tok-com">/* 允許特定元素覆蓋為 content-box */</span>
+}</code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Bootstrap 4+、Tailwind CSS 等主流框架都預設使用 <code>border-box</code>。在響應式版面中，它能防止 padding/border 導致元素溢出容器。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>border-box 的 content 大小如何計算？</summary>
+        <p>content 寬度 = 設定的 width − 左 padding − 右 padding − 左 border − 右 border。如果 padding + border 已超過設定的 width，content 會縮為 0（不會為負值）。</p>
+      </details>
+      <details>
+        <summary>什麼情況下仍要用 content-box？</summary>
+        <p>需要 content 本身有精確尺寸時（如 canvas、某些圖片展示）；或整合未使用 border-box 的第三方元件時，可能需要局部覆蓋。</p>
+      </details>
+      <details>
+        <summary>margin 不論哪種 box-sizing 都不計入寬高，為什麼？</summary>
+        <p>margin 是元素「外部空間」，不屬於盒子本身的尺寸，它影響的是元素與相鄰元素的間距，兩種 box-sizing 模型均不將 margin 納入 width/height 計算。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>* { box-sizing: border-box; }</code> 將元素的 <span class="hl">padding 和 border 納入 width/height 計算</span>，而不是額外增加尺寸。這讓設定 <code>width: 100%</code> 的元素即使加了 padding 也不會溢出容器，版面更好預測。預設的 <code>content-box</code> 只計算 content，加了 padding 和 border 後實際尺寸會超出設定值，容易引發版面問題。<span class="hl">現代框架都預設 border-box</span>，在專案初始就全域套用是標準做法。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋你對盒模型的理解，以及如何用 CSS 告知瀏覽器以不同盒模型渲染版面.html">盒模型完整解釋</a>
+      <a href="你有嘗試過新的 CSS Flexbox 或 Grid 規範嗎？.html">CSS Flexbox 與 Grid</a>
+      <a href="描述區塊格式化上下文（BFC）及其運作方式.html">BFC 區塊格式化上下文</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

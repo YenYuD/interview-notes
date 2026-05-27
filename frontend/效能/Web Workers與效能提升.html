@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Workers 與效能提升</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>把重活交出去，<em>主執行緒只管畫面</em></h1>
+    <p class="lede">JS 是單執行緒的，一旦主執行緒被大計算佔滿，頁面就凍結。<b>Web Worker</b> 讓你開背景執行緒——運算不擋 UI，兩邊用 <b>postMessage</b> 溝通。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>主執行緒 vs Worker 執行緒</h2>
+    <div class="chips">
+      <div class="chip good">Worker 能做<small>大量計算、資料解析、加密、圖像處理</small></div>
+      <div class="chip bad">Worker 不能做<small>存取 DOM、讀 window、操作 UI</small></div>
+    </div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>主執行緒</b>：<code>new Worker('worker.js')</code> → <code>worker.postMessage(data)</code> 送出任務</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Worker 執行緒</b>：<code>onmessage</code> 接收，處理完用 <code>postMessage(result)</code> 回傳</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>主執行緒</b>：<code>worker.onmessage</code> 接收結果，更新 UI</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">程式碼範例</span>
+    <h2>最小可運作結構</h2>
+    <pre><code><span class="tok-com">// main.js — 主執行緒</span>
+<span class="tok-key">const</span> worker = <span class="tok-key">new</span> Worker(<span class="tok-str">'worker.js'</span>);
+worker.postMessage([1, 2, 3, <span class="tok-str">/*...大陣列*/</span>]);
+worker.onmessage = (e) => {
+  console.log(<span class="tok-str">'結果：'</span>, e.data);  <span class="tok-com">// 更新 UI</span>
+};
+
+<span class="tok-com">// worker.js — 背景執行緒</span>
+onmessage = (e) => {
+  <span class="tok-key">const</span> result = e.data.map(x => x * x); <span class="tok-com">// 重度計算</span>
+  postMessage(result);
+};</code></pre>
+    <div class="aside"><b>Transferable Objects</b>（如 <code>ArrayBuffer</code>）可用「轉移所有權」而非複製傳送，零成本跨執行緒傳大型資料。</div>
+  </section>
+
+  <section>
+    <span class="num">限制與取捨</span>
+    <h2>什麼時候不適合用</h2>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>Worker 建立有開銷，任務量太小時反而比直接執行慢。另外資料傳遞是「複製」，大物件頻繁傳送也有代價（除非用 Transferable）。</p>
+    </div>
+    <table>
+      <tr><th></th><th>適合</th><th>不適合</th></tr>
+      <tr><td>任務</td><td>大量計算、影像/資料處理</td><td>小量邏輯、需要同步存取 DOM</td></tr>
+      <tr><td>通訊</td><td>Transferable（大緩衝區）</td><td>頻繁傳送小物件</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Service Worker 和 Web Worker 的差別？</summary><p>Web Worker 是輔助主執行緒做計算；Service Worker 是網路代理，可攔截 fetch、控制快取，讓 PWA 離線運作。兩者都跑在背景執行緒但目的完全不同。</p></details>
+      <details><summary>SharedArrayBuffer 是什麼？</summary><p>讓主執行緒與 Worker 共用同一塊記憶體（不需複製），搭配 <code>Atomics</code> 處理競爭條件。因安全疑慮（Spectre）需開啟 COOP/COEP 標頭才能使用。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">Web Worker 把重度計算搬到背景執行緒</span>，主執行緒繼續回應使用者操作。用 <code>new Worker()</code> 建立，透過 <span class="hl">postMessage 雙向溝通</span>。限制是無法碰 DOM，且資料傳遞預設是複製，大型資料要用 Transferable 傳所有權才有效率。適合圖像處理、大量運算、資料解析這類任務。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript應用程式常見效能瓶頸.html">效能瓶頸</a>
+      <a href="快取概念與效能提升.html">快取概念</a>
+      <a href="延遲加載概念與效能提升.html">延遲加載</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tagged Templates</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JAVASCRIPT</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT / ES6+</div>
+    <h1>模板字面量的隱藏技：<br>用函式<em>接管字串的組裝</em></h1>
+    <p class="lede"><b>Tagged templates</b> 在反引號前面加上一個函式名稱，讓你完全控制模板的解析方式。styled-components 的 CSS-in-JS 語法、GraphQL 的 <code>gql``</code>，都是 tagged templates 的實際應用。</p>
+  </header>
+
+  <section>
+    <span class="num">運作原理</span>
+    <h2>tag 函式收到什麼？</h2>
+    <p>當你寫 <code>tag\`Hello ${name}!\`</code>，JS 引擎會把模板拆成兩部分傳給函式：</p>
+    <div class="chips">
+      <div class="chip info">strings<small>字面字串陣列，此例：["Hello ", "!"]</small></div>
+      <div class="chip info">...values<small>插值的求值結果，此例：[name 的值]</small></div>
+    </div>
+    <pre><code><span class="tok-key">function</span> <span class="tok-fn">tag</span>(strings, ...values) {
+  <span class="tok-com">// strings[0] = "Hello "  values[0] = "World"</span>
+  <span class="tok-com">// strings[1] = "!"</span>
+  <span class="tok-key">return</span> strings[0] + values[0].toUpperCase() + strings[1];
+}
+
+<span class="tok-fn">tag</span>`Hello ${'World'}!`; <span class="tok-com">// "Hello WORLD!"</span></code></pre>
+    <div class="aside"><code>strings.length</code> 永遠比 <code>values.length</code> 多 1。模板開頭若是插值，<code>strings[0]</code> 為空字串；結尾若是插值，最後一個 strings 為空字串。</div>
+  </section>
+
+  <section>
+    <span class="num">實務應用</span>
+    <h2>三個最有用的場景</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>HTML 跳脫（防 XSS）</h4>
+          <p>對插入的使用者輸入自動轉義 <code>&lt;</code>、<code>&gt;</code>、<code>&amp;</code>，讓模板安全輸出 HTML。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>CSS-in-JS（styled-components）</h4>
+          <p><code>styled.div\`color: ${props => props.primary ? 'blue' : 'gray'}\`</code> — tag 函式解析 CSS 並處理動態值。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>GraphQL 查詢（gql）</h4>
+          <p><code>gql\`query { user { id } }\`</code> — tag 函式把字串解析成 AST 物件，不是傳回字串。</p>
+        </div>
+      </div>
+    </div>
+    <pre><code><span class="tok-com">// HTML 跳脫 tag 函式範例</span>
+<span class="tok-key">function</span> <span class="tok-fn">safeHtml</span>(strings, ...values) {
+  <span class="tok-key">return</span> strings.<span class="tok-fn">reduce</span>((acc, str, i) => {
+    <span class="tok-key">const</span> val = values[i - 1];
+    <span class="tok-key">const</span> escaped = val
+      ? <span class="tok-fn">String</span>(val)
+          .<span class="tok-fn">replace</span>(/&/g, <span class="tok-str">'&amp;'</span>)
+          .<span class="tok-fn">replace</span>(/</g, <span class="tok-str">'&lt;'</span>)
+          .<span class="tok-fn">replace</span>(/>/g, <span class="tok-str">'&gt;'</span>)
+      : <span class="tok-str">''</span>;
+    <span class="tok-key">return</span> acc + escaped + str;
+  });
+}
+<span class="tok-key">const</span> input = <span class="tok-str">'&lt;script&gt;alert(1)&lt;/script&gt;'</span>;
+<span class="tok-fn">safeHtml</span>`<span class="tok-str">&lt;p&gt;</span>${input}<span class="tok-str">&lt;/p&gt;</span>`;
+<span class="tok-com">// "&lt;p&gt;&amp;lt;script&amp;gt;alert(1)...&lt;/p&gt;"</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>tag 函式一定要回傳字串嗎？</summary>
+        <p>不必要。tag 函式可以回傳任意值，包含物件、陣列、DOM 元素。<code>gql</code> tag 就是回傳一個 AST 物件，<code>html</code> tag（lit-html）回傳的是可被框架直接渲染的模板物件。</p>
+      </details>
+      <details>
+        <summary><code>strings.raw</code> 是什麼？</summary>
+        <p><code>strings.raw</code> 是 <code>strings</code> 陣列的一個特殊屬性，包含各個字串片段的<strong>原始內容</strong>（不處理跳脫序列，如 <code>\n</code> 保持為兩個字元 <code>\</code> + <code>n</code>）。<code>String.raw</code> 本身就是一個內建 tag 函式，輸出不處理跳脫的原始字串，常用於寫正則表達式或 Windows 路徑。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Tagged templates 是在模板字面量前加上函式，讓該函式接管字串的組裝方式。函式接收兩個參數：<span class="hl">字面字串陣列</span>和<span class="hl">插值的求值結果</span>，可以回傳任意值而非只有字串。最廣為人知的應用是 <code>styled-components</code> 的 CSS 解析和 GraphQL 的 <code>gql</code> tag，它們分別回傳元件物件和 AST。日常可用來寫 HTML 跳脫函式防止 XSS，或用內建的 <code>String.raw</code> 處理不需轉義的路徑字串。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="模板字面量及其用法.html">模板字面量基礎</a>
+      <a href="JavaScript中Symbol的用途.html">Symbol 的用途</a>
+      <a href="JavaScript代理的用途.html">Proxy 代理</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

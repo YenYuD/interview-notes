@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>測試 JavaScript 非同步程式碼</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>非同步測試：讓框架<em>等你的 Promise</em></h1>
+    <p class="lede">測試非同步程式碼最常犯的錯是讓 test 函式在 Promise 還沒 resolve 前就結束。<b>三種寫法都能處理，async/await 最推薦</b>，最接近正常程式碼的閱讀感。</p>
+  </header>
+
+  <section>
+    <span class="num">三種寫法</span>
+    <h2>async/await 是首選</h2>
+
+    <p><b>方法一：async/await</b>（最直覺，現代標準寫法）</p>
+    <pre><code><span class="tok-fn">test</span>(<span class="tok-str">'成功取得資料'</span>, <span class="tok-key">async</span> () =&gt; {
+  <span class="tok-key">const</span> data = <span class="tok-key">await</span> <span class="tok-fn">fetchData</span>();
+  <span class="tok-fn">expect</span>(data).<span class="tok-fn">toBeDefined</span>();
+});</code></pre>
+
+    <p><b>方法二：回傳 Promise</b>（Jest/Mocha 偵測到 return 後會等待）</p>
+    <pre><code><span class="tok-fn">test</span>(<span class="tok-str">'成功取得資料'</span>, () =&gt; {
+  <span class="tok-key">return</span> <span class="tok-fn">fetchData</span>().<span class="tok-fn">then</span>(data =&gt; {
+    <span class="tok-fn">expect</span>(data).<span class="tok-fn">toBeDefined</span>();
+  });
+});</code></pre>
+
+    <p><b>方法三：done callback</b>（舊式 API 或無法 promisify 的情況）</p>
+    <pre><code><span class="tok-fn">test</span>(<span class="tok-str">'callback 風格'</span>, (done) =&gt; {
+  <span class="tok-fn">fetchData</span>((err, data) =&gt; {
+    <span class="tok-fn">expect</span>(err).<span class="tok-fn">toBeNull</span>();
+    <span class="tok-fn">expect</span>(data).<span class="tok-fn">toBeDefined</span>();
+    <span class="tok-fn">done</span>(); <span class="tok-com">// 告訴 Jest「非同步結束了」</span>
+  });
+});</code></pre>
+
+    <div class="callout warn"><span class="ico">⚠️</span><p>忘記 <code>return</code> 或 <code>await</code>，測試會立刻通過（假陽性）。這是非同步測試最危險的坑。</p></div>
+  </section>
+
+  <section>
+    <span class="num">測試錯誤路徑</span>
+    <h2>也要測 reject / throw</h2>
+    <pre><code><span class="tok-com">// 用 rejects 測 Promise 失敗</span>
+<span class="tok-fn">test</span>(<span class="tok-str">'API 失敗時拋出錯誤'</span>, <span class="tok-key">async</span> () =&gt; {
+  <span class="tok-key">await</span> <span class="tok-fn">expect</span>(<span class="tok-fn">fetchData</span>(<span class="tok-str">'bad-url'</span>))
+    .<span class="tok-fn">rejects</span>
+    .<span class="tok-fn">toThrow</span>(<span class="tok-str">'Network Error'</span>);
+});</code></pre>
+    <div class="aside">測試只有 happy path 等於沒測試，錯誤路徑往往是 bug 藏身的地方。</div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Jest 的 fake timers 是什麼？什麼時候用？</summary><p>用 <code>jest.useFakeTimers()</code> 可以接管 <code>setTimeout</code>/<code>setInterval</code>，讓時間可以用 <code>jest.advanceTimersByTime(ms)</code> 手動推進，不需要真的等待。適合測試 debounce、polling 等時間相關邏輯。</p></details>
+      <details><summary>測試非同步時如何避免假陽性（false positive）？</summary><p>1. 永遠 <code>return</code> 或 <code>await</code> 非同步操作。2. 使用 <code>expect.assertions(n)</code> 指定預期斷言次數——若 callback 沒執行，Jest 會報錯而非靜默通過。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「測試非同步程式碼我首選 <span class="hl">async/await</span>，把 test 函式標成 async 再 await 目標函式，語意最清楚。如果是舊式 callback API，就用 <code>done</code> 參數告訴 Jest 非同步何時結束。最重要的是：<span class="hl">一定要 return 或 await，否則測試在 Promise resolve 前就結束，變成假陽性</span>。錯誤路徑也要測，用 <code>.rejects.toThrow()</code> 驗 reject 情況。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何為JavaScript編寫單元測試.html">撰寫單元測試</a>
+      <a href="模擬物與存根在測試中的應用.html">Mock 與 Stub</a>
+      <a href="JavaScript測試工具.html">JavaScript 測試工具</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

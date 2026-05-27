@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>響應式 vs 自適應設計</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 版面設計</div>
+    <h1><em>一顆球</em>還是<em>換一顆球</em>——響應式與自適應的本質差異</h1>
+    <p class="lede"><b>響應式設計（Responsive Design）</b>是彈性流動的：同一套版面根據視口大小連續變化。<b>自適應設計（Adaptive Design）</b>則是針對特定斷點偵測裝置，切換預先定義的版型。</p>
+  </header>
+
+  <section>
+    <span class="num">核心對比</span>
+    <h2>兩種策略的本質差異</h2>
+    <table>
+      <thead>
+        <tr><th></th><th>響應式設計</th><th>自適應設計</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>核心思路</td><td>流動版面，連續變形</td><td>偵測裝置，切換固定版型</td></tr>
+        <tr><td>主要技術</td><td>媒體查詢、彈性格線、響應式圖片</td><td>User-Agent 偵測、DPI 偵測</td></tr>
+        <tr><td>維護成本</td><td>一套程式碼</td><td>多套版型（通常 3-6 組）</td></tr>
+        <tr><td>偵測可靠性</td><td>高（純 CSS 寬度判斷）</td><td>較低（UA/DPI 可能偽造或不準）</td></tr>
+        <tr><td>設計挑戰</td><td>斷點策略難以抉擇</td><td>新裝置尺寸出現時需更新版型</td></tr>
+      </tbody>
+    </table>
+    <div class="aside">
+      <strong>類比：</strong>響應式像是一顆橡皮球，能通過任何大小的圈；自適應像是根據圈環大小更換不同的球。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">選擇指南</span>
+    <h2>什麼時候用哪個？</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>響應式（現代首選）</small>
+        新專案、內容型網站、需長期維護、團隊熟悉 CSS Flexbox/Grid
+      </div>
+      <div class="chip info">
+        <small>自適應（適合特殊情境）</small>
+        桌機與行動功能差異極大、需針對特定裝置深度優化的 Web App
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p>自適應設計依賴 UA 偵測，而 UA 字串可被偽造且解析困難；現代開發通常優先選擇響應式。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>行動優先（Mobile First）和響應式設計是同一回事嗎？</summary>
+        <p>不完全是。行動優先是一種撰寫媒體查詢的策略——先寫行動端樣式作為預設，再用 <code>min-width</code> 媒體查詢覆蓋桌機樣式。響應式設計是更廣的概念，可以用行動優先也可以用桌機優先寫法。現代推薦採用行動優先的響應式設計。</p>
+      </details>
+      <details>
+        <summary>響應式設計如何設定斷點？</summary>
+        <p>有兩派：一是用標準斷點（如 Bootstrap 的 576/768/992/1200px）；二是依版面自然斷裂點決定（版面「撐壞」時才加斷點）。後者更優雅，不依賴特定裝置尺寸。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「響應式設計用<span class="hl">媒體查詢與流動格線</span>讓同一套版面在任意視口下連續調整，一套程式碼通吃所有裝置。自適應設計則是<span class="hl">偵測裝置類型後切換預先定義的版型</span>，維護多套但各版型可深度優化。現代專案我會優先選響應式搭配行動優先策略，UA 偵測不可靠且維護成本高，不推薦。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你能解釋響應式網站開發與行動優先策略之間的差異嗎？.html">響應式開發 vs 行動優先策略</a>
+      <a href="你曾使用或實作過媒體查詢或行動裝置專屬的版面 CSS 嗎？.html">媒體查詢實作經驗</a>
+      <a href="功能偵測、功能推斷和使用 UA 字串有什麼差別？.html">功能偵測 vs UA 字串</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

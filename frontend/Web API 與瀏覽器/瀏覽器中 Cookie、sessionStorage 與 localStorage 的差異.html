@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie vs sessionStorage vs localStorage</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>瀏覽器儲存三劍客：<em>Cookie</em>、<em>localStorage</em>、<em>sessionStorage</em> 選哪個？</h1>
+    <p class="lede">三者都是客戶端儲存，但<b>生命週期、容量、安全性</b>截然不同。Cookie 會隨 HTTP 請求自動送到伺服器，其他兩個不會。選錯可能讓 token 被偷或資料在關分頁後消失。</p>
+  </header>
+
+  <section>
+    <span class="num">三者比較</span>
+    <h2>一表看清核心差異</h2>
+    <table>
+      <thead><tr><th>屬性</th><th>Cookie</th><th>localStorage</th><th>sessionStorage</th></tr></thead>
+      <tbody>
+        <tr><td>容量</td><td>~4KB</td><td>~5MB</td><td>~5MB</td></tr>
+        <tr><td>壽命</td><td>可自訂過期時間</td><td>永久（手動清除才消失）</td><td>關分頁即清除</td></tr>
+        <tr><td>跨分頁</td><td>✅ 跨視窗/分頁</td><td>✅ 跨視窗/分頁</td><td>❌ 僅限當前分頁</td></tr>
+        <tr><td>隨請求送出</td><td>✅ 自動帶在 HTTP header</td><td>❌</td><td>❌</td></tr>
+        <tr><td>安全性選項</td><td>HttpOnly、Secure、SameSite</td><td>無</td><td>無</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">選擇指南</span>
+    <h2>什麼資料放哪裡</h2>
+    <div class="chips">
+      <div class="chip info">
+        <small>Cookie（HttpOnly）</small>
+        <p>session ID、refresh token——需要伺服器驗證，HttpOnly 讓 JS 碰不到，防 XSS</p>
+      </div>
+      <div class="chip info">
+        <small>localStorage</small>
+        <p>主題偏好、語言設定、購物車——不需要伺服器讀取，長期保存</p>
+      </div>
+      <div class="chip info">
+        <small>sessionStorage</small>
+        <p>多步驟表單進度、結帳流程暫存——只在當次瀏覽有效，關閉自動清除</p>
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>常見誤解：Cookie 是<b>客戶端</b>儲存，不是伺服器端儲存！特別的是瀏覽器每次 HTTP 請求都會<b>自動帶上</b>，所以伺服器才看得到它。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>HttpOnly Cookie 是什麼？為什麼更安全？</summary>
+        <p>設定 HttpOnly 後，JavaScript 無法透過 <code>document.cookie</code> 讀取該 Cookie。即使頁面有 XSS 漏洞，攻擊者也無法透過 JS 竊取 token，大幅降低 XSS 攻擊面。</p>
+      </details>
+      <details>
+        <summary>為什麼不把所有資料都存 localStorage？</summary>
+        <p>localStorage 的資料<b>不會隨請求送到伺服器</b>，SSR 首次渲染時無法取得（如使用者語言偏好）。認證資訊更不能放，因為 JS 都能讀到，有 XSS 風險。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三者都是客戶端儲存，差在生命週期和安全性：<span class="hl">Cookie</span> 容量小但會自動隨 HTTP 請求送出，適合認證 token（HttpOnly 可防 XSS）；<span class="hl">localStorage</span> 5MB 永久保存，適合使用者偏好；<span class="hl">sessionStorage</span> 關分頁就清除，適合單次流程暫存。記住 Cookie 是客戶端儲存，不是伺服器端的。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="解釋JavaScript的同源政策.html">同源政策與安全</a>
+      <a href="使用Fetch API發送HTTP請求.html">Fetch API 請求</a>
+      <a href="漸進式網頁應用程式PWA介紹.html">PWA 與 Service Worker</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Proxy 代理</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JAVASCRIPT</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT / ES6+</div>
+    <h1>物件操作的<em>攔截層</em>，<br>Vue 3 反應式的底層秘密</h1>
+    <p class="lede"><b>Proxy</b> 在目標物件和外部程式碼之間插入一個「處理器」，可攔截 get、set、apply 等基本操作並插入自訂邏輯。Vue 3 就是用 Proxy 實作響應式系統，取代 Vue 2 的 <b>Object.defineProperty</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">基本結構</span>
+    <h2>Proxy = 目標物件 + 攔截器（handler）</h2>
+    <pre><code><span class="tok-key">const</span> proxy = <span class="tok-key">new</span> <span class="tok-fn">Proxy</span>(target, handler);
+<span class="tok-com">// handler 是一組「trap」方法</span>
+
+<span class="tok-key">const</span> validator = <span class="tok-key">new</span> <span class="tok-fn">Proxy</span>({}, {
+  <span class="tok-fn">set</span>(target, prop, value) {
+    <span class="tok-key">if</span> (prop === <span class="tok-str">'age'</span> && <span class="tok-key">typeof</span> value !== <span class="tok-str">'number'</span>)
+      <span class="tok-key">throw new</span> <span class="tok-fn">TypeError</span>(<span class="tok-str">'age 必須是數字'</span>);
+    target[prop] = value;
+    <span class="tok-key">return true</span>;
+  }
+});
+validator.age = 25;     <span class="tok-com">// ✓</span>
+validator.age = <span class="tok-str">'old'</span>; <span class="tok-com">// TypeError</span></code></pre>
+    <div class="aside">handler 裡每個方法叫做 <strong>trap</strong>（陷阱），名稱對應 Reflect 方法，如 <code>get</code>、<code>set</code>、<code>has</code>、<code>apply</code>、<code>construct</code> 等共 13 種。</div>
+  </section>
+
+  <section>
+    <span class="num">三大使用場景</span>
+    <h2>Proxy 在實務中怎麼用</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>資料驗證 / 型別守衛</h4>
+          <p>在 <code>set</code> trap 裡檢查型別、範圍，替代大量手動的 setter 方法。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>反應式系統（Vue 3 / MobX / Immer）</h4>
+          <p><code>get</code> 時追蹤依賴，<code>set</code> 時通知訂閱者重繪 UI。這正是 Vue 3 <code>reactive()</code> 的原理。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>Debug 日誌 / 存取稽核</h4>
+          <p>在 <code>get</code>/<code>set</code> trap 裡加 <code>console.log</code>，追蹤物件被誰讀寫，不需修改原始物件。</p>
+        </div>
+      </div>
+    </div>
+
+    <pre><code><span class="tok-com">// 動態預設值：存取不存在的屬性時自動回傳預設</span>
+<span class="tok-key">const</span> withDefault = (<span class="tok-key">target</span>, def) =>
+  <span class="tok-key">new</span> <span class="tok-fn">Proxy</span>(target, {
+    <span class="tok-fn">get</span>(t, k) { <span class="tok-key">return</span> k <span class="tok-key">in</span> t ? t[k] : def; }
+  });
+<span class="tok-key">const</span> cfg = <span class="tok-fn">withDefault</span>({}, <span class="tok-str">'N/A'</span>);
+cfg.name;  <span class="tok-com">// 'N/A'</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">Proxy vs Object.defineProperty</span>
+    <h2>為什麼 Vue 3 要換掉 Vue 2 的做法</h2>
+    <table>
+      <thead><tr><th></th><th>Object.defineProperty（Vue 2）</th><th>Proxy（Vue 3）</th></tr></thead>
+      <tbody>
+        <tr><td>攔截新增屬性</td><td>✕ 需手動 <code>Vue.set()</code></td><td>✓ 自動追蹤</td></tr>
+        <tr><td>攔截陣列索引</td><td>✕ 需 patch 方法</td><td>✓ 原生支援</td></tr>
+        <tr><td>攔截刪除屬性</td><td>✕</td><td>✓ <code>deleteProperty</code> trap</td></tr>
+        <tr><td>效能</td><td>每個屬性個別定義</td><td>整個物件一個 Proxy</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><span class="ico">✕</span><p>Proxy 無法被 polyfill，IE11 完全不支援。需要支援舊瀏覽器只能退回 <code>Object.defineProperty</code> 的方案。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Proxy 和 Reflect 通常一起出現，Reflect 的作用是什麼？</summary>
+        <p><code>Reflect</code> 提供與每個 trap 對應的靜態方法（如 <code>Reflect.get(target, prop, receiver)</code>）。在 trap 裡用 <code>Reflect</code> 執行原始操作，可正確處理繼承鏈的 <code>receiver</code> 問題，比直接寫 <code>target[prop]</code> 更安全。</p>
+      </details>
+      <details>
+        <summary>Proxy 可以攔截哪些操作？能攔截 <code>===</code> 比較嗎？</summary>
+        <p>共 13 個 trap，涵蓋屬性讀寫、<code>in</code> 運算子、<code>delete</code>、函式呼叫、<code>new</code>、<code>Object.keys()</code> 等。<strong>無法</strong>攔截 <code>===</code>、<code>typeof</code>、<code>Object.is()</code>，這些是語言底層的基本操作。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Proxy 讓你在物件外圍包一層攔截層，透過 <span class="hl">handler（trap）</span> 攔截 get、set、apply 等基本操作並插入自訂邏輯。實務常見用途是資料驗證、debug 日誌，以及最重要的<span class="hl">反應式系統</span> — Vue 3 的 <code>reactive()</code> 就是用 Proxy 實作的，相較 Vue 2 的 <code>Object.defineProperty</code>，它能自動追蹤新增屬性和陣列變動，不需要 <code>Vue.set()</code>。唯一限制是無法被 polyfill，不支援 IE11。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中Symbol的用途.html">Symbol 的用途</a>
+      <a href="JavaScript中的迭代器與生成器及其應用.html">迭代器與生成器</a>
+      <a href="Intl命名空間物件的用途.html">Intl 國際化</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

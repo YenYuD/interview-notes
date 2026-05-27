@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optional Chaining 選擇性鏈接</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">TypeScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">TYPESCRIPT</div>
+    <h1><em>Optional Chaining</em> <code>?.</code> 讓深層存取遇到 null 就短路，不拋錯</h1>
+    <p class="lede">深層物件存取最怕中間某層是 <code>null</code> 或 <code>undefined</code>，一路 <code>&& &&</code> 又醜又長。<b><code>?.</code> 讓鏈中任何一環為 null/undefined 時，整個表達式回傳 <code>undefined</code></b>，乾淨不炸。</p>
+  </header>
+
+  <section>
+    <span class="num">01</span>
+    <h2>傳統寫法 vs Optional Chaining</h2>
+    <pre><code><span class="tok-key">const</span> user = { personalInfo: { name: <span class="tok-str">"John"</span>, address: <span class="tok-key">undefined</span> } };
+
+<span class="tok-com">// 傳統：繁瑣且難讀</span>
+<span class="tok-key">const</span> city = user &amp;&amp; user.personalInfo &amp;&amp; user.personalInfo.address
+  ? user.personalInfo.address.city
+  : <span class="tok-key">undefined</span>;
+
+<span class="tok-com">// Optional Chaining：簡潔</span>
+<span class="tok-key">const</span> city = user?.personalInfo?.address?.city;
+<span class="tok-com">// address 是 undefined → 整個表達式回傳 undefined（不拋錯）</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">02</span>
+    <h2>三種用法</h2>
+    <pre><code><span class="tok-com">// 1. 存取屬性</span>
+<span class="tok-key">const</span> name = user?.profile?.name;
+
+<span class="tok-com">// 2. 呼叫方法</span>
+<span class="tok-key">const</span> result = user?.getProfile?.();
+
+<span class="tok-com">// 3. 存取陣列元素</span>
+<span class="tok-key">const</span> first = arr?.[0];</code></pre>
+  </section>
+
+  <section>
+    <span class="num">03</span>
+    <h2>搭配 Nullish Coalescing <code>??</code> 提供預設值</h2>
+    <pre><code><span class="tok-com">// ?? 只對 null / undefined 走右側（不像 || 對所有 falsy 都走）</span>
+<span class="tok-key">const</span> name  = user?.profile?.name ?? <span class="tok-str">"Anonymous"</span>;
+<span class="tok-key">const</span> count = data?.count ?? 0; <span class="tok-com">// count 是 0 時，?? 不會換成 0（|| 會）</span></code></pre>
+    <div class="callout tip"><span class="ico">💡</span><p><code>??</code>（Nullish Coalescing）比 <code>||</code> 更精準：<b><code>||</code> 遇到任何 falsy（0、""、false）都走右側；<code>??</code> 只對 null 和 undefined 走右側</b>。兩者搭配 <code>?.</code> 是處理可選值的最佳組合。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Optional Chaining 和 Optional Parameter（<code>?</code>）有什麼不同？</summary><p>Optional Parameter（<code>name?: string</code>）是在型別定義中標記某個參數/屬性是可選的（可能為 undefined）。Optional Chaining（<code>?.）</code>是在存取時安全處理可能為 null/undefined 的值。前者是型別宣告，後者是存取語法。</p></details>
+      <details><summary>什麼情況下不適合用 Optional Chaining？</summary><p>當你確定某個值一定存在（如必填欄位）時，用 <code>?.</code> 會掩蓋潛在的 bug——原本應該報錯的情況變成靜默回傳 undefined。這種情況用非空斷言 <code>!</code> 或直接存取更合適，讓問題早點爆出來。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Optional Chaining（<code>?.</code>）讓你安全地存取深層物件屬性——<span class="hl">鏈中任何一環是 null 或 undefined，整個表達式立即回傳 undefined 而不拋出錯誤</span>。常搭配 <code>??</code>（Nullish Coalescing）提供預設值，它比 <code>||</code> 更精準，只對 null/undefined 走右側，不會誤判 0 或空字串。兩者都是 ES2020 / TypeScript 3.7 加入的特性。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="012 何時使用 unknown 型別.html">unknown 型別</a>
+      <a href="019 型別斷言 Type Assertions.html">型別斷言</a>
+      <a href="008 var、let、const 的差異.html">var、let、const</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

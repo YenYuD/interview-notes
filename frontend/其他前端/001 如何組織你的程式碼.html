@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如何組織你的程式碼</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">其他前端</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">其他前端</div>
+    <h1>程式碼怎麼放，決定<em>未來能不能改</em></h1>
+    <p class="lede">組織程式碼不只是「放哪個資料夾」，而是讓<b>每個模組只做一件事、依賴方向可預測</b>。好的結構讓你三個月後還看得懂自己寫的東西。</p>
+  </header>
+
+  <section>
+    <span class="num">核心原則</span>
+    <h2>三個問題定架構</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>單一職責</h4>
+          <p>一個模組只做一件事。<code>userService.ts</code> 處理使用者業務邏輯，<code>userApi.ts</code> 處理 HTTP 呼叫——不要混在一起。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>依賴方向</h4>
+          <p>UI 依賴 Service，Service 依賴 API 層——依賴只能往下，不能反過來。這讓你換掉某一層時，其他層不受影響。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>Feature-based vs Layer-based</h4>
+          <p>小專案用按層（<code>components/</code>、<code>hooks/</code>、<code>utils/</code>）；大專案改用按功能（<code>features/auth/</code>、<code>features/cart/</code>）避免跨資料夾追蹤。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">常見結構對比</span>
+    <h2>Layer-based vs Feature-based</h2>
+    <table>
+      <tr><th>方式</th><th>資料夾長這樣</th><th>適合何時</th></tr>
+      <tr><td><b>Layer-based</b></td><td><code>components/ hooks/ utils/ api/</code></td><td>小型專案、功能少於 5 模組</td></tr>
+      <tr><td><b>Feature-based</b></td><td><code>features/auth/ features/cart/</code></td><td>中大型、多人維護、功能增長快</td></tr>
+      <tr><td><b>混合式</b></td><td><code>features/</code> + 共用 <code>shared/</code></td><td>多數 React 中型專案的選擇</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">💡</span><p>Feature-based 的關鍵：每個 feature 資料夾只對外暴露一個 <code>index.ts</code>（barrel export），其餘視為私有。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>什麼是 Colocation？</summary><p>把「一起變動的東西放在一起」，例如把 component 的測試檔、樣式放在同一資料夾，而不是集中在頂層 <code>__tests__/</code>。這讓改一個 component 時，相關檔案一眼可見。</p></details>
+      <details><summary>如何避免 barrel file 造成 Tree Shaking 失效？</summary><p>避免在 <code>index.ts</code> 中重新匯出整個套件（<code>export * from './utils'</code>）。必要時改用 named re-export，讓 bundler 能靜態分析用到哪些 export。</p></details>
+      <details><summary>大型 monorepo 怎麼組織？</summary><p>用 Turborepo 或 Nx，把共用邏輯抽成 <code>packages/</code>，各應用放 <code>apps/</code>。跨 package 依賴由工具管理，避免直接 import 相對路徑。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我通常用<span class="hl">功能導向（Feature-based）</span>組織程式碼：每個功能模組有自己的 components、hooks、API 層，對外只暴露一個 index.ts。共用邏輯抽到 <span class="hl">shared/</span>。這樣依賴方向清楚，改一個功能不會意外影響其他模組，新人也容易找到對應程式碼。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="005 效能優化與架構.html">005 效能優化與架構</a>
+      <a href="006 現代化工具 (Next.js, Tailwind, TS).html">006 現代化工具</a>
+      <a href="007 其他技術問題.html">007 其他技術問題</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

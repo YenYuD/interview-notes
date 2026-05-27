@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>防抖與節流</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>事件狂噴，但你<em>不必每次都處理</em></h1>
+    <p class="lede">輸入、捲動、resize 會在短時間觸發上百次。<b>防抖</b>＝等你停下來再做一次；<b>節流</b>＝固定間隔最多做一次。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 瘋狂點擊看差別</span>
+    <h2>連續觸發 30 次，各執行幾次？</h2>
+    <p>按住「快速觸發」狂點（模擬連續事件），看三種策略各自實際執行了幾次：</p>
+
+    <div class="lab">
+      <div class="lab-label">三種策略並排比較</div>
+      <button class="btn-primary" id="fire">⚡ 快速觸發（多點幾下）</button>
+      <div class="chips" style="margin-top:1rem">
+        <div class="chip" style="border-color:var(--line);color:var(--ink-soft)">原始觸發<small id="cRaw">0 次</small></div>
+        <div class="chip info">防抖 500ms<small id="cDeb">0 次</small></div>
+        <div class="chip good">節流 500ms<small id="cThr">0 次</small></div>
+      </div>
+      <div class="log" id="out" style="max-height:none"></div>
+    </div>
+    <div class="aside">狂點時：防抖<b>幾乎不動</b>，等你停手 500ms 才補一次；節流<b>每 500ms 穩定執行一次</b>。原始則是點幾下跑幾次。</div>
+  </section>
+
+  <section>
+    <span class="num">怎麼選</span>
+    <h2>場景對照</h2>
+    <table>
+      <tr><th></th><th>防抖 Debounce</th><th>節流 Throttle</th></tr>
+      <tr><td>行為</td><td>停止觸發後延遲執行一次</td><td>固定間隔最多執行一次</td></tr>
+      <tr><td>適用</td><td>搜尋輸入、自動儲存、表單驗證</td><td>捲動、resize、滑鼠移動、無限載入</td></tr>
+      <tr><td>關鍵字</td><td>「等你說完」</td><td>「定期回報」</td></tr>
+    </table>
+    <pre><code><span class="tok-com">// 防抖：每次呼叫都重設計時器</span>
+function debounce(fn, d){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; }
+<span class="tok-com">// 節流：時間窗內只放行一次</span>
+function throttle(fn, l){ let on; return (...a)=>{ if(!on){ fn(...a); on=true; setTimeout(()=>on=false, l); } }; }</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>防抖要不要 leading edge？</summary><p>可加參數：leading 在第一次立即執行、trailing 在停止後執行。搜尋常用 trailing；按鈕防連點常用 leading。</p></details>
+      <details><summary>React 裡怎麼用？</summary><p>用 <code>useMemo</code>/<code>useRef</code> 保住同一個 debounced 函式（別每次渲染重建），或用 lodash 的 <code>debounce</code>/<code>throttle</code>，卸載時記得 cancel。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「兩者都在<span class="hl">限制函式執行頻率</span>。<span class="hl">防抖是停止觸發後延遲執行一次</span>，適合搜尋輸入這種『等使用者說完再發 API』；<span class="hl">節流是固定間隔最多執行一次</span>，適合捲動、resize 這種要『定期回應但別太頻繁』。實作上防抖每次重設計時器，節流則設時間窗放行。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="優化網路請求提升效能.html">優化網路請求</a>
+      <a href="JavaScript應用程式常見效能瓶頸.html">效能瓶頸</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const $=id=>document.getElementById(id);
+  let raw=0, deb=0, thr=0;
+  function debounce(fn,d){ let t; return ()=>{ clearTimeout(t); t=setTimeout(fn,d); }; }
+  function throttle(fn,l){ let on=false; return ()=>{ if(!on){ fn(); on=true; setTimeout(()=>on=false,l); } }; }
+  const doDeb=debounce(()=>{ deb++; $('cDeb').textContent=deb+' 次'; log('防抖：使用者停手 → 執行 1 次','c-dim'); }, 500);
+  const doThr=throttle(()=>{ thr++; $('cThr').textContent=thr+' 次'; log('節流：時間窗到 → 執行 1 次','c-ok'); }, 500);
+  function log(m,c){ $('out').insertAdjacentHTML('beforeend',`<div class="ln ${c||''}">${m}</div>`); $('out').scrollTop=$('out').scrollHeight; }
+  $('fire').addEventListener('click',()=>{
+    raw++; $('cRaw').textContent=raw+' 次';
+    doDeb(); doThr();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>點記法 vs 中括號記法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1>點記法能做的 90%，<em>中括號記法全都能</em></h1>
+    <p class="lede">兩種存取物件屬性的語法各有適用場景：<b>點記法</b>簡潔直觀；<b>中括號記法</b>可用變數動態決定屬性名，也能處理含空格或特殊字元的 key。</p>
+  </header>
+
+  <section>
+    <span class="num">語法對照</span>
+    <h2>什麼情況只能用中括號？</h2>
+    <table>
+      <thead><tr><th>情境</th><th>點記法</th><th>中括號記法</th></tr></thead>
+      <tbody>
+        <tr><td>一般識別字屬性</td><td>✓ <code>obj.name</code></td><td>✓ <code>obj['name']</code></td></tr>
+        <tr><td>含空白 / 特殊字元的 key</td><td>✗</td><td>✓ <code>obj['favorite color']</code></td></tr>
+        <tr><td>以數字開頭的 key</td><td>✗</td><td>✓ <code>obj['1st']</code></td></tr>
+        <tr><td>動態 key（變數）</td><td>✗</td><td>✓ <code>obj[someVar]</code></td></tr>
+        <tr><td>保留字為 key（ES5 以前）</td><td>✗（現代 ES 已允許）</td><td>✓ 永遠安全</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">動態屬性存取</span>
+    <h2>中括號記法的核心優勢</h2>
+    <pre><code><span class="tok-key">const</span> user = { name: <span class="tok-str">'Alice'</span>, age: 28, role: <span class="tok-str">'admin'</span> };
+<span class="tok-key">const</span> key = <span class="tok-str">'role'</span>; <span class="tok-com">// 可來自使用者輸入、函式參數…</span>
+
+<span class="tok-com">// 點記法無法動態</span>
+console.log(user.key);   <span class="tok-com">// undefined（找名為 "key" 的屬性）</span>
+
+<span class="tok-com">// 中括號記法可動態</span>
+console.log(user[key]);  <span class="tok-com">// 'admin' ✓</span>
+
+<span class="tok-com">// 常見應用：動態 form 欄位更新</span>
+<span class="tok-key">function</span> <span class="tok-fn">updateField</span>(obj, field, value) {
+  obj[field] = value;
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>中括號記法裡可以放運算式嗎？</summary><p>可以，任何有效的 JS 運算式都行，如 <code>obj[i + 1]</code>、<code>obj['pre' + 'fix']</code>、<code>obj[Symbol.iterator]</code>。這讓中括號記法非常靈活。</p></details>
+      <details><summary>Computed property name（計算屬性名）是什麼？</summary><p>ES2015 引入了在物件字面量裡直接用中括號計算 key 的語法：<code>const key = 'name'; const obj = { [key]: 'Alice' }</code>，等同 <code>{ name: 'Alice' }</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「兩者都能存取物件屬性。點記法更簡潔，日常優先使用；中括號記法有三種點記法辦不到的場景：<span class="hl">動態 key（變數）</span>、含空格或特殊字元的 key、以數字開頭的 key。一旦屬性名是在執行期決定的，就必須用中括號。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何檢查物件是否具有特定屬性.html">檢查物件是否有特定屬性</a>
+      <a href="如何可靠判斷物件是否為空.html">判斷物件是否為空</a>
+      <a href="JavaScript物件的getter與setter用途.html">getter 與 setter</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

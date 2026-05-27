@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flux 模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 架構</div>
+    <h1>Flux：強制<em>單向資料流</em>，讓狀態變更可追蹤</h1>
+    <p class="lede">傳統 MVC 的雙向資料流讓大型應用難以除錯。Meta 提出的 <b>Flux 模式</b>強制資料只能沿著 Action → Dispatcher → Store → View 一個方向流動，讓狀態變更<b>可預測、可重現</b>。它也是 Redux 的前身。</p>
+  </header>
+
+  <section>
+    <span class="num">四個角色</span>
+    <h2>Flux 的組成與資料流</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>View</b>（React 組件）：使用者操作觸發 Action</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Action</b>：描述「發生什麼事」的資訊載荷 <code>{ type, payload }</code></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Dispatcher</b>：中央樞紐，把 Action 廣播給所有 Store</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><b>Store</b>：保存應用狀態和業務邏輯，更新後通知 View 重渲</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">Flux vs Redux</span>
+    <h2>Redux 對 Flux 的演進</h2>
+    <table>
+      <thead><tr><th>面向</th><th>Flux</th><th>Redux</th></tr></thead>
+      <tbody>
+        <tr><td>Store 數量</td><td>多個（每個功能各一個）</td><td>單一全域 store</td></tr>
+        <tr><td>Dispatcher</td><td>需要</td><td>無（reducer 直接處理）</td></tr>
+        <tr><td>Reducer</td><td>無</td><td>純函式 reducer</td></tr>
+        <tr><td>Time-travel debug</td><td>不支援</td><td>支援（Redux DevTools）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info"><span class="ico">ℹ️</span><p>Flux 現在較少直接使用，但它的<b>單向資料流概念</b>影響了 Redux、Vuex、MobX 等現代狀態管理工具的設計。了解 Flux 有助於理解 Redux 的設計哲學。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>為什麼 Flux 用單向資料流而不是雙向？</summary><p>雙向資料流（如 Angular 1 的 two-way binding）在大型應用中，一個狀態變化可能連鎖觸發多個更新，難以追蹤根源。單向流讓每次狀態變化的路徑固定且可追溯。</p></details>
+      <details><summary>React 的 useReducer 和 Flux/Redux 的關係是什麼？</summary><p><code>useReducer</code> 把 Flux/Redux 的模式內建到 React 組件層級——<code>dispatch(action) → reducer → newState</code>。搭配 Context 可以模擬輕量版 Redux，但沒有 middleware 和 DevTools。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Flux 是 Meta 提出的單向資料流架構：View 觸發 Action，Action 透過 Dispatcher 分發給 Store，Store 更新後通知 View 重渲。核心優點是<span class="hl">狀態變更路徑固定、可追蹤</span>，解決了雙向資料流難以除錯的問題。Redux 繼承了 Flux 的單向流概念，但簡化為單一 Store + 純函式 reducer，並加上 DevTools 支援時間旅行除錯。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="React 中的 `useReducer` hook 是什麼？什麼時候應該使用它？.html">useReducer</a>
+      <a href="解釋 React 的單向資料流（one-way data flow）及其優點.html">單向資料流</a>
+      <a href="你如何決定何時使用 React State、Context 或外部狀態管理工具？.html">State / Context / 外部工具選擇</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

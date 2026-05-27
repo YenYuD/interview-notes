@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事件監聽器使用方法</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>事件監聽器：<em>addEventListener</em> 讓頁面對使用者操作做出回應</h1>
+    <p class="lede">事件監聽器是前端互動的基礎。<b>addEventListener</b> 綁定監聽、<b>removeEventListener</b> 解除綁定，搭配<b>事件代理</b>可以高效管理大量動態元素的事件。</p>
+  </header>
+
+  <section>
+    <span class="num">基本用法</span>
+    <h2>綁定、解除、事件物件</h2>
+    <pre><code><span class="tok-com">// 綁定事件監聽器</span>
+<span class="tok-key">function</span> <span class="tok-fn">handleClick</span>(event) {
+  console.log(<span class="tok-str">'Type:'</span>, event.type);    <span class="tok-com">// "click"</span>
+  console.log(<span class="tok-str">'Target:'</span>, event.target); <span class="tok-com">// 被點擊的元素</span>
+}
+
+btn.addEventListener(<span class="tok-str">'click'</span>, handleClick);
+
+<span class="tok-com">// 移除監聽器（必須傳相同函式參考）</span>
+btn.removeEventListener(<span class="tok-str">'click'</span>, handleClick);
+
+<span class="tok-com">// 只觸發一次後自動移除</span>
+btn.addEventListener(<span class="tok-str">'click'</span>, handleClick, { once: <span class="tok-key">true</span> });</code></pre>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>用匿名函式當監聽器時，<code>removeEventListener</code> 無效，因為每次都是新函式參考。要移除監聽器，必須先把函式存在變數裡。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">常用事件類型</span>
+    <h2>面試常考的事件分類</h2>
+    <table>
+      <thead><tr><th>分類</th><th>事件</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>滑鼠</td><td>click / dblclick / mouseenter / mouseleave</td><td>點擊、雙擊、進入、離開</td></tr>
+        <tr><td>鍵盤</td><td>keydown / keyup / keypress</td><td>按鍵按下/釋放</td></tr>
+        <tr><td>表單</td><td>submit / change / input / focus / blur</td><td>送出/變更/輸入/焦點</td></tr>
+        <tr><td>頁面</td><td>DOMContentLoaded / load / resize / scroll</td><td>載入/大小/捲動</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>addEventListener 和 onclick 有什麼差別？</summary>
+        <p><code>onclick</code>（HTML 屬性或 DOM 屬性）只能綁定一個處理器，後設的會覆蓋前者；<code>addEventListener</code> 可以綁定多個獨立的監聽器，不會互相覆蓋。</p>
+      </details>
+      <details>
+        <summary>passive 選項有什麼用？</summary>
+        <p><code>{ passive: true }</code> 告知瀏覽器此監聽器不會呼叫 preventDefault()，讓瀏覽器提前開始捲動，改善滾動效能。用在 scroll、touchstart 等事件上效果明顯。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">addEventListener(eventType, handler, options)</span> 是綁定事件的標準方式，可以對同一元素綁定多個監聽器；要移除監聽器用 removeEventListener，必須傳入相同的函式參考（所以不能用匿名函式）。常用選項：<code>{ once: true }</code> 只觸發一次後自動移除、<code>{ passive: true }</code> 提升捲動效能。大量元素的事件用事件代理，只在父元素綁定一個監聽器。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript事件代理說明.html">事件代理說明</a>
+      <a href="JavaScript事件冒泡與瀏覽器行為.html">事件冒泡說明</a>
+      <a href="event.preventDefault與event.stopPropagation差異.html">preventDefault vs stopPropagation</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

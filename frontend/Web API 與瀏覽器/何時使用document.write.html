@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>何時使用 document.write</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1><em>document.write()</em>：幾乎從不使用，但要知道為什麼</h1>
+    <p class="lede"><code>document.write()</code> 是最古老的 DOM 操作方式，現代開發幾乎完全避免使用。了解它的危險性，以及為什麼有更好的替代方案，這本身就是面試的考點。</p>
+  </header>
+
+  <section>
+    <span class="num">最大問題</span>
+    <h2>頁面載入完成後呼叫會覆蓋整個文件</h2>
+    <div class="callout warn">
+      <span class="ico">⚠</span>
+      <p>如果在頁面載入完成後呼叫 <code>document.write()</code>，瀏覽器會<b>清空整個頁面</b>重新開始，所有現有內容都會消失。</p>
+    </div>
+    <pre><code><span class="tok-com">// 危險：頁面載入完成後才執行</span>
+window.addEventListener(<span class="tok-str">'load'</span>, () => {
+  document.write(<span class="tok-str">'&lt;h1&gt;New Content&lt;/h1&gt;'</span>);
+  <span class="tok-com">// 原本所有頁面內容都消失了！</span>
+});</code></pre>
+    <table>
+      <thead><tr><th>場景</th><th>用 document.write 的問題</th><th>更好的替代方案</th></tr></thead>
+      <tbody>
+        <tr><td>動態插入內容</td><td>可能覆蓋整頁、阻塞渲染</td><td><code>innerHTML</code> 或 <code>createElement</code></td></tr>
+        <tr><td>輸出偵錯訊息</td><td>影響頁面結構</td><td><code>console.log()</code></td></tr>
+        <tr><td>插入腳本</td><td>同步阻塞解析器</td><td>動態建立 script 元素</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">何時可以用？</span>
+    <h2>幾乎只剩教學和舊程式碼維護</h2>
+    <div class="chips">
+      <div class="chip bad">
+        <small>不建議</small>
+        <p>生產環境的任何動態內容插入</p>
+      </div>
+      <div class="chip bad">
+        <small>不建議</small>
+        <p>第三方廣告腳本（現代廣告服務已改用其他方式）</p>
+      </div>
+      <div class="chip info">
+        <small>可接受</small>
+        <p>教學示範 JS 基礎概念（舊版教材）</p>
+      </div>
+      <div class="chip info">
+        <small>可接受</small>
+        <p>維護無法修改的舊有程式碼時理解它</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Chrome 為什麼會封鎖 document.write()？</summary>
+        <p>Chrome 在慢速連線（2G）時會介入封鎖 <code>document.write()</code>，因為它同步阻塞 HTML 解析器，會大幅延遲首次內容繪製（FCP）。這是 Google 效能優化的政策。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">document.write() 在現代開發中幾乎不使用</span>。主要問題是：頁面載入完成後呼叫會清空整個文件；它同步阻塞 HTML 解析器，影響頁面效能；Chrome 在慢速連線下甚至會主動封鎖它。替代方案：動態插入內容用 innerHTML 或 createElement；偵錯用 console.log。唯一接觸它的情況是維護很舊的程式碼。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="使用JavaScript新增移除修改HTML元素.html">JS 操作 DOM 元素</a>
+      <a href="innerHTML與textContent的差異.html">innerHTML vs textContent</a>
+      <a href="什麼是DOM及其結構.html">什麼是 DOM</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

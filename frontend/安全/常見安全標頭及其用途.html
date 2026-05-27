@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>常見安全 HTTP 標頭</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全 · HTTP Headers</div>
+    <h1>六行 Header，擋掉<em>大半常見攻擊</em></h1>
+    <p class="lede">安全 HTTP header 是部署成本最低、效益最高的防禦手段。<b>加幾行設定就能讓瀏覽器主動阻擋 XSS、Clickjacking、MIME 嗅探、降級攻擊</b>。上線前核對清單，確保一個都不少。</p>
+  </header>
+
+  <section>
+    <span class="num">六大安全標頭</span>
+    <h2>各司其職，分層防禦</h2>
+    <table>
+      <tr><th>Header</th><th>防什麼</th><th>推薦設定</th></tr>
+      <tr>
+        <td><code>Content-Security-Policy</code></td>
+        <td>XSS、資料注入</td>
+        <td><code>default-src 'self'; script-src 'self'</code></td>
+      </tr>
+      <tr>
+        <td><code>Strict-Transport-Security</code></td>
+        <td>HTTP 降級、中間人攻擊</td>
+        <td><code>max-age=31536000; includeSubDomains; preload</code></td>
+      </tr>
+      <tr>
+        <td><code>X-Frame-Options</code></td>
+        <td>Clickjacking（iframe 劫持）</td>
+        <td><code>DENY</code> 或 <code>SAMEORIGIN</code></td>
+      </tr>
+      <tr>
+        <td><code>X-Content-Type-Options</code></td>
+        <td>MIME 嗅探攻擊</td>
+        <td><code>nosniff</code>（固定這一個值）</td>
+      </tr>
+      <tr>
+        <td><code>Referrer-Policy</code></td>
+        <td>敏感 URL 資訊外洩</td>
+        <td><code>strict-origin-when-cross-origin</code></td>
+      </tr>
+      <tr>
+        <td><code>X-XSS-Protection</code></td>
+        <td>舊瀏覽器 XSS 過濾（已過時）</td>
+        <td><code>0</code>（現代 app 建議關掉，改用 CSP）</td>
+      </tr>
+    </table>
+
+    <div class="callout warn"><span class="ico">⚠</span><p><b>HSTS 要謹慎</b>：<code>max-age</code> 一旦設高、加進 preload 清單後，就算你想改回 HTTP 也需要等 cache 到期。先從小 <code>max-age</code>（如 86400）測試，確認 HTTPS 穩定再調高。</p></div>
+  </section>
+
+  <section>
+    <span class="num">重點細說</span>
+    <h2>HSTS 與 MIME Sniffing</h2>
+
+    <div class="aside">HSTS（Strict-Transport-Security）讓瀏覽器記住「這個網域只准 HTTPS」，往後連 HTTP request 都不會發出，直接在客戶端升級。preload 讓瀏覽器出廠就知道。</div>
+
+    <pre><code><span class="tok-com"># HSTS — 強制 HTTPS 一年，含子網域，申請 preload</span>
+<span class="tok-key">Strict-Transport-Security</span>: <span class="tok-str">max-age=31536000; includeSubDomains; preload</span>
+
+<span class="tok-com"># 防 MIME 嗅探：瀏覽器不猜 Content-Type，只信宣告的</span>
+<span class="tok-key">X-Content-Type-Options</span>: <span class="tok-str">nosniff</span>
+
+<span class="tok-com"># 控制 Referer 資訊洩漏程度</span>
+<span class="tok-key">Referrer-Policy</span>: <span class="tok-str">strict-origin-when-cross-origin</span></code></pre>
+
+    <div class="callout info"><span class="ico">ℹ</span><p>MIME 嗅探攻擊：攻擊者上傳偽裝成圖片的 HTML 檔，瀏覽器「猜」出是 HTML 後執行。<code>nosniff</code> 告訴瀏覽器：<b>別猜，照宣告的 Content-Type 處理</b>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>X-Frame-Options 跟 CSP frame-ancestors 差在哪？</summary><p><code>X-Frame-Options</code> 較舊但瀏覽器支援廣；CSP <code>frame-ancestors</code> 更彈性（可指定多個允許來源）。建議兩者並設以確保相容性。</p></details>
+      <details><summary>怎麼快速檢查線上站台的安全 header？</summary><p>用 <a href="https://securityheaders.com" target="_blank">securityheaders.com</a> 掃描，或 <code>curl -I https://your-domain.com</code> 直接看 response headers。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「上線前我會確認六個安全 header：<span class="hl">CSP</span> 防 XSS、<span class="hl">HSTS</span> 強制 HTTPS、<span class="hl">X-Frame-Options</span> 防 Clickjacking、<span class="hl">X-Content-Type-Options: nosniff</span> 防 MIME 嗅探、<span class="hl">Referrer-Policy</span> 控制資訊外洩，以及關掉已過時的 <span class="hl">X-XSS-Protection</span>（改用 CSP）。成本幾乎是零，但能擋掉一大類常見攻擊。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="內容安全政策CSP概念與安全強化.html">CSP 深入說明</a>
+      <a href="防範點擊劫持攻擊方法.html">Clickjacking 防範</a>
+      <a href="跨站腳本攻擊XSS及防範方法.html">XSS 攻擊與防範</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

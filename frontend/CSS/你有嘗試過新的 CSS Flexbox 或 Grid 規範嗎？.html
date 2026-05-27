@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flexbox 與 Grid</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS 版面</div>
+    <h1>一句話分工：<em>Flex 管一條線，Grid 管一張表</em></h1>
+    <p class="lede">Flexbox 是<b>一維</b>排版（一排或一列）；Grid 是<b>二維</b>排版（同時管列和欄）。選錯工具會多寫很多 CSS。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 同一批卡片，兩種排法</span>
+    <h2>切換看排版怎麼變</h2>
+
+    <div class="lab">
+      <div class="lab-label">排版模式</div>
+      <div class="toggle-row" id="row">
+        <button class="on" data-m="flex">Flexbox（一維）</button>
+        <button data-m="grid">Grid（二維）</button>
+      </div>
+
+      <div id="stage" style="display:flex;gap:.6rem;flex-wrap:wrap;background:var(--paper);border-radius:10px;padding:1rem;border:1px dashed var(--line)">
+        <div class="gi">1</div><div class="gi">2</div><div class="gi">3</div>
+        <div class="gi">4</div><div class="gi">5</div>
+      </div>
+      <div class="log" id="log" style="max-height:none"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">怎麼選</span>
+    <h2>該用哪個？</h2>
+    <table>
+      <tr><th></th><th>Flexbox</th><th>Grid</th></tr>
+      <tr><td>維度</td><td>一維（主軸）</td><td>二維（列＋欄）</td></tr>
+      <tr><td>擅長</td><td>導覽列、置中、按鈕群、依內容排</td><td>整頁版面、卡片牆、儀表板</td></tr>
+      <tr><td>思維</td><td>內容驅動（item 自己撐）</td><td>版面驅動（先畫格子）</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>實務上常<b>混用</b>：用 Grid 切大版面，每個格子內再用 Flex 排內容。垂直置中也終於不用再靠 hack。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>怎麼做完美置中？</summary><p>Flex：<code>display:flex; justify-content:center; align-items:center;</code>。Grid 更短：<code>display:grid; place-items:center;</code>。</p></details>
+      <details><summary>Grid 的 fr 和 auto-fill / minmax？</summary><p><code>fr</code> 是剩餘空間的比例單位。<code>repeat(auto-fill, minmax(220px, 1fr))</code> 可做出「容器多寬就塞幾欄」的自適應卡片牆——本站索引頁就是這樣排的。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我會看維度選工具：<span class="hl">一維用 Flexbox</span>（導覽列、置中、按鈕群），<span class="hl">二維用 Grid</span>（整頁版面、卡片牆）。實務上常混用——Grid 切大格局，格子內用 Flex 排細節。兩者都已是現代瀏覽器的可靠選擇，置中這種老問題終於不用 hack 了。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你曾使用過格線系統嗎？如果有，你偏好哪一種？.html">格線系統</a>
+      <a href="`block`、`inline` 和 `inline-block` 有什麼差別？.html">display 基礎</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const stage=document.getElementById('stage'), row=document.getElementById('row'), log=document.getElementById('log');
+  function render(m){
+    if(m==='flex'){
+      stage.style.display='flex'; stage.style.flexWrap='wrap';
+      stage.style.gridTemplateColumns='';
+      log.innerHTML='<div class="ln c-dim">display:flex; flex-wrap:wrap</div><div class="ln c-ok">→ item 沿主軸一條線排，依內容寬度自然流動、換行</div>';
+    } else {
+      stage.style.display='grid';
+      stage.style.gridTemplateColumns='repeat(3, 1fr)';
+      log.innerHTML='<div class="ln c-dim">display:grid; grid-template-columns:repeat(3,1fr)</div><div class="ln c-ok">→ 先定義 3 欄格子，item 自動填入列與欄（對齊整齊）</div>';
+    }
+  }
+  row.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    render(b.dataset.m);
+  });
+  render('flex');
+</script>
+<style>
+  .gi{background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent);border-radius:8px;height:54px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;min-width:54px;flex:1}
+</style>
+</body>
+</html>

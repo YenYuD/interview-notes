@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>建立物件的多種方法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 物件</div>
+    <h1>五種建立物件的方式，<em>選哪個最合適</em>？</h1>
+    <p class="lede">從最簡單的物件字面量到 ES2015 class，每種方式有其適用場景。理解各自的<b>原型設定方式</b>，才能選對工具。</p>
+  </header>
+
+  <section>
+    <span class="num">五種方法對照</span>
+    <h2>語法、原型、適用場景</h2>
+    <table>
+      <thead><tr><th>方式</th><th>語法</th><th>原型指向</th><th>適用場景</th></tr></thead>
+      <tbody>
+        <tr><td>物件字面量</td><td><code>const obj = { key: val }</code></td><td><code>Object.prototype</code></td><td>一次性單個物件</td></tr>
+        <tr><td><code>new Object()</code></td><td><code>const obj = new Object()</code></td><td><code>Object.prototype</code></td><td>少用，等同字面量</td></tr>
+        <tr><td><code>Object.create(proto)</code></td><td><code>const obj = Object.create(proto)</code></td><td>指定的 <code>proto</code></td><td>需精確控制原型</td></tr>
+        <tr><td>建構函式</td><td><code>new Person(name)</code></td><td><code>Person.prototype</code></td><td>ES5 多實例</td></tr>
+        <tr><td>ES2015 class</td><td><code>new Person(name)</code>（class 語法）</td><td><code>Person.prototype</code></td><td>現代多實例、含繼承</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">最值得注意</span>
+    <h2>Object.create() 的特殊能力</h2>
+    <pre><code><span class="tok-com">// 精確設定原型</span>
+<span class="tok-key">const</span> proto = {
+  <span class="tok-fn">greet</span>() { console.log(<span class="tok-str">`Hi, I'm ${this.name}`</span>); }
+};
+<span class="tok-key">const</span> person = Object.<span class="tok-fn">create</span>(proto);
+person.name = <span class="tok-str">'Alice'</span>;
+person.<span class="tok-fn">greet</span>(); <span class="tok-com">// Hi, I'm Alice</span>
+
+<span class="tok-com">// 建立無原型的純 dictionary</span>
+<span class="tok-key">const</span> dict = Object.<span class="tok-fn">create</span>(<span class="tok-key">null</span>);
+<span class="tok-com">// dict.toString → undefined（不繼承任何東西）</span></code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>日常開發優先選<strong>物件字面量</strong>或 <strong>class</strong>；只有需要控制原型時才用 <code>Object.create()</code>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>物件字面量和 new Object() 有差嗎？</summary><p>功能相同，都建立 [[Prototype]] 指向 Object.prototype 的物件。字面量更簡潔，生產環境幾乎都用字面量，<code>new Object()</code> 基本上是歷史遺留。</p></details>
+      <details><summary>class 和建構函式建立的實例，原型鏈一樣嗎？</summary><p>一樣。<code>class Person</code> 的底層就是個函式，<code>new Person()</code> 的實例的 [[Prototype]] 都指向 <code>Person.prototype</code>。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JS 建立物件有五種主要方式。日常最常用的是<span class="hl">物件字面量</span>，簡潔直觀；需要多個相似實例就用 <span class="hl">class</span>（或舊式建構函式）；需要精確控制原型繼承用 <span class="hl">Object.create()</span>，傳入 null 還能建立無原型的純 dictionary。每種方式的核心差異在於：新物件的 [[Prototype]] 指向哪裡。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript原型繼承原理解析.html">原型繼承原理</a>
+      <a href="如何建立建構子函式.html">如何建立建構子函式</a>
+      <a href="new關鍵字的用途.html">new 關鍵字詳解</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>什麼是 DOM</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">Web API 與瀏覽器</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">WEB API 與瀏覽器</div>
+    <h1>DOM：把 HTML 變成<em>可以用 JavaScript 操作的樹狀結構</em></h1>
+    <p class="lede">DOM（Document Object Model）是瀏覽器把 HTML 文件轉換成<b>物件樹</b>的結果，JavaScript 透過這個樹狀介面讀取、新增、刪除、修改頁面的任何部分。</p>
+  </header>
+
+  <section>
+    <span class="num">樹狀結構</span>
+    <h2>HTML 如何對應到 DOM 節點</h2>
+    <pre><code><span class="tok-com">HTML 文件：</span>
+&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;Hello&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;標題&lt;/h1&gt;
+    &lt;p&gt;段落&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+<span class="tok-com">DOM 樹：</span>
+Document
+  └── html
+      ├── head → title → "Hello"
+      └── body
+          ├── h1  → "標題"
+          └── p   → "段落"</code></pre>
+  </section>
+
+  <section>
+    <span class="num">節點類型</span>
+    <h2>DOM 樹有哪些節點</h2>
+    <table>
+      <thead><tr><th>節點類型</th><th>說明</th><th>範例</th></tr></thead>
+      <tbody>
+        <tr><td>Document</td><td>整個文件的根</td><td><code>document</code></td></tr>
+        <tr><td>Element</td><td>HTML 標籤</td><td><code>&lt;div&gt;</code>、<code>&lt;p&gt;</code></td></tr>
+        <tr><td>Text</td><td>標籤內的文字</td><td><code>"Hello World"</code></td></tr>
+        <tr><td>Attribute</td><td>元素的屬性</td><td><code>class="btn"</code></td></tr>
+        <tr><td>Comment</td><td>HTML 註解</td><td><code>&lt;!-- ... --&gt;</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout info">
+      <span class="ico">ℹ</span>
+      <p>DOM 不是 JavaScript 語言的一部分，而是<b>瀏覽器提供的 Web API</b>。Node.js 環境中沒有 DOM。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>DOM 和 Virtual DOM 有什麼差別？</summary>
+        <p>DOM 是瀏覽器維護的實際節點樹，直接修改效能較差；Virtual DOM 是 React 等框架在記憶體中維護的 DOM 複製品，比對變化後再批次更新真實 DOM，減少不必要的重排。</p>
+      </details>
+      <details>
+        <summary>為什麼操作 DOM 很耗效能？</summary>
+        <p>每次修改 DOM 可能觸發重排（reflow）和重繪（repaint）。重排要重新計算所有元素的位置和大小，代價很高。應批次修改、用 DocumentFragment，或讓框架來優化。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「DOM 是瀏覽器把 HTML 解析成<span class="hl">樹狀的物件結構</span>，讓 JavaScript 可以用 API（如 querySelector、createElement）存取和修改頁面的任何部分。DOM 是瀏覽器提供的 Web API，不是 JS 語言本身的一部分。操作 DOM 的代價在於可能觸發 reflow/repaint，所以要盡量<span class="hl">批次操作</span>、減少頻繁修改。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="使用JavaScript新增移除修改HTML元素.html">JS 操作 DOM 元素</a>
+      <a href="DOM中屬性與屬性值的差異.html">DOM Attribute vs Property</a>
+      <a href="解釋 document.querySelector 與 document.getElementById 的差異.html">querySelector vs getElementById</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

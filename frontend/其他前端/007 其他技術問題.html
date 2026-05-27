@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>其他技術問題：Redux、CLS、SEO、Git Flow</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">其他前端</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">其他前端</div>
+    <h1>Redux、CLS、SEO、Git Flow——<em>面試雜科</em>快速備戰</h1>
+    <p class="lede">這四題分散在不同領域，共同點是「考你的廣度與實務經驗」。面試官想確認你<b>不只寫元件，也懂狀態管理、效能指標、SEO 與版控流程</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">狀態管理</span>
+    <h2>Redux 單向資料流</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <h4>View 觸發 Action</h4>
+          <p>使用者操作或 API 回應，dispatch 一個描述「發生了什麼」的 Action 物件。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <h4>Reducer 計算新 State</h4>
+          <p>純函式，根據 Action type 和目前 state 計算出新 state——不能有 side effect。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <h4>Store 更新，View 重新渲染</h4>
+          <p>訂閱 Store 的元件收到通知，React 重新渲染對應的 UI。</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout info"><span class="ico">ℹ️</span><p>現代 Redux 推薦 <b>Redux Toolkit（RTK）</b>，用 <code>createSlice</code> 自動產生 action creators，避免手寫大量樣板程式碼。</p></div>
+  </section>
+
+  <section>
+    <span class="num">效能指標 & SEO</span>
+    <h2>CLS 與 SEO 開發要點</h2>
+    <table>
+      <tr><th>主題</th><th>重點</th></tr>
+      <tr>
+        <td><b>CLS（Cumulative Layout Shift）</b></td>
+        <td>衡量頁面載入時元素突然位移的程度，分數應 &lt; 0.1。常見原因：圖片沒設寬高、遲來的廣告、動態插入內容。</td>
+      </tr>
+      <tr>
+        <td><b>SEO — 語意化 HTML</b></td>
+        <td>正確使用 h1~h6（一頁只有一個 h1）、article / section / nav / main，讓爬蟲理解內容結構。</td>
+      </tr>
+      <tr>
+        <td><b>SEO — Meta Tags</b></td>
+        <td>title（每頁唯一）、description（160 字內）、Open Graph（社群分享預覽）。</td>
+      </tr>
+      <tr>
+        <td><b>SEO — Core Web Vitals</b></td>
+        <td>LCP（最大內容渲染）&lt; 2.5s；CLS &lt; 0.1；FID/INP（互動反應）&lt; 200ms。Google 排名因素。</td>
+      </tr>
+    </table>
+    <div class="callout tip"><span class="ico">💡</span><p>防止 CLS 最快的方式：<b>圖片永遠標 width/height</b>，讓瀏覽器在圖片載入前就預留空間。</p></div>
+  </section>
+
+  <section>
+    <span class="num">版控策略</span>
+    <h2>Git Flow 分支職責</h2>
+    <table>
+      <tr><th>分支</th><th>職責</th><th>合併目標</th></tr>
+      <tr><td><code>main</code></td><td>穩定可發布版本，每個 commit 都能上線</td><td>—</td></tr>
+      <tr><td><code>develop</code></td><td>開發主線，整合各功能</td><td>main（發版時）</td></tr>
+      <tr><td><code>feature/*</code></td><td>個別新功能開發</td><td>develop</td></tr>
+      <tr><td><code>release/*</code></td><td>發版前 QA 與最後修正</td><td>main + develop</td></tr>
+      <tr><td><code>hotfix/*</code></td><td>緊急修復線上問題</td><td>main + develop</td></tr>
+    </table>
+    <div class="callout warn"><span class="ico">⚠️</span><p>Git Flow 適合有固定發版週期的傳統專案。若團隊做 CI/CD 持續部署，更常用<b>簡化的 Trunk-based Development</b>（短暫 feature branch → 快速合回 main）。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Redux 和 Context API 的差別？何時選哪個？</summary><p>Context 適合低頻率更新的全域資料（主題、語言、登入使用者）；Redux 適合複雜的頻繁更新、需要 time-travel debugging、或多個元件高度互動的狀態。Context 每次更新會讓所有消費者 re-render，Redux 透過 selector 做更細的訂閱。</p></details>
+      <details><summary>如何改善 LCP（最大內容渲染）？</summary><p>預載最大元素（<code>&lt;link rel="preload"&gt;</code>）、使用 CDN、圖片格式改 WebP / AVIF、Server-side rendering 首屏內容、避免 render-blocking 資源。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Redux 是單向資料流：View dispatch Action，Reducer 算出新 State，Store 通知 View 更新。現在我用 <span class="hl">Redux Toolkit</span> 減少樣板。SEO 方面，我注重語意化 HTML、Meta Tags、Core Web Vitals——尤其是 <span class="hl">CLS 低於 0.1</span>，常見做法是圖片設定寬高避免位移。版控用 Git Flow，但 CI/CD 環境會改用 Trunk-based 加快迭代速度。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="005 效能優化與架構.html">005 效能優化與架構</a>
+      <a href="006 現代化工具 (Next.js, Tailwind, TS).html">006 現代化工具</a>
+      <a href="008 軟實力與行為面題型.html">008 軟實力</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

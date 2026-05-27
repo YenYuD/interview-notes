@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next.js / Tailwind / TypeScript 面試精要</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">其他前端</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">其他前端</div>
+    <h1>App Router、RSC、Tailwind、TypeScript——<em>現代前端工具鏈</em>面試必答四題</h1>
+    <p class="lede">Next.js 13+ 帶來的 <b>App Router 與 React Server Components</b> 徹底改變了前後端邊界。Tailwind 和 TypeScript 則是現代前端標配——面試官問的不是「你用過嗎」，而是「你理解背後的取捨嗎」。</p>
+  </header>
+
+  <section>
+    <span class="num">Next.js App Router</span>
+    <h2>Pages Router vs App Router，為什麼要換？</h2>
+    <table>
+      <tr><th></th><th>Pages Router（舊）</th><th>App Router（Next.js 13+）</th></tr>
+      <tr><td><b>路由檔案</b></td><td><code>pages/about.tsx</code></td><td><code>app/about/page.tsx</code></td></tr>
+      <tr><td><b>預設元件類型</b></td><td>Client Component</td><td>Server Component（RSC）</td></tr>
+      <tr><td><b>資料取得</b></td><td><code>getServerSideProps</code> / <code>getStaticProps</code></td><td>直接在 Server Component 裡 async/await</td></tr>
+      <tr><td><b>Layout 巢狀</b></td><td>需自行處理</td><td>原生 <code>layout.tsx</code> 巢狀</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">💡</span><p>App Router 中，只在真正需要互動（useState、事件監聽）的元件最頂層加 <code>"use client"</code>，把其餘元件保持為 Server Component，才能最大化 RSC 效益。</p></div>
+  </section>
+
+  <section>
+    <span class="num">RSC 是什麼</span>
+    <h2>React Server Components 的核心價值</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>好處</small>
+        程式碼不進 Client Bundle，JS 體積更小
+      </div>
+      <div class="chip good">
+        <small>好處</small>
+        可直接 async/await 資料庫、FS，不需 API Route
+      </div>
+      <div class="chip bad">
+        <small>限制</small>
+        不能用 useState / useEffect / 事件監聽
+      </div>
+      <div class="chip bad">
+        <small>限制</small>
+        不能使用瀏覽器 API（window、localStorage）
+      </div>
+    </div>
+
+    <h2 style="margin-top:1.5rem">Next.js 13+ 的四層 Cache</h2>
+    <table>
+      <tr><th>快取層</th><th>範圍</th><th>控制方式</th></tr>
+      <tr><td>Request Memoization</td><td>同一個請求生命週期</td><td>自動，相同 URL 的 fetch 只發一次</td></tr>
+      <tr><td>Data Cache</td><td>跨請求、跨使用者</td><td><code>fetch(url, { next: { revalidate: 60 } })</code></td></tr>
+      <tr><td>Full Route Cache</td><td>Build time 靜態頁面</td><td>SSG 頁面自動快取 HTML + RSC Payload</td></tr>
+      <tr><td>Router Cache</td><td>瀏覽器端</td><td>已訪問路由的 RSC Payload，自動快取於記憶體</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">Tailwind & TypeScript</span>
+    <h2>兩個常問的取捨題</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">T</div>
+        <div class="flow-body">
+          <h4>Tailwind CSS：Utility-first 的取捨</h4>
+          <p><b>優點</b>：開發快（不用想 class 名）、Bundle 小（PurgeCSS 自動移除未用樣式）、設計一致性高。<br>
+          <b>缺點</b>：HTML 標籤冗長、需要學習 class 語法對照表、複雜樣式需搭配 <code>@apply</code> 或 CVA。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">TS</div>
+        <div class="flow-body">
+          <h4>interface vs type：使用時機</h4>
+          <p><code>interface</code>：定義物件結構或 class 形狀，支援<b>聲明合併（Declaration Merging）</b>，適合定義 API response、component props。<br>
+          <code>type</code>：更靈活，可用於 Union、Intersection、Tuple、條件型別。定義「複雜組合型別」時選 type。</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout info"><span class="ico">ℹ️</span><p>多數 TypeScript 風格指南（包含 React 官方）建議：<b>預設用 interface，遇到 interface 做不到的才換 type</b>。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>RSC 和 SSR 有什麼不同？</summary><p>SSR 是在伺服器生成 HTML 字串送給瀏覽器，元件程式碼仍然包含在 Client Bundle 做 Hydration。RSC 只在伺服器執行，程式碼完全不進 Client Bundle，沒有 Hydration 成本；但 RSC 不能有互動（useState/事件）。兩者可以共存。</p></details>
+      <details><summary>Tailwind 如何搭配 shadcn/ui 這類元件庫？</summary><p>shadcn/ui 把元件原始碼直接複製到專案（不是 npm 安裝），用 Tailwind + CVA 管理樣式變體，讓你完全掌控樣式，不受第三方 CSS 封裝限制。</p></details>
+      <details><summary>TypeScript 的 Generic 泛型如何用在 API 層？</summary><p>定義一個泛型 response wrapper：<code>type ApiResponse&lt;T&gt; = &#123; data: T; error?: string &#125;</code>，配合 fetch 函式 <code>async function get&lt;T&gt;(url: string): Promise&lt;ApiResponse&lt;T&gt;&gt;</code>，讓每個 API 呼叫都有型別安全的回傳值。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我用 Next.js 13+ 的 <span class="hl">App Router</span>，預設用 Server Components 減少 Client Bundle，互動元件才標 <code>"use client"</code>。RSC 可以直接 async/await 資料庫，省去 API Route 的中間層。Tailwind 我用來做 Utility-first 的快速開發，搭配 TypeScript 的 <span class="hl">interface</span> 定義 props 和 API 資料結構。需要 Union 或條件型別才換 type。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="005 效能優化與架構.html">005 CSR/SSR/SSG</a>
+      <a href="004 React 核心.html">004 React 核心</a>
+      <a href="007 其他技術問題.html">007 其他技術問題</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

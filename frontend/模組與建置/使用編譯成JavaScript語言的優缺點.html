@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>編譯成 JavaScript 語言的優缺點</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">模組與建置</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">MODULE &amp; BUILD</div>
+    <h1>TypeScript、Babel、CoffeeScript：<em>編譯一層</em>值不值得？</h1>
+    <p class="lede">在 JavaScript 上再疊一層編譯語言，換來<b>型別安全與更佳語法</b>，但也帶來建置複雜度。這筆交換值不值，答案通常是「值，但要設對工具鏈」。</p>
+  </header>
+
+  <section>
+    <span class="num">優點</span>
+    <h2>多一層編譯，你得到什麼</h2>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot good">✓</div>
+        <div class="flow-body">
+          <h4>靜態型別 — 在編譯期抓 bug</h4>
+          <p>TypeScript 的型別系統讓錯誤在 IDE 與 CI 就被攔截，而不是到了生產環境才爆炸。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot good">✓</div>
+        <div class="flow-body">
+          <h4>更佳的開發工具體驗</h4>
+          <p>自動完成、重構、跳轉定義——IDE 能基於型別資訊提供精確提示，大幅提升生產力。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot good">✓</div>
+        <div class="flow-body">
+          <h4>使用尚未被瀏覽器支援的語法</h4>
+          <p>Babel 讓你今天就用 stage-3 提案語法，等瀏覽器支援到位後直接移除 polyfill。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">缺點</span>
+    <h2>多一層編譯，你付出什麼</h2>
+
+    <div class="callout warn">
+      <span class="ico">⚠️</span>
+      <p><b>建置流程複雜度上升：</b>多了 tsconfig.json、babel.config.js、source map 設定；CI 時間拉長；偶爾出現「型別正確但執行時行為異常」的邊界案例。</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>代價</th><th>說明</th><th>緩解方式</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>建置時間增加</td>
+          <td>TypeScript 全量型別檢查在大型專案可達數十秒</td>
+          <td>開發用 esbuild/SWC（只 transpile），CI 再做 tsc 型別檢查</td>
+        </tr>
+        <tr>
+          <td>設定與學習成本</td>
+          <td>需要熟悉 tsconfig、型別宣告（.d.ts）等</td>
+          <td>用社群現成設定（如 <code>@tsconfig/strictest</code>）快速上手</td>
+        </tr>
+        <tr>
+          <td>第三方套件型別缺失</td>
+          <td>純 JS 套件可能沒有 @types 定義</td>
+          <td>安裝 <code>@types/xxx</code> 或自行撰寫 .d.ts</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p><b>現代工具鏈已大幅降低代價：</b>Vite + TypeScript 開發模式用 esbuild 即時 transpile，型別檢查另開進程，啟動幾乎不受影響。大多數新專案值得採用 TypeScript。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>TypeScript 的型別在執行時還存在嗎？</summary>
+        <p>不存在。TypeScript 的型別標注在編譯後完全被抹去，最終跑在瀏覽器 / Node.js 的純粹是 JavaScript。這表示型別只保護「寫程式時」，執行時若外部資料（如 API response）格式不符，不會有型別錯誤，需額外用 zod / io-ts 等函式庫做執行時驗證。</p>
+      </details>
+      <details>
+        <summary>Babel 和 TypeScript 的 transpile 有什麼差別？</summary>
+        <p>Babel 只做語法轉換，不做型別檢查（用 <code>@babel/preset-typescript</code> 時直接剝離型別標注）；TypeScript compiler（tsc）則同時做型別檢查和語法轉換。現代專案常見的做法是開發時用 Babel/esbuild/SWC 快速 transpile，CI 階段另外跑 <code>tsc --noEmit</code> 只做型別檢查，兼顧速度與正確性。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「以 TypeScript 為例：它的主要優點是<span class="hl">靜態型別</span>讓錯誤在編譯期就能被發現，加上 IDE 的自動完成與重構支援，大幅提升開發體驗和程式碼可維護性。代價是多了建置步驟與 tsconfig 學習成本，但現代工具鏈如 Vite 已大幅降低這個負擔——開發模式用 esbuild 快速 transpile，CI 才做完整型別檢查。以現在的生態系，大多數新專案我都建議採用 TypeScript。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="模組打包工具的優點.html">模組打包工具的優點</a>
+      <a href="JavaScript Polyfill 的用途.html">Polyfill 的用途</a>
+      <a href="CommonJS與ESM比較.html">CommonJS vs ESM</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 敏感資料處理</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全 · 資料保護</div>
+    <h1>密碼、金鑰、Token——<em>不該出現在 client</em> 的東西</h1>
+    <p class="lede">前端 JavaScript 是完全公開的代碼。<b>任何寫在前端的密鑰、寫進 localStorage 的 token，攻擊者都能讀到</b>。敏感資料的安全取決於你把它放在哪裡、怎麼傳輸。</p>
+  </header>
+
+  <section>
+    <span class="num">四大原則</span>
+    <h2>敏感資料怎麼處理</h2>
+
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>不放前端</h4><p>API 金鑰、DB 密碼、私鑰 → 只存環境變數（<code>process.env</code>），不進 git，不寫進 bundle。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>傳輸加密</h4><p>所有 API 都走 HTTPS。用 <code>Strict-Transport-Security</code> header 強制讓瀏覽器不降級。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><h4>Cookie 優於 localStorage</h4><p>token 存 <code>HttpOnly + Secure + SameSite</code> cookie，JS 讀不到，降低 XSS 偷竊風險。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">4</div><div class="flow-body"><h4>最小暴露</h4><p>Log 不輸出密碼和完整 token；error response 不洩漏 stack trace 和資料庫細節。</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">程式碼對照</span>
+    <h2>實作細節</h2>
+
+    <pre><code><span class="tok-com">// ❌ 危險：API key 寫死在前端</span>
+<span class="tok-key">const</span> apiKey = <span class="tok-str">'sk-live-abc123'</span>;  <span class="tok-com">// 任何人都能在 DevTools 看到</span>
+
+<span class="tok-com">// ✅ 安全：金鑰只在 server 端，前端透過自己的 API 呼叫</span>
+<span class="tok-com">// server.js</span>
+<span class="tok-key">const</span> apiKey = process.env.<span class="tok-fn">STRIPE_SECRET_KEY</span>;
+
+<span class="tok-com">// ✅ 設安全 cookie（server side）</span>
+res.<span class="tok-fn">cookie</span>(<span class="tok-str">'session'</span>, token, {
+  httpOnly: <span class="tok-key">true</span>,
+  secure: <span class="tok-key">true</span>,
+  sameSite: <span class="tok-str">'Lax'</span>,
+  maxAge: 3600 * 1000,
+});</code></pre>
+
+    <div class="callout warn"><span class="ico">⚠</span><p>Vite / CRA 的 <code>REACT_APP_</code> / <code>VITE_</code> 前綴變數會被打包進前端 bundle，<b>只放可公開的設定</b>（API endpoint、public key）。私密金鑰永遠只在 server 端。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>前端需要用到第三方 API key（如地圖 API），怎麼辦？</summary><p>用限制式的 public key（在服務商後台設定只允許特定 domain 呼叫），而不是 secret key。或者把呼叫代理到自己的 server，前端只打自己的 API。</p></details>
+      <details><summary>git 不小心 commit 了密鑰怎麼辦？</summary><p>立刻 rotate（換掉那個金鑰），假設它已洩漏。用 <code>git-secrets</code>、<code>truffleHog</code> 或 GitHub Secret Scanning 設 pre-commit hook 防止重蹈覆轍。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我的原則是：<span class="hl">任何秘密都不應該出現在前端</span>。API key 和密碼只放 server 的環境變數，不進 git；token 存 <span class="hl">HttpOnly cookie</span> 而非 localStorage，防 XSS 讀取；全程 HTTPS 防中間人。Vite 的 <code>VITE_</code> 環境變數會打包進 bundle，所以只放公開設定，私密金鑰絕對不放。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript安全認證與授權實作.html">認證與授權實作</a>
+      <a href="跨站腳本攻擊XSS及防範方法.html">XSS 攻擊與防範</a>
+      <a href="常見安全標頭及其用途.html">常見安全標頭</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>熱門 JavaScript 測試框架</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>Jest、Mocha、Jasmine、Cypress：<em>各司其職，別全選</em></h1>
+    <p class="lede">四大框架各有設計哲學：<b>Jest 求一站式</b>，Mocha 求彈性，Jasmine 求 BDD 可讀，Cypress 求真實瀏覽器。搞清楚定位，面試不慌。</p>
+  </header>
+
+  <section>
+    <span class="num">特性對照</span>
+    <h2>四框架一表定勝負</h2>
+    <table>
+      <tr><th>框架</th><th>類型</th><th>內建斷言</th><th>內建 Mock</th><th>瀏覽器測試</th></tr>
+      <tr><td><b>Jest</b></td><td>全功能</td><td>✅</td><td>✅</td><td>jsdom（模擬）</td></tr>
+      <tr><td><b>Mocha</b></td><td>執行器</td><td>❌ 需 Chai</td><td>❌ 需 Sinon</td><td>✅ 可跑</td></tr>
+      <tr><td><b>Jasmine</b></td><td>BDD 框架</td><td>✅</td><td>✅ spy</td><td>✅ 可跑</td></tr>
+      <tr><td><b>Cypress</b></td><td>E2E</td><td>✅ Chai</td><td>✅ stub</td><td>✅ 真實瀏覽器</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">框架速覽</span>
+    <h2>各框架核心賣點</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot" style="background:#e11d48">J</div>
+        <div class="flow-body">
+          <h4>Jest — React 生態系標配</h4>
+          <p>Facebook 出品，<b>零配置</b>即可使用。快照測試（snapshot testing）是亮點——一行程式碼捕捉元件輸出，下次渲染若偷偷變動馬上抓到。內建 <code>jest.fn()</code>、<code>jest.mock()</code>，不需額外安裝。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot" style="background:#7c3aed">M</div>
+        <div class="flow-body">
+          <h4>Mocha — 自由組合派</h4>
+          <p>只是測試<b>執行器</b>，本身不帶斷言或 mock。與 Chai（斷言）+ Sinon（mock/spy）是黃金組合。彈性最高，適合有特殊需求的函式庫或後端服務。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot" style="background:#0891b2">Ja</div>
+        <div class="flow-body">
+          <h4>Jasmine — BDD 語意清晰</h4>
+          <p>語法強調「行為描述」：<code>describe / it / expect</code> 念起來像英文句子。Angular CLI 預設採用。無外部依賴，特別適合教學環境。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot" style="background:#059669">Cy</div>
+        <div class="flow-body">
+          <h4>Cypress — 端對端體驗最佳</h4>
+          <p>跑在<b>真實 Chrome</b> 裡，每步操作都有截圖可回溯。<b>自動等待</b>讓 E2E 測試不再充斥 <code>waitFor</code>。適合驗證整個使用者流程，而非單一函式邏輯。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>新專案 2024 年該選哪個？</summary><p>React/Node 新專案：Jest（或 Vitest for Vite 生態）+ Cypress/Playwright for E2E。不需要 Mocha 或 Jasmine 除非有特殊理由。</p></details>
+      <details><summary>快照測試（Snapshot Testing）是什麼？有什麼缺點？</summary><p>Jest 會把元件渲染結果存成文字快照，之後每次測試比對是否一致。優點是不費力捕捉迴歸；缺點是開發者習慣直接 <code>-u</code> 更新快照，快照變成形式審查，失去保護力。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「熱門框架我會這樣分：<span class="hl">Jest 是 React 生態的首選</span>，內建斷言和 mock，零配置就能跑。<span class="hl">Mocha 的賣點是彈性</span>，可以自由搭 Chai 和 Sinon，適合有客製需求的後端。Jasmine 以 BDD 語意著稱，是 Angular 預設。<span class="hl">Cypress 專攻 E2E</span>，在真實瀏覽器跑，時間旅行除錯很好用。新專案我傾向 Jest + Cypress 組合。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript測試工具.html">JavaScript 測試工具</a>
+      <a href="如何為JavaScript編寫單元測試.html">撰寫單元測試</a>
+      <a href="單元測試整合測試與端對端測試差異.html">測試金字塔</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

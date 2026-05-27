@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock 與 Stub 在測試中的應用</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">測試</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">測試</div>
+    <h1>Mock vs Stub：<em>一個控制輸出，一個驗互動</em></h1>
+    <p class="lede">Stub 是假資料的提供者；Mock 是行為的監視者。<b>搞清楚你要隔離還是要驗證</b>，才能選對工具——否則測試通過了卻什麼都沒保護到。</p>
+  </header>
+
+  <section>
+    <span class="num">核心差異</span>
+    <h2>Stub 隔離，Mock 驗證</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>Stub — 控制依賴的回應</small>
+        <p>給測試對象一個<b>假的依賴</b>，讓它回傳你指定的值。你不在乎這個假依賴有沒有被呼叫，只在乎被測程式碼的輸出結果。</p>
+        <pre><code><span class="tok-key">const</span> fetchStub = sinon.<span class="tok-fn">stub</span>();
+fetchStub.<span class="tok-fn">returns</span>({ id: 1, name: <span class="tok-str">'Alice'</span> });
+
+<span class="tok-key">const</span> result = <span class="tok-fn">processUser</span>(fetchStub);
+<span class="tok-fn">expect</span>(result.name).<span class="tok-fn">toBe</span>(<span class="tok-str">'Alice'</span>);</code></pre>
+      </div>
+      <div class="chip bad">
+        <small>Mock — 驗證互動行為</small>
+        <p>不只替換，還記錄「有沒有被呼叫」、「呼叫幾次」、「用什麼參數」。測完要 <code>verify()</code>。</p>
+        <pre><code><span class="tok-key">const</span> logMock = jest.<span class="tok-fn">fn</span>();
+
+<span class="tok-fn">sendNotification</span>(<span class="tok-str">'hello'</span>, logMock);
+
+<span class="tok-fn">expect</span>(logMock).<span class="tok-fn">toHaveBeenCalledOnce</span>();
+<span class="tok-fn">expect</span>(logMock).<span class="tok-fn">toHaveBeenCalledWith</span>(<span class="tok-str">'hello'</span>);</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">決策流程</span>
+    <h2>要用 Stub 還是 Mock？</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><h4>只需要假資料讓被測程式碼跑起來</h4><p>→ 用 <b>Stub</b>。目的是隔離外部依賴（DB、API），讓測試可控。</p></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><h4>需要確認程式碼是否正確「呼叫」了某個依賴</h4><p>→ 用 <b>Mock</b>（或 Spy）。例如確認「寄信函式有被呼叫一次」、「log 有收到正確參數」。</p></div></div>
+    </div>
+    <div class="callout warn"><span class="ico">⚠️</span><p>過度使用 Mock 會讓測試與實作細節綁定太深，稍微重構就大量測試失敗。能用 Stub 或真實物件就不要用 Mock。</p></div>
+  </section>
+
+  <section>
+    <span class="num">Jest 中的對應</span>
+    <h2>Jest API 速查</h2>
+    <table>
+      <tr><th>需求</th><th>Jest API</th></tr>
+      <tr><td>Stub：讓函式回傳固定值</td><td><code>jest.fn().mockReturnValue(val)</code></td></tr>
+      <tr><td>Stub：非同步回傳</td><td><code>jest.fn().mockResolvedValue(val)</code></td></tr>
+      <tr><td>Mock 整個模組</td><td><code>jest.mock('module-path')</code></td></tr>
+      <tr><td>Spy：追蹤真實函式的呼叫</td><td><code>jest.spyOn(obj, 'method')</code></td></tr>
+      <tr><td>驗有無被呼叫</td><td><code>expect(fn).toHaveBeenCalled()</code></td></tr>
+      <tr><td>驗呼叫參數</td><td><code>expect(fn).toHaveBeenCalledWith(...args)</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Spy 和 Mock 有什麼不同？</summary><p>Spy 包裹在<b>真實實作</b>外面，讓真實邏輯繼續執行但同時記錄呼叫資訊；Mock 則直接替換掉實作。<code>jest.spyOn()</code> 預設就是 Spy 行為，可以選擇是否覆寫實作。</p></details>
+      <details><summary>什麼是「測試替身（Test Double）」？</summary><p>Test Double 是所有替換真實依賴的統稱，包含 Stub、Mock、Spy、Fake（有簡化實作的替身，如 in-memory DB）、Dummy（不使用但需要傳入的參數）。Stub 和 Mock 只是其中兩種。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">Stub 是控制輸入，Mock 是驗證互動</span>。如果我只需要讓被測程式碼收到假資料，我用 Stub（<code>jest.fn().mockReturnValue()</code>）；如果我需要確認程式碼有沒有正確呼叫某個依賴——比如確認 logger 被呼叫一次、email 有送出——我用 Mock 或 Spy。原則上我盡量少用 Mock，因為 Mock 過多會讓測試跟實作細節綁太死，重構時很容易大規模壞掉。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="如何為JavaScript編寫單元測試.html">撰寫單元測試</a>
+      <a href="如何測試JavaScript非同步程式碼.html">測試非同步程式碼</a>
+      <a href="撰寫可維護且有效測試的最佳實踐.html">測試最佳實踐</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 作用域概念</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 作用域</div>
+    <h1>變數能不能被讀到，<em>取決於它在哪裡被宣告</em></h1>
+    <p class="lede">作用域決定了變數的<b>可見範圍</b>。JavaScript 有全域、函式、區塊三層，理解這三層是掌握閉包、提升、模組封裝的基礎。</p>
+  </header>
+
+  <section>
+    <span class="num">三層作用域</span>
+    <h2>全域、函式、區塊</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>全域作用域</strong>：在任何函式或區塊外宣告，整個腳本都可存取。瀏覽器中成為 <code>window</code> 的屬性。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>函式作用域</strong>：在函式內宣告，只能在函式內存取。<code>var</code> 是函式作用域。</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body"><strong>區塊作用域</strong>（ES6）：在 <code>{}</code> 區塊內用 <code>let</code>/<code>const</code> 宣告，只在區塊內有效。</div>
+      </div>
+    </div>
+    <pre><code><span class="tok-key">var</span> globalVar = <span class="tok-str">'全域'</span>;
+
+<span class="tok-fn">function</span> myFunction() {
+  <span class="tok-key">var</span> functionVar = <span class="tok-str">'函式內'</span>;
+  <span class="tok-key">if</span> (<span class="tok-key">true</span>) {
+    <span class="tok-key">let</span> blockVar = <span class="tok-str">'區塊內'</span>;
+    console.log(blockVar);   <span class="tok-com">// ✓ 可存取</span>
+  }
+  <span class="tok-com">// console.log(blockVar); // ✗ ReferenceError</span>
+}
+<span class="tok-com">// console.log(functionVar); // ✗ ReferenceError</span></code></pre>
+  </section>
+
+  <section>
+    <span class="num">詞法作用域</span>
+    <h2>作用域在定義時決定，不是執行時</h2>
+    <p>JavaScript 採用<b>靜態（詞法）作用域</b>：函式能存取的外層變數，由函式宣告的位置決定，而不是呼叫位置。這是閉包的基礎。</p>
+    <pre><code><span class="tok-fn">function</span> outer() {
+  <span class="tok-key">let</span> x = <span class="tok-num">10</span>;
+  <span class="tok-fn">function</span> inner() {
+    console.log(x); <span class="tok-com">// 10 — 詞法作用域，可存取外層的 x</span>
+  }
+  inner();
+}
+outer();</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>作用域鏈（Scope Chain）是什麼？</summary><p>當引擎查詢某個變數時，會從目前作用域向外逐層查找，直到全域作用域為止，這條查找路徑就是作用域鏈。找不到就拋出 ReferenceError。</p></details>
+      <details><summary>全域變數的問題是什麼？</summary><p>全域變數會污染命名空間，容易被任何程式碼覆寫，在多個腳本並存時尤其危險。現代開發用模組（ES modules）或 IIFE 封裝，避免洩漏全域。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「JavaScript 有三種作用域：<span class="hl">全域、函式、區塊</span>。var 是函式作用域，let/const 是區塊作用域。JS 採靜態詞法作用域，<span class="hl">變數的可見範圍在程式碼撰寫時就固定了</span>，不受呼叫位置影響。查詢變數時引擎沿作用域鏈向外尋找，這也是閉包能捕捉外層變數的原因。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="全域作用域_函式作用域_區塊作用域差異.html">三種作用域差異</a>
+      <a href="詞法作用域概念說明.html">詞法作用域</a>
+      <a href="JavaScript 中 let、var 與 const 變數的差異.html">let/var/const 差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

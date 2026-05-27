@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>策略模式</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">設計模式</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Design Patterns</div>
+    <h1>把演算法<em>抽換自如</em>，不動呼叫端</h1>
+    <p class="lede">策略模式將一組可互換的演算法各自封裝，讓 <b>Context（環境）</b> 在執行時動態切換策略，而不是靠一堆 <code>if/else</code> 分支決定行為。</p>
+  </header>
+
+  <section>
+    <span class="num">核心結構</span>
+    <h2>Context 持有策略，隨時可換</h2>
+    <pre><code><span class="tok-com">// 每個策略只負責自己的演算法</span>
+<span class="tok-key">const</span> sortAsc  = { <span class="tok-fn">sort</span>: arr => [...arr].sort((a,b) => a-b) };
+<span class="tok-key">const</span> sortDesc = { <span class="tok-fn">sort</span>: arr => [...arr].sort((a,b) => b-a) };
+
+<span class="tok-key">class</span> <span class="tok-fn">Sorter</span> { <span class="tok-com">// Context</span>
+  <span class="tok-fn">constructor</span>(strategy) { <span class="tok-key">this</span>.strategy = strategy; }
+  <span class="tok-fn">setStrategy</span>(s) { <span class="tok-key">this</span>.strategy = s; }
+  <span class="tok-fn">execute</span>(data)  { <span class="tok-key">return</span> <span class="tok-key">this</span>.strategy.<span class="tok-fn">sort</span>(data); }
+}
+
+<span class="tok-key">const</span> sorter = <span class="tok-key">new</span> Sorter(sortAsc);
+sorter.<span class="tok-fn">execute</span>([3,1,4]); <span class="tok-com">// [1,3,4]</span>
+
+sorter.<span class="tok-fn">setStrategy</span>(sortDesc); <span class="tok-com">// 切換策略，Context 不變</span>
+sorter.<span class="tok-fn">execute</span>([3,1,4]); <span class="tok-com">// [4,3,1]</span></code></pre>
+
+    <div class="callout tip">
+      <span class="ico">✅</span>
+      <p><b>JavaScript 中更輕量的寫法：</b>直接用函式當策略，不一定要包成類別。<code>const strategies = { asc: ..., desc: ... }</code>，然後 <code>strategies[type](data)</code>，簡潔又 functional。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">前端應用場景</span>
+    <h2>策略模式在哪裡出現？</h2>
+    <table>
+      <thead><tr><th>場景</th><th>策略是什麼</th></tr></thead>
+      <tbody>
+        <tr><td>表單驗證</td><td>required、email、minLength 各自是一個策略</td></tr>
+        <tr><td>排序 / 過濾</td><td>按名稱排、按日期排、按評分排</td></tr>
+        <tr><td>支付方式</td><td>信用卡、Line Pay、Apple Pay 各一策略</td></tr>
+        <tr><td>動畫緩動</td><td>easeIn、easeOut、linear 是可互換的 timing function</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>策略模式 vs 工廠模式，怎麼分？</summary>
+        <p>工廠模式關注「如何建立物件」；策略模式關注「如何執行行為」。工廠解決的是建立邏輯的封裝，策略解決的是行為切換的彈性。兩者常搭配使用：工廠負責根據類型建立對應的策略物件。</p>
+      </details>
+      <details>
+        <summary>策略模式如何符合 SOLID 原則？</summary>
+        <p>主要符合 OCP（開放封閉原則）：新增策略時只需新增類別，不修改 Context；也符合 SRP（單一職責原則）：每個策略只負責一種演算法的實作。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「策略模式把一組<span class="hl">可互換的演算法各自封裝</span>成獨立策略，Context 只持有介面參考，執行時動態切換。這樣新增策略不需要修改 Context，符合開放封閉原則。前端我最常在表單驗證和排序功能用到它：把每種規則封裝成策略物件，動態組合而不是寫一堆 <span class="hl">if/else</span> 分支。JavaScript 裡甚至直接用函式物件就夠了，不一定要包成 class。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="觀察者模式與應用場景.html">觀察者模式</a>
+      <a href="命令模式及其應用.html">命令模式</a>
+      <a href="工廠模式及其應用.html">工廠模式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

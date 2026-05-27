@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 安全漏洞識別工具</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">安全</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">Web 安全 · 工具鏈</div>
+    <h1>把安全掃描<em>埋進 CI/CD</em>，讓機器先抓漏洞</h1>
+    <p class="lede">安全漏洞靠人工 review 難以全面覆蓋。<b>靜態分析（lint 時）、依賴掃描（PR 時）、動態測試（staging 時）</b>三層工具形成防護網，讓問題在合併前就被發現。</p>
+  </header>
+
+  <section>
+    <span class="num">三層工具矩陣</span>
+    <h2>在哪個階段用哪種工具</h2>
+    <table>
+      <tr><th>層次</th><th>工具</th><th>抓什麼</th><th>何時跑</th></tr>
+      <tr>
+        <td><b>靜態分析 SAST</b></td>
+        <td>ESLint + eslint-plugin-security</td>
+        <td>危險函式（eval、innerHTML）、不安全 regex</td>
+        <td>本機開發、pre-commit</td>
+      </tr>
+      <tr>
+        <td><b>依賴掃描 SCA</b></td>
+        <td>npm audit、Snyk</td>
+        <td>第三方套件已知 CVE</td>
+        <td>CI/CD 每次 PR</td>
+      </tr>
+      <tr>
+        <td><b>動態掃描 DAST</b></td>
+        <td>OWASP ZAP、Burp Suite</td>
+        <td>執行時 XSS、CSRF、注入，模擬真實攻擊</td>
+        <td>staging 環境定期</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">快速上手</span>
+    <h2>ESLint + npm audit 的 CI 整合</h2>
+    <pre><code><span class="tok-com"># 安裝 ESLint 安全外掛</span>
+npm install eslint eslint-plugin-security --save-dev
+
+<span class="tok-com"># .eslintrc.json</span>
+{
+  "plugins": ["security"],
+  "extends": ["plugin:security/recommended"]
+}
+
+<span class="tok-com"># CI 流程中跑依賴漏洞掃描（有高危漏洞就讓 CI 失敗）</span>
+npm audit --audit-level=high
+
+<span class="tok-com"># 或用 Snyk（更詳細的修復建議）</span>
+snyk test --severity-threshold=high</code></pre>
+
+    <div class="callout info"><span class="ico">ℹ</span><p>SonarQube 適合大型專案，可在 CI 中設定 Quality Gate，超過漏洞門檻就阻止合併。對小型 JS 專案，ESLint 安全外掛 + npm audit 已經夠用且成本低。</p></div>
+  </section>
+
+  <section>
+    <span class="num">人工補強</span>
+    <h2>工具掃不到的，靠 Code Review</h2>
+    <div class="chips">
+      <div class="chip info">業務邏輯漏洞<small>工具看不懂「這個用戶不應該看別人的訂單」這種邏輯</small></div>
+      <div class="chip info">不安全的資料流<small>追蹤使用者輸入從哪裡來、最後輸出到哪裡（taint analysis）</small></div>
+      <div class="chip good">OWASP Top 10 清單<small>每次 review 對照，確保常見弱點都有被考慮到</small></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>npm audit 修不乾淨，依賴的依賴有漏洞怎麼辦？</summary><p>先評估影響：漏洞所在的程式碼是否實際被執行？能否用 <code>npm audit fix --force</code>（有 breaking change 風險）？或在 <code>package.json</code> 的 <code>overrides</code>（npm v8+）強制指定安全版本。</p></details>
+      <details><summary>動態掃描（DAST）有沒有誤報問題？</summary><p>有，OWASP ZAP 等工具對複雜的 SPA 有時會漏掉需要登入才能到達的頁面。需搭配 authenticated scan（設定登入流程腳本）才能掃到保護後的頁面。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我用三層工具防護：開發階段用 <span class="hl">ESLint + eslint-plugin-security</span> 靜態分析，抓危險函式使用；CI/CD 跑 <span class="hl">npm audit 或 Snyk</span> 掃第三方套件的 CVE，有高危漏洞就阻止合併；staging 定期用 <span class="hl">OWASP ZAP</span> 做動態滲透測試。工具之外，Code Review 時我會對照 <span class="hl">OWASP Top 10</span> 確認業務邏輯層面的漏洞沒有被漏掉。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="輸入驗證與安全性重要性.html">輸入驗證重要性</a>
+      <a href="跨站腳本攻擊XSS及防範方法.html">XSS 攻擊與防範</a>
+      <a href="防止JavaScript應用程式中的SQL注入漏洞.html">SQL Injection 防範</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

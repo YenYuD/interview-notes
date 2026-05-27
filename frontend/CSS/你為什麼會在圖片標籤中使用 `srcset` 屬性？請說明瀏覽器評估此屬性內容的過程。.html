@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>srcset 屬性與瀏覽器評估機制</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">HTML / 效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">HTML / 響應式圖片</div>
+    <h1><em>srcset</em>：讓瀏覽器選最合適的圖，不是你來選</h1>
+    <p class="lede"><b>srcset</b> 屬性提供多個解析度版本的圖片，讓瀏覽器根據<b>裝置 DPR</b> 和<b>視口寬度</b>自動選擇最合適的版本——節省行動裝置流量，同時讓高 DPI 螢幕清晰顯示。</p>
+  </header>
+
+  <section>
+    <span class="num">核心語法</span>
+    <h2>w 描述符 + sizes</h2>
+    <pre><code><span class="tok-str">&lt;img</span>
+  src="/img/photo-800.jpg"  <span class="tok-com">&lt;!-- 備用圖 --&gt;</span>
+  srcset="/img/photo-400.jpg 400w,
+          /img/photo-800.jpg 800w,
+          /img/photo-1200.jpg 1200w"
+  sizes="(min-width: 768px) 50vw,
+         100vw"
+  alt="示範圖"
+<span class="tok-str">/&gt;</span></code></pre>
+    <div class="aside">
+      <strong>w 描述符</strong>是圖片的實際像素寬度（非 CSS px），配合 <code>sizes</code> 讓瀏覽器計算「這張圖在當前視口下要顯示多大」，再選最合適的版本。
+    </div>
+  </section>
+
+  <section>
+    <span class="num">瀏覽器如何計算</span>
+    <h2>選圖公式</h2>
+    <p>瀏覽器計算「圖片實際像素寬度 ÷ 當前 CSS 寬度」，選出比值最接近 DPR 的版本。</p>
+    <div class="callout info">
+      <span class="ico">ℹ️</span>
+      <p>範例：視口 320px，sizes="100vw"，DPR=1<br>
+      400÷320=1.5625 → 最接近 DPR 1 且剛好夠大 → <strong>選 400w（small.jpg）</strong><br><br>
+      同樣 320px 視口，但 DPR=2（Retina）<br>
+      需要比值 ≥ 2 → 400w(1.56)不夠 → <strong>選 800w（3.125，最接近 2）</strong></p>
+    </div>
+    <div class="chips">
+      <div class="chip good">
+        <small>w 描述符（彈性）</small>
+        提供圖片實際像素寬，配合 sizes，瀏覽器根據視口和 DPR 綜合選擇
+      </div>
+      <div class="chip info">
+        <small>x 描述符（固定尺寸）</small>
+        直接對應 DPR：<code>icon.png 1x, icon@2x.png 2x</code>，適合固定大小的圖示
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>&lt;picture&gt; 和 srcset 應該怎麼選？</summary>
+        <p><code>srcset</code> 適合「同一張圖的不同解析度」，讓瀏覽器自動選最省流量的版本。<code>&lt;picture&gt;</code> 適合「Art Direction」——針對不同視口顯示完全不同的圖片（如手機顯示裁切版），或提供 WebP 格式備援 JPEG。</p>
+      </details>
+      <details>
+        <summary>如果不提供 sizes 屬性，瀏覽器怎麼選？</summary>
+        <p>若省略 <code>sizes</code>，瀏覽器預設假設圖片寬度等於視口寬度（100vw），再根據此計算選擇版本。這可能選到不必要的大圖，所以有響應式需求時應明確寫 <code>sizes</code>。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<code>srcset</code> 讓我提供同一圖片的多個解析度版本，<span class="hl">瀏覽器自動根據裝置 DPR 和視口寬度選最合適的</span>。搭配 <code>sizes</code> 告訴瀏覽器「這張圖在不同視口下顯示多寬」，瀏覽器就能算出需要幾個像素，再選最接近且不超出的版本。好處是高 DPI 螢幕清晰顯示，行動裝置不必下載桌機大圖，節省流量。這比我手動判斷 DPR 更可靠，因為瀏覽器還會考慮網路狀況等因素。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你曾處理過 Retina 顯示器的圖形嗎？.html">Retina 顯示器圖形處理</a>
+      <a href="什麼是漸進式渲染（progressive rendering）？.html">漸進式渲染</a>
+      <a href="你熟悉 SVG 的樣式設定嗎？.html">SVG 樣式設定</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

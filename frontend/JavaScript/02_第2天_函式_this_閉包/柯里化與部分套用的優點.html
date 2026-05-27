@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柯里化與部分套用的優點</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式式程式設計・優點</div>
+    <h1>為什麼要柯里化？<em>可重用、可組合、語意清晰</em></h1>
+    <p class="lede">柯里化和部分套用的共同目標：讓函式更<b>模組化</b>。固定不變的邏輯，留下可變的部分；在需要的時候才填入剩餘參數，程式碼自然變得更<b>宣告式、易讀、可測試</b>。</p>
+  </header>
+
+  <section>
+    <span class="num">三大優點</span>
+    <h2>柯里化和部分套用帶來什麼？</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>重用性</strong> — 一個通用函式衍生出多個語意明確的專用函式
+          <pre><code>const add = (a) =&gt; (b) =&gt; a + b;
+const add5  = add(5);   // 永遠加 5
+const add10 = add(10);  // 永遠加 10</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>可讀性</strong> — 減少呼叫點的參數雜訊
+          <pre><code>// 每次呼叫都要帶 rate，容易漏或填錯
+prices.map(p =&gt; applyTax(0.05, p));
+
+// 部分套用後，呼叫點乾淨
+const applyTW = multiply.bind(null, 1.05);
+prices.map(applyTW);</code></pre>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>函式組合</strong> — 柯里化後的單參數函式可以直接用 compose/pipe 串接
+          <pre><code>const process = pipe(
+  filter(isActive),
+  map(formatName),
+  take(10)
+);</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">適用情境</span>
+    <h2>什麼時候該用？</h2>
+    <table>
+      <tr><th>情境</th><th>建議</th></tr>
+      <tr><td>對同一組資料反覆套用「只差一個參數」的函式</td><td>柯里化 or 部分套用</td></tr>
+      <tr><td>需要在 pipe/compose 中串接函式</td><td>柯里化（確保單一引數）</td></tr>
+      <tr><td>只是想預先填幾個固定參數</td><td>部分套用（<code>bind</code> 即可）</td></tr>
+      <tr><td>一次性呼叫、無重用需求</td><td>不必要，直接呼叫</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>這些技巧在實際工作中常用嗎？</summary><p>在純函式式風格的代碼庫（Ramda、Lodash/fp）中非常常見；在一般命令式/OOP 風格中，偶爾用部分套用提升可讀性。過度柯里化反而增加理解成本，應視情況使用。</p></details>
+      <details><summary>柯里化對效能有影響嗎？</summary><p>每次呼叫都建立新的閉包和函式物件，有輕微的記憶體開銷。高頻熱路徑中要謹慎；一般邏輯層的可讀性收益遠大於效能損失。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「柯里化和部分套用的核心優點是<span class="hl">從通用函式衍生出可重用的專用函式</span>，讓呼叫點更簡潔、語意更清晰。柯里化還有一個特別的好處——每個函式只接受一個參數，<span class="hl">天然適合函式組合（compose/pipe）</span>，可以串接成 pipeline。實務上我在需要對資料集反覆套用同一組邏輯時會用，但避免過度使用，因為增加抽象層也等於增加閱讀成本。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="柯里化原理與應用.html">柯里化原理與應用</a>
+      <a href="部分應用概念說明.html">部分應用概念說明</a>
+      <a href="Currying與部分套用範例.html">Currying 與部分套用範例</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

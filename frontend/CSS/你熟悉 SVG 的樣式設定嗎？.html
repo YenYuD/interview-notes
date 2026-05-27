@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVG 樣式設定</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS / SVG</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / SVG</div>
+    <h1>SVG 上色：<em>呈現屬性</em>和 CSS 誰說了算？</h1>
+    <p class="lede">SVG 有自己的 <b>fill</b>、<b>stroke</b> 呈現屬性，但 CSS 的優先權更高。理解這個層級關係，才能正確用 CSS 動態改色、做 hover 效果。</p>
+  </header>
+
+  <section>
+    <span class="num">核心概念</span>
+    <h2>三種上色方式的優先順序</h2>
+    <table>
+      <thead>
+        <tr><th>方式</th><th>範例</th><th>能被 CSS 覆蓋？</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>呈現屬性（Presentational Attribute）</td><td><code>fill="purple"</code></td><td>✓ 可被樣式表覆蓋</td></tr>
+        <tr><td>內聯樣式（Inline Style）</td><td><code>style="fill: purple"</code></td><td>✗ 最高優先，難覆蓋</td></tr>
+        <tr><td>外部/嵌入 CSS</td><td><code>.icon { fill: blue; }</code></td><td>— 樣式表本身</td></tr>
+      </tbody>
+    </table>
+    <pre><code><span class="tok-com">&lt;!-- 呈現屬性：fill="purple" 可被 CSS 覆蓋 --&gt;</span>
+<span class="tok-str">&lt;rect</span>
+  x="10" y="10" width="100" height="100"
+  <span class="tok-key">stroke</span>="blue"
+  <span class="tok-key">fill</span>="purple"
+  <span class="tok-key">fill-opacity</span>="0.5"
+  <span class="tok-key">stroke-opacity</span>="0.8" <span class="tok-str">/&gt;</span>
+
+<span class="tok-com">/* CSS 可以覆蓋呈現屬性 */</span>
+<span class="tok-key">svg rect</span> { fill: <span class="tok-str">blue</span>; } <span class="tok-com">/* 會把 fill="purple" 覆蓋 */</span></code></pre>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>想讓 SVG 圖示顏色可由 CSS 動態控制（如 hover 改色），應使用<strong>呈現屬性</strong>或完全不設 fill，讓 CSS <code>currentColor</code> 繼承父元素顏色。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實用技巧</span>
+    <h2>用 currentColor 讓圖示跟隨文字顏色</h2>
+    <pre><code><span class="tok-com">/* SVG 中設定 fill="currentColor" */</span>
+<span class="tok-str">&lt;svg viewBox="0 0 24 24"&gt;
+  &lt;path fill="currentColor" d="M..." /&gt;
+&lt;/svg&gt;</span>
+
+<span class="tok-com">/* 父元素設色，圖示自動跟隨 */</span>
+<span class="tok-key">.btn</span> {
+  color: <span class="tok-str">var(--accent)</span>;  <span class="tok-com">/* SVG fill 自動繼承此顏色 */</span>
+}
+<span class="tok-key">.btn:hover</span> {
+  color: <span class="tok-str">var(--accent-dark)</span>;  <span class="tok-com">/* hover 時圖示也自動改色 */</span>
+}</code></pre>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+        <details>
+          <summary>SVG 圖示用 img 標籤引入和內聯 SVG 有什麼差別？</summary>
+          <p><code>&lt;img src="icon.svg"&gt;</code> 引入的 SVG 是獨立文件，CSS 無法控制內部 fill/stroke 顏色。內聯 SVG（直接在 HTML 中放 <code>&lt;svg&gt;</code>）可以用 CSS 選取內部元素、動態改色，支援動畫、hover 效果，是現代圖示的最佳實踐。</p>
+        </details>
+        <details>
+          <summary>SVG sprite 系統怎麼實作？</summary>
+          <p>用 <code>&lt;symbol id="icon-name"&gt;</code> 定義圖形，隱藏在 HTML 頂部（<code>display:none</code> 的容器），需要時用 <code>&lt;svg&gt;&lt;use href="#icon-name"/&gt;&lt;/svg&gt;</code> 引用。一次定義，多處使用，且仍可用 CSS 控制顏色。</p>
+        </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「SVG 上色有三種方式。<span class="hl">呈現屬性</span>（如 <code>fill="purple"</code>）的優先順序低於 CSS 樣式，所以可以被外部 CSS 覆蓋；<span class="hl">內聯 style</span> 優先順序最高，難以覆蓋。實務上我偏好讓圖示用 <code>fill="currentColor"</code>，這樣父元素的 <code>color</code> 就能控制圖示顏色，hover 效果也能自然繼承，不需要另外寫 SVG 選擇器。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你曾處理過 Retina 顯示器的圖形嗎？.html">Retina 顯示器圖形處理</a>
+      <a href="解釋 CSS 雪碧圖，以及你會如何在頁面或網站上實作它.html">CSS 雪碧圖</a>
+      <a href="什麼是 CSS 選擇器的特異性（specificity），它如何運作？.html">CSS 選擇器特異性</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

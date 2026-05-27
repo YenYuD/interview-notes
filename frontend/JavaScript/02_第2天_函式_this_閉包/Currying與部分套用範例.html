@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Currying 與部分套用範例</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式・柯里化</div>
+    <h1>把多參數函式拆成鏈式呼叫：<em>Currying vs 部分套用</em></h1>
+    <p class="lede"><b>Currying</b> 每次只吃一個參數，回傳下一關函式；<b>部分套用</b>則先固定幾個參數，剩下的以後再補。兩者都讓你從通用函式「客製」出專用函式。</p>
+  </header>
+
+  <section>
+    <span class="num">核心對比</span>
+    <h2>兩種技巧，一眼看懂</h2>
+    <table>
+      <tr><th></th><th>Currying</th><th>部分套用</th></tr>
+      <tr><td>轉換方式</td><td>每次一個參數 <code>f(a)(b)(c)</code></td><td>固定部分參數 <code>f(a, ...rest)</code></td></tr>
+      <tr><td>回傳</td><td>一連串單參數函式</td><td>參數較少的新函式</td></tr>
+      <tr><td>常見實作</td><td>巢狀箭頭函式</td><td><code>Function.prototype.bind</code></td></tr>
+    </table>
+
+    <div class="chips">
+      <div class="chip info">
+        <small>Currying</small>
+        <pre><code>const add = (a) =&gt; (b) =&gt; a + b;
+const add2 = add(2);
+add2(3); // 5</code></pre>
+      </div>
+      <div class="chip info">
+        <small>部分套用</small>
+        <pre><code>function add(a, b) { return a + b; }
+const add2 = add.bind(null, 2);
+add2(3); // 5</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">實務場景</span>
+    <h2>為什麼這兩個技巧有用？</h2>
+    <p>當你需要對同一組資料反覆套用「只差一個參數」的函式時，這兩種技巧能大幅減少重複代碼：</p>
+    <pre><code>// 通用：計算含稅價
+const withTax = (rate) =&gt; (price) =&gt; price * (1 + rate);
+
+// 特化：台灣 5% 營業稅
+const twTax = withTax(0.05);
+twTax(100); // 105
+twTax(200); // 210</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>Currying 天然適合<b>函式組合</b>（compose/pipe）；部分套用更直覺，適合「先填一部分參數再呼叫」的情境。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>Currying 和部分套用最大的差別是什麼？</summary><p>Currying 必須「每次一個參數」，函式鏈長度等於參數數量；部分套用可以一次固定多個參數，較靈活。</p></details>
+      <details><summary>如何實作一個通用的 curry 函式？</summary><p>遞迴檢查收到的參數數量是否達到原函式的 <code>fn.length</code>，未達就繼續回傳等待下一個參數的函式，達到就執行。</p></details>
+      <details><summary><code>bind</code> 實現部分套用的限制是什麼？</summary><p>只能從左側固定參數；若需要固定中間或右側的參數，要自己寫 <code>partial</code> 輔助函式。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">Currying 是把多參數函式拆成每次只接受一個參數的函式鏈</span>，例如 <code>add(a)(b)</code>；部分套用是預先固定部分參數，像 <code>add.bind(null, 2)</code> 回傳一個只需第二個參數的函式。兩者都能從通用函式衍生出<span class="hl">更具語意的專用函式</span>，減少重複，提升可組合性。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="柯里化原理與應用.html">柯里化原理與應用</a>
+      <a href="柯里化與部分應用的差異.html">柯里化與部分應用的差異</a>
+      <a href="部分應用概念說明.html">部分應用概念說明</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

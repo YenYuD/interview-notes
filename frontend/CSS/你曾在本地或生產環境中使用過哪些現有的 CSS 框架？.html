@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 框架評比</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 框架</div>
+    <h1>不只說「用過」——說出<em>優缺點與取捨</em>才有說服力</h1>
+    <p class="lede">CSS 框架面試題考的不是你用過哪些，而是你有沒有<b>獨立的技術判斷</b>——能評估框架的取捨、知道什麼情境適合哪個工具。</p>
+  </header>
+
+  <section>
+    <span class="num">主流框架評比</span>
+    <h2>三大框架的真實問題</h2>
+    <table>
+      <thead>
+        <tr><th>框架</th><th>優點</th><th>痛點</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Bootstrap</strong></td>
+          <td>生態成熟、元件豐富、跨瀏覽器已處理好</td>
+          <td>版本更新慢（v4 alpha 拖了近 2 年）；未客製化時視覺辨識度高，看起來「很 Bootstrap」</td>
+        </tr>
+        <tr>
+          <td><strong>Tailwind CSS</strong></td>
+          <td>Utility-first 極度靈活；JIT 模式按需產出 CSS 體積極小；設計系統化</td>
+          <td>初期學習曲線；HTML class 繁多，可讀性見仁見智；需要建置工具</td>
+        </tr>
+        <tr>
+          <td><strong>Semantic UI / Bulma</strong></td>
+          <td>語意化 class 名稱直觀</td>
+          <td>Semantic UI 主題系統複雜難以自訂；Bulma 不向下相容，升版常悄悄 breaking change</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">選擇框架</span>
+    <h2>什麼情境選什麼</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>Tailwind（現代首選）</small>
+        新專案、有設計系統需求、React/Vue 等元件架構、需要高度客製化視覺
+      </div>
+      <div class="chip info">
+        <small>Bootstrap（成熟穩健）</small>
+        企業內部工具、需要豐富現成元件（modal、datepicker）、團隊不熟悉 Utility-first
+      </div>
+      <div class="chip bad">
+        <small>不用框架</small>
+        設計師主導、設計稿完全獨特、或已有內部設計系統
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>Tailwind 的「Utility-first」和傳統語意化 class 哪個更好？</summary>
+        <p>各有權衡。Utility-first 讓樣式和 HTML 結合，避免了 CSS 命名和特異性問題，元件本地化也更好維護；但 class 繁多影響可讀性，且需要抽取元件來複用。語意化 class（.btn、.card）直觀但容易導致 CSS 全域污染、特異性衝突。大型專案用 Tailwind + 元件化通常是好選擇。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「我主要用過 Bootstrap 和 Tailwind。Bootstrap 元件豐富、生態成熟，但<span class="hl">視覺客製化困難</span>，不同專案看起來很相似。Tailwind 的 Utility-first 非常靈活，JIT 模式讓 CSS 體積極小，設計系統化也做得好；缺點是 HTML class 繁多，需要習慣。現在新專案我優先選 Tailwind，有豐富預製元件需求的企業工具才考慮 Bootstrap。能說出框架的<span class="hl">具體取捨</span>比只說「用過」更重要。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="使用 CSS 預處理器的優缺點是什麼？.html">CSS 預處理器優缺點</a>
+      <a href="重置和標準化 CSS 有什麼差別？你會選擇哪個，為什麼？.html">CSS Reset vs Normalize</a>
+      <a href="描述你對曾使用過的 CSS 預處理器的喜好與不滿.html">CSS 預處理器的喜好與不滿</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

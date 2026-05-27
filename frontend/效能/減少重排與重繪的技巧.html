@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>減少重排與重繪</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">效能</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">前端效能</div>
+    <h1>改個樣式，<em>瀏覽器可能重算整頁版面</em></h1>
+    <p class="lede"><b>重排（reflow）</b>＝重新計算幾何位置，最貴；<b>重繪（repaint）</b>＝只重畫外觀，較便宜。減少觸發次數、批次處理，是前端流暢的關鍵。</p>
+  </header>
+
+  <section>
+    <span class="num">DEMO — 哪種操作觸發什麼</span>
+    <h2>改不同屬性，代價差很多</h2>
+
+    <div class="lab">
+      <div class="lab-label">選一種改動</div>
+      <div class="toggle-row" id="row" style="flex-wrap:wrap">
+        <button class="on" data-k="width">改 width / 位置</button>
+        <button data-k="color">改 color / 背景</button>
+        <button data-k="transform">改 transform / opacity</button>
+      </div>
+      <div class="chips">
+        <div class="chip" id="c1">重排<small id="s1">—</small></div>
+        <div class="chip" id="c2">重繪<small id="s2">—</small></div>
+        <div class="chip" id="c3">合成<small id="s3">—</small></div>
+      </div>
+      <div class="log" id="out" style="max-height:none"></div>
+    </div>
+    <div class="aside"><code>transform</code> 和 <code>opacity</code> 可只走 GPU「合成」階段，<b>不碰版面也不重繪</b>，所以動畫優先用它們。</div>
+  </section>
+
+  <section>
+    <span class="num">實戰技巧</span>
+    <h2>怎麼少觸發</h2>
+    <ul>
+      <li><b>批次 DOM 變更</b>：用 <code>documentFragment</code> 或一次 <code>innerHTML</code>，別在迴圈裡逐筆改。</li>
+      <li><b>改 class 而非逐條 style</b>：一次套用一組樣式。</li>
+      <li><b>分開讀寫</b>：先讀完所有版面數值（<code>offsetTop</code>…）再統一寫，避免「layout thrashing」。</li>
+      <li><b>動畫用 transform/opacity</b> + <code>requestAnimationFrame</code> 對齊重繪週期。</li>
+      <li>頻繁變動的元素酌用 <code>will-change</code> 提示瀏覽器。</li>
+    </ul>
+    <div class="callout warn"><span class="ico">⚠️</span><p>Layout thrashing：在迴圈裡「讀一下版面、寫一下樣式」反覆交錯，會強迫瀏覽器一直同步重排，效能直接崩。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>哪些操作會強制同步重排？</summary><p>寫了樣式後立刻讀 <code>offsetWidth</code>、<code>getBoundingClientRect</code>、<code>scrollTop</code> 等，會逼瀏覽器立即重算版面。要把讀取集中在寫入之前。</p></details>
+      <details><summary>requestAnimationFrame 為什麼比 setTimeout 適合動畫？</summary><p>它在每次重繪前被呼叫、和螢幕更新（約 60fps）同步，不會掉影格或多做無用更新，分頁隱藏時還會自動暫停。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「<span class="hl">重排是重算版面幾何（最貴），重繪是重畫外觀</span>。我會：批次 DOM 變更（fragment）、用 class 取代逐條 style、<span class="hl">把讀取和寫入分開避免 layout thrashing</span>、動畫只改 <span class="hl">transform/opacity</span> 並配 requestAnimationFrame。核心是減少觸發次數、避免強制同步重排。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="優化DOM操作提升效能.html">優化 DOM 操作</a>
+      <a href="JavaScript應用程式常見效能瓶頸.html">效能瓶頸</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const row=document.getElementById('row'), out=document.getElementById('out');
+  const data={
+    width:{reflow:1,repaint:1,comp:1,note:'改 width/top 改變幾何 → 重排 → 連帶重繪 → 合成（最貴）',cls:'bad'},
+    color:{reflow:0,repaint:1,comp:1,note:'改 color/背景不動版面 → 跳過重排，只重繪 + 合成',cls:'info'},
+    transform:{reflow:0,repaint:0,comp:1,note:'transform/opacity 只走 GPU 合成 → 不重排也不重繪（最省）',cls:'good'}
+  };
+  const mark=(el,sub,on)=>{ document.getElementById(el).className='chip'+(on?' '+window._cls:' '); document.getElementById(sub).textContent=on?'✓ 觸發':'跳過'; };
+  function render(k){
+    const d=data[k]; window._cls=d.cls;
+    [['c1','s1',d.reflow],['c2','s2',d.repaint],['c3','s3',d.comp]].forEach(([c,s,on])=>{
+      const el=document.getElementById(c); el.className='chip '+(on?d.cls:''); if(!on) el.style.cssText='border-color:var(--line);color:var(--ink-soft)'; else el.style.cssText='';
+      document.getElementById(s).textContent=on?'✓ 觸發':'跳過';
+    });
+    out.innerHTML=`<div class="ln c-dim">// ${d.note}</div>`;
+  }
+  row.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; [...row.children].forEach(x=>x.classList.remove('on')); b.classList.add('on'); render(b.dataset.k); });
+  render('width');
+</script>
+</body>
+</html>

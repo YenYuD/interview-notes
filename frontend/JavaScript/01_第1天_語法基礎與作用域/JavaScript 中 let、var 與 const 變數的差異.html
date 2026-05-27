@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>let、var、const 差異</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">JAVASCRIPT · 變數宣告</div>
+    <h1>同樣都是宣告變數，<em>作用域與提升行為卻天差地遠</em></h1>
+    <p class="lede"><b>var / let / const</b> 三個關鍵字共存多年，讓無數 bug 悄悄潛入。核心差異在<b>作用域</b>、<b>是否可重新賦值</b>，以及<b>宣告前存取</b>的結果。</p>
+  </header>
+
+  <section>
+    <span class="num">核心對照</span>
+    <h2>三者行為一覽</h2>
+    <table>
+      <tr><th>行為</th><th><code>var</code></th><th><code>let</code></th><th><code>const</code></th></tr>
+      <tr><td>作用域</td><td>函式／全域</td><td>區塊</td><td>區塊</td></tr>
+      <tr><td>初始化時賦值</td><td>可選</td><td>可選</td><td><b>必須</b></td></tr>
+      <tr><td>重新宣告</td><td>可以</td><td><b style="color:var(--bad)">不行</b></td><td><b style="color:var(--bad)">不行</b></td></tr>
+      <tr><td>重新賦值</td><td>可以</td><td>可以</td><td><b style="color:var(--bad)">不行</b></td></tr>
+      <tr><td>宣告前存取</td><td><code>undefined</code></td><td><b style="color:var(--bad)">ReferenceError</b></td><td><b style="color:var(--bad)">ReferenceError</b></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">關鍵概念</span>
+    <h2>作用域：var 跑出 if 區塊</h2>
+    <pre><code><span class="tok-key">if</span> (<span class="tok-key">true</span>) {
+  <span class="tok-key">var</span> bar = <span class="tok-num">1</span>;   <span class="tok-com">// 函式作用域，if 外仍可存取</span>
+  <span class="tok-key">let</span> baz = <span class="tok-num">2</span>;   <span class="tok-com">// 區塊作用域，if 外 → ReferenceError</span>
+}
+console.log(bar); <span class="tok-com">// 1</span>
+console.log(baz); <span class="tok-com">// ReferenceError</span></code></pre>
+    <div class="aside">使用 <code>var</code> 宣告的變數會「漏出」區塊，這是最常見的 bug 來源之一。<code>let</code>/<code>const</code> 具備區塊作用域，行為更直覺。</div>
+  </section>
+
+  <section>
+    <span class="num">選用原則</span>
+    <h2>現代 JS 的宣告守則</h2>
+    <div class="chips">
+      <div class="chip good"><small>const</small>預設用這個，不可變更好</div>
+      <div class="chip info"><small>let</small>需重新賦值時才改用</div>
+      <div class="chip bad"><small>var</small>別再用，作用域太難預測</div>
+    </div>
+    <p style="margin-top:1rem">const 不代表物件內容不能改，只代表<b>變數綁定不能重新指向</b>另一個值。</p>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>const 宣告的物件，屬性可以修改嗎？</summary><p>可以。const 限制的是變數綁定不能重新賦值，但物件本身仍是可變的。若要深度不可變，需搭配 <code>Object.freeze()</code>。</p></details>
+      <details><summary>暫時性死區（TDZ）是什麼？</summary><p>let/const 在被提升後、實際宣告行執行前，變數處於「未初始化」狀態的區間就是 TDZ。這個區間內任何存取都會拋出 ReferenceError。</p></details>
+      <details><summary>為什麼 var 允許重複宣告？</summary><p>歷史設計決策，ES5 及以前沒有區塊作用域。ES6 引入 let/const 修正此問題，重複宣告直接報 SyntaxError。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「三者主要差在<span class="hl">作用域與提升</span>。var 是函式作用域、宣告前存取得到 undefined；<span class="hl">let/const 是區塊作用域、宣告前存取直接 ReferenceError</span>（TDZ）。const 額外限制不能重新賦值。現代開發我預設用 const，需要改變才換 let，完全不用 var，這樣可以避免作用域洩漏與提升陷阱。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript提升機制說明.html">提升機制說明</a>
+      <a href="var、let 與 const 的提升差異說明.html">var/let/const 提升差異</a>
+      <a href="全域作用域_函式作用域_區塊作用域差異.html">三種作用域差異</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

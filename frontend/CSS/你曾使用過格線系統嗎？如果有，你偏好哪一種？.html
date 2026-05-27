@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 格線系統演進</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">CSS</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">CSS / 版面</div>
+    <h1>從 float 格線到 CSS Grid——格線系統的<em>三代演進</em></h1>
+    <p class="lede">CSS 格線系統從 <b>float 時代</b>演進到 <b>Flexbox</b>，再到原生 <b>CSS Grid</b>。現代專案不再需要框架格線——理解每個工具的適用場景才是核心能力。</p>
+  </header>
+
+  <section>
+    <span class="num">三代演進</span>
+    <h2>格線系統的發展歷史</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>Float 格線時代（~2014）</strong>
+          Bootstrap 2/3 用 float 實作 12 欄格線，需要 clearfix，計算百分比寬度。瀏覽器支援最廣但維護複雜。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>Flexbox 格線（2014~）</strong>
+          Bootstrap 4 改用 Flexbox。一維排版更直觀，對齊控制容易，瀏覽器支援率現已達 99.6%。現代的首選框架格線。
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot"></div>
+        <div class="flow-body">
+          <strong>原生 CSS Grid（現代）</strong>
+          真正的二維格線——同時控制行和列。不需要框架即可實現複雜版面，Tailwind 等框架也提供 Grid utility class。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">選擇建議</span>
+    <h2>Flexbox vs Grid 各自的強項</h2>
+    <div class="chips">
+      <div class="chip good">
+        <small>用 Flexbox</small>
+        一維排版（導覽列、按鈕組、卡片行）；動態內容數量不固定；沿主軸對齊分散
+      </div>
+      <div class="chip info">
+        <small>用 CSS Grid</small>
+        二維版面（整頁佈局、儀表板、圖片牆）；需要精確控制行列對齊；固定格線結構
+      </div>
+    </div>
+    <div class="callout tip">
+      <span class="ico">💡</span>
+      <p>Flexbox 和 Grid 並非互相排斥，常見做法是用 Grid 做頁面整體佈局（header/sidebar/main/footer），再用 Flexbox 處理元件內部的對齊。</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details>
+        <summary>CSS Grid 的 fr 單位是什麼？</summary>
+        <p><code>fr</code> 是「fractional unit」，代表可用空間的比例份額。<code>grid-template-columns: 1fr 2fr</code> 表示第一欄佔剩餘空間的 1/3，第二欄佔 2/3，會自動適應容器寬度，比百分比更靈活（因為 fr 在扣除 gap 後才計算）。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「格線系統從 float 時代演進到 Flexbox，再到原生 CSS Grid。現在我不再用框架格線——<span class="hl">Flexbox 處理一維排版</span>（導覽、元件內部對齊），<span class="hl">CSS Grid 處理二維版面</span>（整頁佈局、儀表板）。CSS Grid 的 <code>fr</code> 單位和 <code>grid-template-areas</code> 讓複雜版面變得非常直觀，比 float 的百分比計算優雅太多。如果要用框架，Tailwind 的 grid utility 也很完善，不需要額外引入格線系統。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你有嘗試過新的 CSS Flexbox 或 Grid 規範嗎？.html">CSS Flexbox 與 Grid 規範</a>
+      <a href="描述 `float` 及其運作方式.html">float 的運作方式</a>
+      <a href="有哪些清除浮動的技術，各自適合什麼情境？.html">清除浮動技術</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

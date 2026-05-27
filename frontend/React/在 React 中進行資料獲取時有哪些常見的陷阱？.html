@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資料獲取常見陷阱</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../index.html">← 回索引</a>
+    <span class="tag">React</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">REACT 非同步</div>
+    <h1>資料獲取四個坑：<em>記憶體洩漏、競態條件、缺少 cleanup…</em></h1>
+    <p class="lede">在 React 裡 fetch 資料看似簡單，但每個坑都可能讓你的應用出現難以重現的 bug：組件卸載後 setState、搜尋框快速輸入時舊請求覆蓋新請求……這些<b>在開發環境幾乎不出現、卻在正式環境爆炸</b>的問題。</p>
+  </header>
+
+  <section>
+    <span class="num">四大陷阱</span>
+    <h2>一次看清</h2>
+    <table>
+      <thead><tr><th>陷阱</th><th>症狀</th><th>解法</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>未處理載入 / 錯誤狀態</td>
+          <td>載入中 UI 閃白、錯誤時白屏</td>
+          <td>維護 <code>loading</code> 和 <code>error</code> state，分別渲染</td>
+        </tr>
+        <tr>
+          <td>組件卸載後仍 setState</td>
+          <td>React 警告「can't perform a state update on unmounted component」</td>
+          <td>cleanup 函式設 <code>isMounted = false</code>，或用 AbortController</td>
+        </tr>
+        <tr>
+          <td>競態條件（Race condition）</td>
+          <td>快速切換 id 時，舊請求的回應覆蓋新請求</td>
+          <td>在 cleanup 中 <code>abort()</code> 上一個請求</td>
+        </tr>
+        <tr>
+          <td>在 render 裡直接 fetch</td>
+          <td>無限迴圈（fetch → setState → re-render → fetch…）</td>
+          <td>永遠在 <code>useEffect</code> 裡 fetch</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="num">解法範例</span>
+    <h2>用 AbortController 同時解決記憶體洩漏和競態</h2>
+    <pre><code><span class="tok-fn">useEffect</span>(() =&gt; {
+  <span class="tok-key">const</span> controller = <span class="tok-key">new</span> AbortController();
+
+  <span class="tok-fn">fetch</span>(`/api/user/${userId}`, { signal: controller.signal })
+    .then(r =&gt; r.<span class="tok-fn">json</span>())
+    .then(setData)
+    .catch(err =&gt; {
+      <span class="tok-key">if</span> (err.name !== <span class="tok-str">'AbortError'</span>) <span class="tok-fn">setError</span>(err);
+    });
+
+  <span class="tok-key">return</span> () =&gt; controller.<span class="tok-fn">abort</span>();  <span class="tok-com">// cleanup：取消舊請求</span>
+}, [userId]);</code></pre>
+    <div class="callout tip"><span class="ico">✅</span><p>實務上推薦用 <b>TanStack Query</b>（react-query）或 SWR 等資料獲取函式庫，它們已內建處理這些陷阱，並提供快取、重試、失效等功能。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>為什麼 StrictMode 下 useEffect 會跑兩次，會影響 fetch 嗎？</summary><p>會，Strict Mode 下 effect mount → unmount → remount，第一次 fetch 會被 cleanup abort，然後第二次 fetch 才是「真正的」請求。用 AbortController 的程式碼能正確處理這個情況。</p></details>
+      <details><summary>什麼是 waterfall fetch 問題？如何解決？</summary><p>父組件先 fetch，等資料回來才渲染子組件、子組件再 fetch，形成串行的瀑布效應，延遲很高。解法：並行 fetch（<code>Promise.all</code>）、或用 React Suspense 讓子組件各自並行 fetch。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「React 資料獲取常見陷阱有四：未處理 loading/error 狀態（體驗差）、組件卸載後仍 setState（記憶體洩漏）、<span class="hl">競態條件</span>（舊請求覆蓋新結果）、在 render 直接 fetch（無限迴圈）。用 <span class="hl">AbortController</span> 搭配 cleanup 函式可同時解決後兩個問題。實務上更推薦用 TanStack Query 等函式庫，它們已內建這些最佳實踐。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="你如何處理 React 應用程式中的非同步資料載入？.html">非同步資料載入</a>
+      <a href="React 中的錯誤邊界（error boundaries）是做什麼用的？.html">錯誤邊界</a>
+      <a href="React Suspense 是什麼？它實現了什麼功能？.html">React Suspense</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

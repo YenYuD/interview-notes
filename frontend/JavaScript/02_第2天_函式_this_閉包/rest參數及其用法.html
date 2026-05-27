@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rest 參數及其用法</title>
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="../../index.html">← 回索引</a>
+    <span class="tag">JavaScript</span>
+  </div>
+
+  <header class="hero">
+    <div class="kicker">函式・ES6 語法</div>
+    <h1><em>...rest</em> 把剩下的全部打包成陣列</h1>
+    <p class="lede"><b>Rest 參數</b>（<code>...args</code>）讓函式接受<b>不定數量的引數</b>，並自動收集成一個真正的陣列。和舊版的 <b>arguments</b> 物件相比，rest 是真陣列，可直接用 <code>map</code>/<code>reduce</code> 操作。</p>
+  </header>
+
+  <section>
+    <span class="num">語法與用法</span>
+    <h2>三個點，寫在最後一個參數前</h2>
+    <pre><code>function myFn(a, b, ...rest) {
+  console.log(a);    // 第一個引數
+  console.log(b);    // 第二個引數
+  console.log(rest); // 其餘所有引數組成的陣列
+}
+myFn(1, 2, 3, 4, 5);
+// 1
+// 2
+// [3, 4, 5]</code></pre>
+
+    <pre><code>// 不定引數加總
+function sum(...numbers) {
+  return numbers.reduce((acc, n) =&gt; acc + n, 0);
+}
+sum(1, 2, 3, 4); // 10</code></pre>
+  </section>
+
+  <section>
+    <span class="num">rest vs arguments</span>
+    <h2>兩者的關鍵差異</h2>
+    <table>
+      <tr><th></th><th>rest 參數 (<code>...args</code>)</th><th>arguments 物件</th></tr>
+      <tr><td>型別</td><td>真正的 Array</td><td>類陣列（Array-like）</td></tr>
+      <tr><td>可直接用 map/filter</td><td>✅</td><td>❌ 需先 <code>Array.from</code></td></tr>
+      <tr><td>箭頭函式中可用</td><td>✅</td><td>❌ 箭頭函式無 arguments</td></tr>
+      <tr><td>可只收部分引數</td><td>✅（搭配具名參數）</td><td>❌ 永遠收全部</td></tr>
+    </table>
+    <div class="callout tip"><span class="ico">✅</span><p>Rest 參數必須是函式定義的<b>最後一個參數</b>，且每個函式只能有一個。<code>function f(a, ...b, c)</code> 是語法錯誤。</p></div>
+  </section>
+
+  <section>
+    <span class="num">延伸追問</span>
+    <h2>面試官可能再追</h2>
+    <div class="followup">
+      <details><summary>rest 參數和展開運算子（spread）語法一樣，怎麼區分？</summary><p>寫法都是 <code>...</code>，但方向相反：<b>rest</b> 在函式定義中<b>收集</b>多個值為陣列；<b>spread</b> 在函式呼叫或字面量中<b>展開</b>陣列為多個值。</p></details>
+      <details><summary>箭頭函式中如何取代 arguments？</summary><p>用 rest 參數：<code>const fn = (...args) =&gt; args;</code>，這是箭頭函式中獲取所有引數的唯一方式。</p></details>
+    </div>
+  </section>
+
+  <section class="interview">
+    <span class="num">面試這樣答</span>
+    <h2>30 秒版本</h2>
+    <p class="quote">「Rest 參數用 <code>...name</code> 寫在函式定義的最後一個位置，<span class="hl">把多餘的引數收集成一個真正的陣列</span>。和舊的 <code>arguments</code> 物件相比，rest 是真陣列，可直接鏈接 map/filter/reduce；而且在<span class="hl">箭頭函式中 arguments 根本不存在</span>，rest 是唯一選擇。注意 rest 和 spread 語法相同但語意相反：rest 收集，spread 展開。」</p>
+  </section>
+
+  <footer>
+    <div>相關筆記</div>
+    <div class="rel">
+      <a href="JavaScript中高階函式的定義.html">高階函式定義</a>
+      <a href="箭頭函式語法的使用案例.html">箭頭函式使用案例</a>
+      <a href="JavaScript 中 function foo 與 var foo=function 的差異.html">函式宣告 vs 函式表達式</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
